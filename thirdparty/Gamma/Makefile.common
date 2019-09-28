@@ -1,0 +1,347 @@
+###########################################################################
+# Standard Make variable definitions
+#
+# These are the common variable definitions used across different projects.
+# This will usually be included at the top of a separate project specific
+# Makefile using 'include Makefile.common'.
+###########################################################################
+#==========================================================================
+# Command-line options
+# Modify for your system -or- use command-line argument OPTION=string
+#==========================================================================
+#--------------------------------------------------------------------------
+# Operating system variables
+#--------------------------------------------------------------------------
+# Operating system: 'macosx', 'linux', or 'windows'
+
+ifndef PLATFORM
+	UNAME := $(shell uname)
+	ifeq ($(UNAME), Linux)
+		PLATFORM = linux
+	else ifeq ($(UNAME), Darwin)
+		PLATFORM = macosx
+
+		# Mac OS X version
+		OSX_VERSION := $(shell sw_vers -productVersion)
+		OSX_VERSION := $(word 2,$(subst ., , $(OSX_VERSION)))
+	else
+		PLATFORM = windows
+
+		# uname returns:
+		# MSYS/MinGW:		MINGW32_NT-6.2
+		# MSYS2/MinGW-32:	MINGW32_NT-10.0
+		# MSYS2/MinGW-64:	MINGW64_NT-10.0
+		# MSYS2:			MSYS_NT-10.0
+		ifneq (,$(findstring MINGW32,$(UNAME)))
+			MINGW_VERSION := 32
+		else ifneq (,$(findstring MINGW64,$(UNAME)))
+			MINGW_VERSION := 64
+		else ifneq (,$(findstring MSYS_NT,$(UNAME)))
+			MINGW_VERSION := 64
+		endif
+
+		# uname -o returns 'Msys' for both Msys and Msys2, so can't be used
+		ifneq (,$(wildcard /msys.bat))
+			MSYS_VERSION := 1
+		else
+			MSYS_VERSION := 2
+		endif
+	endif
+endif
+
+
+# Architecture: '32' or '64'
+ifeq ($(shell which getconf 2>/dev/null),)
+	UNAMEM := $(shell uname -m)
+	ifeq ($(UNAMEM), $(findstring $(UNAMEM), x86_64 ia86 amd64))
+		ARCH = 64
+	else
+		ARCH = 32
+	endif
+else
+	# Set equal to number of bits in a type long int
+	ARCH := $(shell getconf LONG_BIT)
+endif
+
+
+#
+USING_PUREDYNE	= 0
+
+#--------------------------------------------------------------------------
+# Build settings
+#--------------------------------------------------------------------------
+# Language version
+CXX_VERSION ?= 14
+ifneq ($(CXX_VERSION),)
+	CXXFLAGS += -std=c++$(CXX_VERSION)
+endif
+
+# Name of the library
+# This should be defined prior to including this file
+LIB_NAME	?=
+
+# Dynamic library major/minor version numbers
+DLIB_MAJ	= 1
+DLIB_MIN	= 0
+
+# Build configuration: 'Release' or 'Debug'
+# 'Release' aggressively optimizes for speed at the expense of greater
+# compile times and program size. 'Debug' generates code suitable for a
+# debugging tool.
+BUILD_CONFIG	= Release
+
+# Whether to build a dynamic library versus a static library
+DYNAMIC		= 0
+
+# Whether to show verbose output
+VERBOSE		= 0
+
+# Whether Make should determine the dependencies of each C or C++ file as
+# it compiles it. This will be automatically disabled for universal builds
+# on Mac OSX.
+DEP_TRACK	= 1
+
+# Whether to enable strict warnings
+STRICT_WARNINGS = 0
+
+# Whether to automatically run executables after building
+AUTORUN		= 1
+
+# Platform-specific library file extensions
+SLIB_EXT	= a
+DLIB_EXT	= so
+DLIB_OPT	= shared
+
+# Flags required for including and linking against library
+LINK_CPPFLAGS	?=
+LINK_LDFLAGS	?=
+
+# Flags handed to 'ar' command
+SLIB_FLAGS 	?=
+DLIB_FLAGS 	?=
+
+#--------------------------------------------------------------------------
+# Default paths
+#--------------------------------------------------------------------------
+PREFIX		= /usr/local/
+CONFPREFIX	= $(PREFIX)/etc/
+MANPREFIX	= $(PREFIX)/share/man/
+
+# Locations of built objects
+BUILD_DIR	?= build/
+BIN_DIR		= $(BUILD_DIR)bin/
+OBJ_DIR		= $(BUILD_DIR)obj/
+
+# Location of library installation
+DESTDIR		= $(PREFIX)
+
+# Check for some common shared library directories
+ifneq ($(wildcard /usr/local/),)
+	HAS_USR_LOCAL = 1
+endif
+ifneq ($(wildcard /opt/local/),)
+	HAS_OPT_LOCAL = 1
+endif
+ifneq ($(wildcard /usr/X11/),)
+	HAS_USR_X11 = 1
+endif
+
+# Platform-dependent directory
+PLATFORM_DIR ?=
+
+#--------------------------------------------------------------------------
+# Default tools/commands
+#--------------------------------------------------------------------------
+
+# NOTE: ar -s is completely equivalent to running ranlib
+AR 		= ar crs
+INSTALL		= install
+RANLIB		= ranlib
+RM		= rm -f
+
+
+# Let user override variables
+-include Makefile.user
+
+#--------------------------------------------------------------------------
+# Finalize variables
+#--------------------------------------------------------------------------
+
+# Dependency tracking doesn't work with universal libraries, so disable it
+ifeq ($(ARCH), 32_64)
+	DEP_TRACK = 0
+endif
+
+# Emscripten (is Unix-like)
+ifeq ($(PLATFORM), em)
+	AR = emar crs
+	RANLIB = emranlib
+
+	LDFLAGS	 += -lm
+	LDFLAGS	 += -lstdc++
+
+	DLIB_FLAGS += -shared
+	DLIB_FLAGS += -Wl,-soname,$(DLIB_MAJ_FILE)
+
+# Linux:
+else ifeq ($(PLATFORM), linux)
+
+	PLATFORM_DIR = linux/
+
+	ifneq ($(USING_PUREDYNE), 0)
+		CXX = gcc
+	endif
+
+	ifeq ($(ARCH), 32)
+		CFLAGS += -m32
+	else ifeq ($(ARCH), 64)
+		CFLAGS += -m64
+	else ifeq ($(ARCH), 32_64)
+		CFLAGS += -m32 -m64
+	endif
+
+	CPPFLAGS += -D__LINUX__ -DLINUX
+	CPPFLAGS += -I/usr/local/include/ -I/usr/include/
+	LDFLAGS	 += -lm
+	LDFLAGS	 += -lstdc++
+
+	DLIB_FLAGS += -shared
+	DLIB_FLAGS += -Wl,-soname,$(DLIB_MAJ_FILE)
+
+# Mac OSX:
+else ifeq ($(PLATFORM), macosx)
+
+	PLATFORM_DIR = osx/
+
+	ifeq ($(ARCH), 32)
+		CFLAGS += -arch i386
+	else ifeq ($(ARCH), 64)
+		CFLAGS += -arch x86_64
+	else ifeq ($(ARCH), 32_64)
+		CFLAGS += -arch i386 -arch x86_64
+	endif
+
+	# Oh where, oh where have my SDKs gone?
+	ifeq ($(wildcard /Applications/Xcode.app),)
+		OSX_SDK_PATH := /Developer/SDKs/
+	else
+		OSX_SDK_PATH := /Applications/XCode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/
+	endif
+
+	# Set system root directory for stdc++ etc.
+	OSX_SDK := $(lastword $(shell ls $(OSX_SDK_PATH)))
+	CFLAGS += -isysroot $(OSX_SDK_PATH)$(OSX_SDK) -mmacosx-version-min=10.$(OSX_VERSION)
+
+	# Needed to link to libraries installed through MacPorts
+	ifdef HAS_OPT_LOCAL
+		LDFLAGS  += -L/opt/local/lib/
+		CPPFLAGS += -I/opt/local/include/
+	endif
+
+	# Needed to link to libraries installed through homebrew or by user
+	ifneq ($(wildcard /usr/local/lib),)
+		LDFLAGS  += -L/usr/local/lib/
+	endif
+	ifneq ($(wildcard /usr/local/include),)
+		CPPFLAGS += -I/usr/local/include/
+	endif
+
+	LDFLAGS	+= -lm
+	LDFLAGS	+= -lstdc++
+	DLIB_EXT = dylib
+	DLIB_OPT = dynamiclib
+
+	DLIB_FLAGS += -dynamiclib
+	DLIB_FLAGS += -current_version $(DLIB_MAJ).$(DLIB_MIN) -compatibility_version $(DLIB_MAJ).$(DLIB_MIN)
+
+# Windows:
+else ifeq ($(PLATFORM), windows)
+
+	PLATFORM_DIR = windows/
+
+	ifeq ($(MSYS_VERSION), 2)
+		LDFLAGS  += -L/usr/lib/
+		CPPFLAGS += -I/usr/include/
+		CPPFLAGS += -D_WIN$(MINGW_VERSION)
+		PREFIX := /mingw$(MINGW_VERSION)/
+	else ifeq ($(MSYS_VERSION), 1)
+		LDFLAGS  += -L/mingw/lib/
+		CPPFLAGS += -I/mingw/include/
+		PREFIX := /local/
+		CC := gcc
+
+		# This fixes a bug in MINGW/MSYS math.h (!!!)
+		CPPFLAGS += -U _hypot -D _hypot=hypot
+	endif
+
+	# Location of user installed libs
+	LDFLAGS += -L$(PREFIX)/lib/
+	CPPFLAGS += -I$(PREFIX)/include/
+
+	CPPFLAGS += -I`pwd`
+
+#	SLIB_EXT = lib
+#	DLIB_EXT = dll
+endif
+
+
+# Whether to echo commands to the terminal...
+ifeq ($(VERBOSE), 0)
+	AR  := @$(AR)
+	CC  := @$(CC)
+	CXX := @$(CXX)
+endif
+
+# Append optimization flags
+ifeq ($(BUILD_CONFIG), Release)
+	CPPFLAGS += -DNDEBUG
+	CFLAGS += -O3
+	#CFLAGS += -fpeel-loops # not supported by clang
+else
+	CFLAGS += -g -O0 -fno-inline
+endif
+
+# Append warning flags
+ifneq ($(STRICT_WARNINGS), 0)
+	# See https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+	CFLAGS += \
+		-Wreturn-type \
+		-Wformat -Wmissing-braces -Wparentheses -Wswitch \
+		-Wunused-variable -Wsign-compare -Wno-unknown-pragmas \
+		-Wuninitialized -Winit-self
+	CXXFLAGS += -Wnon-virtual-dtor -Woverloaded-virtual
+endif
+
+# Turn some warnings into errors as they can cause program crashes
+CFLAGS += -Werror=return-type
+
+SLIB_FILE	= lib$(LIB_NAME).$(SLIB_EXT)
+DLIB_FILE	= lib$(LIB_NAME).$(DLIB_EXT)
+DLIB_MAJ_FILE	= lib$(LIB_NAME).$(DLIB_MAJ).$(DLIB_EXT)
+DLIB_MIN_FILE	= lib$(LIB_NAME).$(DLIB_MAJ).$(DLIB_MIN).$(DLIB_EXT)
+DLIB_PATH	= $(addprefix $(BUILD_DIR)lib/, $(DLIB_MIN_FILE))
+SLIB_PATH	= $(addprefix $(BUILD_DIR)lib/, $(SLIB_FILE))
+
+# Set file directory/name of specified library type
+ifneq ($(DYNAMIC), 0)
+	CFLAGS += -fPIC
+	LIB_FILE = $(DLIB_MIN_FILE)
+	LIB_PATH = $(DLIB_PATH)
+else
+	LIB_FILE = $(SLIB_FILE)
+	LIB_PATH = $(SLIB_PATH)
+endif
+
+
+#--------------------------------------------------------------------------
+# Utility functions
+#--------------------------------------------------------------------------
+RemoveDir = @if test -d $(1); then $(RM) $(1)* && rmdir $(1); fi
+
+define RemoveBuildDir
+       $(call RemoveDir, $(BUILD_DIR)include/)
+       $(call RemoveDir, $(BUILD_DIR)lib/)
+       $(call RemoveDir, $(BIN_DIR))
+       $(call RemoveDir, $(OBJ_DIR))
+       $(call RemoveDir, $(BUILD_DIR))
+endef
