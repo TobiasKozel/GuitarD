@@ -34,13 +34,13 @@
 					<key>description</key>
 					<string>guitard</string>
 					<key>manufacturer</key>
-					<string>Acme</string>
+					<string>tkinc</string>
 					<key>name</key>
 					<string>tk: guitard</string>
 					<key>sandboxSafe</key>
 					<true/>
 					<key>subtype</key>
-					<string>Ipef</string>
+					<string>RTcK</string>
 					<key>tags</key>
 					<array>
 						<string>Effects</string>

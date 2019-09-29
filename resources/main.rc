@@ -228,7 +228,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-#include "..\config.h"
+#include "../config.h"
 ROBOTO_FN TTF ROBOTO_FN
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
