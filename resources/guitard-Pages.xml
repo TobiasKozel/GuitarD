@@ -2,11 +2,11 @@
 <PageTables vers='6.4.0.89'>
 	<PageTableLayouts>
 		<Plugin manID='Acme' prodID='Ipef' plugID='DGDR'>
-			<Desc>guitard 1 -&gt; 1 by Acme Inc.</Desc>
+			<Desc>GuitarD 1 -&gt; 1 by Acme Inc.</Desc>
 			<Layout>StandardLayout</Layout>
 		</Plugin><!--manID='Acme' prodID='Ipef' plugID='DGDR'-->
 		<Plugin manID='Acme' prodID='Ipef' plugID='DGDT'>
-			<Desc>guitard 1 -&gt; 1 by Acme Inc.</Desc>
+			<Desc>GuitarD 1 -&gt; 1 by Acme Inc.</Desc>
 			<Layout>StandardLayout</Layout>
 		</Plugin><!--manID='Acme' prodID='Ipef' plugID='DGDT'-->
 		<PTLayout name='StandardLayout'>
@@ -280,7 +280,7 @@
 		<PluginList>
 			<RTAS>
 				<PluginID manID='Acme' prodID='Ipef' plugID='DGDR'>
-					<MenuStr>AAX Native: guitard, 1 in X 1 out</MenuStr>
+					<MenuStr>AAX Native: GuitarD, 1 in X 1 out</MenuStr>
 				</PluginID><!--manID='Acme' prodID='Ipef' plugID='DGDR'-->
 			</RTAS>
 		</PluginList>

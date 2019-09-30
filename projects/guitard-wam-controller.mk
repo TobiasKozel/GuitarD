@@ -1,6 +1,6 @@
-include ../config/guitard-web.mk
+include ../config/GuitarD-web.mk
 
-TARGET = ../build-web/scripts/guitard-web.js
+TARGET = ../build-web/scripts/GuitarD-web.js
 
 SRC += $(WEB_SRC)
 CFLAGS += $(WEB_CFLAGS)

@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4FFBB8F820863B0E00DDD0E7"
-               BuildableName = "guitard.vst3"
+               BuildableName = "GuitarD.vst3"
                BlueprintName = "VST3P"
-               ReferencedContainer = "container:guitard-macOS.xcodeproj">
+               ReferencedContainer = "container:GuitarD-macOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -51,9 +51,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4FFBB8F820863B0E00DDD0E7"
-            BuildableName = "guitard.vst3"
+            BuildableName = "GuitarD.vst3"
             BlueprintName = "VST3P"
-            ReferencedContainer = "container:guitard-macOS.xcodeproj">
+            ReferencedContainer = "container:GuitarD-macOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -69,9 +69,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4FFBB8F820863B0E00DDD0E7"
-            BuildableName = "guitard.vst3"
+            BuildableName = "GuitarD.vst3"
             BlueprintName = "VST3P"
-            ReferencedContainer = "container:guitard-macOS.xcodeproj">
+            ReferencedContainer = "container:GuitarD-macOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

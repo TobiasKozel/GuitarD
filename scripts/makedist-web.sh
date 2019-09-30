@@ -8,11 +8,11 @@
 # 3rd argument : browser - either "chrome", "safari", "firefox" - if you want to launch a browser other than chrome, you must specify the correct origin for argument #2
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-IPLUG2_ROOT=..\..\..
+IPLUG2_ROOT=../../..
 PROJECT_ROOT=$SCRIPT_DIR/..
 IPLUG2_ROOT=$SCRIPT_DIR/$IPLUG2_ROOT
 
-PROJECT_NAME=guitard
+PROJECT_NAME=GuitarD
 WEBSOCKET_MODE=0
 EMRUN_BROWSER=chrome
 LAUNCH_EMRUN=1

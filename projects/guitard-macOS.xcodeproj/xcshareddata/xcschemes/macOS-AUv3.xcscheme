@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4F39075F2013EBA300DDA490"
-               BuildableName = "guitard.appex"
+               BuildableName = "GuitarD.appex"
                BlueprintName = "AUv3"
-               ReferencedContainer = "container:guitard-macOS.xcodeproj">
+               ReferencedContainer = "container:GuitarD-macOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -30,9 +30,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4F3EE1BA231438D000004786"
-               BuildableName = "guitard.app"
+               BuildableName = "GuitarD.app"
                BlueprintName = "AUv3App"
-               ReferencedContainer = "container:guitard-macOS.xcodeproj">
+               ReferencedContainer = "container:GuitarD-macOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -68,9 +68,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4F39075F2013EBA300DDA490"
-            BuildableName = "guitard.appex"
+            BuildableName = "GuitarD.appex"
             BlueprintName = "AUv3"
-            ReferencedContainer = "container:guitard-macOS.xcodeproj">
+            ReferencedContainer = "container:GuitarD-macOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <CommandLineArguments>
@@ -93,9 +93,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4F39075F2013EBA300DDA490"
-            BuildableName = "guitard.appex"
+            BuildableName = "GuitarD.appex"
             BlueprintName = "AUv3"
-            ReferencedContainer = "container:guitard-macOS.xcodeproj">
+            ReferencedContainer = "container:GuitarD-macOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

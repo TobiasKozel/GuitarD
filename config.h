@@ -1,19 +1,19 @@
-#define PLUG_NAME "guitard"
-#define PLUG_MFR "tk"
+#define PLUG_NAME "GuitarD"
+#define PLUG_MFR "Tobias"
 #define PLUG_VERSION_HEX 0x00010000
 #define PLUG_VERSION_STR "1.0.0"
-#define PLUG_UNIQUE_ID 'RTcK'
-#define PLUG_MFR_ID 'tkinc'
+#define PLUG_UNIQUE_ID 'BM7T'
+#define PLUG_MFR_ID 'TOBI'
 #define PLUG_URL_STR "https://iplug2.github.io"
 #define PLUG_EMAIL_STR "spam@me.com"
-#define PLUG_COPYRIGHT_STR "Copyright 2019 Acme Inc"
-#define PLUG_CLASS_NAME guitard
+#define PLUG_COPYRIGHT_STR "Copyright 2019 me lol"
+#define PLUG_CLASS_NAME GuitarD
 
-#define BUNDLE_NAME "guitard"
-#define BUNDLE_MFR "tk"
+#define BUNDLE_NAME "GuitarD"
+#define BUNDLE_MFR "Tobias"
 #define BUNDLE_DOMAIN "com"
 
-#define SHARED_RESOURCES_SUBPATH "guitard"
+#define SHARED_RESOURCES_SUBPATH "GuitarD"
 
 #define PLUG_CHANNEL_IO "2-2"
 
@@ -29,16 +29,16 @@
 #define PLUG_FPS 60
 #define PLUG_SHARED_RESOURCES 0
 
-#define AUV2_ENTRY guitard_Entry
-#define AUV2_ENTRY_STR "guitard_Entry"
-#define AUV2_FACTORY guitard_Factory
-#define AUV2_VIEW_CLASS guitard_View
-#define AUV2_VIEW_CLASS_STR "guitard_View"
+#define AUV2_ENTRY GuitarD_Entry
+#define AUV2_ENTRY_STR "GuitarD_Entry"
+#define AUV2_FACTORY GuitarD_Factory
+#define AUV2_VIEW_CLASS GuitarD_View
+#define AUV2_VIEW_CLASS_STR "GuitarD_View"
 
 #define AAX_TYPE_IDS 'EFN1', 'EFN2'
 #define AAX_TYPE_IDS_AUDIOSUITE 'EFA1', 'EFA2'
-#define AAX_PLUG_MFR_STR "Acme"
-#define AAX_PLUG_NAME_STR "guitard\nIPEF"
+#define AAX_PLUG_MFR_STR "TOBI"
+#define AAX_PLUG_NAME_STR "GuitarD\nIPEF"
 #define AAX_PLUG_CATEGORY_STR "Effect"
 #define AAX_DOES_AUDIOSUITE 1
 

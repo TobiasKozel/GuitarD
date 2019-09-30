@@ -253,8 +253,8 @@ sudo rm -R -f installer/build-mac/
 
 if [ $DEMO == 1 ]
 then
-git checkout installer/guitard.iss
-git checkout installer/guitard.pkgproj
+git checkout installer/GuitarD.iss
+git checkout installer/GuitarD.pkgproj
 git checkout resources/img/AboutBox.png
 fi
 

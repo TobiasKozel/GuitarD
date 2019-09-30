@@ -1,8 +1,8 @@
-#include "guitard.h"
+#include "GuitarD.h"
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
 
-guitard::guitard(const InstanceInfo& info)
+GuitarD::GuitarD(const InstanceInfo& info)
 : Plugin(info, MakeConfig(kNumParams, kNumPrograms))
 {
   GetParam(kGain)->InitDouble("Gain", 0., 0., 100.0, 0.01, "%");
@@ -24,7 +24,7 @@ guitard::guitard(const InstanceInfo& info)
 }
 
 #if IPLUG_DSP
-void guitard::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
+void GuitarD::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 {
   const double gain = GetParam(kGain)->Value() / 100.;
   const int nChans = NOutChansConnected();

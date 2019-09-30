@@ -5,23 +5,23 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>guitard</string>
+	<string>GuitarD</string>
 	<key>CFBundleGetInfoString</key>
-	<string>guitard v1.0.0 Copyright 2019 Acme Inc</string>
+	<string>GuitarD v1.0.0 Copyright 2019 me lol</string>
 	<key>CFBundleIconFile</key>
-	<string>guitard.icns</string>
+	<string>GuitarD.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.tk.app.guitard</string>
+	<string>com.Tobias.app.GuitarD</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>guitard</string>
+	<string>GuitarD</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
 	<key>CFBundleSignature</key>
-	<string>RTcK</string>
+	<string>BM7T</string>
 	<key>CFBundleVersion</key>
 	<string>1.0.0</string>
 	<key>CSResourcesFileMapped</key>
@@ -31,7 +31,7 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>10.11.0</string>
 	<key>NSMainNibFile</key>
-	<string>guitard-macOS-MainMenu</string>
+	<string>GuitarD-macOS-MainMenu</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs mic access to process audio.</string>
 	<key>NSPrincipalClass</key>

@@ -5,16 +5,16 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>guitard</string>
+	<string>GuitarD</string>
 	<key>CFBundleIcons</key>
 	<dict>
 	</dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.tk.app.guitard</string>
+	<string>com.Tobias.app.GuitarD</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>guitard</string>
+	<string>GuitarD</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -34,9 +34,9 @@
 		<string>audio</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
-	<string>guitard-iOS-LaunchScreen</string>
+	<string>GuitarD-iOS-LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
-	<string>guitard-iOS</string>
+	<string>GuitarD-iOS</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

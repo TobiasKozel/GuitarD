@@ -6,17 +6,17 @@
 	<array>
 		<dict>
 			<key>description</key>
-			<string>guitard</string>
+			<string>GuitarD</string>
 			<key>factoryFunction</key>
-			<string>guitard_Factory</string>
+			<string>GuitarD_Factory</string>
 			<key>manufacturer</key>
-			<string>tkinc</string>
+			<string>TOBI</string>
 			<key>name</key>
-			<string>tk: guitard</string>
+			<string>Tobias: GuitarD</string>
 			<key>sandboxSafe</key>
 			<true/>
 			<key>subtype</key>
-			<string>RTcK</string>
+			<string>BM7T</string>
 			<key>type</key>
 			<string>aufx</string>
 			<key>version</key>
@@ -28,21 +28,21 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>guitard</string>
+	<string>GuitarD</string>
 	<key>CFBundleGetInfoString</key>
-	<string>guitard v1.0.0 Copyright 2019 Acme Inc</string>
+	<string>GuitarD v1.0.0 Copyright 2019 me lol</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.tk.audiounit.guitard</string>
+	<string>com.Tobias.audiounit.GuitarD</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>guitard</string>
+	<string>GuitarD</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
 	<key>CFBundleSignature</key>
-	<string>RTcK</string>
+	<string>BM7T</string>
 	<key>CFBundleVersion</key>
 	<string>1.0.0</string>
 	<key>CSResourcesFileMapped</key>
@@ -50,6 +50,6 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>10.11.0</string>
 	<key>NSPrincipalClass</key>
-	<string>guitard_View</string>
+	<string>GuitarD_View</string>
 </dict>
 </plist>

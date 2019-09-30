@@ -2,9 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:projects/guitard-iOS.xcodeproj">
+      location = "group:projects/GuitarD-iOS.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:projects/guitard-macOS.xcodeproj">
+      location = "group:projects/GuitarD-macOS.xcodeproj">
    </FileRef>
 </Workspace>

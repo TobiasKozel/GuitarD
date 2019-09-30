@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4FB600121567CB0A0020189A"
-               BuildableName = "guitard.aaxplugin"
+               BuildableName = "GuitarD.aaxplugin"
                BlueprintName = "AAX"
-               ReferencedContainer = "container:guitard-macOS.xcodeproj">
+               ReferencedContainer = "container:GuitarD-macOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -53,9 +53,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4FB600121567CB0A0020189A"
-            BuildableName = "guitard.aaxplugin"
+            BuildableName = "GuitarD.aaxplugin"
             BlueprintName = "AAX"
-            ReferencedContainer = "container:guitard-macOS.xcodeproj">
+            ReferencedContainer = "container:GuitarD-macOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>

@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "91236D761B08F59300734C5E"
-               BuildableName = "guitardAppExtension.appex"
+               BuildableName = "GuitarDAppExtension.appex"
                BlueprintName = "AUv3"
-               ReferencedContainer = "container:guitard-iOS.xcodeproj">
+               ReferencedContainer = "container:GuitarD-iOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -30,9 +30,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "91236D0C1B08F42B00734C5E"
-               BuildableName = "guitard.app"
+               BuildableName = "GuitarD.app"
                BlueprintName = "App"
-               ReferencedContainer = "container:guitard-iOS.xcodeproj">
+               ReferencedContainer = "container:GuitarD-iOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -48,9 +48,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "91236D761B08F59300734C5E"
-            BuildableName = "guitardAppExtension.appex"
+            BuildableName = "GuitarDAppExtension.appex"
             BlueprintName = "AUv3"
-            ReferencedContainer = "container:guitard-iOS.xcodeproj">
+            ReferencedContainer = "container:GuitarD-iOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -76,9 +76,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "91236D0C1B08F42B00734C5E"
-            BuildableName = "guitard.app"
+            BuildableName = "GuitarD.app"
             BlueprintName = "App"
-            ReferencedContainer = "container:guitard-iOS.xcodeproj">
+            ReferencedContainer = "container:GuitarD-iOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -96,9 +96,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "91236D0C1B08F42B00734C5E"
-            BuildableName = "guitard.app"
+            BuildableName = "GuitarD.app"
             BlueprintName = "App"
-            ReferencedContainer = "container:guitard-iOS.xcodeproj">
+            ReferencedContainer = "container:GuitarD-iOS.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

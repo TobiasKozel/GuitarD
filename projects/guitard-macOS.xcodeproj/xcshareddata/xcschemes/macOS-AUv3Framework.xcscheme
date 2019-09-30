@@ -17,7 +17,7 @@
                BlueprintIdentifier = "4F78BE0122E73D0800AD537E"
                BuildableName = "AUv3Framework.framework"
                BlueprintName = "AUv3Framework"
-               ReferencedContainer = "container:guitard-macOS.xcodeproj">
+               ReferencedContainer = "container:GuitarD-macOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -48,7 +48,7 @@
             BlueprintIdentifier = "4F78BE0122E73D0800AD537E"
             BuildableName = "AUv3Framework.framework"
             BlueprintName = "AUv3Framework"
-            ReferencedContainer = "container:guitard-macOS.xcodeproj">
+            ReferencedContainer = "container:GuitarD-macOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -66,7 +66,7 @@
             BlueprintIdentifier = "4F78BE0122E73D0800AD537E"
             BuildableName = "AUv3Framework.framework"
             BlueprintName = "AUv3Framework"
-            ReferencedContainer = "container:guitard-macOS.xcodeproj">
+            ReferencedContainer = "container:GuitarD-macOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

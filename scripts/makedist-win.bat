@@ -6,7 +6,7 @@ REM - zipping requires 7zip in %ProgramFiles%\7-Zip\7z.exe
 REM - building installer requires innotsetup in "%ProgramFiles(x86)%\Inno Setup 5\iscc"
 REM - AAX codesigning requires wraptool tool added to %PATH% env variable and aax.key/.crt in .\..\..\..\Certificates\
 
-if %1 == 1 (echo Making guitard Windows DEMO VERSION distribution ...) else (echo Making guitard Windows FULL VERSION distribution ...)
+if %1 == 1 (echo Making GuitarD Windows DEMO VERSION distribution ...) else (echo Making GuitarD Windows FULL VERSION distribution ...)
 
 echo "touching source"
 
@@ -49,21 +49,21 @@ REM -copy ".\resources\img\AboutBox_Registered.png" ".\resources\img\AboutBox.pn
 )
 
 REM - Could build individual targets like this:
-REM - msbuild guitard-app.vcxproj /p:configuration=release /p:platform=win32
+REM - msbuild GuitarD-app.vcxproj /p:configuration=release /p:platform=win32
 
 echo Building 32 bit binaries...
-msbuild guitard.sln /p:configuration=release /p:platform=win32 /nologo /verbosity:minimal /fileLogger /m /flp:logfile=build-win.log;errorsonly 
+msbuild GuitarD.sln /p:configuration=release /p:platform=win32 /nologo /verbosity:minimal /fileLogger /m /flp:logfile=build-win.log;errorsonly 
 
 echo Building 64 bit binaries...
-msbuild guitard.sln /p:configuration=release /p:platform=x64 /nologo /verbosity:minimal /fileLogger /m /flp:logfile=build-win.log;errorsonly;append
+msbuild GuitarD.sln /p:configuration=release /p:platform=x64 /nologo /verbosity:minimal /fileLogger /m /flp:logfile=build-win.log;errorsonly;append
 
 REM --echo Copying AAX Presets
 
 REM --echo ------------------------------------------------------------------
 REM --echo Code sign AAX binary...
 REM --info at pace central, login via iLok license manager https://www.paceap.com/pace-central.html
-REM --wraptool sign --verbose --account XXXXX --wcguid XXXXX --keyfile XXXXX.p12 --keypassword XXXXX --in .\build-win\aax\bin\guitard.aaxplugin\Contents\Win32\guitard.aaxplugin --out .\build-win\aax\bin\guitard.aaxplugin\Contents\Win32\guitard.aaxplugin
-REM --wraptool sign --verbose --account XXXXX --wcguid XXXXX --keyfile XXXXX.p12 --keypassword XXXXX --in .\build-win\aax\bin\guitard.aaxplugin\Contents\x64\guitard.aaxplugin --out .\build-win\aax\bin\guitard.aaxplugin\Contents\x64\guitard.aaxplugin
+REM --wraptool sign --verbose --account XXXXX --wcguid XXXXX --keyfile XXXXX.p12 --keypassword XXXXX --in .\build-win\aax\bin\GuitarD.aaxplugin\Contents\Win32\GuitarD.aaxplugin --out .\build-win\aax\bin\GuitarD.aaxplugin\Contents\Win32\GuitarD.aaxplugin
+REM --wraptool sign --verbose --account XXXXX --wcguid XXXXX --keyfile XXXXX.p12 --keypassword XXXXX --in .\build-win\aax\bin\GuitarD.aaxplugin\Contents\x64\GuitarD.aaxplugin --out .\build-win\aax\bin\GuitarD.aaxplugin\Contents\x64\GuitarD.aaxplugin
 
 REM - Make Installer (InnoSetup)
 
@@ -73,21 +73,21 @@ echo Making Installer ...
 if exist "%ProgramFiles(x86)%" (goto 64-Bit-is) else (goto 32-Bit-is)
 
 :32-Bit-is
-"%ProgramFiles%\Inno Setup 5\iscc" /Q /cc ".\installer\guitard.iss"
+"%ProgramFiles%\Inno Setup 5\iscc" /Q /cc ".\installer\GuitarD.iss"
 goto END-is
 
 :64-Bit-is
-"%ProgramFiles(x86)%\Inno Setup 5\iscc" /Q /cc ".\installer\guitard.iss"
+"%ProgramFiles(x86)%\Inno Setup 5\iscc" /Q /cc ".\installer\GuitarD.iss"
 goto END-is
 
 :END-is
 
 REM - Codesign Installer for Windows 8+
-REM -"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /f "XXXXX.p12" /p XXXXX /d "guitard Installer" ".\installer\guitard Installer.exe"
+REM -"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /f "XXXXX.p12" /p XXXXX /d "GuitarD Installer" ".\installer\GuitarD Installer.exe"
 
 REM -if %1 == 1 (
-REM -copy ".\installer\guitard Installer.exe" ".\installer\guitard Demo Installer.exe"
-REM -del ".\installer\guitard Installer.exe"
+REM -copy ".\installer\GuitarD Installer.exe" ".\installer\GuitarD Demo Installer.exe"
+REM -del ".\installer\GuitarD Installer.exe"
 REM -)
 
 REM - ZIP

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\guitard.cpp" />
+    <ClCompile Include="..\GuitarD.cpp" />
     <ClCompile Include="..\..\..\IPlug\IPlugAPIBase.cpp">
       <Filter>IPlug</Filter>
     </ClCompile>
@@ -68,7 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../config.h" />
-    <ClInclude Include="..\guitard.h" />
+    <ClInclude Include="..\GuitarD.h" />
     <ClInclude Include="..\..\..\IPlug\IPlugAPIBase.h">
       <Filter>IPlug</Filter>
     </ClInclude>
@@ -255,16 +255,16 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\config\guitard-web.mk">
+    <None Include="..\config\GuitarD-web.mk">
       <Filter>config</Filter>
     </None>
-    <None Include="..\config\guitard-win.props">
+    <None Include="..\config\GuitarD-win.props">
       <Filter>config</Filter>
     </None>
-    <None Include="..\config\guitard-mac.xcconfig">
+    <None Include="..\config\GuitarD-mac.xcconfig">
       <Filter>config</Filter>
     </None>
-    <None Include="..\config\guitard-ios.xcconfig">
+    <None Include="..\config\GuitarD-ios.xcconfig">
       <Filter>config</Filter>
     </None>
   </ItemGroup>

@@ -29,8 +29,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2EB4846A-93E0-43A0-821E-12237105168F}</ProjectGuid>
-    <RootNamespace>guitard</RootNamespace>
-    <ProjectName>guitard-vst2</ProjectName>
+    <RootNamespace>GuitarD</RootNamespace>
+    <ProjectName>GuitarD-vst2</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -79,27 +79,27 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(SolutionDir)\config\guitard-win.props" />
+    <Import Project="$(SolutionDir)\config\GuitarD-win.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(SolutionDir)\config\guitard-win.props" />
+    <Import Project="$(SolutionDir)\config\GuitarD-win.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(SolutionDir)\config\guitard-win.props" />
+    <Import Project="$(SolutionDir)\config\GuitarD-win.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(SolutionDir)\config\guitard-win.props" />
+    <Import Project="$(SolutionDir)\config\GuitarD-win.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tracer|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(SolutionDir)\config\guitard-win.props" />
+    <Import Project="$(SolutionDir)\config\GuitarD-win.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tracer|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(SolutionDir)\config\guitard-win.props" />
+    <Import Project="$(SolutionDir)\config\GuitarD-win.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -298,7 +298,7 @@
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_hdr.h" />
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_src.h" />
     <ClInclude Include="..\..\..\IPlug\VST2\IPlugVST2.h" />
-    <ClInclude Include="..\guitard.h" />
+    <ClInclude Include="..\GuitarD.h" />
     <ClInclude Include="..\resources\resource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -372,16 +372,16 @@
     <ClCompile Include="..\..\..\IPlug\IPlugProcessor.cpp" />
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp" />
     <ClCompile Include="..\..\..\IPlug\VST2\IPlugVST2.cpp" />
-    <ClCompile Include="..\guitard.cpp" />
+    <ClCompile Include="..\GuitarD.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\main.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\config\guitard-ios.xcconfig" />
-    <None Include="..\config\guitard-web.mk" />
-    <None Include="..\config\guitard-win.props" />
-    <None Include="..\config\guitard-mac.xcconfig" />
+    <None Include="..\config\GuitarD-ios.xcconfig" />
+    <None Include="..\config\GuitarD-web.mk" />
+    <None Include="..\config\GuitarD-win.props" />
+    <None Include="..\config\GuitarD-mac.xcconfig" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

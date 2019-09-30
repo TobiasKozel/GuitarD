@@ -6,7 +6,7 @@ import plistlib, os, datetime, fileinput, glob, sys, string
 scriptpath = os.path.dirname(os.path.realpath(__file__))
 projectpath = os.path.abspath(os.path.join(scriptpath, os.pardir))
 
-IPLUG2_ROOT = "..\..\.."
+IPLUG2_ROOT = "../../.."
 
 sys.path.insert(0, os.path.join(os.getcwd(), IPLUG2_ROOT + '/scripts'))
 
@@ -60,9 +60,9 @@ def main():
       line="AppVersion=" + config['FULL_VER_STR'] + "\n"
     if "OutputBaseFilename" in line:
       if demo:
-        line="OutputBaseFilename=guitard Demo Installer\n"
+        line="OutputBaseFilename=GuitarD Demo Installer\n"
       else:
-        line="OutputBaseFilename=guitard Installer\n"
+        line="OutputBaseFilename=GuitarD Installer\n"
         
     if 'Source: "readme' in line:
      if demo:
@@ -72,15 +72,15 @@ def main():
     
     if "WelcomeLabel1" in line:
      if demo:
-       line="WelcomeLabel1=Welcome to the guitard Demo installer\n"
+       line="WelcomeLabel1=Welcome to the GuitarD Demo installer\n"
      else:
-       line="WelcomeLabel1=Welcome to the guitard installer\n"
+       line="WelcomeLabel1=Welcome to the GuitarD installer\n"
        
     if "SetupWindowTitle" in line:
      if demo:
-       line="SetupWindowTitle=guitard Demo installer\n"
+       line="SetupWindowTitle=GuitarD Demo installer\n"
      else:
-       line="SetupWindowTitle=guitard installer\n"
+       line="SetupWindowTitle=GuitarD installer\n"
        
     sys.stdout.write(line)
     

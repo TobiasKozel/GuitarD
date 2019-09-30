@@ -13,10 +13,10 @@ enum EParams
 using namespace iplug;
 using namespace igraphics;
 
-class guitard : public Plugin
+class GuitarD : public Plugin
 {
 public:
-  guitard(const InstanceInfo& info);
+  GuitarD(const InstanceInfo& info);
 
 #if IPLUG_DSP // All DSP methods and member variables should be within an IPLUG_DSP guard, should you want distributed UI
   void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;

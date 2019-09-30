@@ -65,7 +65,7 @@ END
 
 IDD_DIALOG_MAIN DIALOG 0, 0, 300, 300
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "guitard"
+CAPTION "GuitarD"
 MENU IDR_MENU1
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -162,7 +162,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON                    "guitard.ico"
+IDI_ICON1               ICON                    "GuitarD.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -204,10 +204,10 @@ BEGIN
         BEGIN
             VALUE "FileVersion", "0.0.1"
             VALUE "ProductVersion", "0.0.1"
-            VALUE "FileDescription", "guitard"
-            VALUE "InternalName", "guitard"
-            VALUE "ProductName", "guitard"
-            VALUE "CompanyName", "tk"
+            VALUE "FileDescription", "GuitarD"
+            VALUE "InternalName", "GuitarD"
+            VALUE "ProductName", "GuitarD"
+            VALUE "CompanyName", "Tobias"
             VALUE "LegalCopyright", "Copyright 2019 Acme Inc"
             VALUE "LegalTrademarks", "VST is a trademark of Steinberg Media Technologies GmbH, Audio Unit is a trademark of Apple, Inc."
         END
@@ -228,7 +228,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-#include "../config.h"
+#include "..\config.h"
 ROBOTO_FN TTF ROBOTO_FN
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

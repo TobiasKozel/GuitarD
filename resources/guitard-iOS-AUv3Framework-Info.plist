@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>AUv3Framework</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.tk.app.guitard.AUv3Framework</string>
+	<string>com.Tobias.app.GuitarD.AUv3Framework</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

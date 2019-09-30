@@ -15,16 +15,16 @@ def  main():
   else:
     demo=int(sys.argv[1])
    
-  installer = "\installer\guitard Installer.exe"
+  installer = "\installer\GuitarD Installer.exe"
    
   if demo:
-    installer = "\installer\guitard Demo Installer.exe"
+    installer = "\installer\GuitarD Demo Installer.exe"
    
   FILES_TO_ZIP = [
     projectpath + installer,
     projectpath + "\installer\changelog.txt",
     projectpath + "\installer\known-issues.txt",
-    projectpath + "\manual\guitard manual.pdf" 
+    projectpath + "\manual\GuitarD manual.pdf" 
   ]
 
   # extract values from config.h
@@ -43,10 +43,10 @@ def  main():
 
   FULLVERSIONSTR = MAJORSTR + "." + MINORSTR + "." + BUGFIXSTR
 
-  ZIPNAME = "guitard-v" + FULLVERSIONSTR + "-win.zip"
+  ZIPNAME = "GuitarD-v" + FULLVERSIONSTR + "-win.zip"
   
   if demo:
-    ZIPNAME = "guitard-v" + FULLVERSIONSTR + "-win-demo.zip"
+    ZIPNAME = "GuitarD-v" + FULLVERSIONSTR + "-win-demo.zip"
   
   zf = zipfile.ZipFile(projectpath + "\installer\/" + ZIPNAME, mode="w")
 

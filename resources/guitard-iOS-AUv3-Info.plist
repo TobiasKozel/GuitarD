@@ -5,15 +5,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>guitardAppExtension</string>
+	<string>GuitarDAppExtension</string>
 	<key>CFBundleExecutable</key>
-	<string>guitardAppExtension</string>
+	<string>GuitarDAppExtension</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.tk.app.guitard.AUv3</string>
+	<string>com.Tobias.app.GuitarD.AUv3</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>guitardAppExtension</string>
+	<string>GuitarDAppExtension</string>
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
@@ -30,13 +30,13 @@
 			<array>
 				<dict>
 					<key>description</key>
-					<string>guitard</string>
+					<string>GuitarD</string>
 					<key>factoryFunction</key>
 					<string>IPlugAUViewController</string>
 					<key>manufacturer</key>
 					<string>Acme</string>
 					<key>name</key>
-					<string>tk: guitard</string>
+					<string>Tobias: GuitarD</string>
 					<key>sandboxSafe</key>
 					<true/>
 					<key>subtype</key>
@@ -53,7 +53,7 @@
 			</array>
 		</dict>
 		<key>NSExtensionMainStoryboard</key>
-		<string>guitard-iOS-MainInterface</string>
+		<string>GuitarD-iOS-MainInterface</string>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.AudioUnit-UI</string>
 	</dict>

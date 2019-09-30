@@ -1,6 +1,6 @@
-include ../config/guitard-web.mk
+include ../config/GuitarD-web.mk
 
-TARGET = ../build-web/scripts/guitard-wam.js
+TARGET = ../build-web/scripts/GuitarD-wam.js
 
 SRC += $(WAM_SRC)
 CFLAGS += $(WAM_CFLAGS)

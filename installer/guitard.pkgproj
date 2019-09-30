@@ -25,7 +25,7 @@
 									<key>GID</key>
 									<integer>80</integer>
 									<key>PATH</key>
-									<string>/Applications/guitard.app</string>
+									<string>/Applications/GuitarD.app</string>
 									<key>PATH_TYPE</key>
 									<integer>0</integer>
 									<key>PERMISSIONS</key>
@@ -478,7 +478,7 @@
 				<key>CONCLUSION_ACTION</key>
 				<integer>0</integer>
 				<key>IDENTIFIER</key>
-				<string>com.tk.app.pkg.guitard</string>
+				<string>com.Tobias.app.pkg.GuitarD</string>
 				<key>NAME</key>
 				<string>Application</string>
 				<key>OVERWRITE_PERMISSIONS</key>
@@ -570,7 +570,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Library/Audio/Plug-Ins/VST/guitard.vst</string>
+															<string>/Library/Audio/Plug-Ins/VST/GuitarD.vst</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -1014,7 +1014,7 @@
 				<key>CONCLUSION_ACTION</key>
 				<integer>0</integer>
 				<key>IDENTIFIER</key>
-				<string>com.tk.vst.pkg.guitard</string>
+				<string>com.Tobias.vst.pkg.GuitarD</string>
 				<key>LOCATION</key>
 				<integer>0</integer>
 				<key>NAME</key>
@@ -1110,7 +1110,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Library/Audio/Plug-Ins/VST3/guitard.vst3</string>
+															<string>/Library/Audio/Plug-Ins/VST3/GuitarD.vst3</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -1554,7 +1554,7 @@
 				<key>CONCLUSION_ACTION</key>
 				<integer>0</integer>
 				<key>IDENTIFIER</key>
-				<string>com.tk.vst3.pkg.guitard</string>
+				<string>com.Tobias.vst3.pkg.GuitarD</string>
 				<key>LOCATION</key>
 				<integer>0</integer>
 				<key>NAME</key>
@@ -1650,7 +1650,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Library/Audio/Plug-Ins/Components/guitard.component</string>
+															<string>/Library/Audio/Plug-Ins/Components/GuitarD.component</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -2094,7 +2094,7 @@
 				<key>CONCLUSION_ACTION</key>
 				<integer>0</integer>
 				<key>IDENTIFIER</key>
-				<string>com.tk.au.pkg.guitard</string>
+				<string>com.Tobias.au.pkg.GuitarD</string>
 				<key>LOCATION</key>
 				<integer>0</integer>
 				<key>NAME</key>
@@ -2176,7 +2176,7 @@
 																	<key>GID</key>
 																	<integer>80</integer>
 																	<key>PATH</key>
-																	<string>/Library/Application Support/Avid/Audio/Plug-Ins/guitard.aaxplugin</string>
+																	<string>/Library/Application Support/Avid/Audio/Plug-Ins/GuitarD.aaxplugin</string>
 																	<key>PATH_TYPE</key>
 																	<integer>0</integer>
 																	<key>PERMISSIONS</key>
@@ -2634,7 +2634,7 @@
 				<key>CONCLUSION_ACTION</key>
 				<integer>0</integer>
 				<key>IDENTIFIER</key>
-				<string>com.tk.aax.pkg.guitard</string>
+				<string>com.Tobias.aax.pkg.GuitarD</string>
 				<key>LOCATION</key>
 				<integer>0</integer>
 				<key>NAME</key>
@@ -2680,7 +2680,7 @@
 				<key>BACKGROUND_PATH</key>
 				<dict>
 					<key>PATH</key>
-					<string>guitard-installer-bg.png</string>
+					<string>GuitarD-installer-bg.png</string>
 					<key>PATH_TYPE</key>
 					<integer>1</integer>
 				</dict>
@@ -2949,7 +2949,7 @@
 						<key>LANGUAGE</key>
 						<string>English</string>
 						<key>VALUE</key>
-						<string>guitard</string>
+						<string>GuitarD</string>
 					</dict>
 				</array>
 			</dict>
@@ -3138,7 +3138,7 @@
 				</dict>
 			</array>
 			<key>NAME</key>
-			<string>guitard Installer</string>
+			<string>GuitarD Installer</string>
 		</dict>
 	</dict>
 	<key>TYPE</key>
