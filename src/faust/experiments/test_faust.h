@@ -7,10 +7,7 @@ Compilation options: -double -ftz 0
 #ifndef  __TestDsp_H__
 #define  __TestDsp_H__
 
-
-
 #include "src/faust/FaustHeadlessDsp.h"
-#define FAUSTFLOAT iplug::sample
 
 
 #ifndef FAUSTFLOAT
