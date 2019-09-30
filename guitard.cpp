@@ -20,6 +20,7 @@ GuitarD::GuitarD(const InstanceInfo& info)
     pGraphics->AttachControl(new ITextControl(b.GetMidVPadded(50), "Hello iPlug 2!", IText(50)));
     pGraphics->AttachControl(new IVKnobControl(b.GetCentredInside(100).GetVShifted(-100), kGain));
   };
+  testsdp.init(GetSampleRate());
 #endif
 }
 
@@ -29,10 +30,11 @@ void GuitarD::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
   const double gain = GetParam(kGain)->Value() / 100.;
   const int nChans = NOutChansConnected();
   
-  for (int s = 0; s < nFrames; s++) {
-    for (int c = 0; c < nChans; c++) {
-      outputs[c][s] = inputs[c][s] * gain;
-    }
-  }
+  //for (int s = 0; s < nFrames; s++) {
+  //  for (int c = 0; c < nChans; c++) {
+  //    outputs[c][s] = inputs[c][s] * gain;
+  //  }
+  //}
+  testsdp.compute(nFrames, inputs, outputs);
 }
 #endif

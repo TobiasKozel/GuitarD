@@ -285,6 +285,12 @@
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.h">
       <Filter>IGraphics\Drawing</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\faust\FaustHeadlessDsp.h">
+      <Filter>faust</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\faust\experiments\test_faust.h">
+      <Filter>faust\experiments</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -316,6 +322,12 @@
     </Filter>
     <Filter Include="IPlug\APP\RTAudioMidi\include">
       <UniqueIdentifier>{649c5de3-b4c2-4de9-8d57-3b1762646259}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="faust">
+      <UniqueIdentifier>{ad3ea073-4891-419e-9f43-ad68acf9a1cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="faust\experiments">
+      <UniqueIdentifier>{26201d24-6d0a-4a97-9bd8-13cd7e9825af}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
