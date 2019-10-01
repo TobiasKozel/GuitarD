@@ -9,7 +9,10 @@ public:
   ReverbFaust(int p_samplerate, int p_maxBuffer = 512, int p_channels = 2) :
     Node(p_samplerate, p_maxBuffer, p_channels) {
     rev.setup(p_samplerate);
-    gain = rev.ui.properties.at("gain");
+    gain = rev.getProperty("gain");
+    if (!gain) {
+      gain = new double;
+    }
   }
 
   TestDsp rev;

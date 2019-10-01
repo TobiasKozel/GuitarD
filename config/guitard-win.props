@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="UserMacros">
+    <EXTRA_INC_PATHS>$(SolutionDir)src\faust\generated</EXTRA_INC_PATHS>
     <IPLUG2_ROOT>$(ProjectDir)..\..\..</IPLUG2_ROOT>
     <BINARY_NAME>GuitarD</BINARY_NAME>
     <EXTRA_ALL_DEFS>IGRAPHICS_CAIRO</EXTRA_ALL_DEFS>

@@ -4,3 +4,7 @@ REM set FORMAT=%1
 REM set NAME=%2
 REM set PLATFORM=%3
 REM set BUILT_BINARY=%4
+
+cd ..
+echo Building Faust
+python scripts\compile_faust.py

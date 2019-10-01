@@ -21,3 +21,5 @@ gui/*
 
 Icon?
 .DS_Stor*
+
+src/faust/generated/*.h
