@@ -286,10 +286,16 @@
       <Filter>IGraphics\Drawing</Filter>
     </ClInclude>
     <ClInclude Include="..\src\faust\FaustHeadlessDsp.h">
-      <Filter>faust</Filter>
+      <Filter>src\faust</Filter>
     </ClInclude>
     <ClInclude Include="..\src\faust\experiments\test_faust.h">
-      <Filter>faust\experiments</Filter>
+      <Filter>src\faust\experiments</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\node\Node.h">
+      <Filter>src\node</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\faust\experiments\test_node.h">
+      <Filter>src\faust\experiments</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -323,11 +329,17 @@
     <Filter Include="IPlug\APP\RTAudioMidi\include">
       <UniqueIdentifier>{649c5de3-b4c2-4de9-8d57-3b1762646259}</UniqueIdentifier>
     </Filter>
-    <Filter Include="faust">
+    <Filter Include="src">
+      <UniqueIdentifier>{259115fd-b292-4067-9d16-3a045dfa3f12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\faust">
       <UniqueIdentifier>{ad3ea073-4891-419e-9f43-ad68acf9a1cf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="faust\experiments">
+    <Filter Include="src\faust\experiments">
       <UniqueIdentifier>{26201d24-6d0a-4a97-9bd8-13cd7e9825af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\node">
+      <UniqueIdentifier>{ed898a12-2e15-45da-9fe2-a23a03581a7d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

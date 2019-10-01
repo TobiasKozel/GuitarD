@@ -4,6 +4,7 @@
 #define FAUSTFLOAT iplug::sample
 
 #include "IPlugConstants.h"
+#include <map>
 
 
 struct Meta
@@ -15,10 +16,11 @@ struct Meta
 
 struct UI
 {
+  std::map<const char*, FAUSTFLOAT*> properties;
   virtual void openVerticalBox(const char* key) {};
   virtual void closeBox() {};
-  virtual void addHorizontalSlider(const char*, FAUSTFLOAT*, FAUSTFLOAT, FAUSTFLOAT, FAUSTFLOAT, FAUSTFLOAT) {
-    
+  virtual void addHorizontalSlider(const char* name, FAUSTFLOAT* proprety, FAUSTFLOAT, FAUSTFLOAT, FAUSTFLOAT, FAUSTFLOAT) {
+    properties.insert(std::pair<const char*, FAUSTFLOAT*>(name, proprety));
   }
 };
 
