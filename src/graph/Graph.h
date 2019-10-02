@@ -2,6 +2,7 @@
 #include "IPlugConstants.h"
 #include "src/graph/Node.h"
 #include "src/graph/DummyNode.h"
+#include "src/graph/nodes/simple_delay/SimpleDelayNode.h"
 
 #define MAXNODES 128
 
@@ -24,12 +25,23 @@ public:
     output = new DummyNode();
     output->channelCount = channelCount;
     output->inputs[0] = input;
+    testAdd();
   }
 
   void ProcessBlock(iplug::sample** in, iplug::sample** out, int nFrames) {
     input->outputs[0] = in;
+    for (int i = 0; i < MAXNODES; i++) {
+      if (nodes[i] != nullptr) {
+        nodes[i]->ProcessBlock(nFrames);
+      }
+    }
+    output->CopyOut(out, nFrames);
+  }
 
-    output->ProcessBlock(in, out, nFrames);
+  void testAdd() {
+    nodes[0] = new SimpleDelayNode(sampleRate);
+    nodes[0]->inputs[0] = input;
+    output->inputs[0] = nodes[0];
   }
 
 private:

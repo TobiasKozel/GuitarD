@@ -21,6 +21,15 @@ GuitarD::GuitarD(const InstanceInfo& info)
     const IRECT b = pGraphics->GetBounds();
     pGraphics->AttachControl(new ITextControl(b.GetMidVPadded(50), "Hello iPlug 2!", IText(50)));
     pGraphics->AttachControl(new IVKnobControl(b.GetCentredInside(100).GetVShifted(-100), kGain));
+
+
+    auto buttonAction = [&](IControl* pCaller) {
+
+    };
+    pGraphics->AttachControl(
+      new IVButtonControl(b.GetCentredInside(100).GetVShifted(-100), buttonAction),
+      kNoParameter, "vcontrols"
+    );
   };
 #endif
 }
@@ -29,12 +38,5 @@ GuitarD::GuitarD(const InstanceInfo& info)
 void GuitarD::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 {
   graph->ProcessBlock(inputs, outputs, nFrames);
-  // const double gain = GetParam(kGain)->Value() / 100.;
-  // const int nChans = NOutChansConnected();
-  //for (int s = 0; s < nFrames; s++) {
-  //  for (int c = 0; c < nChans; c++) {
-  //    outputs[c][s] = inputs[c][s] * gain;
-  //  }
-  //}
 }
 #endif

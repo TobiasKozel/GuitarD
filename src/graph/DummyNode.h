@@ -10,7 +10,10 @@ public:
   DummyNode() : Node(0, 0, 1, 0, 0) {
     isProcessed = true;
   }
-  virtual void ProcessBlock(iplug::sample** in, iplug::sample** out, int nFrames) {
+
+  void ProcessBlock(int) {}
+
+  void CopyOut(iplug::sample** out, int nFrames) {
     if (inputCount && inputs[0] != nullptr) {
       for (int c = 0; c < channelCount; c++) {
         for (int i = 0; i < nFrames; i++) {

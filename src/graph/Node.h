@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IPlugConstants.h"
+#include <algorithm>
 
 class Node
 {
@@ -21,12 +22,12 @@ public:
     isProcessed = false;
     channelCount = p_channles;
 
-    inputs = new Node*[p_inputs];
-    for (int i = 0; i < inputCount; i++) {
+    inputs = new Node*[std::max(1, p_inputs)];
+    for (int i = 0; i < p_inputs; i++) {
       inputs[i] = nullptr;
     }
 
-    outputs = new iplug::sample**[p_outputs];
+    outputs = new iplug::sample**[std::max(1, p_outputs)];
     for (int i = 0; i < p_outputs; i++) {
       outputs[i] = new iplug::sample*[p_channles];
       for (int c = 0; c < p_channles; c++) {
@@ -46,7 +47,7 @@ public:
     delete outputs;
   }
 
-  virtual void ProcessBlock(iplug::sample** in, iplug::sample** out, int nFrames) = 0;
+  virtual void ProcessBlock(int nFrames) = 0;
 
   virtual void ConnectInput(Node* in, int inputNumber = 0) {
     if (inputNumber < inputCount) {

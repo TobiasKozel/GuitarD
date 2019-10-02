@@ -297,6 +297,9 @@
     <ClInclude Include="..\src\graph\DummyNode.h">
       <Filter>src\graph</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\nodes\simple_delay\SimpleDelayNode.h">
+      <Filter>src\graph\nodes\simpledelay</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -340,6 +343,9 @@
     </Filter>
     <Filter Include="src\graph\nodes">
       <UniqueIdentifier>{b5e2264e-d950-4e17-bfa3-8119951e2764}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\nodes\simpledelay">
+      <UniqueIdentifier>{728abb05-c2e6-4666-996d-bc0cdc178c0f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
