@@ -288,14 +288,14 @@
     <ClInclude Include="..\src\faust\FaustHeadlessDsp.h">
       <Filter>src\faust</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\faust\experiments\test_faust.h">
-      <Filter>src\faust\experiments</Filter>
+    <ClInclude Include="..\src\graph\Node.h">
+      <Filter>src\graph</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\node\Node.h">
-      <Filter>src\node</Filter>
+    <ClInclude Include="..\src\graph\Graph.h">
+      <Filter>src\graph</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\faust\experiments\test_node.h">
-      <Filter>src\faust\experiments</Filter>
+    <ClInclude Include="..\src\graph\DummyNode.h">
+      <Filter>src\graph</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -335,11 +335,11 @@
     <Filter Include="src\faust">
       <UniqueIdentifier>{ad3ea073-4891-419e-9f43-ad68acf9a1cf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\faust\experiments">
-      <UniqueIdentifier>{26201d24-6d0a-4a97-9bd8-13cd7e9825af}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\node">
+    <Filter Include="src\graph">
       <UniqueIdentifier>{ed898a12-2e15-45da-9fe2-a23a03581a7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\nodes">
+      <UniqueIdentifier>{b5e2264e-d950-4e17-bfa3-8119951e2764}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
