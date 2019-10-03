@@ -4,6 +4,7 @@
 #include "src/graph/nodes/DummyNode.h"
 #include "src/constants.h"
 #include "src/graph/ParameterManager.h"
+#include "mutex.h"
 
 #include "src/graph/nodes/simple_delay/SimpleDelayNode.h"
 
@@ -15,6 +16,7 @@ public:
   int nodeCount;
   int channelCount;
   ParameterManager* paramManager;
+  WDL_Mutex isProcessing;
 
   Graph(ParameterManager* p_paramManager, int p_sampleRate, int p_channles = 2) {
     paramManager = p_paramManager;
@@ -33,6 +35,7 @@ public:
   }
 
   void ProcessBlock(iplug::sample** in, iplug::sample** out, int nFrames) {
+    WDL_MutexLock lock(&isProcessing);
     input->outputs[0] = in;
     for (int i = 0; i < MAXNODES; i++) {
       if (nodes[i] != nullptr) {
@@ -43,6 +46,7 @@ public:
   }
 
   void testAdd() {
+    WDL_MutexLock lock(&isProcessing);
     if (nodes[0] == nullptr) {
       nodes[0] = new SimpleDelayNode(sampleRate, paramManager);
       nodes[0]->inputs[0] = input;

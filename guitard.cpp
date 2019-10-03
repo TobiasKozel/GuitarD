@@ -29,6 +29,8 @@ GuitarD::GuitarD(const InstanceInfo& info)
 
 
     auto buttonAction = [&](IControl* pCaller) {
+      //pCaller->SplashClickActionFunc();
+      SplashClickActionFunc(pCaller);
       graph->testAdd();
     };
     pGraphics->AttachControl(
