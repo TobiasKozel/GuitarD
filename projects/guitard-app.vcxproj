@@ -332,6 +332,7 @@
     <ClInclude Include="..\src\graph\nodes\DummyNode.h" />
     <ClInclude Include="..\src\graph\nodes\simple_delay\SimpleDelayNode.h" />
     <ClInclude Include="..\src\graph\ParameterManager.h" />
+    <ClInclude Include="..\src\graph\TestUiNode.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Dependencies\IPlug\RTAudio\include\asio.cpp" />

@@ -21,7 +21,12 @@ GuitarD::GuitarD(const InstanceInfo& info)
   };
   
   mLayoutFunc = [&](IGraphics* pGraphics) {
-    pGraphics->AttachCornerResizer(EUIResizerMode::Scale, false);
+    if (pGraphics->NControls()) {
+      //Could handle new layout here
+      return;
+    }
+
+    pGraphics->AttachCornerResizer(EUIResizerMode::Scale, true);
     pGraphics->AttachPanelBackground(COLOR_GRAY);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     const IRECT b = pGraphics->GetBounds();

@@ -17,10 +17,9 @@ public:
     parameters = new ParameterCoupling*[delay.ui.params.size()];
     parameterCount = 0;
     for (auto p : delay.ui.params) {
-      ParameterCoupling* param = p;
-      parameters[parameterCount] = param;
+      parameters[parameterCount] = p;
       parameterCount++;
-      if (!paramManager->claimParameter(param)) {
+      if (!paramManager->claimParameter(p)) {
         // this means the manager has no free parameters left
         assert(false);
       }
@@ -31,6 +30,7 @@ public:
     float test = 0.4;
     // only delete the array, the UI struct will delete all the params inside
     for (int i = 0; i < parameterCount; i++) {
+      // however the daw parameters still have to be freed so another node can take them if needed
       paramManager->releaseParameter(parameters[i]);
     }
     delete parameters;

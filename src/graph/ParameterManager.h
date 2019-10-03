@@ -48,7 +48,8 @@ public:
     std::string paramprefix = "Uninitialized ";
     parametersClaimed[parametersLeft] = false;
     parameters[parametersLeft++] = param;
-    param->InitDouble((paramprefix + std::to_string(parametersLeft)).c_str(), 1, 0, 100, 1);
+    // all these values have a range from 0-100 since this can't be changed later on
+    param->InitDouble((paramprefix + std::to_string(parametersLeft)).c_str(), 1, 0, 100, 0.1);
   }
 
   /**

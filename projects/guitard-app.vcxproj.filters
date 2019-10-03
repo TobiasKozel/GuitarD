@@ -306,6 +306,9 @@
     <ClInclude Include="..\src\graph\ParameterManager.h">
       <Filter>src\graph</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\TestUiNode.h">
+      <Filter>src\graph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
