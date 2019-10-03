@@ -2,4 +2,4 @@
 #define MAXNODES 128
 
 // Amounts of daw params to register at start since dynamic amounts are not well supported
-#define MAXDAWPARAMS 128
+#define MAXDAWPARAMS 16

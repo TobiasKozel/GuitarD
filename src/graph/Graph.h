@@ -43,9 +43,16 @@ public:
   }
 
   void testAdd() {
-    nodes[0] = new SimpleDelayNode(sampleRate, paramManager);
-    nodes[0]->inputs[0] = input;
-    output->inputs[0] = nodes[0];
+    if (nodes[0] == nullptr) {
+      nodes[0] = new SimpleDelayNode(sampleRate, paramManager);
+      nodes[0]->inputs[0] = input;
+      output->inputs[0] = nodes[0];
+    }
+    else {
+      output->inputs[0] = input;
+      delete nodes[0];
+      nodes[0] = nullptr;
+    }
   }
 
 private:

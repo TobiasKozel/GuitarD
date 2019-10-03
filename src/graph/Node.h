@@ -24,6 +24,7 @@ public:
     outputCount = p_outputs;
     isProcessed = false;
     channelCount = p_channles;
+    parameterCount = 0;
 
     inputs = new Node*[std::max(1, p_inputs)];
     for (int i = 0; i < p_inputs; i++) {
@@ -39,7 +40,7 @@ public:
     }
   };
 
-  ~Node() {
+  virtual ~Node() {
     delete inputs;
     for (int i = 0; i < outputCount; i++) {
       for (int c = 0; c < channelCount; c++) {

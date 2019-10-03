@@ -5,6 +5,8 @@
 
 #include "IPlugConstants.h"
 #include <map>
+#include <vector>
+#include "src/graph/ParameterManager.h"
 
 
 struct Meta
@@ -15,36 +17,33 @@ struct Meta
 
 /** 
  * This is a shim to collect pointer to all the properties from the faust DSP code
- * It will store them in a map for easy access by property name
 */
 struct UI
 {
-  std::map<const char*, FAUSTFLOAT*> properties;
-  virtual void openVerticalBox(const char* key) {};
-  virtual void openHorizontalBox(const char* key) {};
-  virtual void closeBox() {};
-  virtual void declare(FAUSTFLOAT*, const char*, const char*) {};
+  std::vector<ParameterCoupling*> params;
 
-  virtual void addHorizontalSlider(const char* name, FAUSTFLOAT* proprety, FAUSTFLOAT, FAUSTFLOAT, FAUSTFLOAT, FAUSTFLOAT) {
-    properties.insert(std::pair<const char*, FAUSTFLOAT*>(name, proprety));
+  void openVerticalBox(const char* key) {};
+  void openHorizontalBox(const char* key) {};
+  void closeBox() {};
+  void declare(FAUSTFLOAT*, const char*, const char*) {};
+
+  void addHorizontalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT default, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
+    params.push_back(new ParameterCoupling(name, prop, default, min, max, stepSize));
   }
 
-  virtual void addVerticalSlider(const char* name, FAUSTFLOAT* proprety, FAUSTFLOAT, FAUSTFLOAT, FAUSTFLOAT, FAUSTFLOAT) {
-    properties.insert(std::pair<const char*, FAUSTFLOAT*>(name, proprety));
+  void addVerticalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT default, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
+    params.push_back(new ParameterCoupling(name, prop, default, min, max, stepSize));
   }
 
-  virtual void addCheckButton(const char* name, FAUSTFLOAT* proprety) {
-    properties.insert(std::pair<const char*, FAUSTFLOAT*>(name, proprety));
+  void addCheckButton(const char* name, FAUSTFLOAT* prop) {
+    params.push_back(new ParameterCoupling(name, prop, 0, 0, 1, 1));
   }
 
-  virtual void addHorizontalBargraph(const char* name, FAUSTFLOAT* value, FAUSTFLOAT min, FAUSTFLOAT max) {};
+  void addHorizontalBargraph(const char* name, FAUSTFLOAT* value, FAUSTFLOAT min, FAUSTFLOAT max) {};
 
-  FAUSTFLOAT* getProperty(const char* name) {
-    if (properties.find(name) != properties.end()) {
-      return properties.at(name);
-    }
-    else {
-      return nullptr;
+  ~UI() {
+    for (auto i : params) {
+      delete i;
     }
   }
 };
@@ -56,11 +55,9 @@ struct UI
 struct FaustHeadlessDsp {
 public:
   UI ui;
-private:
   virtual void init(int samplingFreq) = 0;
   virtual void buildUserInterface(UI* ui_interface) = 0;
 
-public:
   /**
    * This should be used to init the DSP code since it will also gather all the properties
   */
@@ -68,11 +65,6 @@ public:
     buildUserInterface(&ui);
     init(samplingFreq);
   }
-
-  FAUSTFLOAT* getProperty(const char* name) {
-    return ui.getProperty(name);
-  }
-
 };
 
 #endif 
