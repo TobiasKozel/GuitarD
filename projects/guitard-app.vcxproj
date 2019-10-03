@@ -325,11 +325,13 @@
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_src.h" />
     <ClInclude Include="..\GuitarD.h" />
     <ClInclude Include="..\resources\resource.h" />
+    <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\faust\FaustHeadlessDsp.h" />
-    <ClInclude Include="..\src\graph\DummyNode.h" />
     <ClInclude Include="..\src\graph\Graph.h" />
     <ClInclude Include="..\src\graph\Node.h" />
+    <ClInclude Include="..\src\graph\nodes\DummyNode.h" />
     <ClInclude Include="..\src\graph\nodes\simple_delay\SimpleDelayNode.h" />
+    <ClInclude Include="..\src\graph\ParameterManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Dependencies\IPlug\RTAudio\include\asio.cpp" />

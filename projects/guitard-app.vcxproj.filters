@@ -294,11 +294,17 @@
     <ClInclude Include="..\src\graph\Graph.h">
       <Filter>src\graph</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\DummyNode.h">
-      <Filter>src\graph</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\graph\nodes\simple_delay\SimpleDelayNode.h">
       <Filter>src\graph\nodes\simpledelay</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\nodes\DummyNode.h">
+      <Filter>src\graph\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\constants.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\ParameterManager.h">
+      <Filter>src\graph</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,12 +1,15 @@
 #pragma once
 
 #include "IPlugConstants.h"
+#include "src/graph/ParameterManager.h"
 #include <algorithm>
 
 class Node
 {
 public:
- 
+  ParameterManager* paramManager;
+  ParameterCoupling** parameters;
+  int parameterCount;
   Node** inputs;
   iplug::sample*** outputs;
 

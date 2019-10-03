@@ -1,13 +1,19 @@
 #include "GuitarD.h"
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
+#include "src/graph/nodes/simple_delay/SimpleDelayNode.h"
 
 GuitarD::GuitarD(const InstanceInfo& info)
-: Plugin(info, MakeConfig(kNumParams, kNumPrograms))
+: Plugin(info, MakeConfig(MAXDAWPARAMS, kNumPrograms))
 {
-  GetParam(kGain)->InitDouble("Gain", 0., 0., 100.0, 0.01, "%");
 
-  graph = new Graph(GetSampleRate(), NOutChansConnected());
+  // Gather a good amount of parameters to expose to the daw based on what nodes are on the canvas
+  
+  for (int i = 0; i < MAXDAWPARAMS; i++) {
+    paramManager.addParameter(GetParam(i));
+  }
+
+  graph = new Graph(&paramManager, GetSampleRate(), NOutChansConnected());
 
 #if IPLUG_EDITOR // All UI methods and member variables should be within an IPLUG_EDITOR guard, should you want distributed UI
   mMakeGraphicsFunc = [&]() {
@@ -19,15 +25,14 @@ GuitarD::GuitarD(const InstanceInfo& info)
     pGraphics->AttachPanelBackground(COLOR_GRAY);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     const IRECT b = pGraphics->GetBounds();
-    pGraphics->AttachControl(new ITextControl(b.GetMidVPadded(50), "Hello iPlug 2!", IText(50)));
     pGraphics->AttachControl(new IVKnobControl(b.GetCentredInside(100).GetVShifted(-100), kGain));
 
 
     auto buttonAction = [&](IControl* pCaller) {
-
+      graph->testAdd();
     };
     pGraphics->AttachControl(
-      new IVButtonControl(b.GetCentredInside(100).GetVShifted(-100), buttonAction),
+      new IVButtonControl(b.GetCentredInside(100).GetVShifted(100), buttonAction),
       kNoParameter, "vcontrols"
     );
   };
