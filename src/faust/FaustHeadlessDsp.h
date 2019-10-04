@@ -27,12 +27,12 @@ struct UI
   void closeBox() {};
   void declare(FAUSTFLOAT*, const char*, const char*) {};
 
-  void addHorizontalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT default, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
-    params.push_back(new ParameterCoupling(name, prop, default, min, max, stepSize));
+  void addHorizontalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT p_default, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
+    params.push_back(new ParameterCoupling(name, prop, p_default, min, max, stepSize));
   }
 
-  void addVerticalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT default, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
-    params.push_back(new ParameterCoupling(name, prop, default, min, max, stepSize));
+  void addVerticalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT p_default, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
+    params.push_back(new ParameterCoupling(name, prop, p_default, min, max, stepSize));
   }
 
   void addCheckButton(const char* name, FAUSTFLOAT* prop) {

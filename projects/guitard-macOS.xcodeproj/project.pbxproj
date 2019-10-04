@@ -903,8 +903,10 @@
 				089C1671FE841209C02AAC07 /* Frameworks */,
 				19C28FB8FE9D52D311CA2CBB /* Products */,
 			);
+			indentWidth = 2;
 			name = IPlugExample;
 			sourceTree = "<group>";
+			tabWidth = 2;
 		};
 		089C1671FE841209C02AAC07 /* Frameworks */ = {
 			isa = PBXGroup;

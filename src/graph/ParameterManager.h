@@ -6,13 +6,16 @@
 struct ParameterCoupling {
   iplug::IParam* parameter;
   double* value;
-  double min, max, default, stepSize;
+  double min;
+  double max;
+  double defaultVal;
+  double stepSize;
   const char* name;
 
   ParameterCoupling(const char* p_name = nullptr, double* p_proprety = nullptr,
      double p_default = 0.5, double p_min = 0, double p_max = 1, double p_stepSize = 0.1) {
     value = p_proprety;
-    default = p_default;
+    defaultVal = p_default;
     min = p_min;
     max = p_max;
     stepSize = p_stepSize;

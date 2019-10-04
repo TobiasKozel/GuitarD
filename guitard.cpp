@@ -12,8 +12,8 @@ GuitarD::GuitarD(const InstanceInfo& info)
   for (int i = 0; i < MAXDAWPARAMS; i++) {
     paramManager.addParameter(GetParam(i));
   }
-
-  graph = new Graph(&paramManager, GetSampleRate(), NOutChansConnected());
+  // TODO on mac garageband NOutChansConnected() reports zero for some reason
+  graph = new Graph(&paramManager, GetSampleRate(), 2);
 
 #if IPLUG_EDITOR // All UI methods and member variables should be within an IPLUG_EDITOR guard, should you want distributed UI
   mMakeGraphicsFunc = [&]() {
