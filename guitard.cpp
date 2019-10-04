@@ -2,6 +2,7 @@
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
 #include "src/graph/nodes/simple_delay/SimpleDelayNode.h"
+#include "src/graph/TestUiNode.h"
 
 GuitarD::GuitarD(const InstanceInfo& info)
 : Plugin(info, MakeConfig(MAXDAWPARAMS, kNumPrograms))
@@ -30,16 +31,24 @@ GuitarD::GuitarD(const InstanceInfo& info)
     pGraphics->AttachPanelBackground(COLOR_GRAY);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     const IRECT b = pGraphics->GetBounds();
-    pGraphics->AttachControl(new IVKnobControl(b.GetCentredInside(100).GetVShifted(-100), kGain));
-
-
+    cont = nullptr;
     auto buttonAction = [&](IControl* pCaller) {
       //pCaller->SplashClickActionFunc();
       SplashClickActionFunc(pCaller);
       graph->testAdd();
+      if (cont == nullptr) {
+        cont = new IVKnobControl(b.GetCentredInside(100).GetVShifted(-100), kGain);
+        pGraphics->AttachControl(cont);
+      }
+      
     };
     pGraphics->AttachControl(
       new IVButtonControl(b.GetCentredInside(100).GetVShifted(100), buttonAction),
+      kNoParameter, "vcontrols"
+    );
+
+    pGraphics->AttachControl(
+      new UiNode(b.GetCentredInside(100).GetVShifted(200)),
       kNoParameter, "vcontrols"
     );
   };
