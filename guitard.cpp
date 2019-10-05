@@ -32,13 +32,18 @@ GuitarD::GuitarD(const InstanceInfo& info)
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     const IRECT b = pGraphics->GetBounds();
     cont = nullptr;
-    auto buttonAction = [&](IControl* pCaller) {
+    auto buttonAction = [&, pGraphics, b](IControl* pCaller) {
       //pCaller->SplashClickActionFunc();
       SplashClickActionFunc(pCaller);
       graph->testAdd();
       if (cont == nullptr) {
         cont = new IVKnobControl(b.GetCentredInside(100).GetVShifted(-100), kGain);
         pGraphics->AttachControl(cont);
+      }
+      else {
+        pGraphics->RemoveControl(cont);
+        delete cont;
+        cont = nullptr;
       }
       
     };
@@ -47,10 +52,10 @@ GuitarD::GuitarD(const InstanceInfo& info)
       kNoParameter, "vcontrols"
     );
 
-    pGraphics->AttachControl(
-      new UiNode(b.GetCentredInside(100).GetVShifted(200)),
-      kNoParameter, "vcontrols"
-    );
+    //pGraphics->AttachControl(
+    //  new UiNode(b.GetCentredInside(100).GetVShifted(200)),
+    //  kNoParameter, "vcontrols"
+    //);
   };
 #endif
 }
