@@ -5,7 +5,6 @@
 const int kNumPrograms = 1;
 #include "src/graph/Graph.h"
 #include "src/constants.h"
-#include "src/graph/ParameterManager.h"
 
 enum EParams
 {
@@ -21,7 +20,6 @@ class GuitarD : public Plugin
 public:
   GuitarD(const InstanceInfo& info);
   Graph* graph;
-  ParameterManager paramManager;
   IVButtonControl* testButton;
   IVKnobControl* cont;
 #if IPLUG_DSP // All DSP methods and member variables should be within an IPLUG_DSP guard, should you want distributed UI

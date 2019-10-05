@@ -2,9 +2,12 @@
 
 #include "src/constants.h"
 #include "IPlugParameter.h"
+#include "IControl.h"
 
 struct ParameterCoupling {
   iplug::IParam* parameter;
+  iplug::igraphics::IControl* control;
+  int parameterId;
   double* value;
   double min;
   double max;
@@ -20,7 +23,9 @@ struct ParameterCoupling {
     max = p_max;
     stepSize = p_stepSize;
     name = p_name;
+    parameterId = 0;
     parameter = nullptr;
+    control = nullptr;
   }
 
   void update() {
@@ -70,10 +75,14 @@ public:
           );
           couple->parameter->SetLabel(couple->name);
           couple->parameter->SetDisplayText(1, couple->name);
+          couple->parameterId = i;
           return true;
         }
       }
     }
+    // no free parameters left
+    couple->parameter = nullptr;
+    couple->parameterId = iplug::kNoParameter;
     return false;
   }
 

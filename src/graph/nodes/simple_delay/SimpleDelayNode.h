@@ -21,14 +21,14 @@ public:
       parameterCount++;
       if (!paramManager->claimParameter(p)) {
         // this means the manager has no free parameters left
-        assert(false);
+        iplug::DBGMSG("Ran out of daw parameters!");
       }
     }
   }
 
   ~SimpleDelayNode() {
     float test = 0.4;
-    // only delete the array, the UI struct will delete all the params inside
+    // only delete the array, the UI struct in SimpleDelay will delete all the params inside
     for (int i = 0; i < parameterCount; i++) {
       // however the daw parameters still have to be freed so another node can take them if needed
       paramManager->releaseParameter(parameters[i]);
