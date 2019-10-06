@@ -68,14 +68,32 @@ public:
   }
 
   /** The graph needs to know about the graphics context to add and remove the controlls for the nodes*/
-  void setGraphics(iplug::igraphics::IGraphics* pGraphics) {
-    if (pGraphics != graphics) {
+  void setupUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
+    if (pGraphics != nullptr && pGraphics != graphics) {
       iplug::DBGMSG("Graphics context changed");
       graphics = pGraphics;
     }
+    for (int i = 0; i < MAXNODES; i++) {
+      if (nodes[i] != nullptr) {
+        nodes[i]->setupUi(pGraphics);
+      }
+    }
   }
 
-  void layoutChanged() {
+  void cleanupUi() {
+    for (int i = 0; i < MAXNODES; i++) {
+      if (nodes[i] != nullptr) {
+        nodes[i]->cleanupUi(graphics);
+      }
+    }
+  }
+
+  void layoutUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
+    if (pGraphics != nullptr && pGraphics != graphics) {
+      iplug::DBGMSG("Graphics context changed");
+      graphics = pGraphics;
+      // Todo find out whether the context ever changes
+    }
     for (int i = 0; i < MAXNODES; i++) {
       if (nodes[i] != nullptr) {
         nodes[i]->layoutChanged();

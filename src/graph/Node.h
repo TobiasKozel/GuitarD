@@ -84,6 +84,8 @@ public:
       iplug::igraphics::IRECT controlPos = bounds.GetFromLeft(width).GetHShifted(i * width);
       // use the daw parameter to sync the values if possible
       if (couple->parameterId != iplug::kNoParameter) {
+        // All control objects attached to IGraphics will be deleted once the window
+        // is destroyed, e.g the plugin windows was closed, so no need to clean these up
         couple->control = new iplug::igraphics::IVKnobControl(
           controlPos, couple->parameterId
         );
@@ -96,6 +98,7 @@ public:
           }
         );
       }
+      // couple->control->SetValueToDefault();
       couple->control->SetValue(couple->defaultVal);
       pGrahics->AttachControl(couple->control);
     }
@@ -107,6 +110,7 @@ public:
       iplug::igraphics::IControl* control = parameters[i]->control;
       if (control != nullptr) {
         pGrahics->RemoveControl(control, true);
+        control = nullptr;
       }
     }
     uiReady = false;

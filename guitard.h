@@ -21,7 +21,7 @@ public:
   GuitarD(const InstanceInfo& info);
   Graph* graph;
   IVButtonControl* testButton;
-  IVKnobControl* cont;
+  void OnUIClose();
 #if IPLUG_DSP // All DSP methods and member variables should be within an IPLUG_DSP guard, should you want distributed UI
   void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
 #endif

@@ -23,19 +23,17 @@ GuitarD::GuitarD(const InstanceInfo& info)
   };
   
   mLayoutFunc = [&](IGraphics* pGraphics) {
-    this->graph->setGraphics(pGraphics);
+
 
     if (pGraphics->NControls()) {
-      this->graph->layoutChanged();
+      this->graph->layoutUi(pGraphics);
       return;
     }
-
+    pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     pGraphics->AttachCornerResizer(EUIResizerMode::Scale, true);
     pGraphics->AttachPanelBackground(COLOR_GRAY);
-    pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
 
     const IRECT b = pGraphics->GetBounds();
-    cont = nullptr;
     auto buttonAction = [&, pGraphics, b](IControl* pCaller) {
       SplashClickActionFunc(pCaller);
       graph->testAdd();
@@ -46,12 +44,21 @@ GuitarD::GuitarD(const InstanceInfo& info)
       kNoParameter, "vcontrols"
     );
 
+    this->graph->setupUi(pGraphics);
+
     //pGraphics->AttachControl(
     //  new UiNode(b.GetCentredInside(100).GetVShifted(200)),
     //  kNoParameter, "vcontrols"
     //);
   };
 #endif
+}
+
+void GuitarD::OnUIClose() {
+  // The gui will be cleanup when the Iplug window is destructed
+  // but this will be safer and make sure all the nodes can clean up after them selves and
+  // set the control in the ParameterCoupling to nullptr
+  graph->cleanupUi();
 }
 
 #if IPLUG_DSP
