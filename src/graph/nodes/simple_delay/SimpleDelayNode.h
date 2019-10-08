@@ -27,7 +27,6 @@ public:
   }
 
   ~SimpleDelayNode() {
-    float test = 0.4;
     // only delete the array, the UI struct in SimpleDelay will delete all the params inside
     for (int i = 0; i < parameterCount; i++) {
       // however the daw parameters still have to be freed so another node can take them if needed

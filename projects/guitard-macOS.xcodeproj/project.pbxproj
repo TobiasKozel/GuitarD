@@ -338,6 +338,8 @@
 		4FFBB93020863B0E00DDD0E7 /* fbuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F8158C1205D50EB00393585 /* fbuffer.cpp */; };
 		4FFBB93420863B0E00DDD0E7 /* coreiids.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F8158E0205D50EB00393585 /* coreiids.cpp */; };
 		4FFBB93520863B0E00DDD0E7 /* vstnoteexpressiontypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F81588E205D50EB00393585 /* vstnoteexpressiontypes.cpp */; };
+		94A84C4D234CC93500E9B213 /* SimpleDelay.dsp in Resources */ = {isa = PBXBuildFile; fileRef = 94A84C46234CC93400E9B213 /* SimpleDelay.dsp */; };
+		94A84C4E234CC93500E9B213 /* SimpleDelay.dsp in Resources */ = {isa = PBXBuildFile; fileRef = 94A84C46234CC93400E9B213 /* SimpleDelay.dsp */; };
 		B885CBC52304AE7300D73128 /* IPlugProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F8F61A8202807B9003F2573 /* IPlugProcessor.cpp */; };
 		B8E22A0C220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */; };
 		B8E22A0D220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */; };
@@ -815,6 +817,15 @@
 		4FFBB94120863E9300DDD0E7 /* IPlugVST3_Parameter.h */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = IPlugVST3_Parameter.h; path = ../../../IPlug/VST3/IPlugVST3_Parameter.h; sourceTree = "<group>"; tabWidth = 2; };
 		4FFF72B8214BB71400839091 /* main.rc */ = {isa = PBXFileReference; lastKnownFileType = text; name = main.rc; path = ../resources/main.rc; sourceTree = "<group>"; };
 		52FBBED30D0CF143001C8B8A /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../config.h; sourceTree = "<group>"; tabWidth = 2; usesTabs = 0; };
+		94A84C42234CC93400E9B213 /* TestUiNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestUiNode.h; sourceTree = "<group>"; };
+		94A84C43234CC93400E9B213 /* ParameterManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParameterManager.h; sourceTree = "<group>"; };
+		94A84C46234CC93400E9B213 /* SimpleDelay.dsp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SimpleDelay.dsp; sourceTree = "<group>"; };
+		94A84C47234CC93400E9B213 /* SimpleDelayNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleDelayNode.h; sourceTree = "<group>"; };
+		94A84C48234CC93400E9B213 /* DummyNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DummyNode.h; sourceTree = "<group>"; };
+		94A84C49234CC93400E9B213 /* Node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Node.h; sourceTree = "<group>"; };
+		94A84C4A234CC93400E9B213 /* Graph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Graph.h; sourceTree = "<group>"; };
+		94A84C4B234CC93500E9B213 /* constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = constants.h; path = ../../src/constants.h; sourceTree = "<group>"; };
+		94A84C4C234CC93500E9B213 /* logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = logger.h; path = ../../src/logger.h; sourceTree = "<group>"; };
 		B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.cpp.cpp; name = IPlugVST3_ProcessorBase.cpp; path = ../../../IPlug/VST3/IPlugVST3_ProcessorBase.cpp; sourceTree = "<group>"; tabWidth = 2; };
 		B8E22A0B220268C4007CBF4C /* IPlugVST3_ProcessorBase.h */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = IPlugVST3_ProcessorBase.h; path = ../../../IPlug/VST3/IPlugVST3_ProcessorBase.h; sourceTree = "<group>"; tabWidth = 2; };
 		B8EA6B932203868500D23A86 /* IPlugVST3_Common.h */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = IPlugVST3_Common.h; path = ../../../IPlug/VST3/IPlugVST3_Common.h; sourceTree = "<group>"; tabWidth = 2; };
@@ -894,6 +905,7 @@
 		089C166AFE841209C02AAC07 /* IPlugExample */ = {
 			isa = PBXGroup;
 			children = (
+				94A84C40234CC8DC00E9B213 /* src */,
 				52FBBED30D0CF143001C8B8A /* config.h */,
 				4F3862EE2014BBEC0009F402 /* GuitarD.h */,
 				4F3862ED2014BBEC0009F402 /* GuitarD.cpp */,
@@ -1668,6 +1680,47 @@
 			name = WDL;
 			sourceTree = "<group>";
 		};
+		94A84C40234CC8DC00E9B213 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				94A84C4B234CC93500E9B213 /* constants.h */,
+				94A84C41234CC93400E9B213 /* graph */,
+				94A84C4C234CC93500E9B213 /* logger.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		94A84C41234CC93400E9B213 /* graph */ = {
+			isa = PBXGroup;
+			children = (
+				94A84C42234CC93400E9B213 /* TestUiNode.h */,
+				94A84C43234CC93400E9B213 /* ParameterManager.h */,
+				94A84C44234CC93400E9B213 /* nodes */,
+				94A84C49234CC93400E9B213 /* Node.h */,
+				94A84C4A234CC93400E9B213 /* Graph.h */,
+			);
+			name = graph;
+			path = ../../src/graph;
+			sourceTree = "<group>";
+		};
+		94A84C44234CC93400E9B213 /* nodes */ = {
+			isa = PBXGroup;
+			children = (
+				94A84C45234CC93400E9B213 /* simple_delay */,
+				94A84C48234CC93400E9B213 /* DummyNode.h */,
+			);
+			path = nodes;
+			sourceTree = "<group>";
+		};
+		94A84C45234CC93400E9B213 /* simple_delay */ = {
+			isa = PBXGroup;
+			children = (
+				94A84C46234CC93400E9B213 /* SimpleDelay.dsp */,
+				94A84C47234CC93400E9B213 /* SimpleDelayNode.h */,
+			);
+			path = simple_delay;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -2040,6 +2093,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94A84C4E234CC93500E9B213 /* SimpleDelay.dsp in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2085,6 +2139,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94A84C4D234CC93500E9B213 /* SimpleDelay.dsp in Resources */,
 				4F78D88613B6382B0032E0F3 /* GuitarD.icns in Resources */,
 				4F1B4AE42014D33600BC64D4 /* GuitarD-macOS-MainMenu.xib in Resources */,
 			);
