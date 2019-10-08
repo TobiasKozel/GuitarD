@@ -1,8 +1,8 @@
 #include "GuitarD.h"
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
-#include "src/graph/nodes/simple_delay/SimpleDelayNode.h"
 #include "src/graph/TestUiNode.h"
+#include "thirdparty/json.hpp"
 
 GuitarD::GuitarD(const InstanceInfo& info)
 : Plugin(info, MakeConfig(MAXDAWPARAMS, kNumPrograms))
@@ -63,14 +63,53 @@ void GuitarD::OnUIClose() {
 
 bool GuitarD::SerializeState(IByteChunk& chunk) const {
   TRACE;
+  nlohmann::json serialized = {
+    {"version", PLUG_VERSION_STR},
+    {"node_count", graph->nodeCount},
+    {"ui_scale", 1.0} // TODO get the proper scale
+  };
+
+  // get all the nodes a index, TODO move this over to the constructor since this won't change over lifetime of a node
+  for (int i = 0; i < MAXNODES; i++) {
+    if (graph->nodes[i] != nullptr) {
+      graph->nodes[i]->index = i;
+    }
+  }
+  serialized["output"] = { graph->output->inputs[0]->index, 0 };
+  serialized["nodes"] = nlohmann::json::array();
+  for (int i = 0, pos = 0; i < MAXNODES; i++) {
+    Node* node = graph->nodes[i];
+    if (node != nullptr) {
+      serialized["nodes"][pos]["idx"] = i;
+      serialized["nodes"][pos]["type"] = node->type;
+      serialized["nodes"][pos]["inputs"] = nlohmann::json::array();
+      for (int prev = 0; prev < node->inputCount; prev++) {
+        serialized["nodes"][pos]["inputs"][prev] = node->inputs[prev]->index;
+      }
+      serialized["nodes"][pos]["parameters"] = nlohmann::json::array();
+      for (int p = 0; p < node->parameterCount; p++) {
+        serialized["nodes"][pos]["parameters"][p] = {
+          { "idx", node->parameters[p]->parameterId },
+          { "value", *(node->parameters[p]->value) },
+          { "position", { node->x, node->y } }
+        };
+      }
+      pos++;
+    }
+  }
+
+  chunk.PutStr(serialized.dump(4).c_str());
+  return true;
   return IPluginBase::SerializeParams(chunk);
-  // return true;
 }
 
 int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
   TRACE;
+  WDL_String json_string;
+  chunk.GetStr(json_string, startPos);
+
+  return 0;
   return IPluginBase::UnserializeParams(chunk, startPos);
-  //return 0;
 }
 
 #if IPLUG_DSP

@@ -20,8 +20,13 @@ public:
   int inputCount;
   int outputCount;
   bool isProcessed;
+  int index;
+  // This type name is used to serialize and deserialize the node
+  const char* type;
+  float x;
+  float y;
 
-  Node(ParameterManager* p_paramManager, int p_samplerate, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
+  Node(ParameterManager* p_paramManager = nullptr, int p_samplerate = 0, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
     paramManager = p_paramManager;
     samplerate = p_samplerate;
     maxBuffer = p_maxBuffer;
@@ -32,6 +37,10 @@ public:
     parameterCount = 0;
     parameters = nullptr;
     uiReady = false;
+    index = -1;
+    type = "";
+    x = 0;
+    y = 0;
 
     inputs = new Node*[std::max(1, p_inputs)];
     for (int i = 0; i < p_inputs; i++) {

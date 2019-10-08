@@ -9,6 +9,7 @@ public:
     : Node(p_manager, p_samplerate, p_maxBuffer, 1, 1, 2) {
 
     paramsFromFaust(&delay);
+    type = "StereoToolNode";
   }
 
   void ProcessBlock(int nFrames) {

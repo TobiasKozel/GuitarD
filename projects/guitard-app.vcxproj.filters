@@ -312,6 +312,9 @@
     <ClInclude Include="..\src\graph\nodes\stereo_tool\StereoToolNode.h">
       <Filter>src\graph\nodes\stereotool</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\nodes\NodeList.h">
+      <Filter>src\graph\nodes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

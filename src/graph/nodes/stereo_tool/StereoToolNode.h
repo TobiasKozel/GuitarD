@@ -1,5 +1,5 @@
 #pragma once
-#include "src/graph/Node.h"
+#include "src/graph/nodes/NodeList.h"
 #include "StereoTool.h"
 
 class StereoToolNode : public Node {
@@ -9,6 +9,7 @@ public:
     : Node(p_manager, p_samplerate, p_maxBuffer, 1, 1, 2) {
 
     paramsFromFaust(&tool);
+    type = "StereoToolNode";
   }
 
   void ProcessBlock(int nFrames) {
@@ -17,4 +18,9 @@ public:
     }
     tool.compute(nFrames, inputs[0]->outputs[0], outputs[0]);
   }
+private:
+  static DerivedRegister<StereoToolNode> reg;
 };
+
+
+DerivedRegister<StereoToolNode> StereoToolNode::reg("StereoToolNode");
