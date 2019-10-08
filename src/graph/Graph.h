@@ -8,6 +8,7 @@
 #include "mutex.h"
 
 #include "src/graph/nodes/simple_delay/SimpleDelayNode.h"
+#include "src/graph/nodes/stereo_tool/StereoToolNode.h"
 
 class Graph {
   iplug::igraphics::IGraphics* graphics;
@@ -55,7 +56,7 @@ public:
   void testAdd() {
     WDL_MutexLock lock(&isProcessing);
     if (nodes[0] == nullptr) {
-      nodes[0] = new SimpleDelayNode(sampleRate, &paramManager);
+      nodes[0] = new StereoToolNode(sampleRate, &paramManager);
       nodes[0]->setupUi(graphics);
       nodes[0]->inputs[0] = input;
       output->inputs[0] = nodes[0];

@@ -22,6 +22,10 @@ public:
   Graph* graph;
   IVButtonControl* testButton;
   void OnUIClose();
+
+  bool SerializeState(IByteChunk& chunk) const;
+  int UnserializeState(const IByteChunk& chunk, int startPos);
+
 #if IPLUG_DSP // All DSP methods and member variables should be within an IPLUG_DSP guard, should you want distributed UI
   void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
 #endif

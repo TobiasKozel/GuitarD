@@ -55,10 +55,22 @@ GuitarD::GuitarD(const InstanceInfo& info)
 }
 
 void GuitarD::OnUIClose() {
-  // The gui will be cleanup when the Iplug window is destructed
-  // but this will be safer and make sure all the nodes can clean up after them selves and
-  // set the control in the ParameterCoupling to nullptr
+  // The gui will be cleaned up when the Iplug window is destructed
+  // however doint this manually will be safer and make sure all the nodes can clean up
+  // after them selves and set the control in the ParameterCoupling to nullptr
   graph->cleanupUi();
+}
+
+bool GuitarD::SerializeState(IByteChunk& chunk) const {
+  TRACE;
+  return IPluginBase::SerializeParams(chunk);
+  // return true;
+}
+
+int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
+  TRACE;
+  return IPluginBase::UnserializeParams(chunk, startPos);
+  //return 0;
 }
 
 #if IPLUG_DSP
