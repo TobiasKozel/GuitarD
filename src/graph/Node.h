@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IPlugConstants.h"
+#include "src/logger.h"
 #include "src/graph/ParameterManager.h"
 #include <algorithm>
 #include "IGraphics.h"

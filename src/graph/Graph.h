@@ -3,6 +3,7 @@
 #include "src/graph/Node.h"
 #include "src/graph/nodes/DummyNode.h"
 #include "src/constants.h"
+#include "src/logger.h"
 #include "src/graph/ParameterManager.h"
 #include "mutex.h"
 
@@ -70,7 +71,7 @@ public:
   /** The graph needs to know about the graphics context to add and remove the controlls for the nodes*/
   void setGraphics(iplug::igraphics::IGraphics* pGraphics) {
     if (pGraphics != graphics) {
-      iplug::DBGMSG("Graphics context changed");
+      WDBGMSG("Graphics context changed");
       graphics = pGraphics;
     }
   }

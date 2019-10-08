@@ -21,7 +21,7 @@ public:
       parameterCount++;
       if (!paramManager->claimParameter(p)) {
         // this means the manager has no free parameters left
-        iplug::DBGMSG("Ran out of daw parameters!");
+        WDBGMSG("Ran out of daw parameters!");
       }
     }
   }
