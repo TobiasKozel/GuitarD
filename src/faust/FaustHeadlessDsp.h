@@ -9,17 +9,14 @@
 #include "src/graph/ParameterManager.h"
 
 
-struct Meta
-{
+struct Meta {
   virtual void declare(const char* key, const char* value) = 0;
 };
 
-
 /** 
- * This is a shim to collect pointer to all the properties from the faust DSP code
-*/
-struct UI
-{
+ * This is a shim to collect pointers to all the properties/parameters from the faust DSP code
+ */
+struct UI {
   std::vector<ParameterCoupling*> params;
 
   void openVerticalBox(const char* key) {};
@@ -51,7 +48,7 @@ struct UI
 
 /**
  * The faust DSP code will derive from this
-*/
+ */
 struct FaustHeadlessDsp {
 public:
   UI ui;
@@ -60,7 +57,7 @@ public:
 
   /**
    * This should be used to init the DSP code since it will also gather all the properties
-  */
+   */
   void setup(int samplingFreq) {
     buildUserInterface(&ui);
     init(samplingFreq);
