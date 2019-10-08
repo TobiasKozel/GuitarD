@@ -7,7 +7,7 @@
 */
 class DummyNode : public Node {
 public:
-  DummyNode() : Node(0, 0, 1, 0, 0) {
+  DummyNode() : Node(nullptr, 0, 0, 1, 0, 0) {
     isProcessed = true;
   }
 

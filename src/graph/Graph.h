@@ -44,7 +44,7 @@ public:
    void ProcessBlock(iplug::sample** in, iplug::sample** out, int nFrames) {
     WDL_MutexLock lock(&isProcessing);
     input->outputs[0] = in;
-    // this is dump, user the WDL_Pointer list insted
+    // this is dumb, use the WDL_Pointer list instead
     for (int i = 0; i < MAXNODES; i++) {
       if (nodes[i] != nullptr) {
         nodes[i]->ProcessBlock(nFrames);

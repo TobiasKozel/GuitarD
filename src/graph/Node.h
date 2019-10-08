@@ -5,6 +5,7 @@
 #include "src/graph/ParameterManager.h"
 #include <algorithm>
 #include "IGraphics.h"
+#include "src/faust/FaustHeadlessDsp.h"
 
 class Node
 {
@@ -20,7 +21,8 @@ public:
   int outputCount;
   bool isProcessed;
 
-  Node(int p_samplerate, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
+  Node(ParameterManager* p_paramManager, int p_samplerate, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
+    paramManager = p_paramManager;
     samplerate = p_samplerate;
     maxBuffer = p_maxBuffer;
     inputCount = p_inputs;
@@ -28,7 +30,6 @@ public:
     isProcessed = false;
     channelCount = p_channles;
     parameterCount = 0;
-    paramManager = nullptr;
     parameters = nullptr;
     uiReady = false;
 
@@ -55,9 +56,17 @@ public:
       delete outputs[i];
     }
     delete outputs;
+
     if (uiReady) {
       WDBGMSG("Warning, UI of node was not cleaned up!");
     }
+
+    // only delete the array, the UI struct in SimpleDelay will delete all the params inside
+    for (int i = 0; i < parameterCount; i++) {
+      // however the daw parameters still have to be freed so another node can take them if needed
+      paramManager->releaseParameter(parameters[i]);
+    }
+    delete parameters;
   }
 
   virtual void ProcessBlock(int nFrames) = 0;
@@ -115,6 +124,26 @@ public:
       }
     }
     uiReady = false;
+  }
+
+  /**
+   * This will use the UI shim to create ParameterCouplings between the faust dsp and iplug iControls
+   */
+  void paramsFromFaust(FaustHeadlessDsp* faust) {
+    // This must be executed first since this will gather all the parameters from faust
+    faust->setup(samplerate);
+
+    // Keep the pointers around in a normal array since this might be faster than iterating over a vector
+    parameters = new ParameterCoupling * [faust->ui.params.size()];
+    parameterCount = 0;
+    for (auto p : faust->ui.params) {
+      parameters[parameterCount] = p;
+      parameterCount++;
+      if (!paramManager->claimParameter(p)) {
+        // this means the manager has no free parameters left
+        WDBGMSG("Ran out of daw parameters!");
+      }
+    }
   }
 
   virtual void layoutChanged() {
