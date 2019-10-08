@@ -56,7 +56,7 @@ public:
     }
     delete outputs;
     if (uiReady) {
-      iplug::DBGMSG("Warning, UI of node was not cleaned up!");
+      WDBGMSG("Warning, UI of node was not cleaned up!");
     }
   }
 

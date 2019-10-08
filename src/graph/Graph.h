@@ -91,7 +91,7 @@ public:
 
   void layoutUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
     if (pGraphics != nullptr && pGraphics != graphics) {
-      iplug::DBGMSG("Graphics context changed");
+      WDBGMSG("Graphics context changed");
       graphics = pGraphics;
       // Todo find out whether the context ever changes
     }
