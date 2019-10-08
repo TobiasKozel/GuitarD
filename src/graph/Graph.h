@@ -41,7 +41,9 @@ public:
     // testAdd();
   }
 
-   void ProcessBlock(iplug::sample** in, iplug::sample** out, int nFrames) {
+  void ProcessBlock(iplug::sample** in, iplug::sample** out, int nFrames) {
+    // I don't really like the mutex here, but it should only be locked if a change to the
+    // processing chain is made, which will cause some artifacts anyways
     WDL_MutexLock lock(&isProcessing);
     input->outputs[0] = in;
     // this is dumb, use the WDL_Pointer list instead
