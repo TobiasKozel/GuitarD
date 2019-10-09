@@ -139,6 +139,10 @@ public:
   }
 
   void deserialize(nlohmann::json& serialized) {
+    for (int i = 0; i < MAXNODES; i++) {
+      removeNode(i);
+    }
+    output->inputs[0] = input;
     WDL_MutexLock lock(&isProcessing);
     for (auto sNode : serialized["nodes"]) {
       std::string className = sNode["type"];
@@ -146,6 +150,15 @@ public:
       if (node == nullptr) { continue; }
       node->setup(&paramManager, sampleRate);
       nodes[sNode["idx"]] = node;
+      int paramIdx = 0;
+      for (auto param : sNode["parameters"]) {
+        node->parameters[paramIdx]->parameterId = param["idx"];
+        if (graphics && graphics->WindowIsOpen()) {
+          node->setupUi(graphics);
+        }
+        node->parameters[paramIdx]->parameter->Set(param["value"]);
+        paramIdx++;
+      }
     }
 
     for (auto sNode : serialized["nodes"]) {
@@ -163,6 +176,15 @@ public:
     if (nodes[outIndex] != nullptr) {
       output->inputs[serialized["output"][1]] = nodes[outIndex];
     }
+  }
+
+  void removeNode(int index) {
+    if (nodes[index] == nullptr) { return; }
+    if (graphics != nullptr) {
+      nodes[index]->cleanupUi(graphics);
+    }
+    delete nodes[index];
+    nodes[index] = nullptr;
   }
 
 private:
