@@ -26,7 +26,9 @@ public:
   float x;
   float y;
 
-  Node(ParameterManager* p_paramManager = nullptr, int p_samplerate = 0, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
+  Node() { };
+
+  virtual void setup(ParameterManager* p_paramManager, int p_samplerate = 48000, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
     paramManager = p_paramManager;
     samplerate = p_samplerate;
     maxBuffer = p_maxBuffer;
@@ -38,23 +40,22 @@ public:
     parameters = nullptr;
     uiReady = false;
     index = -1;
-    type = "";
     x = 0;
     y = 0;
 
-    inputs = new Node*[std::max(1, p_inputs)];
+    inputs = new Node * [std::max(1, p_inputs)];
     for (int i = 0; i < p_inputs; i++) {
       inputs[i] = nullptr;
     }
 
-    outputs = new iplug::sample**[std::max(1, p_outputs)];
+    outputs = new iplug::sample * *[std::max(1, p_outputs)];
     for (int i = 0; i < p_outputs; i++) {
-      outputs[i] = new iplug::sample*[p_channles];
+      outputs[i] = new iplug::sample * [p_channles];
       for (int c = 0; c < p_channles; c++) {
         outputs[i][c] = new iplug::sample[p_maxBuffer];
       }
     }
-  };
+  }
 
   virtual ~Node() {
     delete inputs;

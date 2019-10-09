@@ -1,14 +1,14 @@
 #pragma once
+#include "mutex.h"
 #include "IPlugConstants.h"
 #include "src/graph/Node.h"
 #include "src/graph/nodes/DummyNode.h"
 #include "src/constants.h"
 #include "src/logger.h"
 #include "src/graph/ParameterManager.h"
-#include "mutex.h"
+#include "src/graph/nodes/NodeList.h"
+#include "thirdparty/json.hpp"
 
-#include "src/graph/nodes/simple_delay/SimpleDelayNode.h"
-#include "src/graph/nodes/stereo_tool/StereoToolNode.h"
 
 class Graph {
   iplug::igraphics::IGraphics* graphics;
@@ -58,7 +58,8 @@ public:
   void testAdd() {
     WDL_MutexLock lock(&isProcessing);
     if (nodes[0] == nullptr) {
-      nodes[0] = new StereoToolNode(sampleRate, &paramManager);
+      nodes[0] = new StereoToolNode();
+      nodes[0]->setup(&paramManager, sampleRate);
       nodes[0]->setupUi(graphics);
       nodes[0]->inputs[0] = input;
       output->inputs[0] = nodes[0];
@@ -102,6 +103,65 @@ public:
       if (nodes[i] != nullptr) {
         nodes[i]->layoutChanged();
       }
+    }
+  }
+
+  void serialize(nlohmann::json &serialized) {
+    // get all the nodes a index, TODO move this over to the constructor since this won't change over lifetime of a node
+    for (int i = 0; i < MAXNODES; i++) {
+      if (nodes[i] != nullptr) {
+        nodes[i]->index = i;
+      }
+    }
+    serialized["output"] = { output->inputs[0]->index, 0 };
+    serialized["nodes"] = nlohmann::json::array();
+    for (int i = 0, pos = 0; i < MAXNODES; i++) {
+      Node* node = nodes[i];
+      if (node != nullptr) {
+        serialized["nodes"][pos]["position"] = { node->x, node->y };
+        serialized["nodes"][pos]["idx"] = i;
+        serialized["nodes"][pos]["type"] = node->type;
+        serialized["nodes"][pos]["inputs"] = nlohmann::json::array();
+        for (int prev = 0; prev < node->inputCount; prev++) {
+          serialized["nodes"][pos]["inputs"][prev] = node->inputs[prev]->index;
+        }
+        serialized["nodes"][pos]["parameters"] = nlohmann::json::array();
+        for (int p = 0; p < node->parameterCount; p++) {
+          serialized["nodes"][pos]["parameters"][p] = {
+            { "idx", node->parameters[p]->parameterId },
+            // TODO the type is not atomic and might tear
+            { "value", *(node->parameters[p]->value) }
+          };
+        }
+        pos++;
+      }
+    }
+  }
+
+  void deserialize(nlohmann::json& serialized) {
+    WDL_MutexLock lock(&isProcessing);
+    for (auto sNode : serialized["nodes"]) {
+      std::string className = sNode["type"];
+      Node* node = createNode(className);
+      if (node == nullptr) { continue; }
+      node->setup(&paramManager, sampleRate);
+      nodes[sNode["idx"]] = node;
+    }
+
+    for (auto sNode : serialized["nodes"]) {
+      int inputIdx = 0;
+      for (int inNodeIdx : sNode["inputs"]) {
+        int ownIndex = sNode["idx"];
+        if (nodes[inNodeIdx] != nullptr && nodes[ownIndex] != nullptr) {
+          nodes[ownIndex]->inputs[inputIdx] = inNodeIdx == -1 ? input : nodes[inNodeIdx];
+        }
+        inputIdx++;
+      }
+    }
+
+    int outIndex = serialized["output"][0];
+    if (nodes[outIndex] != nullptr) {
+      output->inputs[serialized["output"][1]] = nodes[outIndex];
     }
   }
 

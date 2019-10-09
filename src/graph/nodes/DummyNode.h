@@ -7,8 +7,9 @@
 */
 class DummyNode : public Node {
 public:
-  DummyNode() : Node(nullptr, 0, 0, 1, 0, 0) {
+  DummyNode() : Node() {
     isProcessed = true;
+    Node::setup(nullptr, 0, 0, 1, 0, 0);
   }
 
   void ProcessBlock(int) {}
