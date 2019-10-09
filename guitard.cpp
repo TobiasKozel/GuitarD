@@ -4,9 +4,7 @@
 #include "src/graph/TestUiNode.h"
 #include "thirdparty/json.hpp"
 
-GuitarD::GuitarD(const InstanceInfo& info)
-: Plugin(info, MakeConfig(MAXDAWPARAMS, kNumPrograms))
-{
+GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAMS, kNumPrograms)) {
 
   // TODO on mac garageband NOutChansConnected() reports zero for some reason
   graph = new Graph(GetSampleRate(), 2);
@@ -23,14 +21,13 @@ GuitarD::GuitarD(const InstanceInfo& info)
   };
   
   mLayoutFunc = [&](IGraphics* pGraphics) {
-
-
     if (pGraphics->NControls()) {
       this->graph->layoutUi(pGraphics);
       return;
     }
+    pGraphics->SetSizeConstraints(400, 2000, 400, 1500);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
-    pGraphics->AttachCornerResizer(EUIResizerMode::Scale, true);
+    pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);
     pGraphics->AttachPanelBackground(COLOR_GRAY);
 
     const IRECT b = pGraphics->GetBounds();
@@ -85,8 +82,7 @@ int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
 }
 
 #if IPLUG_DSP
-void GuitarD::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
-{
+void GuitarD::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   graph->ProcessBlock(inputs, outputs, nFrames);
 }
 #endif

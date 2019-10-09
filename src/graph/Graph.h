@@ -128,8 +128,9 @@ public:
         serialized["nodes"][pos]["parameters"] = nlohmann::json::array();
         for (int p = 0; p < node->parameterCount; p++) {
           serialized["nodes"][pos]["parameters"][p] = {
-            { "idx", node->parameters[p]->parameterId },
+            { "idx", node->parameters[p]->parameterIdx },
             // TODO the type is not atomic and might tear
+            // only use this when theres no daw parameter
             { "value", *(node->parameters[p]->value) }
           };
         }
@@ -139,11 +140,11 @@ public:
   }
 
   void deserialize(nlohmann::json& serialized) {
+    WDL_MutexLock lock(&isProcessing);
     for (int i = 0; i < MAXNODES; i++) {
       removeNode(i);
     }
     output->inputs[0] = input;
-    WDL_MutexLock lock(&isProcessing);
     for (auto sNode : serialized["nodes"]) {
       std::string className = sNode["type"];
       Node* node = createNode(className);
@@ -152,8 +153,9 @@ public:
       nodes[sNode["idx"]] = node;
       int paramIdx = 0;
       for (auto param : sNode["parameters"]) {
-        node->parameters[paramIdx]->parameterId = param["idx"];
-        if (graphics && graphics->WindowIsOpen()) {
+        if (paramIdx >= node->parameterCount) { break; }
+        node->parameters[paramIdx]->parameterIdx = param["idx"];
+        if (graphics != nullptr && graphics->WindowIsOpen()) {
           node->setupUi(graphics);
         }
         node->parameters[paramIdx]->parameter->Set(param["value"]);

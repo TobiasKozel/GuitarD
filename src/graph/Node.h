@@ -103,11 +103,11 @@ public:
       ParameterCoupling* couple = parameters[i];
       iplug::igraphics::IRECT controlPos = bounds.GetFromLeft(width).GetHShifted(i * width);
       // use the daw parameter to sync the values if possible
-      if (couple->parameterId != iplug::kNoParameter) {
+      if (couple->parameterIdx != iplug::kNoParameter) {
         // All control objects attached to IGraphics will be deleted once the window
         // is destroyed, e.g the plugin windows was closed, so no need to clean these up
         couple->control = new iplug::igraphics::IVKnobControl(
-          controlPos, couple->parameterId
+          controlPos, couple->parameterIdx
         );
       }
       else {
