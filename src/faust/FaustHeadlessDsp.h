@@ -25,6 +25,8 @@ struct UI {
   void declare(FAUSTFLOAT*, const char*, const char*) {};
 
   void addHorizontalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT p_default, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
+    // For every new there should be a delete eh?
+    // Well these will get cleaned up in the node (hopefully)
     params.push_back(new ParameterCoupling(name, prop, p_default, min, max, stepSize));
   }
 
@@ -39,9 +41,6 @@ struct UI {
   void addHorizontalBargraph(const char* name, FAUSTFLOAT* value, FAUSTFLOAT min, FAUSTFLOAT max) {};
 
   ~UI() {
-    for (auto i : params) {
-      delete i;
-    }
   }
 };
 

@@ -112,10 +112,10 @@ public:
       WDBGMSG("Warning, UI of node was not cleaned up!\n");
     }
 
-    // only delete the array, the UI struct in SimpleDelay will delete all the params inside
     for (int i = 0; i < parameterCount; i++) {
       // however the daw parameters still have to be freed so another node can take them if needed
       paramManager->releaseParameter(parameters[i]);
+      delete parameters[i];
     }
     delete parameters;
   }
