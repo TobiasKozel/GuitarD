@@ -303,12 +303,6 @@
     <ClInclude Include="..\src\constants.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\ParameterManager.h">
-      <Filter>src\graph</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\graph\TestUiNode.h">
-      <Filter>src\graph</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\graph\nodes\stereo_tool\StereoToolNode.h">
       <Filter>src\graph\nodes\stereotool</Filter>
     </ClInclude>
@@ -317,6 +311,12 @@
     </ClInclude>
     <ClInclude Include="..\src\graph\ui\Background.h">
       <Filter>src\graph\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\misc\ParameterManager.h">
+      <Filter>src\graph\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\misc\Serializer.h">
+      <Filter>src\graph\misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -370,6 +370,9 @@
     </Filter>
     <Filter Include="src\graph\ui">
       <UniqueIdentifier>{7811b4f4-42c3-4dff-bd81-efa8eeb06dea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\misc">
+      <UniqueIdentifier>{be3fbc2d-2fab-4854-a0d6-b437e3964a2d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

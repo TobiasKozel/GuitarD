@@ -328,13 +328,13 @@
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\faust\FaustHeadlessDsp.h" />
     <ClInclude Include="..\src\graph\Graph.h" />
+    <ClInclude Include="..\src\graph\misc\ParameterManager.h" />
+    <ClInclude Include="..\src\graph\misc\Serializer.h" />
     <ClInclude Include="..\src\graph\Node.h" />
     <ClInclude Include="..\src\graph\nodes\DummyNode.h" />
     <ClInclude Include="..\src\graph\nodes\NodeList.h" />
     <ClInclude Include="..\src\graph\nodes\simple_delay\SimpleDelayNode.h" />
     <ClInclude Include="..\src\graph\nodes\stereo_tool\StereoToolNode.h" />
-    <ClInclude Include="..\src\graph\ParameterManager.h" />
-    <ClInclude Include="..\src\graph\TestUiNode.h" />
     <ClInclude Include="..\src\graph\ui\Background.h" />
   </ItemGroup>
   <ItemGroup>

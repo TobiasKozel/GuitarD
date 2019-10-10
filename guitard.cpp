@@ -1,7 +1,6 @@
 #include "GuitarD.h"
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
-#include "src/graph/TestUiNode.h"
 #include "thirdparty/json.hpp"
 
 GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAMS, kNumPrograms)) {

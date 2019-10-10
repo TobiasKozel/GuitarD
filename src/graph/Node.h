@@ -2,7 +2,7 @@
 
 #include "IPlugConstants.h"
 #include "src/logger.h"
-#include "src/graph/ParameterManager.h"
+#include "src/graph/misc/ParameterManager.h"
 #include <algorithm>
 #include "IGraphics.h"
 #include "src/faust/FaustHeadlessDsp.h"

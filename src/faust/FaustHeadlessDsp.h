@@ -6,7 +6,7 @@
 #include "IPlugConstants.h"
 #include <map>
 #include <vector>
-#include "src/graph/ParameterManager.h"
+#include "src/graph/misc/ParameterManager.h"
 
 
 struct Meta {
