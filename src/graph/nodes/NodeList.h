@@ -1,8 +1,8 @@
 #pragma once
-#include "src/graph/Node.h"
 #include "src/graph/nodes/stereo_tool/StereoToolNode.h"
 #include "src/graph/nodes/simple_delay/SimpleDelayNode.h"
 
+// TODO This file should be auto generated and also provide some way of getting a preview image for the gallery
 Node* createNode(std::string name) {
   if (name == "StereoToolNode") {
     return new StereoToolNode();

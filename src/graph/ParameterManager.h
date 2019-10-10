@@ -77,20 +77,35 @@ public:
    */
   bool claimParameter(ParameterCoupling* couple) {
     if (parametersLeft > 0) {
-      parametersLeft--;
-      for (int i = 0; i < MAXDAWPARAMS; i++) {
-        if (!parametersClaimed[i]) {
-          parametersClaimed[i] = true;
-          couple->parameter = parameters[i];
-          couple->parameter->InitDouble(
-            couple->name, *(couple->value), couple->min, couple->max, couple->stepSize
-          );
-          couple->parameter->SetLabel(couple->name);
-          couple->parameter->SetDisplayText(1, couple->name);
-          couple->parameterIdx = i;
-          return true;
+      int i = couple->parameterIdx;
+      if (i == iplug::kNoParameter) {
+        // if there's no parameter index set, go look for one
+        for (i = 0; i < MAXDAWPARAMS; i++) {
+          if (!parametersClaimed[i]) {
+            // found one
+            break;
+          }
+        }
+      } else {
+        if (parametersClaimed[i]) {
+          WDBGMSG("Could not claim a prefered DAW parameter!");
+          // This is bad
+          couple->parameter = nullptr;
+          couple->parameterIdx = iplug::kNoParameter;
+          return false;
         }
       }
+      parametersLeft--;
+      parametersClaimed[i] = true;
+      couple->parameter = parameters[i];
+      couple->parameter->InitDouble(
+        couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+      );
+      couple->parameter->SetLabel(couple->name);
+      couple->parameter->SetDisplayText(1, couple->name);
+      couple->parameterIdx = i;
+      couple->parameter->Set(*(couple->value));
+      return true;
     }
     // no free parameters left
     couple->parameter = nullptr;

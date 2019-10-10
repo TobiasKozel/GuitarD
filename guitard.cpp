@@ -28,7 +28,10 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
     pGraphics->SetSizeConstraints(400, 2000, 400, 1500);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);
+    pGraphics->SetScreenScale(1);
     pGraphics->AttachPanelBackground(COLOR_GRAY);
+    // pGraphics->AttachBackground("background.png");
+    // const IBitmap bitmap1 = pGraphics->LoadBitmap("background.png");
 
     const IRECT b = pGraphics->GetBounds();
     auto buttonAction = [&, pGraphics, b](IControl* pCaller) {

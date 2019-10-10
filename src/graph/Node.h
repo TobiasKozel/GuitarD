@@ -7,8 +7,7 @@
 #include "IGraphics.h"
 #include "src/faust/FaustHeadlessDsp.h"
 
-class Node
-{
+class Node {
   bool uiReady;
 public:
   ParameterManager* paramManager;
@@ -26,8 +25,14 @@ public:
   float x;
   float y;
 
+  /**
+   * The constructor doesn't take any parameters since it can be instanciated from the NodeList
+   */
   Node() { };
 
+  /**
+   * This is basically a delayed constructor with the only disadvatage: derived methods have to have the same parameters
+   */
   virtual void setup(ParameterManager* p_paramManager, int p_samplerate = 48000, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
     paramManager = p_paramManager;
     samplerate = p_samplerate;
@@ -55,6 +60,42 @@ public:
         outputs[i][c] = new iplug::sample[p_maxBuffer];
       }
     }
+  }
+
+  /**
+   * This will use the UI shim to create ParameterCouplings between the faust dsp and iplug iControls
+   * However they will not be registered to the daw yet, since loading a preset will need them to claim
+   * the right ones so the automation will affect the correct parameters
+   */
+  void paramsFromFaust(FaustHeadlessDsp* faust) {
+    // This must be executed first since this will gather all the parameters from faust
+    faust->setup(samplerate);
+
+    // Keep the pointers around in a normal array since this might be faster than iterating over a vector
+    parameters = new ParameterCoupling * [faust->ui.params.size()];
+    parameterCount = 0;
+    for (auto p : faust->ui.params) {
+      parameters[parameterCount] = p;
+      parameterCount++;
+    }
+  }
+
+  /**
+   * This will go over each control element in the paramters array of the node and try to expose it to the daw
+   * Will return true if all parameters could be claimed, false if at least one failed
+   */
+  virtual bool claimParameters() {
+    bool gotAllPamams = true;
+    for (int i = 0; i < parameterCount; i++) {
+      if (!paramManager->claimParameter(parameters[i])) {
+        /**
+         * this means the manager has no free parameters left and the control cannot be automated from the daw
+         */
+        WDBGMSG("Ran out of daw parameters!");
+        gotAllPamams = false;
+      }
+    }
+    return gotAllPamams;
   }
 
   virtual ~Node() {
@@ -134,26 +175,6 @@ public:
       }
     }
     uiReady = false;
-  }
-
-  /**
-   * This will use the UI shim to create ParameterCouplings between the faust dsp and iplug iControls
-   */
-  void paramsFromFaust(FaustHeadlessDsp* faust) {
-    // This must be executed first since this will gather all the parameters from faust
-    faust->setup(samplerate);
-
-    // Keep the pointers around in a normal array since this might be faster than iterating over a vector
-    parameters = new ParameterCoupling * [faust->ui.params.size()];
-    parameterCount = 0;
-    for (auto p : faust->ui.params) {
-      parameters[parameterCount] = p;
-      parameterCount++;
-      if (!paramManager->claimParameter(p)) {
-        // this means the manager has no free parameters left
-        WDBGMSG("Ran out of daw parameters!");
-      }
-    }
   }
 
   virtual void layoutChanged() {

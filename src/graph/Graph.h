@@ -60,6 +60,7 @@ public:
     if (nodes[0] == nullptr) {
       nodes[0] = new StereoToolNode();
       nodes[0]->setup(&paramManager, sampleRate);
+      nodes[0]->claimParameters();
       nodes[0]->setupUi(graphics);
       nodes[0]->inputs[0] = input;
       output->inputs[0] = nodes[0];
@@ -155,11 +156,12 @@ public:
       for (auto param : sNode["parameters"]) {
         if (paramIdx >= node->parameterCount) { break; }
         node->parameters[paramIdx]->parameterIdx = param["idx"];
-        if (graphics != nullptr && graphics->WindowIsOpen()) {
-          node->setupUi(graphics);
-        }
-        node->parameters[paramIdx]->parameter->Set(param["value"]);
+        *(node->parameters[paramIdx]->value) = param["value"];
         paramIdx++;
+      }
+      node->claimParameters();
+      if (graphics != nullptr && graphics->WindowIsOpen()) {
+        node->setupUi(graphics);
       }
     }
 
