@@ -98,7 +98,10 @@ public:
   }
 
   void onViewPortChange(float x, float y, float scale) {
-    WDBGMSG("x %f y %f s %f\n", x, y, scale);
+    for (int i = 0; i < nodes.GetSize(); i++) {
+      nodes.Get(i)->translate(x, y);
+    }
+    // WDBGMSG("x %f y %f s %f\n", x, y, scale);
   }
 
   void layoutUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {

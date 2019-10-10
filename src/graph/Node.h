@@ -179,6 +179,17 @@ public:
 
   }
 
+  virtual void translate(float x, float y) {
+    for (int i = 0; i < parameterCount; i++) {
+      iplug::igraphics::IRECT rect = parameters[i]->control->GetRECT();
+      rect.T += y;
+      rect.L += x;
+      rect.B += y;
+      rect.R += x;
+      parameters[i]->control->SetRECT(rect);
+    }
+  }
+
   int samplerate;
   int channelCount;
   int maxBuffer;

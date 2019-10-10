@@ -28,6 +28,8 @@ public:
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     mRECT.T += dY;
     mRECT.L += dX;
+    mRECT.B += dY;
+    mRECT.R += dX;
     SetDirty(true);
     mCallback(dX, dY, mScale);
   }
