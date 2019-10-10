@@ -315,6 +315,9 @@
     <ClInclude Include="..\src\graph\nodes\NodeList.h">
       <Filter>src\graph\nodes</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\ui\Background.h">
+      <Filter>src\graph\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -364,6 +367,9 @@
     </Filter>
     <Filter Include="src\graph\nodes\stereotool">
       <UniqueIdentifier>{9111c0bb-f121-47ee-9515-68491507a929}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\ui">
+      <UniqueIdentifier>{7811b4f4-42c3-4dff-bd81-efa8eeb06dea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

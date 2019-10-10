@@ -335,6 +335,7 @@
     <ClInclude Include="..\src\graph\nodes\stereo_tool\StereoToolNode.h" />
     <ClInclude Include="..\src\graph\ParameterManager.h" />
     <ClInclude Include="..\src\graph\TestUiNode.h" />
+    <ClInclude Include="..\src\graph\ui\Background.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Dependencies\IPlug\RTAudio\include\asio.cpp" />

@@ -3,6 +3,7 @@
 #include "IControls.h"
 #include "src/graph/TestUiNode.h"
 #include "thirdparty/json.hpp"
+#include "src/graph/ui/Background.h"
 
 GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAMS, kNumPrograms)) {
 
@@ -30,9 +31,11 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);
     pGraphics->SetScreenScale(1);
-    pGraphics->AttachPanelBackground(COLOR_GRAY);
-    pGraphics->AttachBackground(PNGBACKGROUND_FN);
-    // const IBitmap bitmap1 = pGraphics->LoadBitmap(PNGBACKGROUND_FN);
+    // pGraphics->AttachBackground(PNGBACKGROUND_FN);
+    // IBitmap bg = pGraphics->LoadBitmap(PNGBACKGROUND_FN, 1, false);
+    // IControl* pBG = new IBitmapControl(0, 0, bg, iplug::kNoParameter, iplug::igraphics::EBlend::Clobber);
+    Background* test = new Background(pGraphics);
+    pGraphics->AttachControl(test);
 
     const IRECT b = pGraphics->GetBounds();
     auto buttonAction = [&, pGraphics, b](IControl* pCaller) {
