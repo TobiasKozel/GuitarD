@@ -19,7 +19,6 @@ public:
   int inputCount;
   int outputCount;
   bool isProcessed;
-  int index;
   // This type name is used to serialize and deserialize the node
   const char* type;
   float x;
@@ -44,7 +43,6 @@ public:
     parameterCount = 0;
     parameters = nullptr;
     uiReady = false;
-    index = -1;
     x = 0;
     y = 0;
 

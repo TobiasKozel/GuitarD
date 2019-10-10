@@ -8,18 +8,19 @@
 #include "src/graph/ParameterManager.h"
 #include "src/graph/nodes/NodeList.h"
 #include "thirdparty/json.hpp"
+#include "src/graph/ui/Background.h"
 
 
 class Graph {
   iplug::igraphics::IGraphics* graphics;
 public:
   /** Holds all the nodes in the processing graph */
-  Node** nodes;
+  // Node** nodes;
+  WDL_PtrList<Node> nodes;
 
   /** Dummy nodes to get the audio blocks in and out of the graph */
   DummyNode* input;
   DummyNode* output;
-  int nodeCount;
   int channelCount;
   ParameterManager paramManager;
   WDL_Mutex isProcessing;
@@ -29,11 +30,6 @@ public:
     graphics = nullptr;
     sampleRate = p_sampleRate;
     channelCount = p_channles;
-    nodes = new Node*[MAXNODES];
-    for (int i = 0; i < MAXNODES; i++) {
-      nodes[i] = nullptr;
-    }
-    nodeCount = 0;
     input = new DummyNode();
     output = new DummyNode();
     output->channelCount = channelCount;
@@ -49,19 +45,15 @@ public:
     WDL_MutexLock lock(&isProcessing);
     input->outputs[0] = in;
     input->isProcessed = true;
-
-    for (int n = 0; n < MAXNODES; n++) {
-      if (nodes[n] != nullptr) {
-        nodes[n]->isProcessed = false;
-      }
+    int nodeCount = nodes.GetSize();
+    for (int n = 0; n < nodeCount; n++) {
+      nodes.Get(n)->isProcessed = false;
     }
+
     // TODO multiple passes to ensure all the nodes are computed is super dumb
     while (!output->inputs[0]->isProcessed) {
-      // TODO this is also dumb, use the WDL_Pointer list instead
-      for (int n = 0; n < MAXNODES; n++) {
-        if (nodes[n] != nullptr) {
-          nodes[n]->ProcessBlock(nFrames);
-        }
+      for (int n = 0; n < nodeCount; n++) {
+        nodes.Get(n)->ProcessBlock(nFrames);
       }
     }
     output->CopyOut(out, nFrames);
@@ -69,13 +61,14 @@ public:
 
   void testAdd() {
     WDL_MutexLock lock(&isProcessing);
-    if (nodes[0] == nullptr) {
-      nodes[0] = new StereoToolNode();
-      nodes[0]->setup(&paramManager, sampleRate);
-      nodes[0]->claimParameters();
-      nodes[0]->setupUi(graphics);
-      nodes[0]->inputs[0] = input;
-      output->inputs[0] = nodes[0];
+    if (nodes.GetSize() == 0) {
+      Node* node = new StereoToolNode();
+      node->setup(&paramManager, sampleRate);
+      node->claimParameters();
+      node->setupUi(graphics);
+      node->inputs[0] = input;
+      output->inputs[0] = node;
+      nodes.Add(node);
     }
     else {
       output->inputs[0] = input;
@@ -85,23 +78,27 @@ public:
 
   /** The graph needs to know about the graphics context to add and remove the controlls for the nodes */
   void setupUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
+    pGraphics->AttachControl(new Background(pGraphics, [&](float x, float y, float scale) {
+      this->onViewPortChange(x, y, scale);
+    }));
+
     if (pGraphics != nullptr && pGraphics != graphics) {
       WDBGMSG("Graphics context changed");
       graphics = pGraphics;
     }
-    for (int i = 0; i < MAXNODES; i++) {
-      if (nodes[i] != nullptr) {
-        nodes[i]->setupUi(pGraphics);
-      }
+    for (int n = 0; n < nodes.GetSize(); n++) {
+        nodes.Get(n)->setupUi(pGraphics);
     }
   }
 
   void cleanupUi() {
-    for (int i = 0; i < MAXNODES; i++) {
-      if (nodes[i] != nullptr) {
-        nodes[i]->cleanupUi(graphics);
-      }
+    for (int n = 0; n < nodes.GetSize(); n++) {
+      nodes.Get(n)->cleanupUi(graphics);
     }
+  }
+
+  void onViewPortChange(float x, float y, float scale) {
+    WDBGMSG("x %f y %f s %f\n", x, y, scale);
   }
 
   void layoutUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
@@ -110,36 +107,36 @@ public:
       graphics = pGraphics;
       // Todo find out whether the context ever changes
     }
-    for (int i = 0; i < MAXNODES; i++) {
-      if (nodes[i] != nullptr) {
-        nodes[i]->layoutChanged();
-      }
+    for (int n = 0; n < nodes.GetSize(); n++) {
+      nodes.Get(n)->layoutChanged();
     }
   }
 
   void serialize(nlohmann::json &serialized) {
     WDL_MutexLock lock(&isProcessing);
-    // get all the nodes a index, TODO move this over to the constructor since this won't change over lifetime of a node
-    for (int i = 0; i < MAXNODES; i++) {
-      if (nodes[i] != nullptr) {
-        nodes[i]->index = i;
-      }
-    }
-    serialized["output"] = { output->inputs[0]->index, 0 };
+    // TODO handle nodes with multiple outputs and figure out which one is connected to the out
+    serialized["output"] = { nodes.Find(output->inputs[0]), 0 };
     serialized["nodes"] = nlohmann::json::array();
-    for (int i = 0, pos = 0; i < MAXNODES; i++) {
-      Node* node = nodes[i];
+    for (int i = 0, pos = 0; i < nodes.GetSize(); i++) {
+      Node* node = nodes.Get(i);
       if (node != nullptr) {
         serialized["nodes"][pos]["position"] = { node->x, node->y };
+        // The index shouldn't really matter since they're all in order
         serialized["nodes"][pos]["idx"] = i;
         serialized["nodes"][pos]["type"] = node->type;
         serialized["nodes"][pos]["inputs"] = nlohmann::json::array();
         for (int prev = 0; prev < node->inputCount; prev++) {
           if (node->inputs[prev] == nullptr) {
+            // -2 means not connected
             serialized["nodes"][pos]["inputs"][prev] = -2;
           }
+          else if (node->inputs[prev] == input) {
+            // -1 means connected to the global input
+            serialized["nodes"][pos]["inputs"][prev] = -1;
+          }
           else {
-            serialized["nodes"][pos]["inputs"][prev] = node->inputs[prev]->index;
+            // otherwise just get the index of the actual node
+            serialized["nodes"][pos]["inputs"][prev] = nodes.Find(node->inputs[prev]);
           }
         }
         serialized["nodes"][pos]["parameters"] = nlohmann::json::array();
@@ -158,16 +155,21 @@ public:
 
   void deserialize(nlohmann::json& serialized) {
     WDL_MutexLock lock(&isProcessing);
-    for (int i = 0; i < MAXNODES; i++) {
+    for (int i = 0; i < nodes.GetSize(); i++) {
       removeNode(i);
     }
     output->inputs[0] = input;
+    int expectedIndex = 0;
+    // create all the nodes and setup the parameters in the first pass
     for (auto sNode : serialized["nodes"]) {
       std::string className = sNode["type"];
       Node* node = createNode(className);
       if (node == nullptr) { continue; }
       node->setup(&paramManager, sampleRate);
-      nodes[sNode["idx"]] = node;
+      if (expectedIndex != sNode["idx"]) {
+        WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
+      }
+      nodes.Add(node);
       int paramIdx = 0;
       for (auto param : sNode["parameters"]) {
         if (paramIdx >= node->parameterCount) { break; }
@@ -179,35 +181,39 @@ public:
       if (graphics != nullptr && graphics->WindowIsOpen()) {
         node->setupUi(graphics);
       }
+      expectedIndex++;
     }
 
+    // link them all up accordingly in the second pass
+    int currentNodeIdx = 0;
     for (auto sNode : serialized["nodes"]) {
-      int inputIdx = 0;
+      int currentInputIdx = 0;
       for (int inNodeIdx : sNode["inputs"]) {
-        int ownIndex = sNode["idx"];
-        if (inNodeIdx >= 0 && nodes[inNodeIdx] != nullptr && nodes[ownIndex] != nullptr) {
-          nodes[ownIndex]->inputs[inputIdx] = nodes[inNodeIdx];
+        if (inNodeIdx >= 0 && nodes.Get(inNodeIdx) != nullptr) {
+          nodes.Get(currentInputIdx)->inputs[currentInputIdx] = nodes.Get(inNodeIdx);
         }
         else if (inNodeIdx == -1) {
-          nodes[ownIndex]->inputs[inputIdx] = input;
+          // thie index is -1 if the node is connected to the global input
+          // if it's -2 it's not connected at all and we'll just leave it at a nullptr
+          nodes.Get(currentInputIdx)->inputs[currentInputIdx] = input;
         }
-        inputIdx++;
+        currentInputIdx++;
       }
+      currentNodeIdx++;
     }
 
     int outIndex = serialized["output"][0];
-    if (nodes[outIndex] != nullptr) {
-      output->inputs[serialized["output"][1]] = nodes[outIndex];
+    if (nodes.Get(outIndex) != nullptr) {
+      output->inputs[serialized["output"][1]] = nodes.Get(outIndex);
     }
   }
 
   void removeNode(int index) {
-    if (nodes[index] == nullptr) { return; }
-    if (graphics != nullptr) {
-      nodes[index]->cleanupUi(graphics);
+    Node* node = nodes.Get(index);
+    if (node != nullptr) {
+      node->cleanupUi(graphics);
+      nodes.DeletePtr(node, true);
     }
-    delete nodes[index];
-    nodes[index] = nullptr;
   }
 
 private:
