@@ -16,10 +16,17 @@ public:
   }
 
   void ProcessBlock(int nFrames) {
+    if (isProcessed) { return; }
+    for (int i = 0; i < inputCount; i++) {
+      if (!inputs[i]->isProcessed) {
+        return;
+      }
+    }
     for (int i = 0; i < parameterCount; i++) {
       parameters[i]->update();
     }
     tool.compute(nFrames, inputs[0]->outputs[0], outputs[0]);
+    isProcessed = true;
   }
 };
 

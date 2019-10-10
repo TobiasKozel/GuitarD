@@ -42,14 +42,26 @@ public:
   }
 
   void ProcessBlock(iplug::sample** in, iplug::sample** out, int nFrames) {
-    // I don't really like the mutex here, but it should only be locked if a change to the
-    // processing chain is made, which will cause some artifacts anyways
+    /**
+     * I don't really like the mutex here, but it should only be locked if a change to the
+     * processing chain is made, which will cause some artifacts anyways
+     */
     WDL_MutexLock lock(&isProcessing);
     input->outputs[0] = in;
-    // this is dumb, use the WDL_Pointer list instead
-    for (int i = 0; i < MAXNODES; i++) {
-      if (nodes[i] != nullptr) {
-        nodes[i]->ProcessBlock(nFrames);
+    input->isProcessed = true;
+
+    for (int n = 0; n < MAXNODES; n++) {
+      if (nodes[n] != nullptr) {
+        nodes[n]->isProcessed = false;
+      }
+    }
+    // TODO multiple passes to ensure all the nodes are computed is super dumb
+    while (!output->inputs[0]->isProcessed) {
+      // TODO this is also dumb, use the WDL_Pointer list instead
+      for (int n = 0; n < MAXNODES; n++) {
+        if (nodes[n] != nullptr) {
+          nodes[n]->ProcessBlock(nFrames);
+        }
       }
     }
     output->CopyOut(out, nFrames);
@@ -73,7 +85,7 @@ public:
     }
   }
 
-  /** The graph needs to know about the graphics context to add and remove the controlls for the nodes*/
+  /** The graph needs to know about the graphics context to add and remove the controlls for the nodes */
   void setupUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
     if (pGraphics != nullptr && pGraphics != graphics) {
       WDBGMSG("Graphics context changed");

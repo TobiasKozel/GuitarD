@@ -22,6 +22,7 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
   
   mLayoutFunc = [&](IGraphics* pGraphics) {
     if (pGraphics->NControls()) {
+      // If there are already controls in the context the layout function was only because of a resize
       this->graph->layoutUi(pGraphics);
       return;
     }
@@ -30,8 +31,8 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
     pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);
     pGraphics->SetScreenScale(1);
     pGraphics->AttachPanelBackground(COLOR_GRAY);
-    // pGraphics->AttachBackground("background.png");
-    // const IBitmap bitmap1 = pGraphics->LoadBitmap("background.png");
+    pGraphics->AttachBackground(PNGBACKGROUND_FN);
+    // const IBitmap bitmap1 = pGraphics->LoadBitmap(PNGBACKGROUND_FN);
 
     const IRECT b = pGraphics->GetBounds();
     auto buttonAction = [&, pGraphics, b](IControl* pCaller) {
@@ -55,9 +56,11 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
 }
 
 void GuitarD::OnUIClose() {
-  // The gui will be cleaned up when the Iplug window is destructed
-  // however doint this manually will be safer and make sure all the nodes can clean up
-  // after them selves and set the control in the ParameterCoupling to nullptr
+  /**
+   * The gui will be cleaned up when the Iplug window is destructed
+   * however doing this manually will be safer and make sure all the nodes can clean up
+   * after them selves and set the control in the ParameterCoupling to a nullptr
+   */
   graph->cleanupUi();
 }
 
