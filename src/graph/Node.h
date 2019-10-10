@@ -91,7 +91,7 @@ public:
         /**
          * this means the manager has no free parameters left and the control cannot be automated from the daw
          */
-        WDBGMSG("Ran out of daw parameters!");
+        WDBGMSG("Ran out of daw parameters!\n");
         gotAllPamams = false;
       }
     }
@@ -109,7 +109,7 @@ public:
     delete outputs;
 
     if (uiReady) {
-      WDBGMSG("Warning, UI of node was not cleaned up!");
+      WDBGMSG("Warning, UI of node was not cleaned up!\n");
     }
 
     // only delete the array, the UI struct in SimpleDelay will delete all the params inside
@@ -171,7 +171,7 @@ public:
       iplug::igraphics::IControl* control = parameters[i]->control;
       if (control != nullptr) {
         pGrahics->RemoveControl(control, true);
-        control = nullptr;
+        parameters[i]->control = nullptr;
       }
     }
     uiReady = false;

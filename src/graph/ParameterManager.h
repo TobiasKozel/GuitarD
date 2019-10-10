@@ -88,7 +88,7 @@ public:
         }
       } else {
         if (parametersClaimed[i]) {
-          WDBGMSG("Could not claim a prefered DAW parameter!");
+          WDBGMSG("Could not claim a prefered DAW parameter!\n");
           // This is bad
           couple->parameter = nullptr;
           couple->parameterIdx = iplug::kNoParameter;
@@ -105,6 +105,7 @@ public:
       couple->parameter->SetDisplayText(1, couple->name);
       couple->parameterIdx = i;
       couple->parameter->Set(*(couple->value));
+      WDBGMSG("Claimed param %i\n", i);
       return true;
     }
     // no free parameters left
@@ -122,6 +123,7 @@ public:
         // memleak TODO check if the const char cause leaks
         couple->parameter = nullptr;
         parametersLeft++;
+        WDBGMSG("Released param %i\n", i);
         return;
       }
     }

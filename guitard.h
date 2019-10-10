@@ -21,10 +21,10 @@ public:
   GuitarD(const InstanceInfo& info);
   Graph* graph;
   IVButtonControl* testButton;
-  void OnUIClose();
+  void OnUIClose() override;
 
-  bool SerializeState(IByteChunk& chunk) const;
-  int UnserializeState(const IByteChunk& chunk, int startPos);
+  bool SerializeState(IByteChunk& chunk) const override;
+  int UnserializeState(const IByteChunk& chunk, int startPos) override;
 
 #if IPLUG_DSP // All DSP methods and member variables should be within an IPLUG_DSP guard, should you want distributed UI
   void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;

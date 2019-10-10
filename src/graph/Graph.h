@@ -79,9 +79,7 @@ public:
     }
     else {
       output->inputs[0] = input;
-      nodes[0]->cleanupUi(graphics);
-      delete nodes[0];
-      nodes[0] = nullptr;
+      removeNode(0);
     }
   }
 
@@ -120,6 +118,7 @@ public:
   }
 
   void serialize(nlohmann::json &serialized) {
+    WDL_MutexLock lock(&isProcessing);
     // get all the nodes a index, TODO move this over to the constructor since this won't change over lifetime of a node
     for (int i = 0; i < MAXNODES; i++) {
       if (nodes[i] != nullptr) {
@@ -136,7 +135,12 @@ public:
         serialized["nodes"][pos]["type"] = node->type;
         serialized["nodes"][pos]["inputs"] = nlohmann::json::array();
         for (int prev = 0; prev < node->inputCount; prev++) {
-          serialized["nodes"][pos]["inputs"][prev] = node->inputs[prev]->index;
+          if (node->inputs[prev] == nullptr) {
+            serialized["nodes"][pos]["inputs"][prev] = -2;
+          }
+          else {
+            serialized["nodes"][pos]["inputs"][prev] = node->inputs[prev]->index;
+          }
         }
         serialized["nodes"][pos]["parameters"] = nlohmann::json::array();
         for (int p = 0; p < node->parameterCount; p++) {
@@ -181,8 +185,11 @@ public:
       int inputIdx = 0;
       for (int inNodeIdx : sNode["inputs"]) {
         int ownIndex = sNode["idx"];
-        if (nodes[inNodeIdx] != nullptr && nodes[ownIndex] != nullptr) {
-          nodes[ownIndex]->inputs[inputIdx] = inNodeIdx == -1 ? input : nodes[inNodeIdx];
+        if (inNodeIdx >= 0 && nodes[inNodeIdx] != nullptr && nodes[ownIndex] != nullptr) {
+          nodes[ownIndex]->inputs[inputIdx] = nodes[inNodeIdx];
+        }
+        else if (inNodeIdx == -1) {
+          nodes[ownIndex]->inputs[inputIdx] = input;
         }
         inputIdx++;
       }
