@@ -12,6 +12,9 @@ public:
     Node::setup(p_paramManager, p_samplerate, p_maxBuffer, 1, 1, 2);
     faustmodule = new SimpleDelay();
     paramsFromFaust();
+    for (int i = 0; i < parameterCount; i++) {
+      parameters[i]->y = i * 80;
+    }
   }
 
 };

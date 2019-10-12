@@ -12,5 +12,7 @@ public:
     Node::setup(p_paramManager, p_samplerate, p_maxBuffer, 1, 1, 2);
     faustmodule = new Crybaby();
     paramsFromFaust();
+    parameters[0]->y = 100;
+    parameters[0]->x = 100;
   }
 };

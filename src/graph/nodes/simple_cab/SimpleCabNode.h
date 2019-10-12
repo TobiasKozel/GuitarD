@@ -2,24 +2,31 @@
 #include "src/graph/Node.h"
 #include "config.h"
 #include "src/graph/nodes/simple_cab/c.h"
-#include "src/graph/nodes/simple_cab/c64.h"
 #include "src/graph/nodes/simple_cab/cident.h"
+#include "src/graph/nodes/simple_cab/clean.h"
 #include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
 
 class SimpleCabNode : public Node {
   fftconvolver::FFTConvolver convolver;
   float* convertBufferIn;
   float* convertBufferOut;
+  double selectedIr;
 public:
   SimpleCabNode() : Node() {
     type = "SimpleCabNode";
-    convolver.init(64, cIR, 512);
+    convolver.init(64, cleanIR, 3000);
     convertBufferIn = new float[1024];
     convertBufferOut = new float[1024];
+    selectedIr = 0;
   }
 
   void setup(ParameterManager* p_paramManager, int p_samplerate = 48000, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
     Node::setup(p_paramManager, p_samplerate, p_maxBuffer, 1, 1, 2);
+    parameters = new ParameterCoupling*[1];
+    parameters[0] = new ParameterCoupling("IR", &selectedIr, 0.0, 0.0, 2.0, 1.0);
+    parameters[0]->x = 100;
+    parameters[0]->y = 100;
+    parameterCount = 1;
   }
 
   ~SimpleCabNode() {
@@ -34,9 +41,20 @@ public:
         return;
       }
     }
-    for (int i = 0; i < parameterCount; i++) {
-      parameters[i]->update();
-    }
+    int prev = (int)*(parameters[0]->value);
+    parameters[0]->update();
+    int cur = (int)*(parameters[0]->value);
+    //if (prev != cur) {
+    //  if (cur == 0) {
+    //    convolver.init(64, cleanIR, 3000);
+    //  }
+    //  if (cur == 1) {
+    //    convolver.init(64, stackIR, 4500);
+    //  }
+    //  if (cur == 2) {
+    //    convolver.init(64, driveIR, 4200);
+    //  }
+    //}
 
     float inverseChannelCount = 1.0 / channelCount;
     for (int i = 0; i < nFrames; i++) {
@@ -54,6 +72,7 @@ public:
          outputs[0][c][i] = convertBufferOut[i];
       }
     }
+
     isProcessed = true;
   }
 
@@ -63,7 +82,7 @@ public:
       this->translate(x, y);
     });
     pGrahics->AttachControl(background);
-    uiReady = true;
-    // Node::setupUi(pGrahics);
+    Node::setupUi(pGrahics);
+    // uiReady = true;
   }
 };

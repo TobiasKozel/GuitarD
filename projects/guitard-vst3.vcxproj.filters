@@ -143,6 +143,18 @@
     <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.cpp">
       <Filter>IGraphics\Drawing</Filter>
     </ClCompile>
+    <ClCompile Include="..\thirdparty\fftconvolver\AudioFFT.cpp">
+      <Filter>thirdparty\convolver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\fftconvolver\FFTConvolver.cpp">
+      <Filter>thirdparty\convolver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.cpp">
+      <Filter>thirdparty\convolver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\fftconvolver\Utilities.cpp">
+      <Filter>thirdparty\convolver</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../config.h" />
@@ -378,6 +390,18 @@
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.h">
       <Filter>IGraphics\Drawing</Filter>
     </ClInclude>
+    <ClInclude Include="..\thirdparty\fftconvolver\AudioFFT.h">
+      <Filter>thirdparty\convolver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\fftconvolver\FFTConvolver.h">
+      <Filter>thirdparty\convolver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.h">
+      <Filter>thirdparty\convolver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\fftconvolver\Utilities.h">
+      <Filter>thirdparty\convolver</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -436,6 +460,12 @@
     </Filter>
     <Filter Include="IPlug\VST3\VST3_SDK\plugininterfaces\base">
       <UniqueIdentifier>{5f06b03e-5093-46c0-9513-efb4e494c857}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty">
+      <UniqueIdentifier>{37cc0328-7952-42ef-9df4-1a5e231e30a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\convolver">
+      <UniqueIdentifier>{7f7348ce-df0b-4c18-8794-acf96ee57a60}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

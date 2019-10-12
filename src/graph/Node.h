@@ -132,8 +132,16 @@ public:
       delete parameters[i];
     }
     delete parameters;
+
+    if (faustmodule != nullptr) {
+      delete faustmodule;
+    }
   }
 
+  /**
+   * Generic process function which will use the faustmodule to process
+   * if the is one
+   */
   virtual void ProcessBlock(int nFrames) {
     if (isProcessed || faustmodule == nullptr) { return; }
     for (int i = 0; i < inputCount; i++) {
@@ -148,13 +156,13 @@ public:
     isProcessed = true;
   }
 
-  virtual void ConnectInput(Node* in, int inputNumber = 0) {
+  virtual void connectInput(Node* in, int inputNumber = 0) {
     if (inputNumber < inputCount) {
       inputs[inputNumber] = in;
     }
   }
 
-  virtual void DisconnectInput(int inputNumber = 0) {
+  virtual void disconnectInput(int inputNumber = 0) {
     if (inputNumber < inputCount) {
       inputs[inputNumber] = nullptr;
     }
@@ -164,7 +172,14 @@ public:
    * Generic setup of the parameters to get something on the screen
    */
   virtual void setupUi(iplug::igraphics::IGraphics* pGrahics) {
-
+    if (background == nullptr) {
+      // generic background if there was none set by the derived classes
+      background = new NodeBackground(pGrahics, PNGGENERICBG_FN, L, T,
+        [&](float x, float y) {
+        this->translate(x, y);
+      });
+      pGrahics->AttachControl(background);
+    }
     for (int i = 0; i < parameterCount; i++) {
       ParameterCoupling* couple = parameters[i];
       float px = L + couple->x - (couple->w * 0.5);
@@ -217,6 +232,7 @@ public:
 
   virtual void translate(float x, float y) {
     for (int i = 0; i < parameterCount; i++) {
+      if (parameters[i]->control == nullptr) { continue; }
       iplug::igraphics::IRECT rect = parameters[i]->control->GetRECT();
       rect.T += y;
       rect.L += x;

@@ -92,15 +92,15 @@ bool FFTConvolver::init(size_t blockSize, const Sample* ir, size_t irLen)
   }
   
   //// Ignore zeros at the end of the impulse response because they only waste computation time
-  //while (irLen > 0 && ::fabs(ir[irLen-1]) < 0.000001f)
-  //{
-  //  --irLen;
-  //}
+  while (irLen > 0 && ::fabs(ir[irLen-1]) < 0.000001f)
+  {
+    --irLen;
+  }
 
-  //if (irLen == 0)
-  //{
-  //  return true;
-  //}
+  if (irLen == 0)
+  {
+    return true;
+  }
   
   _blockSize = NextPowerOf2(blockSize);
   _segSize = 2 * _blockSize;

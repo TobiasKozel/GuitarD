@@ -49,6 +49,7 @@ public:
       nodes.Get(n)->isProcessed = false;
     }
 
+    if (output->inputs[0] == nullptr) { return; }
     // TODO multiple passes to ensure all the nodes are computed is super dumb
     while (!output->inputs[0]->isProcessed) {
       for (int n = 0; n < nodeCount; n++) {
@@ -61,18 +62,30 @@ public:
   void testAdd() {
     WDL_MutexLock lock(&isProcessing);
     if (nodes.GetSize() == 0) {
-      Node* node = new SimpleDelayNode();
-      node->setup(&paramManager, sampleRate);
-      node->claimParameters();
-      node->setupUi(graphics);
-      node->inputs[0] = input;
-      output->inputs[0] = node;
-      nodes.Add(node);
+      Node* stereo = new StereoToolNode();
+      addNode(stereo, input, 0);
+      //Node* delay = new SimpleDelayNode();
+      //addNode(delay, stereo, 200);
+      Node* drive = new SimpleDriveNode();
+      addNode(drive, stereo, 400);
+      //Node* baby = new CryBabyNode();
+      //addNode(baby, drive, 600);
+      Node* cab = new SimpleCabNode();
+      addNode(cab, drive, 800);
+      output->inputs[0] = cab;
     }
     else {
-      output->inputs[0] = input;
-      removeNode(0);
+      removeAllNodes();
     }
+  }
+
+  void addNode(Node* node, Node* pInput, float y) {
+    node->setup(&paramManager, sampleRate);
+    node->L = y;
+    node->claimParameters();
+    node->setupUi(graphics);
+    node->connectInput(pInput);
+    nodes.Add(node);
   }
 
   /** The graph needs to know about the graphics context to add and remove the controlls for the nodes */
@@ -124,14 +137,21 @@ public:
 
   void deserialize(nlohmann::json& json) {
     WDL_MutexLock lock(&isProcessing);
-    for (int i = 0; i < nodes.GetSize(); i++) {
-      removeNode(i);
-    }
+    removeAllNodes();
     serializer::deserialize(json, nodes, output, input, sampleRate, &paramManager, graphics);
+  }
+
+  void removeAllNodes() {
+    while (nodes.GetSize()) {
+      removeNode(0);
+    }
   }
 
   void removeNode(int index) {
     Node* node = nodes.Get(index);
+    if (node == output->inputs[0]) {
+      output->inputs[0] = nullptr;
+    }
     if (node != nullptr) {
       node->cleanupUi(graphics);
       nodes.DeletePtr(node, true);
