@@ -27,6 +27,7 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
     }
     pGraphics->SetSizeConstraints(400, 2000, 400, 1500);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
+    pGraphics->AttachPanelBackground(COLOR_GRAY);
     pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);
 
     this->graph->setupUi(pGraphics);
@@ -41,6 +42,7 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
       new IVButtonControl(b.GetCentredInside(100).GetVShifted(100), buttonAction),
       kNoParameter, "vcontrols"
     );
+    this->graph->testAdd();
   };
 #endif
 }

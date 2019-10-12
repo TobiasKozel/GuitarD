@@ -17,8 +17,10 @@ public:
     mY = 0;
     mX = 0;
     mGraphics->SetTranslation(0, 0);
-    mScale = 1;
     mCallback = pCallback;
+    mScale = 1.0;
+    windowX = 0;
+    windowY = 0;
   }
 
   void Draw(IGraphics& g) override {
@@ -30,18 +32,30 @@ public:
     mRECT.L += dX;
     mRECT.B += dY;
     mRECT.R += dX;
+    SetTargetAndDrawRECTs(mRECT);
     SetDirty(true);
-    mCallback(dX, dY, mScale);
+    mCallback(dX, dY, 1.f);
   }
 
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
     // mRECT.Translate(-x, -y);
     // mRECT.Scale(1 - d / 10.f);
     // mRECT.Translate(x, y);
-    mScale += d;
-    WDBGMSG("d %f x %f \n", d, x);
-    mCallback(mX, mY, mScale);
-    SetDirty(true);
+    mScale += d / 20.0;
+    WDBGMSG("scale %f \n", mScale);
+    if (mScale > 0.3 && mScale < 2) {
+      // TODO sucks hard, at least some kind of scaling
+      mGraphics->Resize(windowX, windowY, mScale);
+    }
+    //mCallback(mX, mY, mScale);
+  }
+
+  void OnResize() override {
+    if (mGraphics != nullptr) {
+      IRECT bounds = mGraphics->GetBounds();
+      windowX = bounds.R;
+      windowY = bounds.B;
+    }
   }
 
 protected:
@@ -50,6 +64,8 @@ protected:
   IGraphics* mGraphics;
   float mX;
   float mY;
+  int windowX;
+  int windowY;
   float mScale;
   backgroundCallback mCallback;
 };

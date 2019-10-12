@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "IGraphics.h"
 #include "src/faust/FaustHeadlessDsp.h"
+#include "src/graph/ui/NodeBackground.h"
 
 class Node {
   bool uiReady;
@@ -15,14 +16,17 @@ public:
   int parameterCount;
   Node** inputs;
   iplug::sample*** outputs;
-
+  NodeBackground* background;
   int inputCount;
   int outputCount;
   bool isProcessed;
   // This type name is used to serialize and deserialize the node
   const char* type;
-  float x;
-  float y;
+  float L;
+  float T;
+  float R;
+  float B;
+  float rotation;
 
   /**
    * The constructor doesn't take any parameters since it can be instanciated from the NodeList
@@ -43,8 +47,8 @@ public:
     parameterCount = 0;
     parameters = nullptr;
     uiReady = false;
-    x = 0;
-    y = 0;
+    T = L = 0;
+    B = R = 100;
 
     inputs = new Node * [std::max(1, p_inputs)];
     for (int i = 0; i < p_inputs; i++) {
@@ -136,15 +140,14 @@ public:
    * Generic setup of the parameters to get something on the screen
    */
   virtual void setupUi(iplug::igraphics::IGraphics* pGrahics) {
-    iplug::igraphics::IRECT bounds{ 0, 0, 600, 200 };
-    int width = 80;
+
     for (int i = 0; i < parameterCount; i++) {
       ParameterCoupling* couple = parameters[i];
-      iplug::igraphics::IRECT controlPos = bounds.GetFromLeft(width).GetHShifted(i * width);
+      float px = L + couple->x - (couple->w * 0.5);
+      float py = T + couple->y - (couple->h * 0.5);
+      iplug::igraphics::IRECT controlPos(px, py, px + couple->w, py + couple->h);
       // use the daw parameter to sync the values if possible
       if (couple->parameterIdx != iplug::kNoParameter) {
-        // All control objects attached to IGraphics will be deleted once the window
-        // is destroyed, e.g the plugin windows was closed, so no need to clean these up
         couple->control = new iplug::igraphics::IVKnobControl(
           controlPos, couple->parameterIdx
         );
@@ -157,9 +160,13 @@ public:
           }
         );
       }
-      // couple->control->SetValueToDefault();
-      couple->control->SetValue(couple->defaultVal);
       pGrahics->AttachControl(couple->control);
+      couple->control->SetValue(couple->defaultVal);
+      IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);
+      if (vcontrol != nullptr) {
+        vcontrol->SetShowLabel(false);
+        vcontrol->SetShowValue(false);
+      }
     }
     uiReady = true;
   }
@@ -168,9 +175,14 @@ public:
     for (int i = 0; i < parameterCount; i++) {
       iplug::igraphics::IControl* control = parameters[i]->control;
       if (control != nullptr) {
+        // this also destroys the object
         pGrahics->RemoveControl(control, true);
         parameters[i]->control = nullptr;
       }
+    }
+    if (background != nullptr) {
+      pGrahics->RemoveControl(background, true);
+      background = nullptr;
     }
     uiReady = false;
   }
@@ -186,7 +198,15 @@ public:
       rect.L += x;
       rect.B += y;
       rect.R += x;
-      parameters[i]->control->SetRECT(rect);
+      parameters[i]->control->SetTargetAndDrawRECTs(rect);
+    }
+    if (background != nullptr) {
+      iplug::igraphics::IRECT rect = background->GetRECT();
+      rect.T += y;
+      rect.L += x;
+      rect.B += y;
+      rect.R += x;
+      background->SetTargetAndDrawRECTs(rect);
     }
   }
 

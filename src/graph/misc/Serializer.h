@@ -14,7 +14,7 @@ namespace serializer {
     for (int i = 0, pos = 0; i < nodes.GetSize(); i++) {
       Node* node = nodes.Get(i);
       if (node != nullptr) {
-        serialized["nodes"][pos]["position"] = { node->x, node->y };
+        serialized["nodes"][pos]["position"] = { node->L, node->R };
         // The index shouldn't really matter since they're all in order
         serialized["nodes"][pos]["idx"] = i;
         serialized["nodes"][pos]["type"] = node->type;

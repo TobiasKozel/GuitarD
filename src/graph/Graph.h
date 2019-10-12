@@ -34,7 +34,6 @@ public:
     output = new DummyNode();
     output->channelCount = channelCount;
     output->inputs[0] = input;
-    // testAdd();
   }
 
   void ProcessBlock(iplug::sample** in, iplug::sample** out, int nFrames) {

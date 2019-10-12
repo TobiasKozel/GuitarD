@@ -318,6 +318,9 @@
     <ClInclude Include="..\src\graph\misc\Serializer.h">
       <Filter>src\graph\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\ui\NodeBackground.h">
+      <Filter>src\graph\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

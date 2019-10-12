@@ -27,7 +27,7 @@
 #define PLUG_WIDTH 600
 #define PLUG_MAX_WIDTH 2400
 #define PLUG_MAX_HEIGHT 1400
-#define PLUG_FPS 60
+#define PLUG_FPS 120
 #define PLUG_SHARED_RESOURCES 0
 
 #define AUV2_ENTRY GuitarD_Entry
@@ -55,3 +55,4 @@
 #define ROBOTO_FN "Roboto-Regular.ttf"
 
 #define PNGBACKGROUND_FN "background.png"
+#define PNGSTEREOSHAPERBG_FN "stereoshaper_bg.png"

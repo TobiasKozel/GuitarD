@@ -19,6 +19,11 @@ struct ParameterCoupling {
   double defaultVal;
   double stepSize;
   const char* name;
+  float x;
+  float y;
+  float w;
+  float h;
+  const char* asset;
 
   ParameterCoupling(const char* p_name = nullptr, double* p_proprety = nullptr,
      double p_default = 0.5, double p_min = 0, double p_max = 1, double p_stepSize = 0.01) {
@@ -31,6 +36,9 @@ struct ParameterCoupling {
     parameterIdx = iplug::kNoParameter;
     parameter = nullptr;
     control = nullptr;
+    x = y = 0;
+    asset = nullptr;
+    w = h = 70;
   }
 
   /**
