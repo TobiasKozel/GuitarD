@@ -1,7 +1,6 @@
 import wave, struct, ntpath
 
-files = ["src/graph/nodes/simple_cab/c.wav"]
-files = ["src/graph/nodes/simple_cab/c64.wav"]
+files = ["src/graph/nodes/simple_cab/c.wav", "src/graph/nodes/simple_cab/c64.wav", "src/graph/nodes/simple_cab/cident.wav"]
 
 for f in files:
     wav = wave.open(f, "rb")

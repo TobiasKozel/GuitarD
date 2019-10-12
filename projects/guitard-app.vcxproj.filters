@@ -92,6 +92,18 @@
     <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.cpp">
       <Filter>IGraphics\Drawing</Filter>
     </ClCompile>
+    <ClCompile Include="..\thirdparty\fftconvolver\AudioFFT.cpp">
+      <Filter>thirdparty\convolver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\fftconvolver\FFTConvolver.cpp">
+      <Filter>thirdparty\convolver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.cpp">
+      <Filter>thirdparty\convolver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\fftconvolver\Utilities.cpp">
+      <Filter>thirdparty\convolver</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\GuitarD.h" />
@@ -324,6 +336,18 @@
     <ClInclude Include="..\src\graph\nodes\simple_cab\SimpleCabNode.h">
       <Filter>src\graph\nodes\simplecab</Filter>
     </ClInclude>
+    <ClInclude Include="..\thirdparty\fftconvolver\AudioFFT.h">
+      <Filter>thirdparty\convolver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\fftconvolver\FFTConvolver.h">
+      <Filter>thirdparty\convolver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.h">
+      <Filter>thirdparty\convolver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\fftconvolver\Utilities.h">
+      <Filter>thirdparty\convolver</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -382,6 +406,12 @@
     </Filter>
     <Filter Include="src\graph\nodes\simplecab">
       <UniqueIdentifier>{c980bb6c-a4cd-4a99-8dc5-23d670e19ff4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty">
+      <UniqueIdentifier>{89a4599c-777c-47fe-92d1-9081f902c5ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\convolver">
+      <UniqueIdentifier>{60e082e5-694e-455e-8d9b-cbed989c18c6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
