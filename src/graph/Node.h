@@ -9,6 +9,7 @@
 #include "src/graph/ui/NodeBackground.h"
 
 class Node {
+protected:
   bool uiReady;
 public:
   ParameterManager* paramManager;
@@ -31,7 +32,9 @@ public:
   /**
    * The constructor doesn't take any parameters since it can be instanciated from the NodeList
    */
-  Node() { };
+  Node() {
+    outputs = nullptr;
+  };
 
   /**
    * This is basically a delayed constructor with the only disadvatage: derived methods have to have the same parameters
@@ -54,12 +57,14 @@ public:
     for (int i = 0; i < p_inputs; i++) {
       inputs[i] = nullptr;
     }
-
-    outputs = new iplug::sample * *[std::max(1, p_outputs)];
-    for (int i = 0; i < p_outputs; i++) {
-      outputs[i] = new iplug::sample * [p_channles];
-      for (int c = 0; c < p_channles; c++) {
-        outputs[i][c] = new iplug::sample[p_maxBuffer];
+    if (outputs == nullptr) {
+      // A derived node might have already setup a custom output buffer
+      outputs = new iplug::sample * *[std::max(1, p_outputs)];
+      for (int i = 0; i < p_outputs; i++) {
+        outputs[i] = new iplug::sample * [p_channles];
+        for (int c = 0; c < p_channles; c++) {
+          outputs[i][c] = new iplug::sample[p_maxBuffer];
+        }
       }
     }
   }
@@ -102,13 +107,16 @@ public:
 
   virtual ~Node() {
     delete inputs;
-    for (int i = 0; i < outputCount; i++) {
-      for (int c = 0; c < channelCount; c++) {
-        delete outputs[i][c];
+    if (outputs != nullptr) {
+      for (int i = 0; i < outputCount; i++) {
+        for (int c = 0; c < channelCount; c++) {
+          delete outputs[i][c];
+        }
+        delete outputs[i];
       }
-      delete outputs[i];
+      delete outputs;
     }
-    delete outputs;
+    
 
     if (uiReady) {
       WDBGMSG("Warning, UI of node was not cleaned up!\n");

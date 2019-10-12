@@ -56,3 +56,4 @@
 
 #define PNGBACKGROUND_FN "background.png"
 #define PNGSTEREOSHAPERBG_FN "stereoshaper_bg.png"
+#define PNGSIMPLECABBG_FN "simplecab_bg.png"

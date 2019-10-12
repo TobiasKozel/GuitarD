@@ -321,6 +321,9 @@
     <ClInclude Include="..\src\graph\ui\NodeBackground.h">
       <Filter>src\graph\ui</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\nodes\simple_cab\SimpleCabNode.h">
+      <Filter>src\graph\nodes\simplecab</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -376,6 +379,9 @@
     </Filter>
     <Filter Include="src\graph\misc">
       <UniqueIdentifier>{be3fbc2d-2fab-4854-a0d6-b437e3964a2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\nodes\simplecab">
+      <UniqueIdentifier>{c980bb6c-a4cd-4a99-8dc5-23d670e19ff4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

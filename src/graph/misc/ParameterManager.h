@@ -106,9 +106,16 @@ public:
       parametersLeft--;
       parametersClaimed[i] = true;
       couple->parameter = parameters[i];
-      couple->parameter->InitDouble(
-        couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
-      );
+      if (couple->stepSize == couple->max == 1.0 && couple->min == 0.0) {
+        couple->parameter->InitBool(
+          couple->name, couple->defaultVal == 1.0
+        );
+      }
+      else {
+        couple->parameter->InitDouble(
+          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+        );
+      }
       couple->parameter->SetLabel(couple->name);
       couple->parameter->SetDisplayText(1, couple->name);
       couple->parameterIdx = i;
