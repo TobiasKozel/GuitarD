@@ -208,6 +208,8 @@ public:
       rect.R += x;
       background->SetTargetAndDrawRECTs(rect);
     }
+    L += x;
+    T += y;
   }
 
   int samplerate;

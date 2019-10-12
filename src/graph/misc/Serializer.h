@@ -14,7 +14,7 @@ namespace serializer {
     for (int i = 0, pos = 0; i < nodes.GetSize(); i++) {
       Node* node = nodes.Get(i);
       if (node != nullptr) {
-        serialized["nodes"][pos]["position"] = { node->L, node->R };
+        serialized["nodes"][pos]["position"] = { node->L, node->T };
         // The index shouldn't really matter since they're all in order
         serialized["nodes"][pos]["idx"] = i;
         serialized["nodes"][pos]["type"] = node->type;
@@ -59,6 +59,8 @@ namespace serializer {
       Node* node = createNode(className);
       if (node == nullptr) { continue; }
       node->setup(paramManager, sampleRate);
+      node->L = sNode["position"][0];
+      node->T = sNode["position"][1];
       if (expectedIndex != sNode["idx"]) {
         WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
       }

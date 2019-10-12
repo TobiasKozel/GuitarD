@@ -42,7 +42,6 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
       new IVButtonControl(b.GetCentredInside(100).GetVShifted(100), buttonAction),
       kNoParameter, "vcontrols"
     );
-    this->graph->testAdd();
   };
 #endif
 }

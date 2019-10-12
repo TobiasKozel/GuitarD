@@ -94,6 +94,7 @@ public:
     for (int n = 0; n < nodes.GetSize(); n++) {
       nodes.Get(n)->cleanupUi(graphics);
     }
+    graphics = nullptr;
   }
 
   void onViewPortChange(float x, float y, float scale) {
