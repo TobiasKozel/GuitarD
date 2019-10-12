@@ -28,14 +28,24 @@ public:
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
-    mRECT.T += dY;
-    mRECT.L += dX;
-    mRECT.B += dY;
-    mRECT.R += dX;
-    SetTargetAndDrawRECTs(mRECT);
-    SetDirty(true);
-    mCallback(dX, dY, 1.f);
+    if (mod.L || mod.C) {
+      mRECT.T += dY;
+      mRECT.L += dX;
+      mRECT.B += dY;
+      mRECT.R += dX;
+      SetTargetAndDrawRECTs(mRECT);
+      SetDirty(true);
+      mCallback(dX, dY, 1.f);
+    }
   }
+
+  void OnMouseDown(float x, float y, const IMouseMod& mod) {
+    if (mod.R) {
+      // prolly open the menu to add nodes
+    }
+  }
+
+
 
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
     // mRECT.Translate(-x, -y);

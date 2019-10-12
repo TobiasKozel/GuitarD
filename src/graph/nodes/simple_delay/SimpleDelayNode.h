@@ -25,5 +25,6 @@ public:
       parameters[i]->update();
     }
     delay.compute(nFrames, inputs[0]->outputs[0], outputs[0]);
+    isProcessed = true;
   }
 };
