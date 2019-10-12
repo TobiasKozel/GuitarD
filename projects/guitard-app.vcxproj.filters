@@ -348,6 +348,12 @@
     <ClInclude Include="..\thirdparty\fftconvolver\Utilities.h">
       <Filter>thirdparty\convolver</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\nodes\simple_drive\SimpleDriveNode.h">
+      <Filter>src\graph\nodes\simpledrive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\nodes\crybaby\CryBabyNode.h">
+      <Filter>src\graph\nodes\crybaby</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -412,6 +418,12 @@
     </Filter>
     <Filter Include="thirdparty\convolver">
       <UniqueIdentifier>{60e082e5-694e-455e-8d9b-cbed989c18c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\nodes\simpledrive">
+      <UniqueIdentifier>{60257d00-7163-4bab-b0eb-191135f78e97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\nodes\crybaby">
+      <UniqueIdentifier>{2ba76469-9b04-4493-921f-6456bf85e090}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

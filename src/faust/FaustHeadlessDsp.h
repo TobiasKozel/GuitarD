@@ -48,7 +48,7 @@ struct UI {
 /**
  * The faust DSP code will derive from this
  */
-struct FaustHeadlessDsp {
+class FaustHeadlessDsp {
 public:
   UI ui;
   virtual void init(int samplingFreq) = 0;
@@ -61,6 +61,8 @@ public:
     buildUserInterface(&ui);
     init(samplingFreq);
   }
+
+  virtual void compute(int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) = 0;
 };
 
 #endif 

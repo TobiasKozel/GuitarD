@@ -61,7 +61,7 @@ public:
   void testAdd() {
     WDL_MutexLock lock(&isProcessing);
     if (nodes.GetSize() == 0) {
-      Node* node = new SimpleCabNode();
+      Node* node = new SimpleDelayNode();
       node->setup(&paramManager, sampleRate);
       node->claimParameters();
       node->setupUi(graphics);

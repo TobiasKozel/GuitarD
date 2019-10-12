@@ -4,7 +4,6 @@
 
 
 class StereoToolNode : public Node {
-  StereoTool tool;
 public:
   StereoToolNode() : Node() {
     type = "StereoToolNode";
@@ -12,21 +11,8 @@ public:
 
   void setup(ParameterManager* p_paramManager, int p_samplerate = 48000, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
     Node::setup(p_paramManager, p_samplerate, p_maxBuffer, 1, 1, 2);
-    paramsFromFaust(&tool);
-  }
-
-  void ProcessBlock(int nFrames) {
-    if (isProcessed) { return; }
-    for (int i = 0; i < inputCount; i++) {
-      if (!inputs[i]->isProcessed) {
-        return;
-      }
-    }
-    for (int i = 0; i < parameterCount; i++) {
-      parameters[i]->update();
-    }
-    tool.compute(nFrames, inputs[0]->outputs[0], outputs[0]);
-    isProcessed = true;
+    faustmodule = new StereoTool();
+    paramsFromFaust();
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

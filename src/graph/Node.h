@@ -12,6 +12,7 @@ class Node {
 protected:
   bool uiReady;
 public:
+  FaustHeadlessDsp* faustmodule;
   ParameterManager* paramManager;
   ParameterCoupling** parameters;
   int parameterCount;
@@ -34,6 +35,8 @@ public:
    */
   Node() {
     outputs = nullptr;
+    faustmodule = nullptr;
+    background = nullptr;
   };
 
   /**
@@ -74,14 +77,15 @@ public:
    * However they will not be registered to the daw yet, since loading a preset will need them to claim
    * the right ones so the automation will affect the correct parameters
    */
-  void paramsFromFaust(FaustHeadlessDsp* faust) {
+  void paramsFromFaust(FaustHeadlessDsp* faust = nullptr) {
+    FaustHeadlessDsp* module = faust == nullptr ? faustmodule : faust;
     // This must be executed first since this will gather all the parameters from faust
-    faust->setup(samplerate);
+    module->setup(samplerate);
 
     // Keep the pointers around in a normal array since this might be faster than iterating over a vector
-    parameters = new ParameterCoupling * [faust->ui.params.size()];
+    parameters = new ParameterCoupling * [module->ui.params.size()];
     parameterCount = 0;
-    for (auto p : faust->ui.params) {
+    for (auto p : module->ui.params) {
       parameters[parameterCount] = p;
       parameterCount++;
     }
@@ -130,7 +134,19 @@ public:
     delete parameters;
   }
 
-  virtual void ProcessBlock(int nFrames) = 0;
+  virtual void ProcessBlock(int nFrames) {
+    if (isProcessed || faustmodule == nullptr) { return; }
+    for (int i = 0; i < inputCount; i++) {
+      if (!inputs[i]->isProcessed) {
+        return;
+      }
+    }
+    for (int i = 0; i < parameterCount; i++) {
+      parameters[i]->update();
+    }
+    faustmodule->compute(nFrames, inputs[0]->outputs[0], outputs[0]);
+    isProcessed = true;
+  }
 
   virtual void ConnectInput(Node* in, int inputNumber = 0) {
     if (inputNumber < inputCount) {
