@@ -49,7 +49,15 @@ public:
       nodes.Get(n)->isProcessed = false;
     }
 
-    if (output->inputs[0] == nullptr) { return; }
+    if (output->inputs[0] == nullptr) {
+      // no out connected, so output nothing
+      for (int c = 0; c < channelCount; c++) {
+        for (int i = 0; i < nFrames; i++) {
+          out[c][i] = 0;
+        }
+      }
+      return;
+    }
     // TODO multiple passes to ensure all the nodes are computed is super dumb
     while (!output->inputs[0]->isProcessed) {
       for (int n = 0; n < nodeCount; n++) {
