@@ -340,6 +340,27 @@
 		4FFBB93520863B0E00DDD0E7 /* vstnoteexpressiontypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F81588E205D50EB00393585 /* vstnoteexpressiontypes.cpp */; };
 		94257ECE234F85310043976D /* src in Resources */ = {isa = PBXBuildFile; fileRef = 94257ECD234F85310043976D /* src */; };
 		94257ECF234F85310043976D /* src in Resources */ = {isa = PBXBuildFile; fileRef = 94257ECD234F85310043976D /* src */; };
+		94CDBE422352A4A900191563 /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE372352A4A800191563 /* Utilities.cpp */; };
+		94CDBE432352A4A900191563 /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE372352A4A800191563 /* Utilities.cpp */; };
+		94CDBE442352A4A900191563 /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE372352A4A800191563 /* Utilities.cpp */; };
+		94CDBE452352A4A900191563 /* COPYING.txt in Resources */ = {isa = PBXBuildFile; fileRef = 94CDBE382352A4A800191563 /* COPYING.txt */; };
+		94CDBE462352A4A900191563 /* COPYING.txt in Resources */ = {isa = PBXBuildFile; fileRef = 94CDBE382352A4A800191563 /* COPYING.txt */; };
+		94CDBE472352A4A900191563 /* COPYING.txt in Resources */ = {isa = PBXBuildFile; fileRef = 94CDBE382352A4A800191563 /* COPYING.txt */; };
+		94CDBE482352A4A900191563 /* FFTConvolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE392352A4A800191563 /* FFTConvolver.cpp */; };
+		94CDBE492352A4A900191563 /* FFTConvolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE392352A4A800191563 /* FFTConvolver.cpp */; };
+		94CDBE4A2352A4A900191563 /* FFTConvolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE392352A4A800191563 /* FFTConvolver.cpp */; };
+		94CDBE4B2352A4A900191563 /* test in Resources */ = {isa = PBXBuildFile; fileRef = 94CDBE3A2352A4A800191563 /* test */; };
+		94CDBE4C2352A4A900191563 /* test in Resources */ = {isa = PBXBuildFile; fileRef = 94CDBE3A2352A4A800191563 /* test */; };
+		94CDBE4D2352A4A900191563 /* test in Resources */ = {isa = PBXBuildFile; fileRef = 94CDBE3A2352A4A800191563 /* test */; };
+		94CDBE4E2352A4A900191563 /* TwoStageFFTConvolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE3B2352A4A800191563 /* TwoStageFFTConvolver.cpp */; };
+		94CDBE4F2352A4A900191563 /* TwoStageFFTConvolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE3B2352A4A800191563 /* TwoStageFFTConvolver.cpp */; };
+		94CDBE502352A4A900191563 /* TwoStageFFTConvolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE3B2352A4A800191563 /* TwoStageFFTConvolver.cpp */; };
+		94CDBE512352A4A900191563 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 94CDBE3D2352A4A800191563 /* README.md */; };
+		94CDBE522352A4A900191563 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 94CDBE3D2352A4A800191563 /* README.md */; };
+		94CDBE532352A4A900191563 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 94CDBE3D2352A4A800191563 /* README.md */; };
+		94CDBE542352A4A900191563 /* AudioFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE3E2352A4A800191563 /* AudioFFT.cpp */; };
+		94CDBE552352A4A900191563 /* AudioFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE3E2352A4A800191563 /* AudioFFT.cpp */; };
+		94CDBE562352A4A900191563 /* AudioFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE3E2352A4A800191563 /* AudioFFT.cpp */; };
 		B885CBC52304AE7300D73128 /* IPlugProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F8F61A8202807B9003F2573 /* IPlugProcessor.cpp */; };
 		B8E22A0C220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */; };
 		B8E22A0D220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */; };
@@ -818,6 +839,17 @@
 		4FFF72B8214BB71400839091 /* main.rc */ = {isa = PBXFileReference; lastKnownFileType = text; name = main.rc; path = ../resources/main.rc; sourceTree = "<group>"; };
 		52FBBED30D0CF143001C8B8A /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../config.h; sourceTree = "<group>"; tabWidth = 2; usesTabs = 0; };
 		94257ECD234F85310043976D /* src */ = {isa = PBXFileReference; lastKnownFileType = folder; name = src; path = ../src; sourceTree = "<group>"; };
+		94CDBE372352A4A800191563 /* Utilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Utilities.cpp; path = ../thirdparty/fftconvolver/Utilities.cpp; sourceTree = "<group>"; };
+		94CDBE382352A4A800191563 /* COPYING.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = COPYING.txt; path = ../thirdparty/fftconvolver/COPYING.txt; sourceTree = "<group>"; };
+		94CDBE392352A4A800191563 /* FFTConvolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FFTConvolver.cpp; path = ../thirdparty/fftconvolver/FFTConvolver.cpp; sourceTree = "<group>"; };
+		94CDBE3A2352A4A800191563 /* test */ = {isa = PBXFileReference; lastKnownFileType = folder; name = test; path = ../thirdparty/fftconvolver/test; sourceTree = "<group>"; };
+		94CDBE3B2352A4A800191563 /* TwoStageFFTConvolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TwoStageFFTConvolver.cpp; path = ../thirdparty/fftconvolver/TwoStageFFTConvolver.cpp; sourceTree = "<group>"; };
+		94CDBE3C2352A4A800191563 /* FFTConvolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FFTConvolver.h; path = ../thirdparty/fftconvolver/FFTConvolver.h; sourceTree = "<group>"; };
+		94CDBE3D2352A4A800191563 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../thirdparty/fftconvolver/README.md; sourceTree = "<group>"; };
+		94CDBE3E2352A4A800191563 /* AudioFFT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AudioFFT.cpp; path = ../thirdparty/fftconvolver/AudioFFT.cpp; sourceTree = "<group>"; };
+		94CDBE3F2352A4A900191563 /* AudioFFT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioFFT.h; path = ../thirdparty/fftconvolver/AudioFFT.h; sourceTree = "<group>"; };
+		94CDBE402352A4A900191563 /* TwoStageFFTConvolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TwoStageFFTConvolver.h; path = ../thirdparty/fftconvolver/TwoStageFFTConvolver.h; sourceTree = "<group>"; };
+		94CDBE412352A4A900191563 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Utilities.h; path = ../thirdparty/fftconvolver/Utilities.h; sourceTree = "<group>"; };
 		B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.cpp.cpp; name = IPlugVST3_ProcessorBase.cpp; path = ../../../IPlug/VST3/IPlugVST3_ProcessorBase.cpp; sourceTree = "<group>"; tabWidth = 2; };
 		B8E22A0B220268C4007CBF4C /* IPlugVST3_ProcessorBase.h */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = IPlugVST3_ProcessorBase.h; path = ../../../IPlug/VST3/IPlugVST3_ProcessorBase.h; sourceTree = "<group>"; tabWidth = 2; };
 		B8EA6B932203868500D23A86 /* IPlugVST3_Common.h */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = IPlugVST3_Common.h; path = ../../../IPlug/VST3/IPlugVST3_Common.h; sourceTree = "<group>"; tabWidth = 2; };
@@ -897,6 +929,7 @@
 		089C166AFE841209C02AAC07 /* IPlugExample */ = {
 			isa = PBXGroup;
 			children = (
+				94CDBE362352A48500191563 /* thirdparty */,
 				52FBBED30D0CF143001C8B8A /* config.h */,
 				4F3862EE2014BBEC0009F402 /* GuitarD.h */,
 				4F3862ED2014BBEC0009F402 /* GuitarD.cpp */,
@@ -1672,6 +1705,24 @@
 			name = WDL;
 			sourceTree = "<group>";
 		};
+		94CDBE362352A48500191563 /* thirdparty */ = {
+			isa = PBXGroup;
+			children = (
+				94CDBE3E2352A4A800191563 /* AudioFFT.cpp */,
+				94CDBE3F2352A4A900191563 /* AudioFFT.h */,
+				94CDBE382352A4A800191563 /* COPYING.txt */,
+				94CDBE392352A4A800191563 /* FFTConvolver.cpp */,
+				94CDBE3C2352A4A800191563 /* FFTConvolver.h */,
+				94CDBE3D2352A4A800191563 /* README.md */,
+				94CDBE3A2352A4A800191563 /* test */,
+				94CDBE3B2352A4A800191563 /* TwoStageFFTConvolver.cpp */,
+				94CDBE402352A4A900191563 /* TwoStageFFTConvolver.h */,
+				94CDBE372352A4A800191563 /* Utilities.cpp */,
+				94CDBE412352A4A900191563 /* Utilities.h */,
+			);
+			name = thirdparty;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -2044,7 +2095,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94CDBE472352A4A900191563 /* COPYING.txt in Resources */,
 				94257ECF234F85310043976D /* src in Resources */,
+				94CDBE532352A4A900191563 /* README.md in Resources */,
+				94CDBE4D2352A4A900191563 /* test in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2076,6 +2130,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94CDBE522352A4A900191563 /* README.md in Resources */,
+				94CDBE4C2352A4A900191563 /* test in Resources */,
+				94CDBE462352A4A900191563 /* COPYING.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2090,8 +2147,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94CDBE512352A4A900191563 /* README.md in Resources */,
 				94257ECE234F85310043976D /* src in Resources */,
+				94CDBE4B2352A4A900191563 /* test in Resources */,
 				4F78D88613B6382B0032E0F3 /* GuitarD.icns in Resources */,
+				94CDBE452352A4A900191563 /* COPYING.txt in Resources */,
 				4F1B4AE42014D33600BC64D4 /* GuitarD-macOS-MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2318,13 +2378,17 @@
 				4F6369EE20A466470022C370 /* IControl.cpp in Sources */,
 				4F1A528C205D916F00CF2908 /* IPlugAU.cpp in Sources */,
 				4F63697020A463090022C370 /* IControls.cpp in Sources */,
+				94CDBE562352A4A900191563 /* AudioFFT.cpp in Sources */,
 				4FD52131202A5B9B00A4D22A /* IPlugAU_view_factory.mm in Sources */,
 				4FA9F80721F760C1004E6FE2 /* IGraphicsLice_src.mm in Sources */,
+				94CDBE4A2352A4A900191563 /* FFTConvolver.cpp in Sources */,
 				4FA9F81021F76177004E6FE2 /* IGraphicsAGG_src.mm in Sources */,
 				4F993F7423055C96000313AF /* IPlugProcessor.cpp in Sources */,
 				4F8C10E320BA2796006320CD /* IGraphicsEditorDelegate.cpp in Sources */,
+				94CDBE442352A4A900191563 /* Utilities.cpp in Sources */,
 				4F6FD2B422675B6300FC59E6 /* IGraphicsCoreText.mm in Sources */,
 				4F9A82FA213DE80400BE63A4 /* IPopupMenuControl.cpp in Sources */,
+				94CDBE502352A4A900191563 /* TwoStageFFTConvolver.cpp in Sources */,
 				4FDAC0ED207D76C600299363 /* IPlugTimer.cpp in Sources */,
 				4F78D94513B63BA50032E0F3 /* IPlugAPIBase.cpp in Sources */,
 				4FB1F59320E4B013004157C8 /* IGraphicsMac_view.mm in Sources */,
@@ -2418,6 +2482,8 @@
 				4F81597C205D50EB00393585 /* baseiids.cpp in Sources */,
 				4FDAC0EC207D76C600299363 /* IPlugTimer.cpp in Sources */,
 				B8E22A0C220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp in Sources */,
+				94CDBE432352A4A900191563 /* Utilities.cpp in Sources */,
+				94CDBE4F2352A4A900191563 /* TwoStageFFTConvolver.cpp in Sources */,
 				4F3862F12014BBEC0009F402 /* GuitarD.cpp in Sources */,
 				4F81591F205D50EB00393585 /* pluginfactory.cpp in Sources */,
 				4F63696F20A463090022C370 /* IControls.cpp in Sources */,
@@ -2427,6 +2493,7 @@
 				4FA9F80621F760C1004E6FE2 /* IGraphicsLice_src.mm in Sources */,
 				4F9828B8140A9EB700F3FCC1 /* IPlugAPIBase.cpp in Sources */,
 				4F81597F205D50EB00393585 /* fdynlib.cpp in Sources */,
+				94CDBE492352A4A900191563 /* FFTConvolver.cpp in Sources */,
 				4F815919205D50EB00393585 /* memorystream.cpp in Sources */,
 				4F9828C1140A9EB700F3FCC1 /* IPlugParameter.cpp in Sources */,
 				4F81591A205D50EB00393585 /* pluginview.cpp in Sources */,
@@ -2467,6 +2534,7 @@
 				4F1A527E205D911A00CF2908 /* IPlugVST3.cpp in Sources */,
 				4F815988205D50EB00393585 /* coreiids.cpp in Sources */,
 				4F815993205D51F000393585 /* vstnoteexpressiontypes.cpp in Sources */,
+				94CDBE552352A4A900191563 /* AudioFFT.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2529,6 +2597,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B885CBC52304AE7300D73128 /* IPlugProcessor.cpp in Sources */,
+				94CDBE422352A4A900191563 /* Utilities.cpp in Sources */,
 				4F10D3D9203A6719003EF82A /* RtMidi.cpp in Sources */,
 				4FA9F80421F760C1004E6FE2 /* IGraphicsLice_src.mm in Sources */,
 				4F6369DD20A464BB0022C370 /* IGraphicsNanoVG_src.m in Sources */,
@@ -2542,12 +2611,15 @@
 				4FD16D3C13B6358C001D0217 /* swell-miscdlg.mm in Sources */,
 				4FA9F80D21F76177004E6FE2 /* IGraphicsAGG_src.mm in Sources */,
 				4FD16D3E13B63595001D0217 /* swell-menu.mm in Sources */,
+				94CDBE542352A4A900191563 /* AudioFFT.cpp in Sources */,
 				4FB1F59120E4B011004157C8 /* IGraphicsMac_view.mm in Sources */,
 				4F5C5F6B21BED08700E024A7 /* swell-appstub.mm in Sources */,
+				94CDBE4E2352A4A900191563 /* TwoStageFFTConvolver.cpp in Sources */,
 				4FD16D4013B635A0001D0217 /* swell-misc.mm in Sources */,
 				4FD16D4213B635AB001D0217 /* swell-wnd.mm in Sources */,
 				4FD16D4413B635B2001D0217 /* swell.cpp in Sources */,
 				4F690CA3203A45C700A4A13E /* IPlugAPP_host.cpp in Sources */,
+				94CDBE482352A4A900191563 /* FFTConvolver.cpp in Sources */,
 				4F1A5282205D913300CF2908 /* IPlugAPP.cpp in Sources */,
 				4F03A5AC20A4621100EBDFFB /* IGraphics.cpp in Sources */,
 				4F2EA978203A50EA008E4850 /* IPlugAPP_dialog.cpp in Sources */,
@@ -3767,7 +3839,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = "GuitarD-macOS.entitlements";
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				DEVELOPMENT_TEAM = XKMCM5DHUB;
 				DSTROOT = "$(APP_PATH)";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -3796,7 +3868,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = "GuitarD-macOS.entitlements";
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				DEVELOPMENT_TEAM = XKMCM5DHUB;
 				DSTROOT = "$(APP_PATH)";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -3825,7 +3897,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = "GuitarD-macOS.entitlements";
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				DEVELOPMENT_TEAM = XKMCM5DHUB;
 				DSTROOT = "$(APP_PATH)";
 				ENABLE_HARDENED_RUNTIME = YES;

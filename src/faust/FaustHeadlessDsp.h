@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include "src/graph/misc/ParameterManager.h"
+#include "src/logger.h"
 
 
 struct Meta {
@@ -63,6 +64,8 @@ public:
   }
 
   virtual void compute(int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) = 0;
+
+  virtual ~FaustHeadlessDsp() { }
 };
 
 #endif 

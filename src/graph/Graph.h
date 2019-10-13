@@ -76,6 +76,7 @@ public:
     }
     else {
       removeAllNodes();
+        output->inputs[0] = input;
     }
   }
 
