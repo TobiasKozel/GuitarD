@@ -226,7 +226,7 @@ public:
     }
 
     for (int i = 0; i < outputCount; i++) {
-      outSockets[i] = new NodeSocket(pGrahics, "", R - 20, T + i * 40, i, true, [](int connectedTo) {
+      outSockets[i] = new NodeSocket(pGrahics, "", L + 200, T + i * 40, i, true, [](int connectedTo) {
 
       });
       pGrahics->AttachControl(outSockets[i]);

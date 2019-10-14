@@ -9,32 +9,32 @@ using namespace igraphics;
 class Background : public IControl {
 public:
   Background(IGraphics* g, backgroundCallback pCallback) :
-    IControl(IRECT(0, 0, PLUG_MAX_WIDTH, PLUG_MAX_HEIGHT), kNoParameter)
+    IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
     mBitmap = g->LoadBitmap(PNGBACKGROUND_FN, 1, false);
     mBlend = EBlend::Clobber;
     mGraphics = g;
-    mY = 0;
-    mX = 0;
-    mGraphics->SetTranslation(0, 0);
+    mY = mX = 0;
     mCallback = pCallback;
     mScale = 1.0;
-    windowX = 0;
-    windowY = 0;
+    offsetX = offsetY = windowY = windowX = 0;
   }
 
   void Draw(IGraphics& g) override {
-    g.DrawBitmap(mBitmap, GetRECT(), 1, &mBlend);
+    g.FillRect(COLOR_GRAY, mRECT);
+    int x = offsetX % windowX;
+    int y = offsetY % windowY;
+    g.DrawBitmap(mBitmap, IRECT(x, y, windowX, windowY), 1, &mBlend);
+    g.DrawBitmap(mBitmap, IRECT(x - windowX, y, windowX, windowY), 1, &mBlend);
+    g.DrawBitmap(mBitmap, IRECT(x, y - windowY, windowX, windowY), 1, &mBlend);
+    g.DrawBitmap(mBitmap, IRECT(x - windowX, y - windowY, windowX, windowY), 1, &mBlend);
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     if (mod.L || mod.C) {
-      mRECT.T += dY;
-      mRECT.L += dX;
-      mRECT.B += dY;
-      mRECT.R += dX;
-      SetTargetAndDrawRECTs(mRECT);
-      SetDirty(true);
+      offsetX += dX;
+      offsetY += dY;
+      mGraphics->SetAllControlsDirty();
       mCallback(dX, dY, 1.f);
     }
   }
@@ -63,8 +63,13 @@ public:
   void OnResize() override {
     if (mGraphics != nullptr) {
       IRECT bounds = mGraphics->GetBounds();
+      // keep track of the window size so the background alsoways fills the screen
+      //bounds.R += 200;
+      //bounds.B += 200;
       windowX = bounds.R;
       windowY = bounds.B;
+      mRECT = bounds;
+      mTargetRECT = bounds;
     }
   }
 
@@ -74,6 +79,8 @@ protected:
   IGraphics* mGraphics;
   float mX;
   float mY;
+  int offsetX;
+  int offsetY;
   int windowX;
   int windowY;
   float mScale;
