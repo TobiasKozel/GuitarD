@@ -7,6 +7,7 @@
 #include "IGraphics.h"
 #include "src/faust/FaustHeadlessDsp.h"
 #include "src/graph/ui/NodeBackground.h"
+#include "src/graph/ui/NodeSocket.h"
 
 class Node {
 protected:
@@ -17,6 +18,8 @@ public:
   ParameterCoupling** parameters;
   int parameterCount;
   Node** inputs;
+  NodeSocket** inSockets;
+  NodeSocket** outSockets;
   iplug::sample*** outputs;
   NodeBackground* background;
   int inputCount;
@@ -70,6 +73,9 @@ public:
         }
       }
     }
+
+    inSockets = new NodeSocket * [inputCount];
+    outSockets = new NodeSocket * [outputCount];
   }
 
   /**
@@ -140,7 +146,7 @@ public:
 
   /**
    * Generic process function which will use the faustmodule to process
-   * if the is one
+   * if there is one
    */
   virtual void ProcessBlock(int nFrames) {
     if (isProcessed || faustmodule == nullptr) { return; }
@@ -199,14 +205,33 @@ public:
           }
         );
       }
+      couple->control->SetValue(couple->defaultVal);
       pGrahics->AttachControl(couple->control);
       couple->control->SetValue(couple->defaultVal);
+      couple->control->SetValueToDefault();
+
+      // optinally hide the lables etc
       IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);
       if (vcontrol != nullptr) {
         vcontrol->SetShowLabel(false);
         vcontrol->SetShowValue(false);
       }
     }
+
+    for (int i = 0; i < inputCount; i++) {
+      inSockets[i] = new NodeSocket(pGrahics, "", L + 20, T + i * 40, i, false, [](int connectedTo) {
+
+      });
+      pGrahics->AttachControl(inSockets[i]);
+    }
+
+    for (int i = 0; i < outputCount; i++) {
+      outSockets[i] = new NodeSocket(pGrahics, "", R - 20, T + i * 40, i, true, [](int connectedTo) {
+
+      });
+      pGrahics->AttachControl(outSockets[i]);
+    }
+
     uiReady = true;
   }
 
@@ -223,6 +248,13 @@ public:
       pGrahics->RemoveControl(background, true);
       background = nullptr;
     }
+
+    for (int i = 0; i < inputCount; i++) {
+      pGrahics->RemoveControl(inSockets[i], true);
+    }
+    for (int i = 0; i < outputCount; i++) {
+      pGrahics->RemoveControl(outSockets[i], true);
+    }
     uiReady = false;
   }
 
@@ -232,24 +264,27 @@ public:
 
   virtual void translate(float x, float y) {
     for (int i = 0; i < parameterCount; i++) {
-      if (parameters[i]->control == nullptr) { continue; }
-      iplug::igraphics::IRECT rect = parameters[i]->control->GetRECT();
-      rect.T += y;
-      rect.L += x;
-      rect.B += y;
-      rect.R += x;
-      parameters[i]->control->SetTargetAndDrawRECTs(rect);
+      moveControl(parameters[i]->control, x, y);
     }
-    if (background != nullptr) {
-      iplug::igraphics::IRECT rect = background->GetRECT();
-      rect.T += y;
-      rect.L += x;
-      rect.B += y;
-      rect.R += x;
-      background->SetTargetAndDrawRECTs(rect);
+    moveControl(background, x, y);
+    for (int i = 0; i < inputCount; i++) {
+      moveControl(inSockets[i], x, y);
+    }
+    for (int i = 0; i < outputCount; i++) {
+      moveControl(outSockets[i], x, y);
     }
     L += x;
     T += y;
+  }
+
+  void moveControl(iplug::igraphics::IControl* control, float x, float y) {
+    if (control == nullptr) { return; }
+    iplug::igraphics::IRECT rect = control->GetRECT();
+    rect.T += y;
+    rect.L += x;
+    rect.B += y;
+    rect.R += x;
+    control->SetTargetAndDrawRECTs(rect);
   }
 
   int samplerate;

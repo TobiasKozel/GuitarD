@@ -21,7 +21,6 @@ public:
     SetTargetAndDrawRECTs(mRECT);
     mBlend = EBlend::Clobber;
     mGraphics = g;
-    mGraphics->SetTranslation(0, 0);
     mCallback = pCallback;
   }
 

@@ -340,6 +340,7 @@
     <ClInclude Include="..\src\graph\nodes\stereo_tool\StereoToolNode.h" />
     <ClInclude Include="..\src\graph\ui\Background.h" />
     <ClInclude Include="..\src\graph\ui\NodeBackground.h" />
+    <ClInclude Include="..\src\graph\ui\NodeSocket.h" />
     <ClInclude Include="..\thirdparty\fftconvolver\AudioFFT.h" />
     <ClInclude Include="..\thirdparty\fftconvolver\FFTConvolver.h" />
     <ClInclude Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.h" />

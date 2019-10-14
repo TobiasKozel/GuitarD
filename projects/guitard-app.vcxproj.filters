@@ -354,6 +354,9 @@
     <ClInclude Include="..\src\graph\nodes\crybaby\CryBabyNode.h">
       <Filter>src\graph\nodes\crybaby</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\ui\NodeSocket.h">
+      <Filter>src\graph\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
