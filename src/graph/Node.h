@@ -1,30 +1,31 @@
 #pragma once
 
-#include "IPlugConstants.h"
-#include "src/logger.h"
 #include <algorithm>
+#include "IPlugConstants.h"
 #include "IGraphics.h"
-#include "src/faust/FaustHeadlessDsp.h"
+#include "src/logger.h"
+#include "src/constants.h"
 #include "src/graph/ui/NodeBackground.h"
 #include "src/graph/ui/NodeSocket.h"
+#include "src/graph/misc/ParameterCoupling.h"
 
 class Node {
 protected:
   bool uiReady;
 public:
-  FaustHeadlessDsp* faustmodule;
+  // blah, blah not the point of oop but this type name is used to serialize the node
+  const char* type;
   ParameterCoupling** parameters;
   int parameterCount;
   Node** inputs;
   NodeSocket** inSockets;
+  int inputCount;
   NodeSocket** outSockets;
   iplug::sample*** outputs;
-  NodeBackground* background;
-  int inputCount;
   int outputCount;
+  NodeBackground* background;
   bool isProcessed;
-  // This type name is used to serialize and deserialize the node
-  const char* type;
+  
   float L;
   float T;
   float R;
@@ -36,14 +37,14 @@ public:
    */
   Node() {
     outputs = nullptr;
-    faustmodule = nullptr;
     background = nullptr;
+    type = DefaultNodeName;
   };
 
   /**
    * This is basically a delayed constructor with the only disadvatage: derived methods have to have the same parameters
    */
-  virtual void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
+  virtual void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
     samplerate = p_samplerate;
     maxBuffer = p_maxBuffer;
     inputCount = p_inputs;
@@ -75,24 +76,6 @@ public:
     outSockets = new NodeSocket * [outputCount];
   }
 
-  /**
-   * This will use the UI shim to create ParameterCouplings between the faust dsp and iplug iControls
-   * However they will not be registered to the daw yet, since loading a preset will need them to claim
-   * the right ones so the automation will affect the correct parameters
-   */
-  void paramsFromFaust(FaustHeadlessDsp* faust = nullptr) {
-    FaustHeadlessDsp* module = faust == nullptr ? faustmodule : faust;
-    // This must be executed first since this will gather all the parameters from faust
-    module->setup(samplerate);
-
-    // Keep the pointers around in a normal array since this might be faster than iterating over a vector
-    parameters = new ParameterCoupling * [module->ui.params.size()];
-    parameterCount = 0;
-    for (auto p : module->ui.params) {
-      parameters[parameterCount] = p;
-      parameterCount++;
-    }
-  }
 
   virtual ~Node() {
     delete inputs;
@@ -114,29 +97,18 @@ public:
       delete parameters[i];
     }
     delete parameters;
-
-    if (faustmodule != nullptr) {
-      delete faustmodule;
-    }
   }
 
-  /**
-   * Generic process function which will use the faustmodule to process
-   * if there is one
-   */
-  virtual void ProcessBlock(int nFrames) {
-    if (isProcessed || faustmodule == nullptr) { return; }
+  virtual bool inputsReady() {
     for (int i = 0; i < inputCount; i++) {
       if (!inputs[i]->isProcessed) {
-        return;
+        return false;
       }
     }
-    for (int i = 0; i < parameterCount; i++) {
-      parameters[i]->update();
-    }
-    faustmodule->compute(nFrames, inputs[0]->outputs[0], outputs[0]);
-    isProcessed = true;
+    return true;
   }
+
+  virtual void ProcessBlock(int nFrames) = 0;
 
   virtual void connectInput(Node* in, int inputNumber = 0) {
     if (inputNumber < inputCount) {

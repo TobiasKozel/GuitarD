@@ -3,11 +3,12 @@
 
 #define FAUSTFLOAT iplug::sample
 
-#include "IPlugConstants.h"
 #include <map>
 #include <vector>
+#include "IPlugConstants.h"
 #include "src/logger.h"
 #include "src/graph/misc/ParameterCoupling.h"
+#include "src/graph/Node.h"
 
 
 struct Meta {
@@ -19,8 +20,20 @@ struct Meta {
  */
 struct UI {
   std::vector<ParameterCoupling*> params;
+  const char* name;
 
-  void openVerticalBox(const char* key) {};
+  UI() {
+    name = DefaultNodeName;
+  }
+
+  void openVerticalBox(const char* key) {
+    // NOTE This only is the name of the module if it has one box!
+    if (name != DefaultNodeName) {
+      WDBGMSG("openVerticalBox called multiple times. The node Type might be wrong!");
+      assert(false);
+    }
+    name = key;
+  };
   void openHorizontalBox(const char* key) {};
   void closeBox() {};
   void declare(FAUSTFLOAT*, const char*, const char*) {};
@@ -41,31 +54,61 @@ struct UI {
 
   void addHorizontalBargraph(const char* name, FAUSTFLOAT* value, FAUSTFLOAT min, FAUSTFLOAT max) {};
 
-  ~UI() {
-  }
 };
 
 
 /**
  * The faust DSP code will derive from this
  */
-class FaustHeadlessDsp {
+class FaustHeadlessDsp: public Node {
 public:
   UI ui;
+
+  // These three will be overridden by the generated faust code
   virtual void init(int samplingFreq) = 0;
   virtual void buildUserInterface(UI* ui_interface) = 0;
+  virtual void compute(int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) = 0;
+  virtual int getNumInputs() = 0;
+  virtual int getNumOutputs() = 0;
 
-  /**
-   * This should be used to init the DSP code since it will also gather all the properties
-   */
-  void setup(int samplingFreq) {
+  void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
+    Node::setup(p_samplerate, p_maxBuffer, p_channles, getNumInputs() / p_channles, getNumOutputs() / p_channles);
+    
+    /**
+     * This will use the UI shim to create ParameterCouplings between the faust dsp and iplug iControls
+     * However they will not be registered to the daw yet, since loading a preset will need them to claim
+     * the right ones so the automation will affect the correct parameters
+     */
     buildUserInterface(&ui);
-    init(samplingFreq);
+    init(p_samplerate);
+
+    if (type == DefaultNodeName) {
+      type = ui.name;
+    }
+
+    // Keep the pointers around in a normal array since this might be faster than iterating over a vector
+    parameters = new ParameterCoupling * [ui.params.size()];
+    parameterCount = 0;
+    for (auto p : ui.params) {
+      parameters[parameterCount] = p;
+      p->y = p->h * parameterCount;
+      parameterCount++;
+    }
   }
 
-  virtual void compute(int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) = 0;
+  /**
+   * The faust uses a fairly similar way of processing blocks, however
+   * A node might have multiple inputs so the right ones have to be forwarded
+   */
+  virtual void ProcessBlock(int nFrames) {
+    if (!inputsReady()) { return; }
 
-  virtual ~FaustHeadlessDsp() { }
+    for (int i = 0; i < parameterCount; i++) {
+      parameters[i]->update();
+    }
+    compute(nFrames, inputs[0]->outputs[0], outputs[0]);
+    isProcessed = true;
+  }
 };
 
 #endif 

@@ -1,10 +1,10 @@
 #pragma once
-#include "src/graph/Node.h"
+#include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
 #include "config.h"
+#include "src/graph/Node.h"
 #include "src/graph/nodes/simple_cab/c.h"
 #include "src/graph/nodes/simple_cab/cident.h"
 #include "src/graph/nodes/simple_cab/clean.h"
-#include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
 
 class SimpleCabNode : public Node {
   fftconvolver::FFTConvolver convolver;
@@ -20,8 +20,8 @@ public:
     selectedIr = 0;
   }
 
-  void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
-    Node::setup(p_samplerate, p_maxBuffer, 1, 1, 2);
+  void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
+    Node::setup(p_samplerate, p_maxBuffer, 2, 1, 1);
     parameters = new ParameterCoupling*[1];
     parameters[0] = new ParameterCoupling("IR", &selectedIr, 0.0, 0.0, 2.0, 1.0);
     parameters[0]->x = 100;
