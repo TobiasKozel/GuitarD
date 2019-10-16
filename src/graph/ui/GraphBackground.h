@@ -45,8 +45,6 @@ public:
     }
   }
 
-
-
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
     // mRECT.Translate(-x, -y);
     // mRECT.Scale(1 - d / 10.f);

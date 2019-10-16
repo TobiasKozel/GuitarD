@@ -3,8 +3,6 @@
 
 #define FAUSTFLOAT iplug::sample
 
-#include <map>
-#include <vector>
 #include "IPlugConstants.h"
 #include "src/logger.h"
 #include "src/graph/misc/ParameterCoupling.h"
@@ -19,7 +17,7 @@ struct Meta {
  * This is a shim to collect pointers to all the properties/parameters from the faust DSP code
  */
 struct UI {
-  std::vector<ParameterCoupling*> params;
+  WDL_PtrList<ParameterCoupling> params;
   const char* name;
 
   UI() {
@@ -41,15 +39,15 @@ struct UI {
   void addHorizontalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT p_default, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
     // For every new there should be a delete eh?
     // Well these will get cleaned up in the node (hopefully)
-    params.push_back(new ParameterCoupling(name, prop, p_default, min, max, stepSize));
+    params.Add(new ParameterCoupling(name, prop, p_default, min, max, stepSize));
   }
 
   void addVerticalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT p_default, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
-    params.push_back(new ParameterCoupling(name, prop, p_default, min, max, stepSize));
+    params.Add(new ParameterCoupling(name, prop, p_default, min, max, stepSize));
   }
 
   void addCheckButton(const char* name, FAUSTFLOAT* prop) {
-    params.push_back(new ParameterCoupling(name, prop, 0, 0, 1, 1));
+    params.Add(new ParameterCoupling(name, prop, 0, 0, 1, 1));
   }
 
   void addHorizontalBargraph(const char* name, FAUSTFLOAT* value, FAUSTFLOAT min, FAUSTFLOAT max) {};
@@ -62,7 +60,7 @@ struct UI {
  */
 class FaustHeadlessDsp: public Node {
 public:
-  UI ui;
+  UI faustUi;
 
   // These three will be overridden by the generated faust code
   virtual void init(int samplingFreq) = 0;
@@ -79,20 +77,17 @@ public:
      * However they will not be registered to the daw yet, since loading a preset will need them to claim
      * the right ones so the automation will affect the correct parameters
      */
-    buildUserInterface(&ui);
+    buildUserInterface(&faustUi);
     init(p_samplerate);
 
     if (type == DefaultNodeName) {
-      type = ui.name;
+      type = faustUi.name;
     }
 
-    // Keep the pointers around in a normal array since this might be faster than iterating over a vector
-    parameters = new ParameterCoupling * [ui.params.size()];
-    parameterCount = 0;
-    for (auto p : ui.params) {
-      parameters[parameterCount] = p;
-      p->y = p->h * parameterCount;
-      parameterCount++;
+    for (int i = 0; i < faustUi.params.GetSize(); i++) {
+      ParameterCoupling* p = faustUi.params.Get(i);
+      parameters.Add(p);
+      p->y = p->h * i;
     }
   }
 
@@ -103,10 +98,10 @@ public:
   virtual void ProcessBlock(int nFrames) {
     if (!inputsReady()) { return; }
 
-    for (int i = 0; i < parameterCount; i++) {
-      parameters[i]->update();
+    for (int i = 0; i < parameters.GetSize(); i++) {
+      parameters.Get(i)->update();
     }
-    compute(nFrames, inputs[0]->outputs[0], outputs[0]);
+    compute(nFrames, inSockets.Get(0)->buffer, outputs[0]);
     isProcessed = true;
   }
 };

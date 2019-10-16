@@ -33,8 +33,7 @@ public:
     channelCount = p_channles;
     input = new DummyNode();
     output = new DummyNode();
-    output->channelCount = channelCount;
-    output->inputs[0] = input;
+    output->connectInput(input->outSockets.Get(0));
   }
 
   ~Graph() {
@@ -48,14 +47,14 @@ public:
      * processing chain is made, which will cause some artifacts anyways
      */
     WDL_MutexLock lock(&isProcessing);
-    input->outputs[0] = in;
-    input->isProcessed = true;
+    //input->outputs[0] = in;
+    input->SetIn(in);
     int nodeCount = nodes.GetSize();
     for (int n = 0; n < nodeCount; n++) {
       nodes.Get(n)->isProcessed = false;
     }
 
-    if (output->inputs[0] == nullptr) {
+    if (output->inSockets.Get(0)->buffer == nullptr) {
       // no out connected, so output nothing
       for (int c = 0; c < channelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
@@ -65,7 +64,7 @@ public:
       return;
     }
     // TODO multiple passes to ensure all the nodes are computed is super dumb
-    while (!output->inputs[0]->isProcessed) {
+    while (!output->inSockets.Get(0)->connectedNode->isProcessed) {
       for (int n = 0; n < nodeCount; n++) {
         nodes.Get(n)->ProcessBlock(nFrames);
       }
@@ -77,20 +76,20 @@ public:
     WDL_MutexLock lock(&isProcessing);
     if (nodes.GetSize() == 0) {
       Node* stereo = new StereoToolNode();
-      addNode(stereo, input, 0);
+      addNode(stereo, input, 0, 0);
       //Node* delay = new SimpleDelayNode();
       //addNode(delay, stereo, 200);
       Node* drive = new SimpleDriveNode();
-      addNode(drive, stereo, 400);
+      addNode(drive, stereo, 0, 400);
       //Node* baby = new CryBabyNode();
       //addNode(baby, drive, 600);
       Node* cab = new SimpleCabNode();
-      addNode(cab, drive, 800);
-      output->inputs[0] = cab;
+      addNode(cab, drive, 0, 800);
+      output->connectInput(cab->outSockets.Get(0));
     }
     else {
       removeAllNodes();
-        output->inputs[0] = input;
+      output->connectInput(input->outSockets.Get(0));
     }
   }
 
@@ -119,7 +118,7 @@ public:
 
   void onViewPortChange(float x, float y, float scale) {
     for (int i = 0; i < nodes.GetSize(); i++) {
-      nodes.Get(i)->translate(x, y);
+      nodes.Get(i)->mUi->translate(x, y);
     }
     // WDBGMSG("x %f y %f s %f\n", x, y, scale);
   }
@@ -137,7 +136,10 @@ public:
 
   void serialize(nlohmann::json &json) {
     WDL_MutexLock lock(&isProcessing);
-    json["output"] = { nodes.Find(output->inputs[0]), 0 };
+    json["output"] = {
+      nodes.Find(output->inSockets.Get(0)->connectedNode),
+      output->inSockets.Get(0)->connectedBufferIndex
+    };
     serializer::serialize(json, nodes, input);
 
   }
@@ -148,12 +150,12 @@ public:
     serializer::deserialize(json, nodes, output, input, sampleRate, &paramManager, graphics);
   }
 
-  void addNode(Node* node, Node* pInput, float y) {
+  void addNode(Node* node, Node* pInput, int index = 0, float x = 0) {
     node->setup(sampleRate);
-    node->L = y;
+    node->X = x;
     paramManager.claimNode(node);
     node->setupUi(graphics);
-    node->connectInput(pInput);
+    node->connectInput(pInput->outSockets.Get(index));
     nodes.Add(node);
   }
 
@@ -165,10 +167,10 @@ public:
 
   void removeNode(int index) {
     Node* node = nodes.Get(index);
-    if (node == output->inputs[0]) {
-      output->inputs[0] = nullptr;
-    }
     if (node != nullptr) {
+      if (node == output->inSockets.Get(0)->connectedNode) {
+        output->disconnectInput(0);
+      }
       node->cleanupUi(graphics);
       paramManager.releaseNode(node);
       nodes.DeletePtr(node, true);

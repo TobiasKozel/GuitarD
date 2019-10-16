@@ -39,8 +39,8 @@ public:
    */
   bool claimNode(Node* node) {
     bool gotAllPamams = true;
-    for (int i = 0; i < node->parameterCount; i++) {
-      if (!claimParameter(node->parameters[i])) {
+    for (int i = 0; i < node->parameters.GetSize(); i++) {
+      if (!claimParameter(node->parameters.Get(i))) {
         /**
          * this means the manager has no free parameters left and the control cannot be automated from the daw
          */
@@ -101,8 +101,8 @@ public:
   }
 
   void releaseNode(Node* node) {
-    for (int i = 0; i < node->parameterCount; i++) {
-      releaseParameter(node->parameters[i]);
+    for (int i = 0; i < node->parameters.GetSize(); i++) {
+      releaseParameter(node->parameters.Get(i));
     }
   }
 

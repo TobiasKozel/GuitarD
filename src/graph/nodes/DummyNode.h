@@ -9,18 +9,27 @@ class DummyNode : public Node {
 public:
   DummyNode() : Node() {
     isProcessed = true;
-    Node::setup(0, 0, 1, 0, 0);
+    // Node::setup(0, 0, 1, 1, 1);
+    NodeSocket* in = new NodeSocket(0);
+    inSockets.Add(in);
+    NodeSocket* out = new NodeSocket(0, this);
+    outSockets.Add(out);
+    inputCount = 1;
+    outputCount = 1;
   }
 
   void ProcessBlock(int) {}
 
+  void SetIn(iplug::sample** in) {
+    NodeSocket* socket = outSockets.Get(0);
+    socket->buffer = in;
+    isProcessed = true;
+  }
+
   void CopyOut(iplug::sample** out, int nFrames) {
-    if (inputCount && inputs[0] != nullptr) {
-      for (int c = 0; c < channelCount; c++) {
-        for (int i = 0; i < nFrames; i++) {
-          // TODO THIS IS BAD SINCE THE OUTPUT OF THE PREV NODE COULD ALSO BE INDEX 1 OR HIGHER
-          out[c][i] = inputs[0]->outputs[0][c][i];
-        }
+    for (int c = 0; c < channelCount; c++) {
+      for (int i = 0; i < nFrames; i++) {
+        out[c][i] = inSockets.Get(0)->buffer[c][i];
       }
     }
   }

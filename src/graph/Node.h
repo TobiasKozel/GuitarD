@@ -5,8 +5,8 @@
 #include "IGraphics.h"
 #include "src/logger.h"
 #include "src/constants.h"
-#include "src/graph/ui/NodeBackground.h"
-#include "src/graph/ui/NodeSocket.h"
+#include "src/graph/ui/NodeUi.h"
+#include "src/graph/misc/NodeSocket.h"
 #include "src/graph/misc/ParameterCoupling.h"
 
 class Node {
@@ -15,30 +15,32 @@ protected:
 public:
   // blah, blah not the point of oop but this type name is used to serialize the node
   const char* type;
-  ParameterCoupling** parameters;
-  int parameterCount;
-  Node** inputs;
-  NodeSocket** inSockets;
-  int inputCount;
-  NodeSocket** outSockets;
+
+  WDL_PtrList<ParameterCoupling> parameters;
+  // The dsp will get the data from the buffer inside the socket
+  WDL_PtrList<NodeSocket> inSockets;
+  WDL_PtrList<NodeSocket> outSockets;
+
+  // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
   iplug::sample*** outputs;
+  int inputCount;
   int outputCount;
-  NodeBackground* background;
+  NodeUi* mUi;
   bool isProcessed;
   
-  float L;
-  float T;
-  float R;
-  float B;
+  float X;
+  float Y;
   float rotation;
+  int samplerate;
+  int channelCount;
+  int maxBuffer;
 
   /**
    * The constructor doesn't take any parameters since it can be instanciated from the NodeList
    */
   Node() {
-    outputs = nullptr;
-    background = nullptr;
     type = DefaultNodeName;
+    outputs = nullptr;
   };
 
   /**
@@ -51,34 +53,36 @@ public:
     outputCount = p_outputs;
     isProcessed = false;
     channelCount = p_channles;
-    parameterCount = 0;
-    parameters = nullptr;
     uiReady = false;
-    T = L = 0;
-    B = R = 100;
+    X = Y = 0;
 
-    inputs = new Node * [std::max(1, p_inputs)];
-    for (int i = 0; i < p_inputs; i++) {
-      inputs[i] = nullptr;
-    }
+    // A derived node might have already setup a custom output buffer
+    // Setup the output buffer only if there's none
     if (outputs == nullptr) {
-      // A derived node might have already setup a custom output buffer
-      outputs = new iplug::sample * *[std::max(1, p_outputs)];
+      outputs = new iplug::sample** [p_outputs];
       for (int i = 0; i < p_outputs; i++) {
-        outputs[i] = new iplug::sample * [p_channles];
+        outputs[i] = new iplug::sample* [p_channles];
         for (int c = 0; c < p_channles; c++) {
           outputs[i][c] = new iplug::sample[p_maxBuffer];
         }
       }
     }
 
-    inSockets = new NodeSocket * [inputCount];
-    outSockets = new NodeSocket * [outputCount];
+    // Setup the sockets for the node connections
+    for (int i = 0; i < inputCount; i++) {
+      NodeSocket* in = new NodeSocket(i);
+      inSockets.Add(in);
+    }
+
+    for (int i = 0; i < outputCount; i++) {
+      NodeSocket* out = new NodeSocket(i, this, outputs[i]);
+      outSockets.Add(out);
+    }
   }
 
 
   virtual ~Node() {
-    delete inputs;
+    // clean up the output buffers
     if (outputs != nullptr) {
       for (int i = 0; i < outputCount; i++) {
         for (int c = 0; c < channelCount; c++) {
@@ -89,19 +93,18 @@ public:
       delete outputs;
     }
     
-    if (uiReady) {
+    if (uiReady || mUi != nullptr) {
       WDBGMSG("Warning, UI of node was not cleaned up!\n");
     }
 
-    for (int i = 0; i < parameterCount; i++) {
-      delete parameters[i];
-    }
-    delete parameters;
+    parameters.Empty(true);
+    inSockets.Empty(true);
+    outSockets.Empty(true);
   }
 
   virtual bool inputsReady() {
     for (int i = 0; i < inputCount; i++) {
-      if (!inputs[i]->isProcessed) {
+      if (!inSockets.Get(i)->connectedNode->isProcessed) {
         return false;
       }
     }
@@ -110,15 +113,27 @@ public:
 
   virtual void ProcessBlock(int nFrames) = 0;
 
-  virtual void connectInput(Node* in, int inputNumber = 0) {
+  virtual void connectInput(NodeSocket* out, int inputNumber = 0) {
     if (inputNumber < inputCount) {
-      inputs[inputNumber] = in;
+      if (out->isInput) {
+        WDBGMSG("Trying to connect an input to an input!");
+        assert(false);
+        return;
+      }
+      Node* outNode = out->connectedNode;
+      NodeSocket* inSocket = inSockets.Get(inputNumber);
+      inSocket->connectedNode = outNode;
+      inSocket->buffer = outNode->outputs[out->ownIndex];
+      inSocket->connectedBufferIndex = inputNumber;
     }
   }
 
   virtual void disconnectInput(int inputNumber = 0) {
     if (inputNumber < inputCount) {
-      inputs[inputNumber] = nullptr;
+      NodeSocket* inSocket = inSockets.Get(inputNumber);
+      inSocket->connectedNode = nullptr;
+      inSocket->buffer = nullptr;
+      inSocket->connectedBufferIndex = -1;
     }
   }
 
@@ -126,83 +141,43 @@ public:
    * Generic setup of the parameters to get something on the screen
    */
   virtual void setupUi(iplug::igraphics::IGraphics* pGrahics) {
-    if (background == nullptr) {
-      // generic background if there was none set by the derived classes
-      background = new NodeBackground(pGrahics, PNGGENERICBG_FN, L, T,
-        [&](float x, float y) {
-        this->translate(x, y);
-      });
-      pGrahics->AttachControl(background);
-    }
-    for (int i = 0; i < parameterCount; i++) {
-      ParameterCoupling* couple = parameters[i];
-      float px = L + couple->x - (couple->w * 0.5);
-      float py = T + couple->y - (couple->h * 0.5);
-      iplug::igraphics::IRECT controlPos(px, py, px + couple->w, py + couple->h);
-      // use the daw parameter to sync the values if possible
-      if (couple->parameterIdx != iplug::kNoParameter) {
-        couple->control = new iplug::igraphics::IVKnobControl(
-          controlPos, couple->parameterIdx
-        );
-      }
-      else {
-        // use the callback to get tha value to the dsp, won't allow automation though
-        couple->control = new iplug::igraphics::IVKnobControl(
-          controlPos, [couple](iplug::igraphics::IControl* pCaller) {
-            *(couple->value) = pCaller->GetValue();
-          }
-        );
-      }
-      couple->control->SetValue(couple->defaultVal);
-      pGrahics->AttachControl(couple->control);
-      couple->control->SetValue(couple->defaultVal);
-      couple->control->SetValueToDefault();
+    mUi = new NodeUi(NodeUiParam {
+      pGrahics,
+      PNGGENERICBG_FN,
+      &X, &Y,
+      &parameters,
+      &inSockets,
+      &outSockets
+    });
+    pGrahics->AttachControl(mUi);
 
-      // optinally hide the lables etc
-      IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);
-      if (vcontrol != nullptr) {
-        vcontrol->SetShowLabel(false);
-        vcontrol->SetShowValue(false);
-      }
-    }
-
-    for (int i = 0; i < inputCount; i++) {
-      inSockets[i] = new NodeSocket(pGrahics, "", L + 20, T + i * 40, i, false, [](int connectedTo) {
-
-      });
-      pGrahics->AttachControl(inSockets[i]);
-    }
-
-    for (int i = 0; i < outputCount; i++) {
-      outSockets[i] = new NodeSocket(pGrahics, "", L + 200, T + i * 40, i, true, [](int connectedTo) {
-
-      });
-      pGrahics->AttachControl(outSockets[i]);
-    }
+    //for (int i = 0; i < inputCount; i++) {
+    //  inSockets[i] = new NodeSocket(pGrahics, "", X + 20, Y + i * 40, i, false, [](int connectedTo) {
+    //  });
+    //  pGrahics->AttachControl(inSockets[i]);
+    //}
+    //for (int i = 0; i < outputCount; i++) {
+    //  outSockets[i] = new NodeSocket(pGrahics, "", X + 200, Y + i * 40, i, true, [](int connectedTo) {
+    //  });
+    //  pGrahics->AttachControl(outSockets[i]);
+    //}
 
     uiReady = true;
   }
 
   virtual void cleanupUi(iplug::igraphics::IGraphics* pGrahics) {
-    for (int i = 0; i < parameterCount; i++) {
-      iplug::igraphics::IControl* control = parameters[i]->control;
-      if (control != nullptr) {
-        // this also destroys the object
-        pGrahics->RemoveControl(control, true);
-        parameters[i]->control = nullptr;
-      }
-    }
-    if (background != nullptr) {
-      pGrahics->RemoveControl(background, true);
-      background = nullptr;
+
+    if (mUi != nullptr) {
+      pGrahics->RemoveControl(mUi, true);
+      mUi = nullptr;
     }
 
-    for (int i = 0; i < inputCount; i++) {
-      pGrahics->RemoveControl(inSockets[i], true);
-    }
-    for (int i = 0; i < outputCount; i++) {
-      pGrahics->RemoveControl(outSockets[i], true);
-    }
+    //for (int i = 0; i < inputCount; i++) {
+    //  pGrahics->RemoveControl(inSockets[i], true);
+    //}
+    //for (int i = 0; i < outputCount; i++) {
+    //  pGrahics->RemoveControl(outSockets[i], true);
+    //}
     uiReady = false;
   }
 
@@ -210,33 +185,6 @@ public:
 
   }
 
-  virtual void translate(float x, float y) {
-    for (int i = 0; i < parameterCount; i++) {
-      moveControl(parameters[i]->control, x, y);
-    }
-    moveControl(background, x, y);
-    for (int i = 0; i < inputCount; i++) {
-      moveControl(inSockets[i], x, y);
-    }
-    for (int i = 0; i < outputCount; i++) {
-      moveControl(outSockets[i], x, y);
-    }
-    L += x;
-    T += y;
-  }
 
-  void moveControl(iplug::igraphics::IControl* control, float x, float y) {
-    if (control == nullptr) { return; }
-    iplug::igraphics::IRECT rect = control->GetRECT();
-    rect.T += y;
-    rect.L += x;
-    rect.B += y;
-    rect.R += x;
-    control->SetTargetAndDrawRECTs(rect);
-  }
-
-  int samplerate;
-  int channelCount;
-  int maxBuffer;
 };
 

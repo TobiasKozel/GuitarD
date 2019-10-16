@@ -327,9 +327,6 @@
     <ClInclude Include="..\src\graph\misc\Serializer.h">
       <Filter>src\graph\misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\ui\NodeBackground.h">
-      <Filter>src\graph\ui</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\graph\nodes\simple_cab\SimpleCabNode.h">
       <Filter>src\graph\nodes\simplecab</Filter>
     </ClInclude>
@@ -351,13 +348,19 @@
     <ClInclude Include="..\src\graph\nodes\crybaby\CryBabyNode.h">
       <Filter>src\graph\nodes\crybaby</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\ui\NodeSocket.h">
-      <Filter>src\graph\ui</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\graph\ui\GraphBackground.h">
       <Filter>src\graph\ui</Filter>
     </ClInclude>
     <ClInclude Include="..\src\graph\misc\ParameterCoupling.h">
+      <Filter>src\graph\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\ui\NodeUi.h">
+      <Filter>src\graph\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\ui\NodeSocketUi.h">
+      <Filter>src\graph\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\misc\NodeSocket.h">
       <Filter>src\graph\misc</Filter>
     </ClInclude>
   </ItemGroup>

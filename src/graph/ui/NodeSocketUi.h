@@ -6,9 +6,9 @@ using namespace igraphics;
 
 typedef std::function<void(int connectedTo)> nodeSocketCallback;
 
-class NodeSocket : public IControl {
+class NodeSocketUi : public IControl {
 public:
-  NodeSocket(IGraphics* g, const char* bitmap, float L, float T, int index, bool out, nodeSocketCallback pCallback) :
+  NodeSocketUi(IGraphics* g, const char* bitmap, float L, float T, int index, bool out, nodeSocketCallback pCallback) :
     IControl(IRECT(L, T, L, T), kNoParameter)
   {
     //mBitmap = g->LoadBitmap(bitmap, 1, false);

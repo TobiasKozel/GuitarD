@@ -14,32 +14,34 @@ namespace serializer {
     for (int i = 0, pos = 0; i < nodes.GetSize(); i++) {
       Node* node = nodes.Get(i);
       if (node != nullptr) {
-        serialized["nodes"][pos]["position"] = { node->L, node->T };
+        serialized["nodes"][pos]["position"] = { node->X, node->Y };
         // The index shouldn't really matter since they're all in order
         serialized["nodes"][pos]["idx"] = i;
         serialized["nodes"][pos]["type"] = node->type;
         serialized["nodes"][pos]["inputs"] = nlohmann::json::array();
         for (int prev = 0; prev < node->inputCount; prev++) {
-          if (node->inputs[prev] == nullptr) {
+          Node* cNode = node->inSockets.Get(prev)->connectedNode;
+          if (cNode == nullptr) {
             // -2 means not connected
-            serialized["nodes"][pos]["inputs"][prev] = -2;
+            serialized["nodes"][pos]["inputs"][prev] = { -2, 0 };
           }
-          else if (node->inputs[prev] == input) {
+          else if (cNode == input) {
             // -1 means connected to the global input
-            serialized["nodes"][pos]["inputs"][prev] = -1;
+            serialized["nodes"][pos]["inputs"][prev] = { -1, 0 };
           }
           else {
             // otherwise just get the index of the actual node
-            serialized["nodes"][pos]["inputs"][prev] = nodes.Find(node->inputs[prev]);
+            serialized["nodes"][pos]["inputs"][prev] =
+              { nodes.Find(cNode), node->inSockets.Get(prev)->connectedBufferIndex };
           }
         }
         serialized["nodes"][pos]["parameters"] = nlohmann::json::array();
-        for (int p = 0; p < node->parameterCount; p++) {
+        for (int p = 0; p < node->parameters.GetSize(); p++) {
           serialized["nodes"][pos]["parameters"][p] = {
-            { "idx", node->parameters[p]->parameterIdx },
+            { "idx", node->parameters.Get(i)->parameterIdx },
             // TODO the type is not atomic and might tear
             // only use this when theres no daw parameter
-            { "value", *(node->parameters[p]->value) }
+            { "value", *(node->parameters.Get(i)->value) }
           };
         }
         pos++;
@@ -51,7 +53,8 @@ namespace serializer {
     nlohmann::json& serialized, WDL_PtrList<Node>& nodes, Node* output, Node* input, int sampleRate,
     ParameterManager* paramManager, iplug::igraphics::IGraphics* graphics
   ) {
-    output->inputs[0] = input;
+    // output->inputs[0] = input;
+    output->connectInput(input->outSockets.Get(0));
     int expectedIndex = 0;
     // create all the nodes and setup the parameters in the first pass
     for (auto sNode : serialized["nodes"]) {
@@ -59,17 +62,17 @@ namespace serializer {
       Node* node = createNode(className);
       if (node == nullptr) { continue; }
       node->setup(sampleRate);
-      node->L = sNode["position"][0];
-      node->T = sNode["position"][1];
+      node->X = sNode["position"][0];
+      node->Y = sNode["position"][1];
       if (expectedIndex != sNode["idx"]) {
         WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
       }
       nodes.Add(node);
       int paramIdx = 0;
       for (auto param : sNode["parameters"]) {
-        if (paramIdx >= node->parameterCount) { break; }
-        node->parameters[paramIdx]->parameterIdx = param["idx"];
-        *(node->parameters[paramIdx]->value) = param["value"];
+        if (paramIdx >= node->parameters.GetSize()) { break; }
+        node->parameters.Get(paramIdx)->parameterIdx = param["idx"];
+        *(node->parameters.Get(paramIdx)->value) = param["value"];
         paramIdx++;
       }
       paramManager->claimNode(node);
@@ -83,24 +86,27 @@ namespace serializer {
     int currentNodeIdx = 0;
     for (auto sNode : serialized["nodes"]) {
       int currentInputIdx = 0;
-      for (int inNodeIdx : sNode["inputs"]) {
-        if (inNodeIdx >= 0 && nodes.Get(inNodeIdx) != nullptr) {
-          nodes.Get(currentInputIdx)->inputs[currentInputIdx] = nodes.Get(inNodeIdx);
-        }
-        else if (inNodeIdx == -1) {
-          // thie index is -1 if the node is connected to the global input
-          // if it's -2 it's not connected at all and we'll just leave it at a nullptr
-          nodes.Get(currentInputIdx)->inputs[currentInputIdx] = input;
-        }
-        currentInputIdx++;
+      for (auto connection : sNode["inputs"]) {
+        connection = connection;
+        //if (inNodeIdx >= 0 && nodes.Get(inNodeIdx) != nullptr) {
+        //  //nodes.Get(currentInputIdx)->inputs[currentInputIdx] = nodes.Get(inNodeIdx);
+        //  nodes.Get(currentNodeIdx)->connectInput(nodes.Get(inNodeIdx)->, currentInputIdx);
+        //}
+        //else if (inNodeIdx == -1) {
+        //  // thie index is -1 if the node is connected to the global input
+        //  // if it's -2 it's not connected at all and we'll just leave it at a nullptr
+        //  nodes.Get(currentInputIdx)->inputs[currentInputIdx] = input;
+        //}
+        //currentInputIdx++;
       }
       currentNodeIdx++;
     }
 
     // connect the output nodes to the global output
-    int outIndex = serialized["output"][0];
-    if (nodes.Get(outIndex) != nullptr) {
-      output->inputs[serialized["output"][1]] = nodes.Get(outIndex);
+    int outNodeIndex = serialized["output"][0];
+    int outConnectionIndex = serialized["output"][1];
+    if (nodes.Get(outNodeIndex) != nullptr) {
+      output->connectInput(nodes.Get(outNodeIndex)->outSockets.Get(outConnectionIndex));
     }
   }
 }

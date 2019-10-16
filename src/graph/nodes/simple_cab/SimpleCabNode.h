@@ -22,11 +22,10 @@ public:
 
   void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
     Node::setup(p_samplerate, p_maxBuffer, 2, 1, 1);
-    parameters = new ParameterCoupling*[1];
-    parameters[0] = new ParameterCoupling("IR", &selectedIr, 0.0, 0.0, 2.0, 1.0);
-    parameters[0]->x = 100;
-    parameters[0]->y = 100;
-    parameterCount = 1;
+    ParameterCoupling* p = new ParameterCoupling("IR", &selectedIr, 0.0, 0.0, 2.0, 1.0);
+    p->x = 100;
+    p->y = 100;
+    parameters.Add(p);
   }
 
   ~SimpleCabNode() {
@@ -37,13 +36,13 @@ public:
   void ProcessBlock(int nFrames) {
     if (isProcessed) { return; }
     for (int i = 0; i < inputCount; i++) {
-      if (!inputs[i]->isProcessed) {
+      if (!inSockets.Get(0)->connectedNode->isProcessed) {
         return;
       }
     }
-    int prev = (int)*(parameters[0]->value);
-    parameters[0]->update();
-    int cur = (int)*(parameters[0]->value);
+    //int prev = (int)*(parameters[0]->value);
+    //parameters[0]->update();
+    //int cur = (int)*(parameters[0]->value);
     //if (prev != cur) {
     //  if (cur == 0) {
     //    convolver.init(64, cleanIR, 3000);
@@ -60,7 +59,7 @@ public:
     for (int i = 0; i < nFrames; i++) {
       convertBufferIn[i] = 0;
       for (int c = 0; c < channelCount; c++) {
-        convertBufferIn[i] += inputs[0]->outputs[0][c][i];
+        convertBufferIn[i] += inSockets.Get(0)->buffer[c][i];
       }
       convertBufferIn[i] *= inverseChannelCount;
     }
@@ -77,11 +76,11 @@ public:
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    background = new NodeBackground(pGrahics, PNGSIMPLECABBG_FN, L, T,
-      [&](float x, float y) {
-      this->translate(x, y);
-    });
-    pGrahics->AttachControl(background);
+    //background = new NodeBackground(pGrahics, PNGSIMPLECABBG_FN, L, T,
+    //  [&](float x, float y) {
+    //  this->translate(x, y);
+    //});
+    //pGrahics->AttachControl(background);
     Node::setupUi(pGrahics);
     // uiReady = true;
   }
