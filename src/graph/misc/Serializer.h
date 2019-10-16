@@ -58,7 +58,7 @@ namespace serializer {
       std::string className = sNode["type"];
       Node* node = createNode(className);
       if (node == nullptr) { continue; }
-      node->setup(paramManager, sampleRate);
+      node->setup(sampleRate);
       node->L = sNode["position"][0];
       node->T = sNode["position"][1];
       if (expectedIndex != sNode["idx"]) {
@@ -72,7 +72,7 @@ namespace serializer {
         *(node->parameters[paramIdx]->value) = param["value"];
         paramIdx++;
       }
-      node->claimParameters();
+      paramManager->claimNode(node);
       if (graphics != nullptr && graphics->WindowIsOpen()) {
         node->setupUi(graphics);
       }

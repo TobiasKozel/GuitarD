@@ -321,9 +321,6 @@
     <ClInclude Include="..\src\graph\nodes\NodeList.h">
       <Filter>src\graph\nodes</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\ui\Background.h">
-      <Filter>src\graph\ui</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\graph\misc\ParameterManager.h">
       <Filter>src\graph\misc</Filter>
     </ClInclude>
@@ -356,6 +353,12 @@
     </ClInclude>
     <ClInclude Include="..\src\graph\ui\NodeSocket.h">
       <Filter>src\graph\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\ui\GraphBackground.h">
+      <Filter>src\graph\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\misc\ParameterCoupling.h">
+      <Filter>src\graph\misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2,7 +2,6 @@
 
 #include "IPlugConstants.h"
 #include "src/logger.h"
-#include "src/graph/misc/ParameterManager.h"
 #include <algorithm>
 #include "IGraphics.h"
 #include "src/faust/FaustHeadlessDsp.h"
@@ -14,7 +13,6 @@ protected:
   bool uiReady;
 public:
   FaustHeadlessDsp* faustmodule;
-  ParameterManager* paramManager;
   ParameterCoupling** parameters;
   int parameterCount;
   Node** inputs;
@@ -45,8 +43,7 @@ public:
   /**
    * This is basically a delayed constructor with the only disadvatage: derived methods have to have the same parameters
    */
-  virtual void setup(ParameterManager* p_paramManager, int p_samplerate = 48000, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
-    paramManager = p_paramManager;
+  virtual void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_inputs = 1, int p_outputs = 1, int p_channles = 2) {
     samplerate = p_samplerate;
     maxBuffer = p_maxBuffer;
     inputCount = p_inputs;
@@ -97,24 +94,6 @@ public:
     }
   }
 
-  /**
-   * This will go over each control element in the paramters array of the node and try to expose it to the daw
-   * Will return true if all parameters could be claimed, false if at least one failed
-   */
-  virtual bool claimParameters() {
-    bool gotAllPamams = true;
-    for (int i = 0; i < parameterCount; i++) {
-      if (!paramManager->claimParameter(parameters[i])) {
-        /**
-         * this means the manager has no free parameters left and the control cannot be automated from the daw
-         */
-        WDBGMSG("Ran out of daw parameters!\n");
-        gotAllPamams = false;
-      }
-    }
-    return gotAllPamams;
-  }
-
   virtual ~Node() {
     delete inputs;
     if (outputs != nullptr) {
@@ -127,14 +106,11 @@ public:
       delete outputs;
     }
     
-
     if (uiReady) {
       WDBGMSG("Warning, UI of node was not cleaned up!\n");
     }
 
     for (int i = 0; i < parameterCount; i++) {
-      // however the daw parameters still have to be freed so another node can take them if needed
-      paramManager->releaseParameter(parameters[i]);
       delete parameters[i];
     }
     delete parameters;

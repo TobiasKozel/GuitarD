@@ -6,8 +6,8 @@
 #include "IPlugConstants.h"
 #include <map>
 #include <vector>
-#include "src/graph/misc/ParameterManager.h"
 #include "src/logger.h"
+#include "src/graph/misc/ParameterCoupling.h"
 
 
 struct Meta {

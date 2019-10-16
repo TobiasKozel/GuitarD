@@ -6,34 +6,40 @@
 #include "src/constants.h"
 #include "src/logger.h"
 #include "thirdparty/json.hpp"
-#include "src/graph/ui/Background.h"
+#include "src/graph/ui/GraphBackground.h"
 #include "src/graph/misc/Serializer.h"
 #include "src/graph/misc/ParameterManager.h"
 
 
 class Graph {
   iplug::igraphics::IGraphics* graphics;
-public:
   /** Holds all the nodes in the processing graph */
-  // Node** nodes;
   WDL_PtrList<Node> nodes;
-
+  WDL_Mutex isProcessing;
   /** Dummy nodes to get the audio blocks in and out of the graph */
   DummyNode* input;
   DummyNode* output;
   int channelCount;
+
+  GraphBackground* background;
+public:
   ParameterManager paramManager;
-  WDL_Mutex isProcessing;
 
 
   Graph(int p_sampleRate, int p_channles = 2) {
     graphics = nullptr;
+    background = nullptr;
     sampleRate = p_sampleRate;
     channelCount = p_channles;
     input = new DummyNode();
     output = new DummyNode();
     output->channelCount = channelCount;
     output->inputs[0] = input;
+  }
+
+  ~Graph() {
+    // TODO get rid of all the things
+    // not a priority since there is no use case for multiple/dynamic graphs
   }
 
   void ProcessBlock(iplug::sample** in, iplug::sample** out, int nFrames) {
@@ -88,20 +94,12 @@ public:
     }
   }
 
-  void addNode(Node* node, Node* pInput, float y) {
-    node->setup(&paramManager, sampleRate);
-    node->L = y;
-    node->claimParameters();
-    node->setupUi(graphics);
-    node->connectInput(pInput);
-    nodes.Add(node);
-  }
-
   /** The graph needs to know about the graphics context to add and remove the controlls for the nodes */
   void setupUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
-    pGraphics->AttachControl(new Background(pGraphics, [&](float x, float y, float scale) {
+    background = new GraphBackground(pGraphics, [&](float x, float y, float scale) {
       this->onViewPortChange(x, y, scale);
-    }));
+    });
+    pGraphics->AttachControl(background);
 
     if (pGraphics != nullptr && pGraphics != graphics) {
       WDBGMSG("Graphics context changed");
@@ -150,6 +148,15 @@ public:
     serializer::deserialize(json, nodes, output, input, sampleRate, &paramManager, graphics);
   }
 
+  void addNode(Node* node, Node* pInput, float y) {
+    node->setup(sampleRate);
+    node->L = y;
+    paramManager.claimNode(node);
+    node->setupUi(graphics);
+    node->connectInput(pInput);
+    nodes.Add(node);
+  }
+
   void removeAllNodes() {
     while (nodes.GetSize()) {
       removeNode(0);
@@ -163,6 +170,7 @@ public:
     }
     if (node != nullptr) {
       node->cleanupUi(graphics);
+      paramManager.releaseNode(node);
       nodes.DeletePtr(node, true);
     }
   }

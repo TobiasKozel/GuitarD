@@ -9,7 +9,7 @@ class DummyNode : public Node {
 public:
   DummyNode() : Node() {
     isProcessed = true;
-    Node::setup(nullptr, 0, 0, 1, 0, 0);
+    Node::setup(0, 0, 1, 0, 0);
   }
 
   void ProcessBlock(int) {}

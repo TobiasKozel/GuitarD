@@ -3,55 +3,8 @@
 #include "src/constants.h"
 #include "IPlugParameter.h"
 #include "IControl.h"
-
-
-/**
- * Struct/Class used to pair up a daw IParam if one is available and always a IControl + dsp parameter to be altered
- * Also contains the value bounds, stepsize, name and IParam index
- */
-struct ParameterCoupling {
-  iplug::IParam* parameter;
-  iplug::igraphics::IControl* control;
-  int parameterIdx;
-  double* value;
-  double min;
-  double max;
-  double defaultVal;
-  double stepSize;
-  const char* name;
-  float x;
-  float y;
-  float w;
-  float h;
-  const char* asset;
-
-  ParameterCoupling(const char* p_name = nullptr, double* p_proprety = nullptr,
-     double p_default = 0.5, double p_min = 0, double p_max = 1, double p_stepSize = 0.01) {
-    value = p_proprety;
-    defaultVal = p_default;
-    min = p_min;
-    max = p_max;
-    stepSize = p_stepSize;
-    name = p_name;
-    parameterIdx = iplug::kNoParameter;
-    parameter = nullptr;
-    control = nullptr;
-    x = y = 0;
-    asset = nullptr;
-    w = h = 70;
-  }
-
-  /**
-   * This should only be called from the audio thread since the value might tear on 32bit
-   */
-  void update() {
-    if (parameter != nullptr) {
-      *value = parameter->Value();
-    }
-    else {
-    }
-  }
-};
+#include "src/graph/Node.h"
+#include "src/graph/misc/ParameterCoupling.h"
 
 class ParameterManager {
   iplug::IParam* parameters[MAXDAWPARAMS];
@@ -78,6 +31,24 @@ public:
     // all these values have a range from 0-100 since this can't be changed later on
     // TODO find out how scaled paramters work
     param->InitDouble((paramprefix + std::to_string(parametersLeft)).c_str(), 1, 0, 100.0, 0.1);
+  }
+
+  /**
+   * This will go over each control element in the paramters array of the node and try to expose it to the daw
+   * Will return true if all parameters could be claimed, false if at least one failed
+   */
+  bool claimNode(Node* node) {
+    bool gotAllPamams = true;
+    for (int i = 0; i < node->parameterCount; i++) {
+      if (!claimParameter(node->parameters[i])) {
+        /**
+         * this means the manager has no free parameters left and the control cannot be automated from the daw
+         */
+        WDBGMSG("Ran out of daw parameters!\n");
+        gotAllPamams = false;
+      }
+    }
+    return gotAllPamams;
   }
 
   /**
@@ -127,6 +98,12 @@ public:
     couple->parameter = nullptr;
     couple->parameterIdx = iplug::kNoParameter;
     return false;
+  }
+
+  void releaseNode(Node* node) {
+    for (int i = 0; i < node->parameterCount; i++) {
+      releaseParameter(node->parameters[i]);
+    }
   }
 
   void releaseParameter(ParameterCoupling* couple) {

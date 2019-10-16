@@ -59,7 +59,6 @@ bool GuitarD::SerializeState(IByteChunk& chunk) const {
   TRACE;
   nlohmann::json serialized = {
     {"version", PLUG_VERSION_STR},
-    {"node_count", graph->nodes.GetSize() },
     {"ui_scale", 1.0} // TODO get the proper scale
   };
   graph->serialize(serialized);

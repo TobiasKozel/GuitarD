@@ -6,9 +6,9 @@ typedef std::function<void(float x, float y, float scale)> backgroundCallback;
 
 using namespace iplug;
 using namespace igraphics;
-class Background : public IControl {
+class GraphBackground : public IControl {
 public:
-  Background(IGraphics* g, backgroundCallback pCallback) :
+  GraphBackground(IGraphics* g, backgroundCallback pCallback) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
     mBitmap = g->LoadBitmap(PNGBACKGROUND_FN, 1, false);
