@@ -140,6 +140,8 @@ public:
   }
 
   void serialize(nlohmann::json &json) {
+    // TODO this shouldn't need a lock since we don't want stutter when autosaves etc
+    // are in progress. Without it crashes about 50% of the time
     WDL_MutexLock lock(&isProcessing);
     json["output"] = {
       nodes.Find(output->inSockets.Get(0)->connectedNode),

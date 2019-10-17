@@ -31,17 +31,18 @@ namespace serializer {
           }
           else {
             // otherwise just get the index of the actual node
-            serialized["nodes"][pos]["inputs"][prev] =
-              { nodes.Find(cNode), node->inSockets.Get(prev)->connectedBufferIndex };
+            serialized["nodes"][pos]["inputs"][prev] = { nodes.Find(cNode),
+              node->inSockets.Get(prev)->connectedBufferIndex
+            };
           }
         }
         serialized["nodes"][pos]["parameters"] = nlohmann::json::array();
         for (int p = 0; p < node->parameters.GetSize(); p++) {
+          int idx = node->parameters.Get(p)->parameterIdx;
+          double val = *(node->parameters.Get(p)->value);
           serialized["nodes"][pos]["parameters"][p] = {
-            { "idx", node->parameters.Get(i)->parameterIdx },
-            // TODO the type is not atomic and might tear
-            // only use this when theres no daw parameter
-            { "value", *(node->parameters.Get(i)->value) }
+            { "idx", idx },
+            { "value", val }
           };
         }
         pos++;
@@ -87,17 +88,24 @@ namespace serializer {
     for (auto sNode : serialized["nodes"]) {
       int currentInputIdx = 0;
       for (auto connection : sNode["inputs"]) {
-        connection = connection;
-        //if (inNodeIdx >= 0 && nodes.Get(inNodeIdx) != nullptr) {
-        //  //nodes.Get(currentInputIdx)->inputs[currentInputIdx] = nodes.Get(inNodeIdx);
-        //  nodes.Get(currentNodeIdx)->connectInput(nodes.Get(inNodeIdx)->, currentInputIdx);
-        //}
-        //else if (inNodeIdx == -1) {
-        //  // thie index is -1 if the node is connected to the global input
-        //  // if it's -2 it's not connected at all and we'll just leave it at a nullptr
-        //  nodes.Get(currentInputIdx)->inputs[currentInputIdx] = input;
-        //}
-        //currentInputIdx++;
+        int inNodeIdx = connection[0];
+        int inBufferIdx = connection[1];
+        if (inNodeIdx >= 0 && nodes.Get(inNodeIdx) != nullptr) {
+          //nodes.Get(currentInputIdx)->inputs[currentInputIdx] = nodes.Get(inNodeIdx);
+          nodes.Get(currentNodeIdx)->connectInput(
+            nodes.Get(inNodeIdx)->outSockets.Get(inBufferIdx),
+            currentInputIdx
+          );
+        }
+        else if (inNodeIdx == -1) {
+          // thie index is -1 if the node is connected to the global input
+          // if it's -2 it's not connected at all and we'll just leave it at a nullptr
+          nodes.Get(currentNodeIdx)->connectInput(
+            input->outSockets.Get(0),
+            currentInputIdx
+          );
+        }
+        currentInputIdx++;
       }
       currentNodeIdx++;
     }

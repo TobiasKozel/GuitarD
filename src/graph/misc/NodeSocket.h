@@ -10,7 +10,7 @@ public:
     isInput = true;
     ownIndex = pIndex;
     buffer = nullptr;
-    connectedNode = pNode;
+    connectedNode = nullptr;
     connectedBufferIndex = -1;
     X = Y = 0;
   }
