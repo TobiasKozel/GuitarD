@@ -9,7 +9,7 @@
 #include "src/graph/ui/GraphBackground.h"
 #include "src/graph/misc/Serializer.h"
 #include "src/graph/misc/ParameterManager.h"
-
+#include "src/graph/ui/NodeSocketUi.h"
 
 class Graph {
   iplug::igraphics::IGraphics* graphics;
@@ -21,7 +21,9 @@ class Graph {
   DummyNode* output;
   int channelCount;
 
+  // background element to allow moving the viewport
   GraphBackground* background;
+
 public:
   ParameterManager paramManager;
 
@@ -31,9 +33,10 @@ public:
     background = nullptr;
     sampleRate = p_sampleRate;
     channelCount = p_channles;
-    input = new DummyNode();
-    output = new DummyNode();
-    output->connectInput(input->outSockets.Get(0));
+    input = new DummyNode(true, channelCount);
+    output = new DummyNode(false, channelCount);
+    NodeSocket* test = input->outSockets.Get(0);
+    output->connectInput(test);
   }
 
   ~Graph() {
@@ -48,7 +51,8 @@ public:
      */
     WDL_MutexLock lock(&isProcessing);
     //input->outputs[0] = in;
-    input->SetIn(in);
+    input->CopyIn(in, nFrames);
+
     int nodeCount = nodes.GetSize();
     for (int n = 0; n < nodeCount; n++) {
       nodes.Get(n)->isProcessed = false;
@@ -69,6 +73,7 @@ public:
         nodes.Get(n)->ProcessBlock(nFrames);
       }
     }
+
     output->CopyOut(out, nFrames);
   }
 
@@ -80,7 +85,7 @@ public:
       //Node* delay = new SimpleDelayNode();
       //addNode(delay, stereo, 200);
       Node* drive = new SimpleDriveNode();
-      addNode(drive, stereo, 0, 400);
+      addNode(drive, nullptr, 0, 400);
       //Node* baby = new CryBabyNode();
       //addNode(baby, drive, 600);
       Node* cab = new SimpleCabNode();
@@ -150,12 +155,14 @@ public:
     serializer::deserialize(json, nodes, output, input, sampleRate, &paramManager, graphics);
   }
 
-  void addNode(Node* node, Node* pInput, int index = 0, float x = 0) {
-    node->setup(sampleRate);
+  void addNode(Node* node, Node* pInput = nullptr, int index = 0, float x = 0) {
     node->X = x;
+    node->setup(sampleRate);
     paramManager.claimNode(node);
     node->setupUi(graphics);
-    node->connectInput(pInput->outSockets.Get(index));
+    if (pInput != nullptr) {
+      node->connectInput(pInput->outSockets.Get(index));
+    }
     nodes.Add(node);
   }
 

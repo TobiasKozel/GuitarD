@@ -2,8 +2,8 @@
 #include "IControl.h"
 #include "src/graph/misc/ParameterCoupling.h"
 #include "src/graph/misc/NodeSocket.h"
+#include "src/graph/ui/NodeSocketUi.h"
 
-typedef std::function<void(float x, float y)> NodeUiCallback;
 struct NodeUiParam {
   iplug::igraphics::IGraphics* pGraphics;
   const char* pBg;
@@ -12,7 +12,6 @@ struct NodeUiParam {
   WDL_PtrList<ParameterCoupling>* pParameters;
   WDL_PtrList<NodeSocket>* inSockets;
   WDL_PtrList<NodeSocket>* outSockets;
-  // NodeUiCallback pCallback;
 };
 
 using namespace iplug;
@@ -27,6 +26,8 @@ class NodeUi : public IControl {
   WDL_PtrList<ParameterCoupling>* mParameters;
   WDL_PtrList<NodeSocket>* mInSockets;
   WDL_PtrList<NodeSocket>* mOutSockets;
+  WDL_PtrList<NodeSocketUi> mInSocketsUi;
+  WDL_PtrList<NodeSocketUi> mOutSocketsUi;
 public:
   NodeUi(NodeUiParam pParam) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
@@ -48,22 +49,28 @@ public:
     rect.B = *Y + h / 2;
     SetTargetAndDrawRECTs(rect);
     mBlend = EBlend::Clobber;
+  }
 
+  ~NodeUi() {
+
+  }
+
+  void setUp(NodeSocketCallback callback) {
     for (int i = 0; i < mParameters->GetSize(); i++) {
       ParameterCoupling* couple = mParameters->Get(i);
       float px = *X + couple->x - (couple->w * 0.5);
       float py = *Y + couple->y - (couple->h * 0.5);
-      iplug::igraphics::IRECT controlPos(px, py, px + couple->w, py + couple->h);
+      IRECT controlPos(px, py, px + couple->w, py + couple->h);
       // use the daw parameter to sync the values if possible
-      if (couple->parameterIdx != iplug::kNoParameter) {
-        couple->control = new iplug::igraphics::IVKnobControl(
+      if (couple->parameterIdx != kNoParameter) {
+        couple->control = new IVKnobControl(
           controlPos, couple->parameterIdx
         );
       }
       else {
         // use the callback to get tha value to the dsp, won't allow automation though
-        couple->control = new iplug::igraphics::IVKnobControl(
-          controlPos, [couple](iplug::igraphics::IControl* pCaller) {
+        couple->control = new IVKnobControl(
+          controlPos, [couple](IControl* pCaller) {
           *(couple->value) = pCaller->GetValue();
         }
         );
@@ -80,9 +87,21 @@ public:
       //  vcontrol->SetShowValue(false);
       //}
     }
+
+    for (int i = 0; i < mInSockets->GetSize(); i++) {
+      NodeSocketUi* socket = new NodeSocketUi(mGraphics, mInSockets->Get(i), callback);
+      mGraphics->AttachControl(socket);
+      mInSocketsUi.Add(socket);
+    }
+
+    for (int i = 0; i < mOutSockets->GetSize(); i++) {
+      NodeSocketUi* socket = new NodeSocketUi(mGraphics, mOutSockets->Get(i), callback);
+      mGraphics->AttachControl(socket);
+      mOutSocketsUi.Add(socket);
+    }
   }
 
-  ~NodeUi() {
+  void cleanUp() {
     for (int i = 0; i < mParameters->GetSize(); i++) {
       ParameterCoupling* param = mParameters->Get(i);
       if (param->control != nullptr) {
@@ -91,16 +110,25 @@ public:
         param->control = nullptr;
       }
     }
+
+    for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
+      mGraphics->RemoveControl(mInSocketsUi.Get(i), true);
+    }
+
+    for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
+      mGraphics->RemoveControl(mOutSocketsUi.Get(i), true);
+    }
   }
 
-
   void Draw(IGraphics& g) override {
+    // this will just draw the backround since all the controls are also registered
+    // to the IGraphics class which will draw them
+    // which means the rendering order is kinda hard to controll
     g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     translate(dX, dY);
-    //mCallback(dX, dY);
   }
 
   void translate(float dX, float dY) {
@@ -108,15 +136,17 @@ public:
       moveControl(mParameters->Get(i)->control, dX, dY);
     }
     moveControl(this, dX, dY);
+
+    for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
+      moveControl(mInSocketsUi.Get(i), dX, dY);
+    }
+
+    for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
+      moveControl(mOutSocketsUi.Get(i), dX, dY);
+    }
+
     *X += dX;
     *Y += dY;
-    //for (int i = 0; i < inputCount; i++) {
-    //  moveControl(inSockets[i], x, y);
-    //}
-    //for (int i = 0; i < outputCount; i++) {
-    //  moveControl(outSockets[i], x, y);
-    //}
-
     mGraphics->SetAllControlsDirty();
   }
 
@@ -137,5 +167,4 @@ protected:
   IBitmap mBitmap;
   IBlend mBlend;
   IGraphics* mGraphics;
-  NodeUiCallback mCallback;
 };

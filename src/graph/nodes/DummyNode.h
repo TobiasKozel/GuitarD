@@ -7,22 +7,28 @@
 */
 class DummyNode : public Node {
 public:
-  DummyNode() : Node() {
-    isProcessed = true;
-    // Node::setup(0, 0, 1, 1, 1);
-    NodeSocket* in = new NodeSocket(0);
-    inSockets.Add(in);
-    NodeSocket* out = new NodeSocket(0, this);
-    outSockets.Add(out);
-    inputCount = 1;
-    outputCount = 1;
+  DummyNode(bool isIn, int channels) : Node() {
+    if (isIn) {
+      setup(0, 512, channels, 0, 1);
+    }
+    else {
+      setup(0, 512, channels, 1, 0);
+    }
+  }
+
+  ~DummyNode() {
   }
 
   void ProcessBlock(int) {}
 
-  void SetIn(iplug::sample** in) {
+  void CopyIn(iplug::sample** in, int nFrames) {
+    // PERFORMANCE this can be avoided by updating the pointer in the outputnode socket instead
     NodeSocket* socket = outSockets.Get(0);
-    socket->buffer = in;
+    for (int c = 0; c < channelCount; c++) {
+      for (int i = 0; i < nFrames; i++) {
+        socket->buffer[c][i] = in[c][i];
+      }
+    }
     isProcessed = true;
   }
 

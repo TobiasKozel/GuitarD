@@ -1,31 +1,33 @@
 #pragma once
 #include "IControl.h"
+#include "src/graph/misc/NodeSocket.h"
 
 using namespace iplug;
 using namespace igraphics;
 
-typedef std::function<void(int connectedTo)> nodeSocketCallback;
+typedef std::function<void(NodeSocket* connectedTo)> NodeSocketCallback;
 
 class NodeSocketUi : public IControl {
 public:
-  NodeSocketUi(IGraphics* g, const char* bitmap, float L, float T, int index, bool out, nodeSocketCallback pCallback) :
-    IControl(IRECT(L, T, L, T), kNoParameter)
+  NodeSocketUi(IGraphics* g, NodeSocket* socket, NodeSocketCallback callback) :
+    IControl(IRECT(0, 0, 0, 0), kNoParameter)
   {
     //mBitmap = g->LoadBitmap(bitmap, 1, false);
     //mRECT.R = L + mBitmap.W();
     //mRECT.B = T + mBitmap.H();
-    mIndex = index;
-    mOut = out;
+    mSocket = socket;
     mDiameter = 30;
     mRadius = mDiameter * 0.5;
-    mRECT.R = L + mDiameter;
-    mRECT.B = T + mDiameter;
+    mRECT.L = socket->X;
+    mRECT.T = socket->Y;
+    mRECT.R = mRECT.L + mDiameter;
+    mRECT.B = mRECT.T + mDiameter;
     SetTargetAndDrawRECTs(mRECT);
     mBlend = EBlend::Clobber;
     mGraphics = g;
-    mCallback = pCallback;
+    mCallback = callback;
     color.A = 255;
-    if (out) {
+    if (socket->isInput) {
       color.R = 255;
     }
     else {
@@ -52,7 +54,15 @@ public:
     mDragging = false;
     SetRECT(mTargetRECT);
     mGraphics->SetAllControlsDirty();
-    // mCallback(dX, dY);
+    IControl* target = mGraphics->GetControl(x, y);
+    if (target != nullptr) {
+      NodeSocketUi* targetUi = dynamic_cast<NodeSocketUi*>(target);
+      if (targetUi != nullptr) {
+        if (!targetUi->mSocket->isInput && mSocket->isInput) {
+          mCallback(targetUi->mSocket);
+        }
+      }
+    }
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
@@ -64,10 +74,11 @@ public:
   }
 
 protected:
+  NodeSocket* mSocket;
   IBitmap mBitmap;
   IBlend mBlend;
   IGraphics* mGraphics;
-  nodeSocketCallback mCallback;
+  NodeSocketCallback mCallback;
   IColor color;
   float mDiameter;
   float mRadius;

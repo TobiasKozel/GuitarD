@@ -41,6 +41,7 @@ public:
   Node() {
     type = DefaultNodeName;
     outputs = nullptr;
+    X = Y = 0;
   };
 
   /**
@@ -54,7 +55,6 @@ public:
     isProcessed = false;
     channelCount = p_channles;
     uiReady = false;
-    X = Y = 0;
 
     // A derived node might have already setup a custom output buffer
     // Setup the output buffer only if there's none
@@ -70,12 +70,16 @@ public:
 
     // Setup the sockets for the node connections
     for (int i = 0; i < inputCount; i++) {
-      NodeSocket* in = new NodeSocket(i);
+      NodeSocket* in = new NodeSocket(i, this);
+      in->X = X - 100;
+      in->Y = Y + (i * 50);
       inSockets.Add(in);
     }
 
     for (int i = 0; i < outputCount; i++) {
       NodeSocket* out = new NodeSocket(i, this, outputs[i]);
+      out->X = X + 100;
+      out->Y = Y + (i * 50);
       outSockets.Add(out);
     }
   }
@@ -103,6 +107,10 @@ public:
   }
 
   virtual bool inputsReady() {
+    if (inSockets.Get(0)->buffer == nullptr) {
+      isProcessed = true;
+      return false;
+    }
     for (int i = 0; i < inputCount; i++) {
       if (!inSockets.Get(i)->connectedNode->isProcessed) {
         return false;
@@ -150,17 +158,9 @@ public:
       &outSockets
     });
     pGrahics->AttachControl(mUi);
-
-    //for (int i = 0; i < inputCount; i++) {
-    //  inSockets[i] = new NodeSocket(pGrahics, "", X + 20, Y + i * 40, i, false, [](int connectedTo) {
-    //  });
-    //  pGrahics->AttachControl(inSockets[i]);
-    //}
-    //for (int i = 0; i < outputCount; i++) {
-    //  outSockets[i] = new NodeSocket(pGrahics, "", X + 200, Y + i * 40, i, true, [](int connectedTo) {
-    //  });
-    //  pGrahics->AttachControl(outSockets[i]);
-    //}
+    mUi->setUp([&](NodeSocket* socket) {
+      connectInput(socket);
+    });
 
     uiReady = true;
   }
@@ -168,16 +168,10 @@ public:
   virtual void cleanupUi(iplug::igraphics::IGraphics* pGrahics) {
 
     if (mUi != nullptr) {
+      mUi->cleanUp();
       pGrahics->RemoveControl(mUi, true);
       mUi = nullptr;
     }
-
-    //for (int i = 0; i < inputCount; i++) {
-    //  pGrahics->RemoveControl(inSockets[i], true);
-    //}
-    //for (int i = 0; i < outputCount; i++) {
-    //  pGrahics->RemoveControl(outSockets[i], true);
-    //}
     uiReady = false;
   }
 
