@@ -139,10 +139,14 @@ public:
 
     for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
       moveControl(mInSocketsUi.Get(i), dX, dY);
+      mInSockets->Get(i)->X += dX;
+      mInSockets->Get(i)->Y += dY;
     }
 
     for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
       moveControl(mOutSocketsUi.Get(i), dX, dY);
+      mOutSockets->Get(i)->X += dX;
+      mOutSockets->Get(i)->Y += dY;
     }
 
     *X += dX;

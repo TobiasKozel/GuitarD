@@ -10,6 +10,7 @@
 #include "src/graph/misc/Serializer.h"
 #include "src/graph/misc/ParameterManager.h"
 #include "src/graph/ui/NodeSocketUi.h"
+#include "src/graph/ui/CableLayer.h"
 
 class Graph {
   iplug::igraphics::IGraphics* graphics;
@@ -23,6 +24,8 @@ class Graph {
 
   // background element to allow moving the viewport
   GraphBackground* background;
+
+  CableLayer* cableLayer;
 
 public:
   ParameterManager paramManager;
@@ -112,12 +115,16 @@ public:
     for (int n = 0; n < nodes.GetSize(); n++) {
         nodes.Get(n)->setupUi(pGraphics);
     }
+    cableLayer = new CableLayer(pGraphics, &nodes);
+    pGraphics->AttachControl(cableLayer);
   }
 
   void cleanupUi() {
     for (int n = 0; n < nodes.GetSize(); n++) {
       nodes.Get(n)->cleanupUi(graphics);
     }
+    graphics->RemoveControl(cableLayer, true);
+    cableLayer = nullptr;
     graphics = nullptr;
   }
 
@@ -166,6 +173,9 @@ public:
       node->connectInput(pInput->outSockets.Get(index));
     }
     nodes.Add(node);
+    // keep the cable layer on top
+    graphics->RemoveControl(cableLayer);
+    graphics->AttachControl(cableLayer);
   }
 
   void removeAllNodes() {
