@@ -2,7 +2,7 @@
 #include "StereoTool.h"
 
 class StereoToolNode : public StereoTool {
-public:
+ public:
   StereoToolNode() {
     type = "StereoToolNode";
   }
@@ -24,4 +24,3 @@ public:
     Node::setupUi(pGrahics);
   }
 };
-

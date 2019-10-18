@@ -20,6 +20,7 @@ public:
     mCallback = pCallback;
     mScale = 1.0;
     offsetX = offsetY = windowY = windowX = 0;
+    mGallery = nullptr;
   }
 
   void Draw(IGraphics& g) override {
@@ -30,6 +31,11 @@ public:
     g.DrawBitmap(mBitmap, IRECT(x - windowX, y, windowX, windowY), 1, &mBlend);
     g.DrawBitmap(mBitmap, IRECT(x, y - windowY, windowX, windowY), 1, &mBlend);
     g.DrawBitmap(mBitmap, IRECT(x - windowX, y - windowY, windowX, windowY), 1, &mBlend);
+    if (mGallery == nullptr) {
+      mGallery = new NodeGallery(mGraphics, [](const char* asd) {
+      });
+      mGraphics->AttachControl(mGallery);
+    }
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
@@ -44,7 +50,7 @@ public:
   void OnMouseDown(float x, float y, const IMouseMod& mod) {
     if (mod.R) {
       // prolly open the menu to add nodes
-      mGallery = new NodeGallery(mGraphics, IRECT(400, 10, 800, 400), [](const char* asd) {
+      mGallery = new NodeGallery(mGraphics, [](const char* asd) {
 
       });
       mGraphics->AttachControl(mGallery);

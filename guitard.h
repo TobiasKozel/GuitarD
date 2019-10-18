@@ -1,10 +1,12 @@
 #pragma once
 
+const int kNumPrograms = 1;
+
+#include "thirdparty/json.hpp"
 #include "IPlug_include_in_plug_hdr.h"
 #include "IControls.h"
-const int kNumPrograms = 1;
-#include "src/graph/Graph.h"
 #include "src/constants.h"
+#include "src/graph/Graph.h"
 
 enum EParams
 {

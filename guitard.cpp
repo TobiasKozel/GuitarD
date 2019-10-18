@@ -1,10 +1,11 @@
 #include "GuitarD.h"
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
-#include "thirdparty/json.hpp"
+#include "src/graph/nodes/RegisterNodes.h"
+
 
 GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAMS, kNumPrograms)) {
-
+  NodeList::registerNodes();
   // TODO on mac garageband NOutChansConnected() reports zero for some reason
   graph = new Graph(GetSampleRate(), 2);
 

@@ -1,9 +1,9 @@
 #pragma once
 #include "thirdparty/json.hpp"
-#include "src/graph/Node.h"
-#include "src/graph/nodes/NodeList.h"
-#include "src/graph/misc/ParameterManager.h"
 #include "IGraphics.h"
+#include "src/graph/Node.h"
+#include "src/graph/misc/NodeList.h"
+#include "src/graph/misc/ParameterManager.h"
 
 
 namespace serializer {
@@ -60,7 +60,7 @@ namespace serializer {
     // create all the nodes and setup the parameters in the first pass
     for (auto sNode : serialized["nodes"]) {
       std::string className = sNode["type"];
-      Node* node = createNode(className);
+      Node* node = NodeList::createNode(className);
       if (node == nullptr) { continue; }
       node->setup(sampleRate);
       node->X = sNode["position"][0];

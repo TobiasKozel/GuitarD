@@ -1,11 +1,11 @@
 #pragma once
 #include "mutex.h"
+#include "thirdparty/json.hpp"
 #include "IPlugConstants.h"
-#include "src/graph/Node.h"
-#include "src/graph/nodes/DummyNode.h"
 #include "src/constants.h"
 #include "src/logger.h"
-#include "thirdparty/json.hpp"
+#include "src/graph/Node.h"
+#include "src/graph/nodes/DummyNode.h"
 #include "src/graph/ui/GraphBackground.h"
 #include "src/graph/misc/Serializer.h"
 #include "src/graph/misc/ParameterManager.h"
@@ -83,15 +83,15 @@ public:
   void testAdd() {
     WDL_MutexLock lock(&isProcessing);
     if (nodes.GetSize() == 0) {
-      Node* stereo = new StereoToolNode();
+      Node* stereo = NodeList::createNode("StereoToolNode");
       addNode(stereo, input, 0, 0);
       //Node* delay = new SimpleDelayNode();
       //addNode(delay, stereo, 200);
-      Node* drive = new SimpleDriveNode();
+      Node* drive = NodeList::createNode("SimpleDriveNode");
       addNode(drive, nullptr, 0, 400);
       //Node* baby = new CryBabyNode();
       //addNode(baby, drive, 600);
-      Node* cab = new SimpleCabNode();
+      Node* cab = NodeList::createNode("SimpleCabNode");
       addNode(cab, drive, 0, 800);
       output->connectInput(cab->outSockets.Get(0));
     }
