@@ -3,92 +3,124 @@
 #include "src/graph/Node.h"
 #include "src/graph/misc/NodeList.h"
 #include "config.h"
+#include "src/logger.h"
 
 using namespace iplug;
 using namespace igraphics;
 
 
+#define ELEMENTHEIGHT 110
+#define ELEMENTWIDTH 200
+#define ELEMENTPADDING 8
+#define TITLEHEIGHT 28
+
 class GalleryElement {
 public:
   GalleryElement(NodeList::NodeInfo node) {
-    //mRect.L = x;
-    //mRect.T = y;
-    //mRect.R = x + pBitmap->W();
-    //mRect.B = y + pBitmap->H();
-    //mBitmap = pBitmap;
-    //mName = pName;
+    mInfo = node;
+    mName = mInfo.dislayName.c_str();
+    mTitle = IText{
+      18, COLOR_WHITE, "Roboto-Regular", EAlign::Center, EVAlign::Bottom, 0
+    };
   }
 
-  void Draw(IGraphics& g) {
-    g.DrawCircle(IColor(255, 0, 100, 255), 0, 0, 10);
+  void Draw(IGraphics& g, IRECT* rect, int index, int columns) {
+    //g.DrawCircle(IColor(255, 0, 100, 255), 0, 0, 10);
+    mRECT = *rect;
+    int row = floorf(index / (float)columns);
+    mRECT.T += (row * ELEMENTHEIGHT) + ELEMENTPADDING + TITLEHEIGHT + ELEMENTPADDING * row;
+    mRECT.B = mRECT.T + ELEMENTHEIGHT;
+    mRECT.L += (index % columns) * ELEMENTWIDTH + (index % columns + 1) * ELEMENTPADDING;
+    mRECT.R = mRECT.L + ELEMENTWIDTH;
+    g.DrawRect(COLOR_WHITE, mRECT);
+    g.DrawText(mTitle, mName, mRECT);
   }
+  NodeList::NodeInfo mInfo;
   IRECT mRECT;
   IBitmap* mBitmap;
   const char* mName;
   const char* mImage;
+  IText mTitle;
 };
 
-#define TITLEHEIGHT 40
-#define CATEGORYPADDING 20
+#define CATEGORYPADDING 8
+
 class GalleryCategory {
   WDL_PtrList<GalleryElement> mElements;
 public:
-  GalleryCategory(GalleryCategory* prev) {
-    mPrev = prev;
+  GalleryCategory(GalleryCategory* prev, IRECT* viewport) {
     mTitleBack = IColor(255, 100, 100, 100);
+    mBack = IColor(255, 30, 30, 30);
+    mPrev = prev;
+    mViewport = viewport;
     mOpen = false;
     mRECT = IRECT(0, 0, 400, TITLEHEIGHT);
     mTitleRect = mRECT;
-    OnResize();
+    mTitle = IText {
+      24, COLOR_WHITE, "Roboto-Regular", EAlign::Center, EVAlign::Middle, 0
+    };
   }
 
   void OnResize() {
-    mRECT.L = 0;
-    mRECT.R = 400;
-    float fromTop = mRECT.T;
-    if (mPrev != nullptr) {
-      fromTop -= mPrev->mRECT.B - CATEGORYPADDING;
-    }
-    mRECT.T = 0;
-    mRECT.B -= fromTop;
   }
 
   void addNode(NodeList::NodeInfo node) {
-    mName = node.categoryName.c_str();
+    mNameString = node.categoryName;
+    mName = mNameString.c_str();
     mElements.Add(new GalleryElement(node));
   }
 
-  void Draw(IGraphics& g, IRECT &viewport, IRECT& bounds) {
+  void Draw(IGraphics& g) {
+    mRECT.L = mViewport->L;
+    mRECT.R = mViewport->R;
+    if (mPrev != nullptr) {
+      mRECT.T = mPrev->mRECT.B + CATEGORYPADDING;
+    }
+    else {
+      mRECT.T = mViewport->T + CATEGORYPADDING;
+    }
+    mRECT.B = mRECT.T + TITLEHEIGHT;
     if (mOpen) {
-      g.FillRect(mTitleBack, mRECT);
-      return;
+      int columns = floorf(mRECT.W() / ELEMENTWIDTH);
+      if (columns == 0) { columns = 1; }
+      mTitleRect = mRECT;
+      mRECT.B += ceilf(mElements.GetSize() / (float) columns) * ELEMENTHEIGHT + ELEMENTPADDING * 2;
+      g.FillRect(mBack, mRECT);
       GalleryElement* elem;
       for (int i = 0; i < mElements.GetSize(); i++) {
-        elem = mElements.Get(i);
-        if (bounds.Contains(elem->mRECT)) {
-          elem->Draw(g);
-        }
+        mElements.Get(i)->Draw(g, &mRECT, i, columns);
       }
+    }
+    else {
+      mTitleRect = mRECT;
     }
     g.FillRect(mTitleBack, mTitleRect);
     g.DrawText(mTitle, mName, mTitleRect);
   }
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) {
-
+    if (mTitleRect.Contains(IRECT(x, y, x, y))) {
+      mOpen = !mOpen;
+    }
   }
 
   IText mTitle;
   bool mOpen;
   const char* mName;
-  IRECT mRECT;
+  // keep this one around so the c_str() of it stays valid
+  std::string mNameString;
   IColor mTitleBack;
+  IColor mBack;
+  IRECT* mViewport;
+  IRECT mRECT;
   IRECT mTitleRect;
   GalleryCategory* mPrev;
 };
 
 
 typedef std::function<void(const char* nodeName)> GalleryAddCallBack;
+
+#define GALLERYPADDING 10
 
 class NodeGallery : public IControl {
 public:
@@ -102,32 +134,12 @@ public:
     OnResize();
   }
 
-
-
-
   void Draw(IGraphics& g) override {
     g.FillRect(IColor(255, 50, 50, 50), mRECT);
 
     for (int i = 0; i < mCategories.GetSize(); i++) {
-      mCategories.Get(i)->Draw(g, mViewPort, mRECT);
+      mCategories.Get(i)->Draw(g);
     }
-  }
-
-
-
-  void addBelow() {
-    //float yOff = 0;
-    //for (int i = 0; i < mElements.GetSize(); i++) {
-    //  float b = mElements.Get(i)->mRect.B;
-    //  yOff = yOff < b ? b : yOff;
-    //}
-    //auto mBitmap = mGraphics->LoadBitmap(PNGGENERICBG_FN, 1, false);
-    //GalleryElement* elem = new GalleryElement(0, yOff + mPadding, "asd", &mBitmap);
-    //float b = elem->mRect.B;
-    //mViewPort.B = b > mViewPort.B ? b : mViewPort.B;
-    //float r = elem->mRect.B;
-    //mViewPort.R = r > mViewPort.R ? r : mViewPort.R;
-    //mElements.Add(elem);
   }
 
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
@@ -137,9 +149,12 @@ public:
   void OnResize() override {
     if (mGraphics != nullptr) {
       IRECT bounds = mGraphics->GetBounds();
+      bounds.Pad(-GALLERYPADDING);
       bounds.L = bounds.R * 0.5;
       mRECT = bounds;
       mTargetRECT = bounds;
+      mViewPort = bounds;
+      mViewPort.Pad(-GALLERYPADDING);
     }
   }
 
@@ -150,6 +165,11 @@ public:
     }
     else {
       mViewPort.Translate(0, scroll);
+      if (mViewPort.T > 0) {
+        mViewPort.Translate(0, -mViewPort.T);
+      }
+      else {
+      }
     }
     mDirty = true;
   }
@@ -160,6 +180,7 @@ public:
       cat = mCategories.Get(i);
       if (cat->mRECT.Contains(IRECT(x, y, x, y))) {
         cat->OnMouseDown(x, y, mod);
+        mDirty = true;
       }
     }
   }
@@ -170,7 +191,7 @@ private:
     GalleryCategory* prevCat = nullptr;
     for (auto i : NodeList::nodelist) {
       if (uniqueCat.find(i.second.categoryName) == uniqueCat.end()) {
-        GalleryCategory* cat = new GalleryCategory(prevCat);
+        GalleryCategory* cat = new GalleryCategory(prevCat, &mViewPort);
         prevCat = cat;
         uniqueCat.insert(std::pair<std::string, GalleryCategory*>(i.second.categoryName, cat));
         mCategories.Add(cat);
@@ -180,6 +201,7 @@ private:
       uniqueCat.at(i.second.categoryName)->addNode(i.second);
     }
   }
+
   float mPadding;
   GalleryAddCallBack mCallback;
   IGraphics* mGraphics;
