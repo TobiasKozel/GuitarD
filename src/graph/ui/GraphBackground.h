@@ -1,6 +1,7 @@
 #pragma once
 #include "IControl.h"
 #include "config.h"
+#include "src/graph/ui/NodeGallery.h"
 
 typedef std::function<void(float x, float y, float scale)> backgroundCallback;
 
@@ -8,6 +9,7 @@ using namespace iplug;
 using namespace igraphics;
 class GraphBackground : public IControl {
 public:
+  NodeGallery* mGallery;
   GraphBackground(IGraphics* g, backgroundCallback pCallback) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
@@ -42,6 +44,10 @@ public:
   void OnMouseDown(float x, float y, const IMouseMod& mod) {
     if (mod.R) {
       // prolly open the menu to add nodes
+      mGallery = new NodeGallery(mGraphics, IRECT(10, 10, 400, 400), [](const char* asd) {
+
+      });
+      mGraphics->AttachControl(mGallery);
     }
   }
 

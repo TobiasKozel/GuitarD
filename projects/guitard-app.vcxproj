@@ -342,6 +342,7 @@
     <ClInclude Include="..\src\graph\nodes\stereo_tool\StereoToolNode.h" />
     <ClInclude Include="..\src\graph\ui\CableLayer.h" />
     <ClInclude Include="..\src\graph\ui\GraphBackground.h" />
+    <ClInclude Include="..\src\graph\ui\NodeGallery.h" />
     <ClInclude Include="..\src\graph\ui\NodeUi.h" />
     <ClInclude Include="..\src\graph\ui\NodeSocketUi.h" />
     <ClInclude Include="..\thirdparty\fftconvolver\AudioFFT.h" />

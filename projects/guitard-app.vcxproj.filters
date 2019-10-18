@@ -366,6 +366,9 @@
     <ClInclude Include="..\src\graph\ui\CableLayer.h">
       <Filter>src\graph\ui</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\ui\NodeGallery.h">
+      <Filter>src\graph\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
