@@ -44,7 +44,7 @@ public:
   void OnMouseDown(float x, float y, const IMouseMod& mod) {
     if (mod.R) {
       // prolly open the menu to add nodes
-      mGallery = new NodeGallery(mGraphics, IRECT(10, 10, 400, 400), [](const char* asd) {
+      mGallery = new NodeGallery(mGraphics, IRECT(400, 10, 800, 400), [](const char* asd) {
 
       });
       mGraphics->AttachControl(mGallery);

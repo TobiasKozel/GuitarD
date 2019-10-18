@@ -34,6 +34,7 @@ public:
     mPadding = 10;
     mGraphics = g;
     mCallback = callback;
+    mViewPort = size;
     addBelow();
     addBelow();
     addBelow();
@@ -69,7 +70,12 @@ public:
       yOff = yOff < b ? b : yOff;
     }
     auto mBitmap = mGraphics->LoadBitmap(PNGGENERICBG_FN, 1, false);
-    mElements.Add(new GalleryElement(0, yOff + mPadding, "asd", &mBitmap));
+    GalleryElement* elem = new GalleryElement(0, yOff + mPadding, "asd", &mBitmap);
+    float b = elem->mRect.B;
+    mViewPort.B = b > mViewPort.B ? b : mViewPort.B;
+    float r = elem->mRect.B;
+    mViewPort.R = r > mViewPort.R ? r : mViewPort.R;
+    mElements.Add(elem);
   }
 
 private:
