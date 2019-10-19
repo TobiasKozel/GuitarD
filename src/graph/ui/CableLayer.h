@@ -9,11 +9,12 @@ using namespace igraphics;
 
 class CableLayer : public IControl {
 public:
-  CableLayer(IGraphics* g, WDL_PtrList<Node>* pNodes) :
+  CableLayer(IGraphics* g, WDL_PtrList<Node>* pNodes, Node* pOutNode) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
     SetTargetRECT(IRECT(0, 0, 0, 0));
     mNodes = pNodes;
+    mOutNode = pOutNode;
     mGraphics = g;
     mBlend = EBlend::Clobber;
     mColor.A = 255;
@@ -25,8 +26,11 @@ public:
     NodeSocket* curSock;
     NodeSocket* tarSock;
     float socketRadius = SOCKETDIAMETER / 2;
-    for (int n = 0; n < mNodes->GetSize(); n++) {
+    for (int n = 0; n < mNodes->GetSize() + 1; n++) {
       curNode = mNodes->Get(n);
+      if (curNode == nullptr) {
+        curNode = mOutNode;
+      }
       for (int i = 0; i < curNode->inputCount; i++) {
         curSock = curNode->inSockets.Get(i);
         if (curSock->connectedNode != nullptr) {
@@ -51,6 +55,7 @@ public:
 private:
   IGraphics* mGraphics;
   WDL_PtrList<Node>* mNodes;
+  Node* mOutNode;
   IColor mColor;
   IBlend mBlend;
 };

@@ -137,7 +137,7 @@ public:
     }
     moveControl(this, dX, dY);
 
-    for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
+    for (int i = 0; i < mInSocketsUi.GetSize(); i++) {
       moveControl(mInSocketsUi.Get(i), dX, dY);
       mInSockets->Get(i)->X += dX;
       mInSockets->Get(i)->Y += dY;

@@ -126,7 +126,9 @@ public:
     for (int n = 0; n < nodes.GetSize(); n++) {
         nodes.Get(n)->setupUi(pGraphics);
     }
-    cableLayer = new CableLayer(pGraphics, &nodes);
+    input->setupUi(pGraphics);
+    output->setupUi(pGraphics);
+    cableLayer = new CableLayer(pGraphics, &nodes, output);
     pGraphics->AttachControl(cableLayer);
   }
 
@@ -149,6 +151,8 @@ public:
     }
     graphics->RemoveControl(background, true);
     graphics->RemoveControl(cableLayer, true);
+    input->cleanupUi(graphics);
+    output->cleanupUi(graphics);
     cableLayer = nullptr;
     graphics = nullptr;
   }
@@ -160,6 +164,8 @@ public:
     for (int i = 0; i < nodes.GetSize(); i++) {
       nodes.Get(i)->mUi->translate(x, y);
     }
+    output->mUi->translate(x, y);
+    input->mUi->translate(x, y);
     // WDBGMSG("x %f y %f s %f\n", x, y, scale);
   }
 
