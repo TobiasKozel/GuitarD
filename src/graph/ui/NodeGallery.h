@@ -97,9 +97,17 @@ public:
     g.DrawText(mTitle, mName, mTitleRect);
   }
 
-  void OnMouseDown(float x, float y, const IMouseMod& mod) {
-    if (mTitleRect.Contains(IRECT(x, y, x, y))) {
+  NodeList::NodeInfo* OnMouseDown(float x, float y, const IMouseMod& mod) {
+    IRECT p(x, y, x, y);
+    if (mTitleRect.Contains(p)) {
       mOpen = !mOpen;
+      return nullptr;
+    }
+    for (int i = 0; i < mElements.GetSize(); i++) {
+      GalleryElement* elem = mElements.Get(i);
+      if (elem->mRECT.Contains(p)) {
+        return &(elem->mInfo);
+      }
     }
   }
 
@@ -117,7 +125,7 @@ public:
 };
 
 
-typedef std::function<void(const char* nodeName)> GalleryAddCallBack;
+typedef std::function<void(NodeList::NodeInfo info)> GalleryAddCallBack;
 
 #define GALLERYPADDING 10
 
@@ -139,10 +147,6 @@ public:
     for (int i = 0; i < mCategories.GetSize(); i++) {
       mCategories.Get(i)->Draw(g);
     }
-  }
-
-  virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
-    mCallback("asd");
   }
 
   void OnResize() override {
@@ -173,12 +177,15 @@ public:
     mDirty = true;
   }
 
-  void OnMouseDown(float x, float y, const IMouseMod& mod) {
+  void OnMouseUp(float x, float y, const IMouseMod& mod) {
     GalleryCategory* cat;
     for (int i = 0; i < mCategories.GetSize(); i++) {
       cat = mCategories.Get(i);
       if (cat->mRECT.Contains(IRECT(x, y, x, y))) {
-        cat->OnMouseDown(x, y, mod);
+        NodeList::NodeInfo* ret = cat->OnMouseDown(x, y, mod);
+        if (ret != nullptr) {
+          mCallback(*ret);
+        }
         mDirty = true;
       }
     }
@@ -206,4 +213,5 @@ private:
   IGraphics* mGraphics;
   WDL_PtrList<GalleryCategory> mCategories;
   IRECT mViewPort;
+  IRECT mViewPortBounds;
 };

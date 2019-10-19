@@ -11,6 +11,7 @@
 #include "src/graph/misc/ParameterManager.h"
 #include "src/graph/ui/NodeSocketUi.h"
 #include "src/graph/ui/CableLayer.h"
+#include "src/graph/ui/NodeGallery.h"
 
 class Graph {
   iplug::igraphics::IGraphics* graphics;
@@ -26,6 +27,8 @@ class Graph {
 
   CableLayer* cableLayer;
 
+  NodeGallery* nodeGallery;
+
 public:
   ParameterManager paramManager;
 
@@ -33,6 +36,7 @@ public:
   Graph(int p_sampleRate, int p_channles = 2) {
     graphics = nullptr;
     background = nullptr;
+    nodeGallery = nullptr;
     sampleRate = p_sampleRate;
     channelCount = p_channles;
     input = new DummyNode(true, channelCount);
@@ -102,8 +106,17 @@ public:
   /** The graph needs to know about the graphics context to add and remove the controlls for the nodes */
   void setupUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
     background = new GraphBackground(pGraphics, [&](float x, float y, float scale) {
-      this->onViewPortChange(x, y, scale);
-    });
+        this->onViewPortChange(x, y, scale);
+      },
+      [&](float x, float y, const IMouseMod& mod) {
+        if (mod.R) {
+          this->toggleGallery();
+        }
+        else {
+          this->toggleGallery(true);
+        }
+      }
+    );
     pGraphics->AttachControl(background);
 
     if (pGraphics != nullptr && pGraphics != graphics) {
@@ -115,6 +128,19 @@ public:
     }
     cableLayer = new CableLayer(pGraphics, &nodes);
     pGraphics->AttachControl(cableLayer);
+  }
+
+  void toggleGallery(bool wantsClose = false) {
+    if (nodeGallery == nullptr && !wantsClose) {
+      nodeGallery = new NodeGallery(graphics, [&](NodeList::NodeInfo info) {
+        this->addNode(info.constructor());
+      });
+      graphics->AttachControl(nodeGallery);
+    }
+    else if (nodeGallery != nullptr){
+      graphics->RemoveControl(nodeGallery, true);
+      nodeGallery = nullptr;
+    }
   }
 
   void cleanupUi() {

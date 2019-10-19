@@ -1,16 +1,16 @@
 #pragma once
 #include "IControl.h"
 #include "config.h"
-#include "src/graph/ui/NodeGallery.h"
-
-typedef std::function<void(float x, float y, float scale)> backgroundCallback;
 
 using namespace iplug;
 using namespace igraphics;
+
+typedef std::function<void(float x, float y, float scale)> BackgroundMoveCallback;
+typedef std::function<void(float x, float y, const IMouseMod& mod)> BackgroundClickCallback;
+
 class GraphBackground : public IControl {
 public:
-  NodeGallery* mGallery;
-  GraphBackground(IGraphics* g, backgroundCallback pCallback) :
+  GraphBackground(IGraphics* g, BackgroundMoveCallback pCallback, BackgroundClickCallback pClick) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
     mBitmap = g->LoadBitmap(PNGBACKGROUND_FN, 1, false);
@@ -18,9 +18,9 @@ public:
     mGraphics = g;
     mY = mX = 0;
     mCallback = pCallback;
+    mClickCallback = pClick;
     mScale = 1.0;
     offsetX = offsetY = windowY = windowX = 0;
-    mGallery = nullptr;
   }
 
   void Draw(IGraphics& g) override {
@@ -43,14 +43,8 @@ public:
     }
   }
 
-  void OnMouseDown(float x, float y, const IMouseMod& mod) {
-    if (mod.R) {
-      // prolly open the menu to add nodes
-      mGallery = new NodeGallery(mGraphics, [](const char* asd) {
-
-      });
-      mGraphics->AttachControl(mGallery);
-    }
+  void OnMouseDown(float x, float y, const IMouseMod& mod) override {
+    mClickCallback(x, y, mod);
   }
 
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
@@ -90,5 +84,6 @@ protected:
   int windowX;
   int windowY;
   float mScale;
-  backgroundCallback mCallback;
+  BackgroundMoveCallback mCallback;
+  BackgroundClickCallback mClickCallback;
 };
