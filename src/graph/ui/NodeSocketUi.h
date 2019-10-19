@@ -1,5 +1,6 @@
 #pragma once
 #include "IControl.h"
+#include "src/constants.h"
 #include "src/graph/misc/NodeSocket.h"
 
 using namespace iplug;
@@ -16,7 +17,7 @@ public:
     //mRECT.R = L + mBitmap.W();
     //mRECT.B = T + mBitmap.H();
     mSocket = socket;
-    mDiameter = 30;
+    mDiameter = SOCKETDIAMETER;
     mRadius = mDiameter * 0.5;
     mRECT.L = socket->X;
     mRECT.T = socket->Y;
@@ -46,15 +47,19 @@ public:
   }
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
-    mStartX = x;
-    mStartY = y;
+    auto center = mRECT;
+    center.ScaleAboutCentre(0);
+    mStartX = center.L;
+    mStartY = center.T;
   }
 
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
     mDragging = false;
     SetRECT(mTargetRECT);
     mGraphics->SetAllControlsDirty();
-    IControl* target = mGraphics->GetControl(x, y);
+    IControl* target = mGraphics->GetControl(
+      mGraphics->GetMouseControlIdx(x, y, false)
+    );
     if (target != nullptr) {
       NodeSocketUi* targetUi = dynamic_cast<NodeSocketUi*>(target);
       if (targetUi != nullptr) {

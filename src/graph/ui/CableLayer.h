@@ -1,5 +1,6 @@
 #pragma once
 #include "IControl.h"
+#include "src/constants.h"
 #include "src/graph/Node.h"
 #include "src/graph/misc/NodeSocket.h"
 
@@ -23,6 +24,7 @@ public:
     Node* curNode;
     NodeSocket* curSock;
     NodeSocket* tarSock;
+    float socketRadius = SOCKETDIAMETER / 2;
     for (int n = 0; n < mNodes->GetSize(); n++) {
       curNode = mNodes->Get(n);
       for (int i = 0; i < curNode->inputCount; i++) {
@@ -31,8 +33,8 @@ public:
           tarSock = curSock->connectedNode->outSockets.Get(curSock->connectedBufferIndex);
           g.DrawLine(
             mColor,
-            curSock->X, curSock->Y,
-            tarSock->X, tarSock->Y,
+            curSock->X + socketRadius, curSock->Y + socketRadius,
+            tarSock->X + socketRadius, tarSock->Y + socketRadius,
             &mBlend, 5
           );
         }

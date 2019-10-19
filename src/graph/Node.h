@@ -9,6 +9,9 @@
 #include "src/graph/misc/NodeSocket.h"
 #include "src/graph/misc/ParameterCoupling.h"
 
+/**
+ * Virtual class which all nodes will derive from
+ */
 class Node {
 protected:
   bool uiReady;
@@ -106,6 +109,9 @@ public:
     outSockets.Empty(true);
   }
 
+  /**
+   * Check where the node is able to process a block
+   */
   virtual bool inputsReady() {
     if (inSockets.Get(0)->buffer == nullptr) {
         // zero all the outputs since no processing happened
@@ -174,7 +180,6 @@ public:
   }
 
   virtual void cleanupUi(iplug::igraphics::IGraphics* pGrahics) {
-
     if (mUi != nullptr) {
       mUi->cleanUp();
       pGrahics->RemoveControl(mUi, true);
@@ -183,10 +188,6 @@ public:
     uiReady = false;
   }
 
-  virtual void layoutChanged() {
-
-  }
-
-
+  virtual void layoutChanged() { }
 };
 

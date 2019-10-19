@@ -8,3 +8,5 @@
 #define DefaultNodeName "DEFAULTNODENAME"
 
 #define MAXBUFFER 512
+
+#define SOCKETDIAMETER 30

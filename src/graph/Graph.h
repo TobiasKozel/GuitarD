@@ -22,7 +22,6 @@ class Graph {
   DummyNode* output;
   int channelCount;
 
-  // background element to allow moving the viewport
   GraphBackground* background;
 
   CableLayer* cableLayer;
@@ -53,7 +52,6 @@ public:
      * processing chain is made, which will cause some artifacts anyways
      */
     WDL_MutexLock lock(&isProcessing);
-    //input->outputs[0] = in;
     input->CopyIn(in, nFrames);
 
     int nodeCount = nodes.GetSize();
@@ -123,11 +121,15 @@ public:
     for (int n = 0; n < nodes.GetSize(); n++) {
       nodes.Get(n)->cleanupUi(graphics);
     }
+    graphics->RemoveControl(background, true);
     graphics->RemoveControl(cableLayer, true);
     cableLayer = nullptr;
     graphics = nullptr;
   }
 
+  /**
+   * Called via a callback from the background
+   */
   void onViewPortChange(float x, float y, float scale) {
     for (int i = 0; i < nodes.GetSize(); i++) {
       nodes.Get(i)->mUi->translate(x, y);
@@ -144,18 +146,6 @@ public:
     for (int n = 0; n < nodes.GetSize(); n++) {
       nodes.Get(n)->layoutChanged();
     }
-  }
-
-  void serialize(nlohmann::json &json) {
-    // TODO this shouldn't need a lock since we don't want stutter when autosaves etc
-    // are in progress. Without it crashes about 50% of the time
-    WDL_MutexLock lock(&isProcessing);
-    json["output"] = {
-      nodes.Find(output->inSockets.Get(0)->connectedNode),
-      output->inSockets.Get(0)->connectedBufferIndex
-    };
-    serializer::serialize(json, nodes, input);
-
   }
 
   void deserialize(nlohmann::json& json) {
@@ -194,6 +184,19 @@ public:
       paramManager.releaseNode(node);
       nodes.DeletePtr(node, true);
     }
+  }
+
+  void serialize(nlohmann::json& json) {
+    /**
+     * TODO this shouldn't need a lock since we don't want stutter when autosaves etc
+     * are in progress. Without it crashes about 50% of the time
+     */
+    WDL_MutexLock lock(&isProcessing);
+    json["output"] = {
+      nodes.Find(output->inSockets.Get(0)->connectedNode),
+      output->inSockets.Get(0)->connectedBufferIndex
+    };
+    serializer::serialize(json, nodes, input);
   }
 
 private:
