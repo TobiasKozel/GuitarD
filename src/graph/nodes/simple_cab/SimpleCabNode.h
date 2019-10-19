@@ -34,12 +34,7 @@ public:
   }
 
   void ProcessBlock(int nFrames) {
-    if (isProcessed) { return; }
-    for (int i = 0; i < inputCount; i++) {
-      if (!inSockets.Get(0)->connectedNode->isProcessed) {
-        return;
-      }
-    }
+    if (!inputsReady()) { return; }
     //int prev = (int)*(parameters[0]->value);
     //parameters[0]->update();
     //int cur = (int)*(parameters[0]->value);

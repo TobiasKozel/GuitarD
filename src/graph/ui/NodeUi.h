@@ -58,6 +58,7 @@ public:
   void setUp(NodeSocketCallback callback) {
     for (int i = 0; i < mParameters->GetSize(); i++) {
       ParameterCoupling* couple = mParameters->Get(i);
+      double value = *(couple->value);
       float px = *X + couple->x - (couple->w * 0.5);
       float py = *Y + couple->y - (couple->h * 0.5);
       IRECT controlPos(px, py, px + couple->w, py + couple->h);
@@ -75,10 +76,9 @@ public:
         }
         );
       }
-      couple->control->SetValue(couple->defaultVal);
+      couple->control->SetValue(value);
       mGraphics->AttachControl(couple->control);
-      couple->control->SetValue(couple->defaultVal);
-      couple->control->SetValueToDefault();
+      couple->control->SetValue(value);
 
       // optinally hide the lables etc
       //IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);

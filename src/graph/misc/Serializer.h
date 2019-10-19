@@ -62,9 +62,9 @@ namespace serializer {
       std::string className = sNode["type"];
       Node* node = NodeList::createNode(className);
       if (node == nullptr) { continue; }
-      node->setup(sampleRate);
       node->X = sNode["position"][0];
       node->Y = sNode["position"][1];
+      node->setup(sampleRate);
       if (expectedIndex != sNode["idx"]) {
         WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
       }

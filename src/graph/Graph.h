@@ -133,7 +133,7 @@ public:
   void toggleGallery(bool wantsClose = false) {
     if (nodeGallery == nullptr && !wantsClose) {
       nodeGallery = new NodeGallery(graphics, [&](NodeList::NodeInfo info) {
-        this->addNode(info.constructor());
+        this->addNode(info.constructor(), nullptr, 0, 300, 300);
       });
       graphics->AttachControl(nodeGallery);
     }
@@ -178,10 +178,13 @@ public:
     WDL_MutexLock lock(&isProcessing);
     removeAllNodes();
     serializer::deserialize(json, nodes, output, input, sampleRate, &paramManager, graphics);
+    sortRenderStack();
   }
 
-  void addNode(Node* node, Node* pInput = nullptr, int index = 0, float x = 0) {
+  void addNode(Node* node, Node* pInput = nullptr, int index = 0, float x = 0, float y = 0) {
+    WDL_MutexLock lock(&isProcessing);
     node->X = x;
+    node->Y = y;
     node->setup(sampleRate);
     paramManager.claimNode(node);
     node->setupUi(graphics);
@@ -189,9 +192,7 @@ public:
       node->connectInput(pInput->outSockets.Get(index));
     }
     nodes.Add(node);
-    // keep the cable layer on top
-    graphics->RemoveControl(cableLayer);
-    graphics->AttachControl(cableLayer);
+    sortRenderStack();
   }
 
   void removeAllNodes() {
@@ -201,6 +202,7 @@ public:
   }
 
   void removeNode(int index) {
+    WDL_MutexLock lock(&isProcessing);
     Node* node = nodes.Get(index);
     if (node != nullptr) {
       if (node == output->inSockets.Get(0)->connectedNode) {
@@ -226,5 +228,16 @@ public:
   }
 
 private:
+
+  void sortRenderStack() {
+    // keep the cable layer on top
+    graphics->RemoveControl(cableLayer);
+    graphics->AttachControl(cableLayer);
+    if (nodeGallery != nullptr) {
+      graphics->RemoveControl(nodeGallery);
+      graphics->AttachControl(nodeGallery);
+    }
+  }
+
   int sampleRate;
 };
