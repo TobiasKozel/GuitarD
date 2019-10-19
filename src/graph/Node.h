@@ -47,7 +47,7 @@ public:
   /**
    * This is basically a delayed constructor with the only disadvatage: derived methods have to have the same parameters
    */
-  virtual void setup(int p_samplerate = 48000, int p_maxBuffer = 1024, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
+  virtual void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
     samplerate = p_samplerate;
     maxBuffer = p_maxBuffer;
     inputCount = p_inputs;

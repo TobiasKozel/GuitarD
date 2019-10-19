@@ -4,6 +4,7 @@
 #define FAUSTFLOAT iplug::sample
 
 #include "IPlugConstants.h"
+#include "src/constants.h"
 #include "src/logger.h"
 #include "src/graph/misc/ParameterCoupling.h"
 #include "src/graph/Node.h"
@@ -69,7 +70,7 @@ public:
   virtual int getNumInputs() = 0;
   virtual int getNumOutputs() = 0;
 
-  void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
+  void setup(int p_samplerate = 48000, int p_maxBuffer = MAXBUFFER, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
     Node::setup(p_samplerate, p_maxBuffer, p_channles, getNumInputs() / p_channles, getNumOutputs() / p_channles);
     
     /**

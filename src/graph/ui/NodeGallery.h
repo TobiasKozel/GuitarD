@@ -86,7 +86,6 @@ public:
       mTitleRect = mRECT;
       mRECT.B += ceilf(mElements.GetSize() / (float) columns) * ELEMENTHEIGHT + ELEMENTPADDING * 2;
       g.FillRect(mBack, mRECT);
-      GalleryElement* elem;
       for (int i = 0; i < mElements.GetSize(); i++) {
         mElements.Get(i)->Draw(g, &mRECT, i, columns);
       }

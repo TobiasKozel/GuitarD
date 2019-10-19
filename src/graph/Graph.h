@@ -61,8 +61,8 @@ public:
       nodes.Get(n)->isProcessed = false;
     }
 
-    if (output->inSockets.Get(0)->buffer == nullptr) {
-      // no out connected, so output nothing
+    if (output->inSockets.Get(0)->buffer == nullptr || nFrames > MAXBUFFER) {
+      // no out connected or too large of a block requested, so output nothing
       for (int c = 0; c < channelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
           out[c][i] = 0;

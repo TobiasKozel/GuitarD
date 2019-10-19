@@ -6,3 +6,5 @@
 
 // This is the name of a node if it wasn't overridden anywhere
 #define DefaultNodeName "DEFAULTNODENAME"
+
+#define MAXBUFFER 512
