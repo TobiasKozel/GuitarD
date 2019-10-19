@@ -4,7 +4,7 @@
 class StereoToolNode : public StereoTool {
  public:
   StereoToolNode() {
-    type = "StereoToolNode";
+    type = "CombineNode";
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

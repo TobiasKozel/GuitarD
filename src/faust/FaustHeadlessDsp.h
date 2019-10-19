@@ -97,7 +97,7 @@ public:
    * A node might have multiple inputs so the right ones have to be forwarded
    */
   virtual void ProcessBlock(int nFrames) {
-    if (!inputsReady()) { return; }
+    if (!inputsReady() || isProcessed) { return; }
 
     for (int i = 0; i < parameters.GetSize(); i++) {
       parameters.Get(i)->update();

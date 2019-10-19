@@ -10,9 +10,11 @@ public:
   CombineNode() {
     pan1 = pan2 = 0;
     mix = 0.5;
+    type = "StereoToolNode";
   }
 
   void ProcessBlock(int nFrames) {
+    if (isProcessed) { return; }
     Node* node1 = inSockets.Get(0)->connectedNode;
     Node* node2 = inSockets.Get(1)->connectedNode;
     if (node1 == node2 && node1 == nullptr) {
