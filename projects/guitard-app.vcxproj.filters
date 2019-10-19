@@ -372,6 +372,9 @@
     <ClInclude Include="..\src\graph\misc\NodeList.h">
       <Filter>src\graph\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\nodes\combine\CombineNode.h">
+      <Filter>src\graph\nodes\combine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -442,6 +445,9 @@
     </Filter>
     <Filter Include="src\graph\nodes\crybaby">
       <UniqueIdentifier>{2ba76469-9b04-4493-921f-6456bf85e090}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\nodes\combine">
+      <UniqueIdentifier>{d863aa7e-b984-4b1f-9231-5eab1d61c2d5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

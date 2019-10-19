@@ -5,6 +5,7 @@
 #include "src/graph/nodes/simple_delay/SimpleDelayNode.h"
 #include "src/graph/nodes/simple_cab/SimpleCabNode.h"
 #include "src/graph/nodes/crybaby/CryBabyNode.h"
+#include "src/graph/nodes/combine/CombineNode.h"
 
 
 namespace NodeList {
@@ -13,6 +14,14 @@ namespace NodeList {
       []() { return new StereoToolNode(); },
       "StereoToolNode",
       "Stereo Tool",
+      "asd",
+      "Tools"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new CombineNode(); },
+      "CombineNode",
+      "Combine",
       "asd",
       "Tools"
     });

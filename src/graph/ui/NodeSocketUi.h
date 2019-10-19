@@ -6,7 +6,7 @@
 using namespace iplug;
 using namespace igraphics;
 
-typedef std::function<void(NodeSocket* connectedTo)> NodeSocketCallback;
+typedef std::function<void(NodeSocket* connectedTo, int ownIndex)> NodeSocketCallback;
 
 class NodeSocketUi : public IControl {
 public:
@@ -64,7 +64,7 @@ public:
       NodeSocketUi* targetUi = dynamic_cast<NodeSocketUi*>(target);
       if (targetUi != nullptr) {
         if (!targetUi->mSocket->isInput && mSocket->isInput) {
-          mCallback(targetUi->mSocket);
+          mCallback(targetUi->mSocket, mSocket->ownIndex);
         }
       }
     }

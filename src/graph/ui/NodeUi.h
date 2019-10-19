@@ -111,7 +111,7 @@ public:
       }
     }
 
-    for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
+    for (int i = 0; i < mInSocketsUi.GetSize(); i++) {
       mGraphics->RemoveControl(mInSocketsUi.Get(i), true);
     }
 

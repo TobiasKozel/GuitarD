@@ -114,15 +114,19 @@ public:
    */
   virtual bool inputsReady() {
     if (inSockets.Get(0)->buffer == nullptr) {
-        // zero all the outputs since no processing happened
-        for (int o = 0; o < outputCount; o++) {
-            for (int c = 0; c < channelCount; c++) {
-                for (int i = 0; i < maxBuffer; i++) {
-                    outputs[o][c][i] = 0;
-                }
-            }
+      // zero all the outputs since no processing happened
+      for (int o = 0; o < outputCount; o++) {
+        for (int c = 0; c < channelCount; c++) {
+          for (int i = 0; i < maxBuffer; i++) {
+            outputs[o][c][i] = 0;
+          }
         }
+      }
       isProcessed = true;
+      return false;
+    }
+    if (inputCount > 1) {
+      // TODO this doesn't work with a node that has multiple inputs
       return false;
     }
     for (int i = 0; i < inputCount; i++) {
@@ -146,7 +150,7 @@ public:
       NodeSocket* inSocket = inSockets.Get(inputNumber);
       inSocket->connectedNode = outNode;
       inSocket->buffer = outNode->outputs[out->ownIndex];
-      inSocket->connectedBufferIndex = inputNumber;
+      inSocket->connectedBufferIndex = out->ownIndex;
     }
   }
 
@@ -172,8 +176,8 @@ public:
       &outSockets
     });
     pGrahics->AttachControl(mUi);
-    mUi->setUp([&](NodeSocket* socket) {
-      connectInput(socket);
+    mUi->setUp([&](NodeSocket* socket, int ownIndex) {
+      connectInput(socket, ownIndex);
     });
 
     uiReady = true;

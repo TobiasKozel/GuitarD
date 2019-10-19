@@ -51,10 +51,11 @@ public:
     //}
 
     float inverseChannelCount = 1.0 / channelCount;
+    sample** buffer = inSockets.Get(0)->buffer;
     for (int i = 0; i < nFrames; i++) {
       convertBufferIn[i] = 0;
       for (int c = 0; c < channelCount; c++) {
-        convertBufferIn[i] += inSockets.Get(0)->buffer[c][i];
+        convertBufferIn[i] += buffer[c][i];
       }
       convertBufferIn[i] *= inverseChannelCount;
     }
