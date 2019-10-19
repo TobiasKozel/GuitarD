@@ -47,7 +47,7 @@ public:
   /**
    * This is basically a delayed constructor with the only disadvatage: derived methods have to have the same parameters
    */
-  virtual void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
+  virtual void setup(int p_samplerate = 48000, int p_maxBuffer = 1024, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
     samplerate = p_samplerate;
     maxBuffer = p_maxBuffer;
     inputCount = p_inputs;
@@ -108,6 +108,14 @@ public:
 
   virtual bool inputsReady() {
     if (inSockets.Get(0)->buffer == nullptr) {
+        // zero all the outputs since no processing happened
+        for (int o = 0; o < outputCount; o++) {
+            for (int c = 0; c < channelCount; c++) {
+                for (int i = 0; i < maxBuffer; i++) {
+                    outputs[o][c][i] = 0;
+                }
+            }
+        }
       isProcessed = true;
       return false;
     }

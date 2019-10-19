@@ -31,11 +31,7 @@ public:
     g.DrawBitmap(mBitmap, IRECT(x - windowX, y, windowX, windowY), 1, &mBlend);
     g.DrawBitmap(mBitmap, IRECT(x, y - windowY, windowX, windowY), 1, &mBlend);
     g.DrawBitmap(mBitmap, IRECT(x - windowX, y - windowY, windowX, windowY), 1, &mBlend);
-    if (mGallery == nullptr) {
-      mGallery = new NodeGallery(mGraphics, [](const char* asd) {
-      });
-      mGraphics->AttachControl(mGallery);
-    }
+
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {

@@ -9,10 +9,10 @@ class DummyNode : public Node {
 public:
   DummyNode(bool isIn, int channels) : Node() {
     if (isIn) {
-      setup(0, 512, channels, 0, 1);
+      setup(0, 1024, channels, 0, 1);
     }
     else {
-      setup(0, 512, channels, 1, 0);
+      setup(0, 1024, channels, 1, 0);
     }
   }
 
