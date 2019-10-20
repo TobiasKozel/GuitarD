@@ -37,12 +37,12 @@ public:
     graphics = nullptr;
     background = nullptr;
     nodeGallery = nullptr;
+    cableLayer = nullptr;
     sampleRate = p_sampleRate;
     channelCount = p_channles;
     input = new DummyNode(true, channelCount);
     output = new DummyNode(false, channelCount);
-    NodeSocket* test = input->outSockets.Get(0);
-    output->connectInput(test);
+    output->connectInput(input->outSockets.Get(0));
   }
 
   ~Graph() {
@@ -237,8 +237,10 @@ private:
 
   void sortRenderStack() {
     // keep the cable layer on top
-    graphics->RemoveControl(cableLayer);
-    graphics->AttachControl(cableLayer);
+    if (cableLayer != nullptr) {
+      graphics->RemoveControl(cableLayer);
+      graphics->AttachControl(cableLayer);
+    }
     if (nodeGallery != nullptr) {
       graphics->RemoveControl(nodeGallery);
       graphics->AttachControl(nodeGallery);

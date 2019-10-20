@@ -28,7 +28,6 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
     }
     pGraphics->SetSizeConstraints(400, 2000, 400, 1500);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
-    // pGraphics->AttachPanelBackground(COLOR_GRAY);
     pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);
 
     this->graph->setupUi(pGraphics);
@@ -57,7 +56,6 @@ void GuitarD::OnUIClose() {
 }
 
 bool GuitarD::SerializeState(IByteChunk& chunk) const {
-  TRACE;
   nlohmann::json serialized = {
     {"version", PLUG_VERSION_STR},
     {"ui_scale", 1.0} // TODO get the proper scale
@@ -65,11 +63,9 @@ bool GuitarD::SerializeState(IByteChunk& chunk) const {
   graph->serialize(serialized);
   chunk.PutStr(serialized.dump(4).c_str());
   return true;
-  return IPluginBase::SerializeParams(chunk);
 }
 
 int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
-  TRACE;
   WDL_String json_string;
   chunk.GetStr(json_string, startPos);
   nlohmann::json serialized = nlohmann::json::parse(json_string.Get());
