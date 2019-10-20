@@ -212,7 +212,7 @@ public:
     Node* node = nodes.Get(index);
     if (node != nullptr) {
       if (node == output->inSockets.Get(0)->connectedNode) {
-        output->disconnectInput(0);
+        output->connectInput(nullptr, 0);
       }
       node->cleanupUi(graphics);
       paramManager.releaseNode(node);

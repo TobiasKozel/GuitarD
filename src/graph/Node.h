@@ -141,25 +141,22 @@ public:
 
   virtual void connectInput(NodeSocket* out, int inputNumber = 0) {
     if (inputNumber < inputCount) {
+      NodeSocket* inSocket = inSockets.Get(inputNumber);
+      if (out == nullptr) {
+        inSocket->connectedNode = nullptr;
+        inSocket->buffer = nullptr;
+        inSocket->connectedBufferIndex = -1;
+        return;
+      }
       if (out->isInput) {
         WDBGMSG("Trying to connect an input to an input!");
         assert(false);
         return;
       }
       Node* outNode = out->connectedNode;
-      NodeSocket* inSocket = inSockets.Get(inputNumber);
       inSocket->connectedNode = outNode;
       inSocket->buffer = outNode->outputs[out->ownIndex];
       inSocket->connectedBufferIndex = out->ownIndex;
-    }
-  }
-
-  virtual void disconnectInput(int inputNumber = 0) {
-    if (inputNumber < inputCount) {
-      NodeSocket* inSocket = inSockets.Get(inputNumber);
-      inSocket->connectedNode = nullptr;
-      inSocket->buffer = nullptr;
-      inSocket->connectedBufferIndex = -1;
     }
   }
 

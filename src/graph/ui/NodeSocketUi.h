@@ -78,6 +78,14 @@ public:
     mGraphics->SetAllControlsDirty();
   }
 
+  /**
+   * Disconnect the input on double click
+   */
+  void OnMouseDblClick(float x, float y, const IMouseMod& mod) override {
+    mCallback(nullptr, mSocket->ownIndex);
+    mGraphics->SetAllControlsDirty();
+  }
+
 protected:
   NodeSocket* mSocket;
   IBitmap mBitmap;
