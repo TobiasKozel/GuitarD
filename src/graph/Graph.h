@@ -226,7 +226,6 @@ public:
     removeAllNodes();
     WDL_MutexLock lock(&isProcessing);
     serializer::deserialize(json, nodes, output, input, sampleRate, &paramManager, graphics);
-    onViewPortChange();
     sortRenderStack();
   }
 

@@ -79,8 +79,10 @@ namespace serializer {
   ) {
     
     output->connectInput(nullptr, 0);
-    input->X = serialized["input"]["position"][0];
-    input->Y = serialized["input"]["position"][1];
+    input->mUi->setTranslation(
+      serialized["input"]["position"][0],
+      serialized["input"]["position"][1]
+    );
     int expectedIndex = 0;
 
     // create all the nodes and setup the parameters in the first pass
@@ -145,8 +147,10 @@ namespace serializer {
     else if (outNodeIndex == InputNode) {
       output->connectInput(input->outSockets.Get(0));
     }
-    output->X = serialized["output"]["position"][0];
-    output->Y = serialized["output"]["position"][1];
+    output->mUi->setTranslation(
+      serialized["output"]["position"][0],
+      output->Y = serialized["output"]["position"][1]
+    );
   }
 }
 

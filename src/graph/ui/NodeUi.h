@@ -154,6 +154,12 @@ public:
     mGraphics->SetAllControlsDirty();
   }
 
+  void setTranslation(float x, float y) {
+    float dX = x - *X;
+    float dY = y - *Y;
+    translate(dX, dY);
+  }
+
 private:
   void moveControl(IControl* control, float x, float y) {
     if (control == nullptr) { return; }
