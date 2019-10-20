@@ -64,6 +64,7 @@ public:
       IRECT controlPos(px, py, px + couple->w, py + couple->h);
       // use the daw parameter to sync the values if possible
       if (couple->parameterIdx != kNoParameter) {
+        couple->parameter->Set(value);
         couple->control = new IVKnobControl(
           controlPos, couple->parameterIdx
         );
@@ -72,13 +73,15 @@ public:
         // use the callback to get tha value to the dsp, won't allow automation though
         couple->control = new IVKnobControl(
           controlPos, [couple](IControl* pCaller) {
-          *(couple->value) = pCaller->GetValue();
-        }
+            *(couple->value) =
+              (pCaller->GetValue() * (couple->max - couple->min)) + couple->min;
+          }
         );
       }
-      couple->control->SetValue(value);
       mGraphics->AttachControl(couple->control);
-      couple->control->SetValue(value);
+      couple->control->SetValue(
+        (value - couple->min) / (couple->max - couple->min)
+      );
 
       // optinally hide the lables etc
       //IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);

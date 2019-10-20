@@ -84,7 +84,7 @@ public:
       }
       else {
         couple->parameter->InitDouble(
-          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize, couple->name
         );
       }
       couple->parameter->SetLabel(couple->name);

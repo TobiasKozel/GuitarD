@@ -181,6 +181,14 @@ public:
   }
 
   virtual void cleanupUi(iplug::igraphics::IGraphics* pGrahics) {
+    /**
+     * The param value gets only synced to the dsp value when the node is processed
+     * If the node is not connected this won't happen, so always do the update when the
+     * Gui window is closed just in case
+     */
+    for (int i = 0; i < parameters.GetSize(); i++) {
+      parameters.Get(i)->update();
+    }
     if (mUi != nullptr) {
       mUi->cleanUp();
       pGrahics->RemoveControl(mUi, true);

@@ -88,7 +88,7 @@ public:
     for (int i = 0; i < faustUi.params.GetSize(); i++) {
       ParameterCoupling* p = faustUi.params.Get(i);
       parameters.Add(p);
-      p->y = p->h * i;
+      p->y = p->h * i - 80;
     }
   }
 
