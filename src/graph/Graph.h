@@ -160,12 +160,12 @@ public:
   /**
    * Called via a callback from the background
    */
-  void onViewPortChange(float x, float y, float scale) {
+  void onViewPortChange(float dX = 0, float dY = 0, float scale = 1) {
     for (int i = 0; i < nodes.GetSize(); i++) {
-      nodes.Get(i)->mUi->translate(x, y);
+      nodes.Get(i)->mUi->translate(dX, dY);
     }
-    output->mUi->translate(x, y);
-    input->mUi->translate(x, y);
+    output->mUi->translate(dX, dY);
+    input->mUi->translate(dX, dY);
     // WDBGMSG("x %f y %f s %f\n", x, y, scale);
   }
 
@@ -178,13 +178,6 @@ public:
     for (int n = 0; n < nodes.GetSize(); n++) {
       nodes.Get(n)->layoutChanged();
     }
-  }
-
-  void deserialize(nlohmann::json& json) {
-    WDL_MutexLock lock(&isProcessing);
-    removeAllNodes();
-    serializer::deserialize(json, nodes, output, input, sampleRate, &paramManager, graphics);
-    sortRenderStack();
   }
 
   void addNode(Node* node, Node* pInput = nullptr, int index = 0, float x = 0, float y = 0) {
@@ -226,11 +219,15 @@ public:
      * are in progress. Without it crashes about 50% of the time
      */
     WDL_MutexLock lock(&isProcessing);
-    json["output"] = {
-      nodes.Find(output->inSockets.Get(0)->connectedNode),
-      output->inSockets.Get(0)->connectedBufferIndex
-    };
-    serializer::serialize(json, nodes, input);
+    serializer::serialize(json, nodes, input, output);
+  }
+
+  void deserialize(nlohmann::json& json) {
+    removeAllNodes();
+    WDL_MutexLock lock(&isProcessing);
+    serializer::deserialize(json, nodes, output, input, sampleRate, &paramManager, graphics);
+    onViewPortChange();
+    sortRenderStack();
   }
 
 private:
