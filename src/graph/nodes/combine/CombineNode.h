@@ -10,7 +10,7 @@ public:
   CombineNode() {
     pan1 = pan2 = 0;
     mix = 0.5;
-    type = "StereoToolNode";
+    type = "CombineNode";
   }
 
   void ProcessBlock(int nFrames) {

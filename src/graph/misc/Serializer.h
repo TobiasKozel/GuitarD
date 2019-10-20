@@ -19,39 +19,36 @@ namespace serializer {
       input->X, input->Y
     };
     serialized["nodes"] = nlohmann::json::array();
-    for (int i = 0, pos = 0; i < nodes.GetSize(); i++) {
+    for (int i = 0; i < nodes.GetSize(); i++) {
       Node* node = nodes.Get(i);
-      if (node != nullptr) {
-        serialized["nodes"][pos]["position"] = { node->X, node->Y };
-        // The index shouldn't really matter since they're all in order
-        serialized["nodes"][pos]["idx"] = i;
-        serialized["nodes"][pos]["type"] = node->type;
-        serialized["nodes"][pos]["inputs"] = nlohmann::json::array();
-        for (int prev = 0; prev < node->inputCount; prev++) {
-          Node* cNode = node->inSockets.Get(prev)->connectedNode;
-          if (cNode == nullptr) {
-            serialized["nodes"][pos]["inputs"][prev] = { NoNode, 0 };
-          }
-          else if (cNode == input) {
-            serialized["nodes"][pos]["inputs"][prev] = { InputNode, 0 };
-          }
-          else {
-            serialized["nodes"][pos]["inputs"][prev] = {
-              nodes.Find(cNode),
-              node->inSockets.Get(prev)->connectedBufferIndex
-            };
-          }
+      serialized["nodes"][i]["position"] = { node->X, node->Y };
+      // The index shouldn't really matter since they're all in order
+      serialized["nodes"][i]["idx"] = i;
+      serialized["nodes"][i]["type"] = node->type;
+      serialized["nodes"][i]["inputs"] = nlohmann::json::array();
+      for (int prev = 0; prev < node->inputCount; prev++) {
+        Node* cNode = node->inSockets.Get(prev)->connectedNode;
+        if (cNode == nullptr) {
+          serialized["nodes"][i]["inputs"][prev] = { NoNode, 0 };
         }
-        serialized["nodes"][pos]["parameters"] = nlohmann::json::array();
-        for (int p = 0; p < node->parameters.GetSize(); p++) {
-          int idx = node->parameters.Get(p)->parameterIdx;
-          double val = *(node->parameters.Get(p)->value);
-          serialized["nodes"][pos]["parameters"][p] = {
-            { "idx", idx },
-            { "value", val }
+        else if (cNode == input) {
+          serialized["nodes"][i]["inputs"][prev] = { InputNode, 0 };
+        }
+        else {
+          serialized["nodes"][i]["inputs"][prev] = {
+            nodes.Find(cNode),
+            node->inSockets.Get(prev)->connectedBufferIndex
           };
         }
-        pos++;
+      }
+      serialized["nodes"][i]["parameters"] = nlohmann::json::array();
+      for (int p = 0; p < node->parameters.GetSize(); p++) {
+        int idx = node->parameters.Get(p)->parameterIdx;
+        double val = *(node->parameters.Get(p)->value);
+        serialized["nodes"][i]["parameters"][p] = {
+          { "idx", idx },
+          { "value", val }
+        };
       }
     }
     // Handle the output node
