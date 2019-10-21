@@ -9,6 +9,7 @@ using namespace igraphics;
 typedef std::function<void(NodeSocket* connectedTo, int ownIndex)> NodeSocketCallback;
 
 class NodeSocketUi : public IControl {
+  int vol;
 public:
   NodeSocketUi(IGraphics* g, NodeSocket* socket, NodeSocketCallback callback) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
@@ -39,12 +40,21 @@ public:
 
   void Draw(IGraphics& g) override {
     // g.DrawBitmap(mBitmap, GetRECT(), 1, &mBlend);
+    //double avg = 0;
+    //if (mSocket->buffer != nullptr) {
+    //  for (int i = 0; i < 64; i++) {
+    //    avg += abs(mSocket->buffer[0][i]);
+    //  }
+    //}
+    //vol = SkClampMax(avg * 50, 255);
+    //g.DrawCircle(IColor(255, vol, 0, 0), mTargetRECT.L + mRadius, mTargetRECT.T + mRadius, 4, &mBlend, 10);
+    mDirty = true;
     g.DrawCircle(color, mTargetRECT.L + mRadius, mTargetRECT.T + mRadius, mRadius, &mBlend, 10);
     if (mDragging) {
-
       g.DrawLine(color, mStartX, mStartY, mCurrentX, mCurrentY, &mBlend, 5);
     }
   }
+
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
     auto center = mRECT;

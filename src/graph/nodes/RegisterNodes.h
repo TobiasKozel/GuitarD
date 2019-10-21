@@ -6,6 +6,7 @@
 #include "src/graph/nodes/simple_cab/SimpleCabNode.h"
 #include "src/graph/nodes/crybaby/CryBabyNode.h"
 #include "src/graph/nodes/combine/CombineNode.h"
+#include "src/graph/nodes/feedback/FeedbackNode.h"
 
 
 namespace NodeList {
@@ -22,6 +23,14 @@ namespace NodeList {
       []() { return new CombineNode(); },
       "CombineNode",
       "Combine",
+      "asd",
+      "Tools"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new FeedbackNode(); },
+      "FeedbackNode",
+      "Feedback",
       "asd",
       "Tools"
     });

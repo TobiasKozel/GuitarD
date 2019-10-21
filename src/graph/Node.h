@@ -137,6 +137,10 @@ public:
     return true;
   }
 
+  virtual void BlockStart() {
+    isProcessed = false;
+  }
+
   virtual void ProcessBlock(int nFrames) = 0;
 
   virtual void connectInput(NodeSocket* out, int inputNumber = 0) {

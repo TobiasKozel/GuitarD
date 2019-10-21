@@ -375,6 +375,9 @@
     <ClInclude Include="..\src\graph\nodes\combine\CombineNode.h">
       <Filter>src\graph\nodes\combine</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\nodes\feedback\FeedbackNode.h">
+      <Filter>src\graph\nodes\feedback</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -448,6 +451,9 @@
     </Filter>
     <Filter Include="src\graph\nodes\combine">
       <UniqueIdentifier>{d863aa7e-b984-4b1f-9231-5eab1d61c2d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\nodes\feedback">
+      <UniqueIdentifier>{45693ae6-f0e3-43f3-8767-266e45f22abd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

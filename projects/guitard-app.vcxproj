@@ -337,6 +337,7 @@
     <ClInclude Include="..\src\graph\nodes\combine\CombineNode.h" />
     <ClInclude Include="..\src\graph\nodes\crybaby\CryBabyNode.h" />
     <ClInclude Include="..\src\graph\nodes\DummyNode.h" />
+    <ClInclude Include="..\src\graph\nodes\feedback\FeedbackNode.h" />
     <ClInclude Include="..\src\graph\nodes\RegisterNodes.h" />
     <ClInclude Include="..\src\graph\nodes\simple_cab\SimpleCabNode.h" />
     <ClInclude Include="..\src\graph\nodes\simple_delay\SimpleDelayNode.h" />

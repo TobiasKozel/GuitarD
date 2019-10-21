@@ -60,7 +60,7 @@ public:
 
     int nodeCount = nodes.GetSize();
     for (int n = 0; n < nodeCount; n++) {
-      nodes.Get(n)->isProcessed = false;
+      nodes.Get(n)->BlockStart();
     }
 
     if (output->inSockets.Get(0)->buffer == nullptr || nFrames > MAXBUFFER) {
