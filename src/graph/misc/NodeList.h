@@ -1,20 +1,11 @@
 #pragma once
 #include <map>
 #include <functional>
+#include "src/graph/misc/NodeInfo.h"
 
 class Node;
 
 namespace NodeList {
-  typedef std::function<Node* ()> NodeConstructor;
-
-  struct NodeInfo {
-    NodeConstructor constructor;
-    std::string name;
-    std::string dislayName;
-    std::string image;
-    std::string categoryName;
-  };
-
   typedef std::map<std::string, NodeInfo> NodeMap;
 
   NodeMap nodelist;

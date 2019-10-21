@@ -3,7 +3,7 @@
 
 class SimpleDelayNode : public SimpleDelay {
 public:
-  SimpleDelayNode() {
-    type = "SimpleDelayNode";
+  SimpleDelayNode(std::string pType) {
+    type = pType;
   }
 };

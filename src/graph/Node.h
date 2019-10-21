@@ -16,8 +16,7 @@ class Node {
 protected:
   bool uiReady;
 public:
-  // blah, blah not the point of oop but this type name is used to serialize the node
-  const char* type;
+  std::string type;
 
   WDL_PtrList<ParameterCoupling> parameters;
   // The dsp will get the data from the buffer inside the socket
@@ -42,7 +41,6 @@ public:
    * The constructor doesn't take any parameters since it can be instanciated from the NodeList
    */
   Node() {
-    type = DefaultNodeName;
     outputs = nullptr;
     X = Y = 0;
   };

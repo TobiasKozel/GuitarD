@@ -7,10 +7,10 @@ class CombineNode : public Node {
   double mix;
   sample** emptyBuffer;
 public:
-  CombineNode() {
+  CombineNode(std::string pType) : Node() {
     pan1 = pan2 = 0;
     mix = 0.5;
-    type = "CombineNode";
+    type = pType;
   }
 
   void ProcessBlock(int nFrames) {

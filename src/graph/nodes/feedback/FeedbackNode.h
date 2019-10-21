@@ -6,8 +6,8 @@ class FeedbackNode : public Node {
   double gain;
   sample** prevBlock;
 public:
-  FeedbackNode() : Node() {
-    type = "FeedbackNode";
+  FeedbackNode(std::string pType) : Node() {
+    type = pType;
   }
 
   void setup(int p_samplerate = 48000, int p_maxBuffer = MAXBUFFER, int p_channels = 2, int p_inputs = 1, int p_outputs = 1) {

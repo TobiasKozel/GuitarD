@@ -3,8 +3,8 @@
 
 class StereoToolNode : public StereoTool {
  public:
-  StereoToolNode() {
-    type = "StereoToolNode";
+  StereoToolNode(std::string pType) {
+    type = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

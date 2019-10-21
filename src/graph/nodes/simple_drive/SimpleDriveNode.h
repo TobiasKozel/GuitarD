@@ -3,8 +3,8 @@
 
 class SimpleDriveNode : public SimpleDrive {
 public:
-  SimpleDriveNode() {
-    type = "SimpleDriveNode";
+  SimpleDriveNode(std::string pType) {
+    type = pType;
   }
   //parameters[0]->y = 100;
   //parameters[0]->x = 100;

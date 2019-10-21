@@ -12,7 +12,7 @@
 namespace NodeList {
   void registerNodes() {
     NodeList::registerNode(NodeList::NodeInfo {
-      []() { return new StereoToolNode(); },
+      []() { return new StereoToolNode("StereoToolNode"); },
       "StereoToolNode",
       "Stereo Tool",
       "asd",
@@ -20,7 +20,7 @@ namespace NodeList {
     });
 
     NodeList::registerNode(NodeList::NodeInfo{
-      []() { return new CombineNode(); },
+      []() { return new CombineNode("CombineNode"); },
       "CombineNode",
       "Combine",
       "asd",
@@ -28,7 +28,7 @@ namespace NodeList {
     });
 
     NodeList::registerNode(NodeList::NodeInfo{
-      []() { return new FeedbackNode(); },
+      []() { return new FeedbackNode("FeedbackNode"); },
       "FeedbackNode",
       "Feedback",
       "asd",
@@ -36,7 +36,7 @@ namespace NodeList {
     });
 
     NodeList::registerNode(NodeList::NodeInfo{
-      []() { return new SimpleDriveNode(); },
+      []() { return new SimpleDriveNode("SimpleDriveNode"); },
       "SimpleDriveNode",
       "Simple Drive",
       "asd",
@@ -44,7 +44,7 @@ namespace NodeList {
     });
 
     NodeList::registerNode(NodeList::NodeInfo{
-      []() { return new SimpleDelayNode(); },
+      []() { return new SimpleDelayNode("SimpleDelayNode"); },
       "SimpleDelayNode",
       "Mono Delay",
       "asd",
@@ -52,7 +52,7 @@ namespace NodeList {
     });
 
     NodeList::registerNode(NodeList::NodeInfo{
-      []() { return new SimpleCabNode(); },
+      []() { return new SimpleCabNode("SimpleCabNode"); },
       "SimpleCabNode",
       "Simple Cabinet",
       "asd",
@@ -60,7 +60,7 @@ namespace NodeList {
     });
 
     NodeList::registerNode(NodeList::NodeInfo{
-      []() { return new CryBabyNode(); },
+      []() { return new CryBabyNode("CryBabyNode"); },
       "CryBabyNode",
       "Crybaby",
       "asd",

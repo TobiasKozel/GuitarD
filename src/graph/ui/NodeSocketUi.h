@@ -48,7 +48,7 @@ public:
     //}
     //vol = SkClampMax(avg * 50, 255);
     //g.DrawCircle(IColor(255, vol, 0, 0), mTargetRECT.L + mRadius, mTargetRECT.T + mRadius, 4, &mBlend, 10);
-    mDirty = true;
+    //mDirty = true;
     g.DrawCircle(color, mTargetRECT.L + mRadius, mTargetRECT.T + mRadius, mRadius, &mBlend, 10);
     if (mDragging) {
       g.DrawLine(color, mStartX, mStartY, mCurrentX, mCurrentY, &mBlend, 5);

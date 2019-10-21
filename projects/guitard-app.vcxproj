@@ -328,6 +328,7 @@
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\faust\FaustHeadlessDsp.h" />
     <ClInclude Include="..\src\graph\Graph.h" />
+    <ClInclude Include="..\src\graph\misc\NodeInfo.h" />
     <ClInclude Include="..\src\graph\misc\NodeList.h" />
     <ClInclude Include="..\src\graph\misc\NodeSocket.h" />
     <ClInclude Include="..\src\graph\misc\ParameterCoupling.h" />

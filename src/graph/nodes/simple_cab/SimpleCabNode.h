@@ -12,8 +12,8 @@ class SimpleCabNode : public Node {
   float* convertBufferOut;
   double selectedIr;
 public:
-  SimpleCabNode() : Node() {
-    type = "SimpleCabNode";
+  SimpleCabNode(std::string pType) : Node() {
+    type = pType;
     convolver.init(64, cleanIR, 3000);
     convertBufferIn = new float[1024];
     convertBufferOut = new float[1024];

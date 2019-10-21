@@ -378,6 +378,9 @@
     <ClInclude Include="..\src\graph\nodes\feedback\FeedbackNode.h">
       <Filter>src\graph\nodes\feedback</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\misc\NodeInfo.h">
+      <Filter>src\graph\misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
