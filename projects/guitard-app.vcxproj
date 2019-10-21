@@ -341,8 +341,11 @@
     <ClInclude Include="..\src\graph\nodes\feedback\FeedbackNode.h" />
     <ClInclude Include="..\src\graph\nodes\RegisterNodes.h" />
     <ClInclude Include="..\src\graph\nodes\simple_cab\SimpleCabNode.h" />
+    <ClInclude Include="..\src\graph\nodes\simple_compressor\SimpleComressorNode.h" />
     <ClInclude Include="..\src\graph\nodes\simple_delay\SimpleDelayNode.h" />
     <ClInclude Include="..\src\graph\nodes\simple_drive\SimpleDriveNode.h" />
+    <ClInclude Include="..\src\graph\nodes\simple_gate\SimpleGateNode.h" />
+    <ClInclude Include="..\src\graph\nodes\simple_reverb\SimpleReverbNode.h" />
     <ClInclude Include="..\src\graph\nodes\stereo_tool\StereoToolNode.h" />
     <ClInclude Include="..\src\graph\ui\CableLayer.h" />
     <ClInclude Include="..\src\graph\ui\GraphBackground.h" />

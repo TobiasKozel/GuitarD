@@ -73,10 +73,12 @@ public:
       return;
     }
     // TODO multiple passes to ensure all the nodes are computed is super dumb
-    while (!output->inSockets.Get(0)->connectedNode->isProcessed) {
+    int attempts = 0;
+    while (!output->inSockets.Get(0)->connectedNode->isProcessed && attempts < 10) {
       for (int n = 0; n < nodeCount; n++) {
         nodes.Get(n)->ProcessBlock(nFrames);
       }
+      attempts++;
     }
 
     output->CopyOut(out, nFrames);
@@ -218,7 +220,6 @@ public:
      * TODO this shouldn't need a lock since we don't want stutter when autosaves etc
      * are in progress. Without it crashes about 50% of the time
      */
-    WDL_MutexLock lock(&isProcessing);
     serializer::serialize(json, nodes, input, output);
   }
 

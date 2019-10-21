@@ -381,6 +381,15 @@
     <ClInclude Include="..\src\graph\misc\NodeInfo.h">
       <Filter>src\graph\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\nodes\simple_reverb\SimpleReverbNode.h">
+      <Filter>src\graph\nodes\simplereverb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\nodes\simple_compressor\SimpleComressorNode.h">
+      <Filter>src\graph\nodes\simplecompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\nodes\simple_gate\SimpleGateNode.h">
+      <Filter>src\graph\nodes\simplegate</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -457,6 +466,15 @@
     </Filter>
     <Filter Include="src\graph\nodes\feedback">
       <UniqueIdentifier>{45693ae6-f0e3-43f3-8767-266e45f22abd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\nodes\simplereverb">
+      <UniqueIdentifier>{89813c7e-8601-4013-ac64-adce72eaa249}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\nodes\simplecompressor">
+      <UniqueIdentifier>{bb0b0422-21a3-4e19-855e-21f448cc13ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph\nodes\simplegate">
+      <UniqueIdentifier>{32c697c6-3dda-4502-934d-7dd2a71385e7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -7,6 +7,9 @@
 #include "src/graph/nodes/crybaby/CryBabyNode.h"
 #include "src/graph/nodes/combine/CombineNode.h"
 #include "src/graph/nodes/feedback/FeedbackNode.h"
+#include "src/graph/nodes/simple_reverb/SimpleReverbNode.h"
+#include "src/graph/nodes/simple_gate/SimpleGateNode.h"
+#include "src/graph/nodes/simple_compressor/SimpleComressorNode.h"
 
 
 namespace NodeList {
@@ -52,6 +55,14 @@ namespace NodeList {
     });
 
     NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new SimpleReverbNode("SimpleReverbNode"); },
+      "SimpleReverbNode",
+      "Stereo Reverb",
+      "asd",
+      "Delays/Reverbs"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
       []() { return new SimpleCabNode("SimpleCabNode"); },
       "SimpleCabNode",
       "Simple Cabinet",
@@ -65,6 +76,22 @@ namespace NodeList {
       "Crybaby",
       "asd",
       "Filters"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new SimpleComressorNode("SimpleComressorNode"); },
+      "SimpleComressorNode",
+      "Simple Compressor",
+      "asd",
+      "Dynamics"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new SimpleGateNode("SimpleGateNode"); },
+      "SimpleGateNode",
+      "Simple Gate",
+      "asd",
+      "Dynamics"
     });
   }
 }
