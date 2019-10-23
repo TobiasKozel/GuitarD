@@ -36,8 +36,8 @@ public:
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     if (mod.L || mod.C) {
-      offsetX += dX;
-      offsetY += dY;
+      offsetX += static_cast<int>(dX);
+      offsetY += static_cast<int>(dY);
       mGraphics->SetAllControlsDirty();
       mCallback(dX, dY, 1.f);
     }
@@ -51,7 +51,7 @@ public:
     // mRECT.Translate(-x, -y);
     // mRECT.Scale(1 - d / 10.f);
     // mRECT.Translate(x, y);
-    mScale += d / 20.0;
+    mScale += d / 20.f;
     WDBGMSG("scale %f \n", mScale);
     if (mScale > 0.3 && mScale < 2) {
       // TODO sucks hard, at least some kind of scaling
@@ -66,8 +66,8 @@ public:
       // keep track of the window size so the background alsoways fills the screen
       //bounds.R += 200;
       //bounds.B += 200;
-      windowX = bounds.R;
-      windowY = bounds.B;
+      windowX = static_cast<int>(bounds.R);
+      windowY = static_cast<int>(bounds.B);
       mRECT = bounds;
       mTargetRECT = bounds;
     }

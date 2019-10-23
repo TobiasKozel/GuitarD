@@ -59,8 +59,8 @@ public:
     for (int i = 0; i < mParameters->GetSize(); i++) {
       ParameterCoupling* couple = mParameters->Get(i);
       double value = *(couple->value);
-      float px = *X + couple->x - (couple->w * 0.5);
-      float py = *Y + couple->y - (couple->h * 0.5);
+      float px = *X + couple->x - (couple->w * 0.5f);
+      float py = *Y + couple->y - (couple->h * 0.5f);
       IRECT controlPos(px, py, px + couple->w, py + couple->h);
       // use the daw parameter to sync the values if possible
       if (couple->parameterIdx != kNoParameter) {

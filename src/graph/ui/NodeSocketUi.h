@@ -19,7 +19,7 @@ public:
     //mRECT.B = T + mBitmap.H();
     mSocket = socket;
     mDiameter = SOCKETDIAMETER;
-    mRadius = mDiameter * 0.5;
+    mRadius = mDiameter * 0.5f;
     mRECT.L = socket->X;
     mRECT.T = socket->Y;
     mRECT.R = mRECT.L + mDiameter;

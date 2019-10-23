@@ -27,7 +27,7 @@ public:
   void Draw(IGraphics& g, IRECT* rect, int index, int columns) {
     //g.DrawCircle(IColor(255, 0, 100, 255), 0, 0, 10);
     mRECT = *rect;
-    int row = floorf(index / (float)columns);
+    int row = static_cast<int>(floorf(index / (float)columns));
     mRECT.T += (row * ELEMENTHEIGHT) + ELEMENTPADDING + TITLEHEIGHT + ELEMENTPADDING * row;
     mRECT.B = mRECT.T + ELEMENTHEIGHT;
     mRECT.L += (index % columns) * ELEMENTWIDTH + (index % columns + 1) * ELEMENTPADDING;
@@ -81,7 +81,7 @@ public:
     }
     mRECT.B = mRECT.T + TITLEHEIGHT;
     if (mOpen) {
-      int columns = floorf(mRECT.W() / ELEMENTWIDTH);
+      int columns = static_cast<int>(floorf(mRECT.W() / ELEMENTWIDTH));
       if (columns == 0) { columns = 1; }
       mTitleRect = mRECT;
       mRECT.B += ceilf(mElements.GetSize() / (float) columns) * ELEMENTHEIGHT + ELEMENTPADDING * 2;
@@ -153,7 +153,7 @@ public:
     if (mGraphics != nullptr) {
       IRECT bounds = mGraphics->GetBounds();
       bounds.Pad(-GALLERYPADDING);
-      bounds.L = bounds.R * 0.5;
+      bounds.L = bounds.R * 0.5f;
       mRECT = bounds;
       mTargetRECT = bounds;
       mViewPort = bounds;
