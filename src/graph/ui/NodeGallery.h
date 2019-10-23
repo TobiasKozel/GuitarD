@@ -61,12 +61,17 @@ public:
     };
   }
 
+  ~GalleryCategory() {
+    mElements.Empty(true);
+  }
+
   void OnResize() {
   }
 
   void addNode(NodeList::NodeInfo node) {
     mNameString = node.categoryName;
     mName = mNameString.c_str();
+    mElements.Compact();
     mElements.Add(new GalleryElement(node));
   }
 
@@ -139,6 +144,10 @@ public:
     mCallback = callback;
     init();
     OnResize();
+  }
+
+  ~NodeGallery() {
+    mCategories.Empty(true);
   }
 
   void Draw(IGraphics& g) override {
