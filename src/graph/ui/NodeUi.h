@@ -137,6 +137,7 @@ public:
     // to the IGraphics class which will draw them
     // which means the rendering order is kinda hard to controll
     g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
+    //g.FillRect(IColor(255, 10, 10, 10), mRECT);
     g.DrawRect(IColor(255, 0, 255, 0), mCloseButton);
   }
 

@@ -87,8 +87,10 @@ public:
           couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize, couple->name
         );
       }
-      couple->parameter->SetLabel(couple->name);
-      couple->parameter->SetDisplayText(1, couple->name);
+      // TODO These seem to be leaking and also don't force vsts to update the names
+      // works for AU though
+      // couple->parameter->SetLabel(couple->name);
+      // couple->parameter->SetDisplayText(1, couple->name);
       couple->parameterIdx = i;
       couple->parameter->Set(*(couple->value));
       WDBGMSG("Claimed param %i\n", i);
@@ -110,8 +112,8 @@ public:
     for (int i = 0; i < MAXDAWPARAMS; i++) {
       if (parameters[i] == couple->parameter) {
         parametersClaimed[i] = false;
-        parameters[i]->SetLabel("Released");
-        parameters[i]->SetDisplayText(1, "Released");
+        // parameters[i]->SetLabel("Released");
+        // parameters[i]->SetDisplayText(1, "Released");
         // memleak TODO check if the const char cause leaks
         couple->parameter = nullptr;
         parametersLeft++;

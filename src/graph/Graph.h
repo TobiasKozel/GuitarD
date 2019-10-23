@@ -196,6 +196,7 @@ public:
       node->cleanupUi(graphics);
       paramManager.releaseNode(node);
       nodes.DeletePtr(node, true);
+      nodes.Compact();
     }
   }
 
