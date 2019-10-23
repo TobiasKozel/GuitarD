@@ -3,6 +3,9 @@
 #include "src/graph/misc/ParameterCoupling.h"
 #include "src/graph/misc/NodeSocket.h"
 #include "src/graph/ui/NodeSocketUi.h"
+#include "src/graph/misc/MessageBus.h"
+
+class Node;
 
 struct NodeUiParam {
   iplug::igraphics::IGraphics* pGraphics;
@@ -12,6 +15,7 @@ struct NodeUiParam {
   WDL_PtrList<ParameterCoupling>* pParameters;
   WDL_PtrList<NodeSocket>* inSockets;
   WDL_PtrList<NodeSocket>* outSockets;
+  Node* node;
 };
 
 using namespace iplug;
@@ -23,11 +27,13 @@ using namespace igraphics;
  * since it will only exists as long as the UI window is open but is owned by the node
  */
 class NodeUi : public IControl {
+  IRECT mCloseButton;
   WDL_PtrList<ParameterCoupling>* mParameters;
   WDL_PtrList<NodeSocket>* mInSockets;
   WDL_PtrList<NodeSocket>* mOutSockets;
   WDL_PtrList<NodeSocketUi> mInSocketsUi;
   WDL_PtrList<NodeSocketUi> mOutSocketsUi;
+  Node* mParentNode;
 public:
   NodeUi(NodeUiParam pParam) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
@@ -38,7 +44,7 @@ public:
     mParameters = pParam.pParameters;
     mInSockets = pParam.inSockets;
     mOutSockets = pParam.outSockets;
-
+    mParentNode = pParam.node;
     mBitmap = mGraphics->LoadBitmap(pParam.pBg, 1, false);
     float w = mBitmap.W();
     float h = mBitmap.H();
@@ -48,11 +54,14 @@ public:
     rect.T = *Y - h / 2;
     rect.B = *Y + h / 2;
     SetTargetAndDrawRECTs(rect);
+    mCloseButton.L = rect.R - 80;
+    mCloseButton.T = rect.T + 80;
+    mCloseButton.R = mCloseButton.L + 40;
+    mCloseButton.B = mCloseButton.T + 40;
     mBlend = EBlend::Clobber;
   }
 
   ~NodeUi() {
-
   }
 
   void setUp(NodeSocketCallback callback) {
@@ -128,6 +137,13 @@ public:
     // to the IGraphics class which will draw them
     // which means the rendering order is kinda hard to controll
     g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
+    g.DrawRect(IColor(255, 0, 255, 0), mCloseButton);
+  }
+
+  void OnMouseUp(float x, float y, const IMouseMod& mod) {
+    if (mCloseButton.Contains(IRECT(x, y, x, y))) {
+      MessageBus::fireEvent<Node*>("NodeDeleted", mParentNode);
+    }
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
@@ -154,6 +170,9 @@ public:
 
     *X += dX;
     *Y += dY;
+
+    mCloseButton.Translate(dX, dY);
+
     mGraphics->SetAllControlsDirty();
   }
 

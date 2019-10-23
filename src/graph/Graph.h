@@ -12,8 +12,11 @@
 #include "src/graph/ui/NodeSocketUi.h"
 #include "src/graph/ui/CableLayer.h"
 #include "src/graph/ui/NodeGallery.h"
+#include "src/graph/misc/MessageBus.h"
 
 class Graph {
+  MessageBus::Subscription<Node*> mNodeDelSub;
+
   iplug::igraphics::IGraphics* graphics;
   /** Holds all the nodes in the processing graph */
   WDL_PtrList<Node> nodes;
@@ -43,6 +46,9 @@ public:
     input = new DummyNode(true, channelCount);
     output = new DummyNode(false, channelCount);
     output->connectInput(input->outSockets.Get(0));
+    mNodeDelSub.subscribe("NodeDeleted", [&](Node* param) {
+      this->removeNode(param);
+    });
   }
 
   ~Graph() {
@@ -82,27 +88,6 @@ public:
     }
 
     output->CopyOut(out, nFrames);
-  }
-
-  void testAdd() {
-    WDL_MutexLock lock(&isProcessing);
-    if (nodes.GetSize() == 0) {
-      Node* stereo = NodeList::createNode("StereoToolNode");
-      addNode(stereo, input, 0, 0);
-      //Node* delay = new SimpleDelayNode();
-      //addNode(delay, stereo, 200);
-      Node* drive = NodeList::createNode("SimpleDriveNode");
-      addNode(drive, nullptr, 0, 400);
-      //Node* baby = new CryBabyNode();
-      //addNode(baby, drive, 600);
-      Node* cab = NodeList::createNode("SimpleCabNode");
-      addNode(cab, drive, 0, 800);
-      output->connectInput(cab->outSockets.Get(0));
-    }
-    else {
-      removeAllNodes();
-      output->connectInput(input->outSockets.Get(0));
-    }
   }
 
   /** The graph needs to know about the graphics context to add and remove the controlls for the nodes */
@@ -202,9 +187,8 @@ public:
     }
   }
 
-  void removeNode(int index) {
+  void removeNode(Node* node) {
     WDL_MutexLock lock(&isProcessing);
-    Node* node = nodes.Get(index);
     if (node != nullptr) {
       if (node == output->inSockets.Get(0)->connectedNode) {
         output->connectInput(nullptr, 0);
@@ -213,6 +197,10 @@ public:
       paramManager.releaseNode(node);
       nodes.DeletePtr(node, true);
     }
+  }
+
+  void removeNode(int index) {
+    removeNode(nodes.Get(index));
   }
 
   void serialize(nlohmann::json& json) {

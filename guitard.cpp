@@ -31,17 +31,6 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
     pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);
 
     this->graph->setupUi(pGraphics);
-
-    const IRECT b = pGraphics->GetBounds();
-    auto buttonAction = [&, pGraphics, b](IControl* pCaller) {
-      SplashClickActionFunc(pCaller);
-      graph->testAdd();
-    };
-
-    pGraphics->AttachControl(
-      new IVButtonControl(IRECT(10, 10, 50, 50), buttonAction),
-      kNoParameter, "vcontrols"
-    );
   };
 #endif
 }

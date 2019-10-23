@@ -390,6 +390,9 @@
     <ClInclude Include="..\src\graph\nodes\simple_gate\SimpleGateNode.h">
       <Filter>src\graph\nodes\simplegate</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\misc\MessageBus.h">
+      <Filter>src\graph\misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

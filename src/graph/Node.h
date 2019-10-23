@@ -8,6 +8,7 @@
 #include "src/graph/ui/NodeUi.h"
 #include "src/graph/misc/NodeSocket.h"
 #include "src/graph/misc/ParameterCoupling.h"
+#include "src/graph/misc/MessageBus.h"
 
 /**
  * Virtual class which all nodes will derive from
@@ -166,19 +167,20 @@ public:
    * Generic setup of the parameters to get something on the screen
    */
   virtual void setupUi(iplug::igraphics::IGraphics* pGrahics) {
+
     mUi = new NodeUi(NodeUiParam {
       pGrahics,
       PNGGENERICBG_FN,
       &X, &Y,
       &parameters,
       &inSockets,
-      &outSockets
+      &outSockets,
+      this
     });
     pGrahics->AttachControl(mUi);
     mUi->setUp([&](NodeSocket* socket, int ownIndex) {
       connectInput(socket, ownIndex);
     });
-
     uiReady = true;
   }
 
