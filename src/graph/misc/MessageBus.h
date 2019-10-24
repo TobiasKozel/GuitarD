@@ -38,6 +38,7 @@ namespace MessageBus {
     }
 
     void subscribe(string eventName, function<void(T param)> callback) {
+      mEventName = eventName;
       mCallback = callback;
       if (subscriptions.find(eventName) == subscriptions.end()) {
         SubsVector temp;
