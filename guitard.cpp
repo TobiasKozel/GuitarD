@@ -14,6 +14,10 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
     graph->paramManager.addParameter(GetParam(i));
   }
 
+  mParamChanged.subscribe("ParametersChanged", [&](bool) {
+    this->InformHostOfParameterDetailsChange();
+  });
+
 
 #if IPLUG_EDITOR // All UI methods and member variables should be within an IPLUG_EDITOR guard, should you want distributed UI
   mMakeGraphicsFunc = [&]() {

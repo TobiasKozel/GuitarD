@@ -19,6 +19,7 @@ using namespace igraphics;
 
 class GuitarD : public Plugin
 {
+  MessageBus::Subscription<bool> mParamChanged;
 public:
   GuitarD(const InstanceInfo& info);
   Graph* graph;

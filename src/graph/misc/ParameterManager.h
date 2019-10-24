@@ -5,6 +5,7 @@
 #include "IControl.h"
 #include "src/graph/Node.h"
 #include "src/graph/misc/ParameterCoupling.h"
+#include "src/graph/misc/MessageBus.h"
 
 class ParameterManager {
   iplug::IParam* parameters[MAXDAWPARAMS];
@@ -28,9 +29,8 @@ public:
     std::string paramprefix = "Uninitialized ";
     parametersClaimed[parametersLeft] = false;
     parameters[parametersLeft++] = param;
-    // all these values have a range from 0-100 since this can't be changed later on
-    // TODO find out how scaled paramters work
-    param->InitDouble((paramprefix + std::to_string(parametersLeft)).c_str(), 1, 0, 100.0, 0.1);
+    // all these values have a range from 0-1 since this can't be changed later on
+    param->InitDouble((paramprefix + std::to_string(parametersLeft)).c_str(), 1, 0, 1.0, 0.01);
   }
 
   /**
@@ -48,6 +48,7 @@ public:
         gotAllPamams = false;
       }
     }
+    MessageBus::fireEvent<bool>("ParametersChanged", false);
     return gotAllPamams;
   }
 
@@ -84,13 +85,13 @@ public:
       }
       else {
         couple->parameter->InitDouble(
-          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize, couple->name
+          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
         );
       }
       // TODO These seem to be leaking and also don't force vsts to update the names
       // works for AU though
-      // couple->parameter->SetLabel(couple->name);
-      // couple->parameter->SetDisplayText(1, couple->name);
+      //couple->parameter->SetLabel(couple->name);
+      //couple->parameter->SetDisplayText(1, couple->name);
       couple->parameterIdx = i;
       couple->parameter->Set(*(couple->value));
       WDBGMSG("Claimed param %i\n", i);
@@ -106,14 +107,15 @@ public:
     for (int i = 0; i < node->parameters.GetSize(); i++) {
       releaseParameter(node->parameters.Get(i));
     }
+    MessageBus::fireEvent<bool>("ParametersChanged", false);
   }
 
   void releaseParameter(ParameterCoupling* couple) {
     for (int i = 0; i < MAXDAWPARAMS; i++) {
       if (parameters[i] == couple->parameter) {
         parametersClaimed[i] = false;
-        // parameters[i]->SetLabel("Released");
-        // parameters[i]->SetDisplayText(1, "Released");
+        parameters[i]->SetLabel("Released");
+        parameters[i]->SetDisplayText(1, "Released");
         // memleak TODO check if the const char cause leaks
         couple->parameter = nullptr;
         parametersLeft++;
