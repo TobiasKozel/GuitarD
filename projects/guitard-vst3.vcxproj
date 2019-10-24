@@ -429,6 +429,7 @@
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp" />
     <ClCompile Include="..\..\..\IPlug\VST3\IPlugVST3.cpp" />
     <ClCompile Include="..\..\..\IPlug\VST3\IPlugVST3_ProcessorBase.cpp" />
+    <ClCompile Include="..\..\..\WDL\resample.cpp" />
     <ClCompile Include="..\GuitarD.cpp" />
     <ClCompile Include="..\thirdparty\fftconvolver\AudioFFT.cpp" />
     <ClCompile Include="..\thirdparty\fftconvolver\FFTConvolver.cpp" />

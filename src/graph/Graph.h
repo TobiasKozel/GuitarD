@@ -45,10 +45,17 @@ public:
     channelCount = p_channles;
     input = new DummyNode(true, channelCount);
     output = new DummyNode(false, channelCount);
-    output->connectInput(input->outSockets.Get(0));
+    // output->connectInput(input->outSockets.Get(0));
     mNodeDelSub.subscribe("NodeDeleted", [&](Node* param) {
       this->removeNode(param);
     });
+  }
+
+  void testadd() {
+    return;
+    Node* test = NodeList::createNode("SimpleCabNode");
+    addNode(test, input, 0);
+    output->connectInput(test->outSockets.Get(0));
   }
 
   ~Graph() {
@@ -117,6 +124,7 @@ public:
     output->setupUi(pGraphics);
     cableLayer = new CableLayer(pGraphics, &nodes, output);
     pGraphics->AttachControl(cableLayer);
+    testadd();
   }
 
   void toggleGallery(bool wantsClose = false) {

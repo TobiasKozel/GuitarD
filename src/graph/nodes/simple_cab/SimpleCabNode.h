@@ -1,5 +1,6 @@
 #pragma once
 #include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
+#include "resample.h"
 #include "config.h"
 #include "src/graph/Node.h"
 #include "src/graph/nodes/simple_cab/c.h"
@@ -8,29 +9,39 @@
 
 class SimpleCabNode : public Node {
   fftconvolver::FFTConvolver convolver;
-  float* convertBufferIn;
-  float* convertBufferOut;
+  fftconvolver::FFTConvolver convolver2;
+  WDL_Resampler mResampler;
+  double* resampledIR;
   double selectedIr;
 public:
   SimpleCabNode(std::string pType) : Node() {
     type = pType;
-    convolver.init(64, cleanIR, 3000);
-    convertBufferIn = new float[1024];
-    convertBufferOut = new float[1024];
+    resampledIR = nullptr;
     selectedIr = 0;
   }
 
   void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
     Node::setup(p_samplerate, p_maxBuffer, 2, 1, 1);
-    ParameterCoupling* p = new ParameterCoupling("IR", &selectedIr, 0.0, 0.0, 2.0, 1.0);
-    p->x = 100;
-    p->y = 100;
-    parameters.Add(p);
+    //ParameterCoupling* p = new ParameterCoupling("IR", &selectedIr, 0.0, 0.0, 2.0, 1.0);
+    //parameters.Add(p);
+    mResampler.SetMode(true, 0, true);
+    mResampler.SetFilterParms();
+    mResampler.SetFeedMode(true);
+    mResampler.SetRates(48000, p_samplerate);
+    double* test;
+    int inSamples = mResampler.ResamplePrepare(3000, 1, &test);
+    for (int i = 0; i < 3000; i++) {
+      test[i] = cleanIR[i];
+    }
+    resampledIR = new double[10000];
+    int outSamples = mResampler.ResampleOut(resampledIR, inSamples, 8000, 1);
+    convolver.init(64, resampledIR, outSamples);
+    convolver2.init(64, resampledIR, outSamples);
+    //convolver.init(64, cleanIR, 3000);
   }
 
   ~SimpleCabNode() {
-    delete convertBufferIn;
-    delete convertBufferOut;
+    delete resampledIR;
   }
 
   void ProcessBlock(int nFrames) {
@@ -50,23 +61,12 @@ public:
     //  }
     //}
 
-    float inverseChannelCount = 1.0 / channelCount;
     sample** buffer = inSockets.Get(0)->buffer;
-    for (int i = 0; i < nFrames; i++) {
-      convertBufferIn[i] = 0;
-      for (int c = 0; c < channelCount; c++) {
-        convertBufferIn[i] += buffer[c][i];
-      }
-      convertBufferIn[i] *= inverseChannelCount;
-    }
+
     
-    convolver.process(convertBufferIn, convertBufferOut, nFrames);
+    convolver.process(buffer[0], outputs[0][0], nFrames);
+    convolver2.process(buffer[1], outputs[0][1], nFrames);
     
-    for (int i = 0; i < nFrames; i++) {
-      for (int c = 0; c < channelCount; c++) {
-         outputs[0][c][i] = convertBufferOut[i];
-      }
-    }
 
     isProcessed = true;
   }

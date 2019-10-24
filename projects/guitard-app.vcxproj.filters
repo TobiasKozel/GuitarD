@@ -104,6 +104,9 @@
     <ClCompile Include="..\thirdparty\fftconvolver\Utilities.cpp">
       <Filter>thirdparty\convolver</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\WDL\resample.cpp">
+      <Filter>WDL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\GuitarD.h" />
@@ -478,6 +481,9 @@
     </Filter>
     <Filter Include="src\graph\nodes\simplegate">
       <UniqueIdentifier>{32c697c6-3dda-4502-934d-7dd2a71385e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WDL">
+      <UniqueIdentifier>{fa23b9fb-6159-4e25-9eed-6ee81794c82c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
