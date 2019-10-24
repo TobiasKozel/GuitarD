@@ -1,16 +1,16 @@
 #pragma once
 #include "IControl.h"
 #include "config.h"
+#include "src/graph/misc/MessageBus.h"
 
 using namespace iplug;
 using namespace igraphics;
 
 typedef std::function<void(float x, float y, float scale)> BackgroundMoveCallback;
-typedef std::function<void(float x, float y, const IMouseMod& mod)> BackgroundClickCallback;
 
 class GraphBackground : public IControl {
 public:
-  GraphBackground(IGraphics* g, BackgroundMoveCallback pCallback, BackgroundClickCallback pClick) :
+  GraphBackground(IGraphics* g, BackgroundMoveCallback pCallback) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
     mBitmap = g->LoadBitmap(PNGBACKGROUND_FN, 1, false);
@@ -18,7 +18,6 @@ public:
     mGraphics = g;
     mY = mX = 0;
     mCallback = pCallback;
-    mClickCallback = pClick;
     mScale = 1.0;
     offsetX = offsetY = windowY = windowX = 0;
   }
@@ -44,7 +43,7 @@ public:
   }
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
-    mClickCallback(x, y, mod);
+    MessageBus::fireEvent<bool>("OpenGallery", mod.R);
   }
 
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
@@ -85,5 +84,4 @@ protected:
   int windowY;
   float mScale;
   BackgroundMoveCallback mCallback;
-  BackgroundClickCallback mClickCallback;
 };

@@ -4,6 +4,7 @@
 #include "src/graph/misc/NodeList.h"
 #include "config.h"
 #include "src/logger.h"
+#include "src/graph/misc/MessageBus.h"
 
 using namespace iplug;
 using namespace igraphics;
@@ -129,48 +130,76 @@ public:
   GalleryCategory* mPrev;
 };
 
-
-typedef std::function<void(NodeList::NodeInfo info)> GalleryAddCallBack;
-
 #define GALLERYPADDING 10
 
 class NodeGallery : public IControl {
 public:
-  NodeGallery(IGraphics* g, GalleryAddCallBack callback) :
+  NodeGallery(IGraphics* g) :
     IControl(IRECT(), kNoParameter)
   {
     mPadding = 10;
     mGraphics = g;
-    mCallback = callback;
     init();
+    mIsOpen = false;
     OnResize();
+    mOpenGalleryEvent.subscribe("OpenGallery", [&](bool open) {
+      this->openGallery(open);
+    });
   }
 
   ~NodeGallery() {
     mCategories.Empty(true);
   }
 
-  void Draw(IGraphics& g) override {
-    g.FillRect(IColor(255, 50, 50, 50), mRECT);
+  void openGallery(bool open = true) {
+    if (open == mIsOpen) { return; }
+    mIsOpen = open;
+    OnResize();
+    if (mIsOpen) {
+      mDirty = true;
+    }
+    else {
+      // redraw the whole screen
+      mGraphics->SetAllControlsDirty();
+    }
+  }
 
-    for (int i = 0; i < mCategories.GetSize(); i++) {
-      mCategories.Get(i)->Draw(g);
+  void Draw(IGraphics& g) override {
+    if (mIsOpen) {
+      g.FillRect(IColor(255, 50, 50, 50), mRECT);
+      for (int i = 0; i < mCategories.GetSize(); i++) {
+        mCategories.Get(i)->Draw(g);
+      }
+    }
+    else {
+      g.FillCircle(IColor(255, 50, 50, 50), mRECT);
     }
   }
 
   void OnResize() override {
     if (mGraphics != nullptr) {
       IRECT bounds = mGraphics->GetBounds();
-      bounds.Pad(-GALLERYPADDING);
-      bounds.L = bounds.R * 0.5f;
-      mRECT = bounds;
-      mTargetRECT = bounds;
-      mViewPort = bounds;
-      mViewPort.Pad(-GALLERYPADDING);
+      if (mIsOpen) {
+        bounds.Pad(-GALLERYPADDING);
+        bounds.L = bounds.R * 0.5f;
+        mRECT = bounds;
+        mTargetRECT = bounds;
+        mViewPort = bounds;
+        mViewPort.Pad(-GALLERYPADDING);
+      }
+      else {
+        bounds.Pad(-GALLERYPADDING);
+        bounds.L = bounds.R - 60;
+        bounds.B = bounds.T + 60;
+        mRECT = bounds;
+        mTargetRECT = bounds;
+        mViewPort = bounds;
+      }
     }
   }
 
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
+    if (!mIsOpen) { return; }
     float scroll = d * 20;
     if (mod.C) {
       mViewPort.Translate(scroll, 0);
@@ -187,16 +216,21 @@ public:
   }
 
   void OnMouseUp(float x, float y, const IMouseMod& mod) {
-    GalleryCategory* cat;
-    for (int i = 0; i < mCategories.GetSize(); i++) {
-      cat = mCategories.Get(i);
-      if (cat->mRECT.Contains(IRECT(x, y, x, y))) {
-        NodeList::NodeInfo* ret = cat->OnMouseDown(x, y, mod);
-        if (ret != nullptr) {
-          mCallback(*ret);
+    if (mIsOpen) {
+      GalleryCategory* cat;
+      for (int i = 0; i < mCategories.GetSize(); i++) {
+        cat = mCategories.Get(i);
+        if (cat->mRECT.Contains(IRECT(x, y, x, y))) {
+          NodeList::NodeInfo* ret = cat->OnMouseDown(x, y, mod);
+          if (ret != nullptr) {
+            MessageBus::fireEvent<NodeList::NodeInfo>("NodeAdd", *ret);
+          }
+          mDirty = true;
         }
-        mDirty = true;
       }
+    }
+    else {
+      openGallery();
     }
   }
 
@@ -216,11 +250,11 @@ private:
       uniqueCat.at(i.second.categoryName)->addNode(i.second);
     }
   }
-
+  bool mIsOpen;
   float mPadding;
-  GalleryAddCallBack mCallback;
   IGraphics* mGraphics;
   WDL_PtrList<GalleryCategory> mCategories;
   IRECT mViewPort;
   IRECT mViewPortBounds;
+  MessageBus::Subscription<bool> mOpenGalleryEvent;
 };

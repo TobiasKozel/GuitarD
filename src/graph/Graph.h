@@ -16,6 +16,7 @@
 
 class Graph {
   MessageBus::Subscription<Node*> mNodeDelSub;
+  MessageBus::Subscription<NodeList::NodeInfo> mNodeAddEvent;
 
   iplug::igraphics::IGraphics* graphics;
   /** Holds all the nodes in the processing graph */
@@ -48,6 +49,9 @@ public:
     // output->connectInput(input->outSockets.Get(0));
     mNodeDelSub.subscribe("NodeDeleted", [&](Node* param) {
       this->removeNode(param);
+    });
+    mNodeAddEvent.subscribe("NodeAdd", [&](NodeList::NodeInfo info) {
+      this->addNode(info.constructor(), nullptr, 0, 300, 300);
     });
   }
 
@@ -99,24 +103,16 @@ public:
 
   /** The graph needs to know about the graphics context to add and remove the controlls for the nodes */
   void setupUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
-    background = new GraphBackground(pGraphics, [&](float x, float y, float scale) {
-        this->onViewPortChange(x, y, scale);
-      },
-      [&](float x, float y, const IMouseMod& mod) {
-        if (mod.R) {
-          this->toggleGallery();
-        }
-        else {
-          this->toggleGallery(true);
-        }
-      }
-    );
-    pGraphics->AttachControl(background);
-
     if (pGraphics != nullptr && pGraphics != graphics) {
       WDBGMSG("Graphics context changed");
       graphics = pGraphics;
     }
+
+    background = new GraphBackground(pGraphics, [&](float x, float y, float scale) {
+      this->onViewPortChange(x, y, scale);
+    });
+    pGraphics->AttachControl(background);
+
     for (int n = 0; n < nodes.GetSize(); n++) {
         nodes.Get(n)->setupUi(pGraphics);
     }
@@ -124,30 +120,23 @@ public:
     output->setupUi(pGraphics);
     cableLayer = new CableLayer(pGraphics, &nodes, output);
     pGraphics->AttachControl(cableLayer);
-    testadd();
-  }
 
-  void toggleGallery(bool wantsClose = false) {
-    if (nodeGallery == nullptr && !wantsClose) {
-      nodeGallery = new NodeGallery(graphics, [&](NodeList::NodeInfo info) {
-        this->addNode(info.constructor(), nullptr, 0, 300, 300);
-      });
-      graphics->AttachControl(nodeGallery);
-    }
-    else if (nodeGallery != nullptr){
-      graphics->RemoveControl(nodeGallery, true);
-      nodeGallery = nullptr;
-    }
+    nodeGallery = new NodeGallery(graphics);
+    graphics->AttachControl(nodeGallery);
+
+    testadd();
   }
 
   void cleanupUi() {
     for (int n = 0; n < nodes.GetSize(); n++) {
       nodes.Get(n)->cleanupUi(graphics);
     }
+    graphics->RemoveControl(nodeGallery, true);
     graphics->RemoveControl(background, true);
     graphics->RemoveControl(cableLayer, true);
     input->cleanupUi(graphics);
     output->cleanupUi(graphics);
+    nodeGallery = nullptr;
     cableLayer = nullptr;
     graphics = nullptr;
   }
