@@ -340,6 +340,7 @@
 		4FFBB93520863B0E00DDD0E7 /* vstnoteexpressiontypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F81588E205D50EB00393585 /* vstnoteexpressiontypes.cpp */; };
 		94257ECE234F85310043976D /* src in Resources */ = {isa = PBXBuildFile; fileRef = 94257ECD234F85310043976D /* src */; };
 		94257ECF234F85310043976D /* src in Resources */ = {isa = PBXBuildFile; fileRef = 94257ECD234F85310043976D /* src */; };
+		9461A5E52362531200FB9381 /* resample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94E7662D236251A0000B599F /* resample.cpp */; };
 		94CDBE422352A4A900191563 /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE372352A4A800191563 /* Utilities.cpp */; };
 		94CDBE432352A4A900191563 /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE372352A4A800191563 /* Utilities.cpp */; };
 		94CDBE442352A4A900191563 /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE372352A4A800191563 /* Utilities.cpp */; };
@@ -361,6 +362,7 @@
 		94CDBE542352A4A900191563 /* AudioFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE3E2352A4A800191563 /* AudioFFT.cpp */; };
 		94CDBE552352A4A900191563 /* AudioFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE3E2352A4A800191563 /* AudioFFT.cpp */; };
 		94CDBE562352A4A900191563 /* AudioFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CDBE3E2352A4A800191563 /* AudioFFT.cpp */; };
+		94E7662E236251AF000B599F /* resample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94E7662D236251A0000B599F /* resample.cpp */; };
 		B885CBC52304AE7300D73128 /* IPlugProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F8F61A8202807B9003F2573 /* IPlugProcessor.cpp */; };
 		B8E22A0C220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */; };
 		B8E22A0D220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */; };
@@ -850,6 +852,7 @@
 		94CDBE3F2352A4A900191563 /* AudioFFT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioFFT.h; path = ../thirdparty/fftconvolver/AudioFFT.h; sourceTree = "<group>"; };
 		94CDBE402352A4A900191563 /* TwoStageFFTConvolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TwoStageFFTConvolver.h; path = ../thirdparty/fftconvolver/TwoStageFFTConvolver.h; sourceTree = "<group>"; };
 		94CDBE412352A4A900191563 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Utilities.h; path = ../thirdparty/fftconvolver/Utilities.h; sourceTree = "<group>"; };
+		94E7662D236251A0000B599F /* resample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = resample.cpp; path = ../../../WDL/resample.cpp; sourceTree = "<group>"; };
 		B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.cpp.cpp; name = IPlugVST3_ProcessorBase.cpp; path = ../../../IPlug/VST3/IPlugVST3_ProcessorBase.cpp; sourceTree = "<group>"; tabWidth = 2; };
 		B8E22A0B220268C4007CBF4C /* IPlugVST3_ProcessorBase.h */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = IPlugVST3_ProcessorBase.h; path = ../../../IPlug/VST3/IPlugVST3_ProcessorBase.h; sourceTree = "<group>"; tabWidth = 2; };
 		B8EA6B932203868500D23A86 /* IPlugVST3_Common.h */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.h; name = IPlugVST3_Common.h; path = ../../../IPlug/VST3/IPlugVST3_Common.h; sourceTree = "<group>"; tabWidth = 2; };
@@ -1693,6 +1696,7 @@
 		4FF01613134E0BCD001447BA /* WDL */ = {
 			isa = PBXGroup;
 			children = (
+				94E7662D236251A0000B599F /* resample.cpp */,
 				4FD16CF713B6343B001D0217 /* SWELL */,
 				4F1F1BE9135B1F60003A5BB2 /* wdlendian.h */,
 				4FF01719134E153A001447BA /* heapbuf.h */,
@@ -2373,6 +2377,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9461A5E52362531200FB9381 /* resample.cpp in Sources */,
 				4F03A5AF20A4621100EBDFFB /* IGraphics.cpp in Sources */,
 				4F6369E020A464BB0022C370 /* IGraphicsNanoVG_src.m in Sources */,
 				4F6369EE20A466470022C370 /* IControl.cpp in Sources */,
@@ -2596,6 +2601,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94E7662E236251AF000B599F /* resample.cpp in Sources */,
 				B885CBC52304AE7300D73128 /* IPlugProcessor.cpp in Sources */,
 				94CDBE422352A4A900191563 /* Utilities.cpp in Sources */,
 				4F10D3D9203A6719003EF82A /* RtMidi.cpp in Sources */,
