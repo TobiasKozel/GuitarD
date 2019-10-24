@@ -108,18 +108,19 @@ public:
       graphics = pGraphics;
     }
 
-    background = new GraphBackground(pGraphics, [&](float x, float y, float scale) {
+    background = new GraphBackground(graphics, [&](float x, float y, float scale) {
       this->onViewPortChange(x, y, scale);
     });
-    pGraphics->AttachControl(background);
+    graphics->AttachControl(background);
 
     for (int n = 0; n < nodes.GetSize(); n++) {
-        nodes.Get(n)->setupUi(pGraphics);
+        nodes.Get(n)->setupUi(graphics);
     }
-    input->setupUi(pGraphics);
-    output->setupUi(pGraphics);
-    cableLayer = new CableLayer(pGraphics, &nodes, output);
-    pGraphics->AttachControl(cableLayer);
+    input->setupUi(graphics);
+    output->setupUi(graphics);
+
+    cableLayer = new CableLayer(graphics, &nodes, output);
+    graphics->AttachControl(cableLayer);
 
     nodeGallery = new NodeGallery(graphics);
     graphics->AttachControl(nodeGallery);
@@ -131,13 +132,19 @@ public:
     for (int n = 0; n < nodes.GetSize(); n++) {
       nodes.Get(n)->cleanupUi(graphics);
     }
+
     graphics->RemoveControl(nodeGallery, true);
+    nodeGallery = nullptr;
+
     graphics->RemoveControl(background, true);
+    background = nullptr;
+
     graphics->RemoveControl(cableLayer, true);
+    cableLayer = nullptr;
+
     input->cleanupUi(graphics);
     output->cleanupUi(graphics);
-    nodeGallery = nullptr;
-    cableLayer = nullptr;
+
     graphics = nullptr;
   }
 
