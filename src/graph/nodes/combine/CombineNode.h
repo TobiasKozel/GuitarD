@@ -15,36 +15,37 @@ public:
 
   void ProcessBlock(int nFrames) {
     if (isProcessed) { return; }
-    Node* node1 = inSockets.Get(0)->connectedNode;
-    Node* node2 = inSockets.Get(1)->connectedNode;
-    if (node1 == node2 && node1 == nullptr) {
-      // Both inputs disconnected means nothing to do
-      for (int c = 0; c < channelCount; c++) {
-        for (int i = 0; i < nFrames; i++) {
-          outputs[0][c][i] = 0;
-        }
-      }
-      isProcessed = true;
+    NodeSocket* s1 = inSockets.Get(0);
+    NodeSocket* s2 = inSockets.Get(1);
+    bool has1 = s1->connectedNode != nullptr;
+    bool has2 = s2->connectedNode != nullptr;
+    if (has1 == has2 && has1 == false) {
+      outputSilence();
       return;
     }
 
-    if ((node1 != nullptr && !node1->isProcessed) || node2 != nullptr && !node2->isProcessed) {
+    if ((has1 && !s1->connectedNode->isProcessed) || has2 && !s2->connectedNode->isProcessed) {
       return;
     }
 
-    sample** buffer1 = inSockets.Get(0)->connectedTo->parentBuffer;
-    sample** buffer2 = inSockets.Get(1)->connectedTo->parentBuffer;
-    buffer1 = buffer1 == nullptr ? emptyBuffer : buffer1;
-    buffer2 = buffer2 == nullptr ? emptyBuffer : buffer2;
+    sample** buffer1 = has1 ? s1->connectedTo->parentBuffer : emptyBuffer;
+    sample** buffer2 = has2 ? s2->connectedTo->parentBuffer : emptyBuffer;
     parameters.Get(0)->update();
     parameters.Get(1)->update();
     parameters.Get(2)->update();
     double mix = *(parameters.Get(2)->value);
     double invMix = 1 - mix;
-    for (int c = 0; c < channelCount; c++) {
-      for (int i = 0; i < nFrames; i++) {
-        outputs[0][c][i] = buffer1[c][i] * mix + buffer2[c][i] * invMix;
-      }
+    double pan1 = *(parameters.Get(0)->value);
+    double pan2 = *(parameters.Get(1)->value);
+    double pan1l = min(1.0, max(-pan1 + 1.0, 0.0)) * mix;
+    double pan1r = min(1.0, max(+pan1 + 1.0, 0.0)) * mix;
+    double pan2l = min(1.0, max(-pan2 + 1.0, 0.0)) * invMix;
+    double pan2r = min(1.0, max(+pan2 + 1.0, 0.0)) * invMix;
+    for (int i = 0; i < nFrames; i++) {
+      outputs[0][0][i] = buffer1[0][i] * pan1l + buffer2[0][i] * pan2l;
+    }
+    for (int i = 0; i < nFrames; i++) {
+      outputs[0][1][i] = buffer1[1][i] * pan1r + buffer2[1][i] * pan2r;
     }
     isProcessed = true;
   }

@@ -18,6 +18,7 @@ public:
     parentBuffer = nullptr;
     X = Y = 0;
     connectedSocketIndex = -1;
+    connectedNode = nullptr;
   }
 
   /**
@@ -32,6 +33,7 @@ public:
     parentBuffer = pBuffer;
     X = Y = 0;
     connectedSocketIndex = -1;
+    connectedNode = nullptr;
   }
 
   ~NodeSocket() {
