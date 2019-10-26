@@ -14,6 +14,7 @@ struct SocketConnectRequest {
 
 class NodeSocketUi : public IControl {
   MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
+  MessageBus::Subscription<Node*> onDisconnectAllEvent;
   int vol;
 public:
   NodeSocketUi(IGraphics* g, NodeSocket* socket) :
@@ -42,6 +43,12 @@ public:
     onConnectionEvent.subscribe("socketConnection", [&](SocketConnectRequest req) {
       if (req.to == this->mSocket) {
         this->mSocket->connect(req.from);
+      }
+    });
+
+    onDisconnectAllEvent.subscribe("NodeDisconnectAll", [&](Node* node) {
+      if (this->mSocket->parentNode == node) {
+        mSocket->disconnect();
       }
     });
   }
@@ -105,6 +112,7 @@ public:
    * Disconnect the input on double click
    */
   void OnMouseDblClick(float x, float y, const IMouseMod& mod) override {
+    mSocket->disconnect();
     mGraphics->SetAllControlsDirty();
   }
 

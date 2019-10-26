@@ -28,6 +28,7 @@ using namespace igraphics;
  */
 class NodeUi : public IControl {
   IRECT mCloseButton;
+  IRECT mDisconnectAllButton;
   WDL_PtrList<ParameterCoupling>* mParameters;
   WDL_PtrList<NodeSocket>* mInSockets;
   WDL_PtrList<NodeSocket>* mOutSockets;
@@ -54,10 +55,20 @@ public:
     rect.T = *Y - h / 2;
     rect.B = *Y + h / 2;
     SetTargetAndDrawRECTs(rect);
-    mCloseButton.L = rect.R - 80;
-    mCloseButton.T = rect.T + 80;
-    mCloseButton.R = mCloseButton.L + 40;
-    mCloseButton.B = mCloseButton.T + 40;
+#define buttonX 40
+#define buttonY 0
+#define buttonW 40
+#define buttonH 40
+    mCloseButton.L = rect.R - buttonX;
+    mCloseButton.T = rect.T + buttonY;
+    mCloseButton.R = mCloseButton.L + buttonW;
+    mCloseButton.B = mCloseButton.T + buttonH;
+
+    mDisconnectAllButton.L = rect.R - buttonW - buttonX;
+    mDisconnectAllButton.T = rect.T + buttonY;
+    mDisconnectAllButton.R = mDisconnectAllButton.L + buttonW;
+    mDisconnectAllButton.B = mDisconnectAllButton.T + buttonH;
+
     mBlend = EBlend::Clobber;
   }
 
@@ -139,11 +150,15 @@ public:
     g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
     //g.FillRect(IColor(255, 10, 10, 10), mRECT);
     g.DrawRect(IColor(255, 0, 255, 0), mCloseButton);
+    g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
   }
 
   void OnMouseUp(float x, float y, const IMouseMod& mod) {
     if (mCloseButton.Contains(IRECT(x, y, x, y))) {
       MessageBus::fireEvent<Node*>("NodeDeleted", mParentNode);
+    }
+    if (mDisconnectAllButton.Contains(IRECT(x, y, x, y))) {
+      MessageBus::fireEvent<Node*>("NodeDisconnectAll", mParentNode);
     }
   }
 
@@ -173,6 +188,7 @@ public:
     *Y += dY;
 
     mCloseButton.Translate(dX, dY);
+    mDisconnectAllButton.Translate(dX, dY);
 
     mGraphics->SetAllControlsDirty();
   }

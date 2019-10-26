@@ -3,11 +3,13 @@
 #include "src/constants.h"
 #include "src/graph/Node.h"
 #include "src/graph/misc/NodeSocket.h"
+#include "src/graph/misc/MessageBus.h"
 
 using namespace iplug;
 using namespace igraphics;
 
 class CableLayer : public IControl {
+  MessageBus::Subscription<Node*> mDisconnectAllEvent;
 public:
   CableLayer(IGraphics* g, WDL_PtrList<Node>* pNodes, Node* pOutNode) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
@@ -19,6 +21,10 @@ public:
     mBlend = EBlend::Clobber;
     mColor.A = 255;
     mColor.R = 255;
+    
+    mDisconnectAllEvent.subscribe("NodeDisconnectAll", [&](Node*) {
+      this->mDirty = true;
+    });
   }
 
   void Draw(IGraphics& g) override {
