@@ -72,6 +72,9 @@ public:
 
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
+    // HACK
+    // this will mean the control is attached twice once on toop of the drawing stack
+    mGraphics->AttachControl(this);
     auto center = mRECT;
     center.ScaleAboutCentre(0);
     mStartX = center.L;
@@ -79,6 +82,8 @@ public:
   }
 
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
+    // this will get rid of the top most duplicate
+    mGraphics->RemoveControl(this);
     mDragging = false;
     SetRECT(mTargetRECT);
     mGraphics->SetAllControlsDirty();

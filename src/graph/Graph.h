@@ -188,6 +188,7 @@ public:
   }
 
   void removeNode(Node* node) {
+    if (node == inputNode || node == outputNode) { return; }
     WDL_MutexLock lock(&isProcessing);
     node->cleanupUi(graphics);
     paramManager.releaseNode(node);

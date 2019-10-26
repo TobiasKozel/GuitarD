@@ -156,7 +156,9 @@ public:
     mIsOpen = open;
     OnResize();
     if (mIsOpen) {
-      mDirty = true;
+      // ensure it's on top of the drawing stack
+      mGraphics->RemoveControl(this);
+      mGraphics->AttachControl(this);
     }
     else {
       // redraw the whole screen
