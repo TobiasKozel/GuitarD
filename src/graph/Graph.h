@@ -82,14 +82,18 @@ public:
       nodes.Get(n)->BlockStart();
     }
 
+    outputNode->BlockStart();
+
     // TODO multiple passes to ensure all the nodes are computed is super dumb
     int attempts = 0;
     while (!outputNode->isProcessed && attempts < 10) {
       for (int n = 0; n < nodeCount; n++) {
         nodes.Get(n)->ProcessBlock(nFrames);
       }
+      outputNode->ProcessBlock(nFrames);
       attempts++;
     }
+
     outputNode->CopyOut(out, nFrames);
   }
 

@@ -41,6 +41,7 @@ public:
     }
     onConnectionEvent.subscribe("socketConnection", [&](SocketConnectRequest req) {
       if (req.to == this->mSocket) {
+        this->mSocket->connect(req.from);
       }
     });
   }
@@ -81,16 +82,13 @@ public:
       NodeSocketUi* targetUi = dynamic_cast<NodeSocketUi*>(target);
       if (targetUi != nullptr) {
         NodeSocket* targetSocket = targetUi->mSocket;
-        if (!targetSocket->isInput && mSocket->isInput) {
-          MessageBus::fireEvent<SocketConnectRequest>(
-            "socketConnection",
-            SocketConnectRequest{
-              mSocket,
-              targetSocket
-            }
-          );
-          // mCallback(targetUi->mSocket, mSocket->ownIndex);
-        }
+        MessageBus::fireEvent<SocketConnectRequest>(
+          "socketConnection",
+          SocketConnectRequest{
+            mSocket,
+            targetSocket
+          }
+        );
       }
     }
   }
