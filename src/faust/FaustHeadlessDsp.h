@@ -102,7 +102,7 @@ public:
     for (int i = 0; i < parameters.GetSize(); i++) {
       parameters.Get(i)->update();
     }
-    compute(nFrames, inSockets.Get(0)->buffer, outputs[0]);
+    compute(nFrames, inSockets.Get(0)->connectedTo->parentBuffer, outputs[0]);
     isProcessed = true;
   }
 };

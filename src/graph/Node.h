@@ -108,28 +108,35 @@ public:
     outSockets.Empty(true);
   }
 
+  void outputSilence() {
+    for (int o = 0; o < outputCount; o++) {
+      for (int c = 0; c < channelCount; c++) {
+        for (int i = 0; i < maxBuffer; i++) {
+          outputs[o][c][i] = 0;
+        }
+      }
+    }
+    isProcessed = true;
+  }
+
   /**
    * Check where the node is able to process a block
    */
   virtual bool inputsReady() {
-    if (inSockets.Get(0)->buffer == nullptr) {
-      // zero all the outputs since no processing happened
-      for (int o = 0; o < outputCount; o++) {
-        for (int c = 0; c < channelCount; c++) {
-          for (int i = 0; i < maxBuffer; i++) {
-            outputs[o][c][i] = 0;
-          }
-        }
+    /**
+     * If one input isn't connected, skip the processing and output silence
+     * If that's not desired, this function has to be overidden
+     */
+    for (int i = 0; i < inSockets.GetSize(); i++) {
+      if (inSockets.Get(i)->connectedTo == nullptr) {
+        outputSilence();
+        return false;
       }
-      isProcessed = true;
-      return false;
     }
-    if (inputCount > 1) {
-      // TODO this doesn't work with a node that has multiple inputs
-      return false;
-    }
+
     for (int i = 0; i < inputCount; i++) {
-      if (!inSockets.Get(i)->connectedNode->isProcessed) {
+      if (!inSockets.Get(i)->connectedTo->parentNode->isProcessed) {
+        // A node isn't ready so return false
         return false;
       }
     }
@@ -143,23 +150,14 @@ public:
   virtual void ProcessBlock(int nFrames) = 0;
 
   virtual void connectInput(NodeSocket* out, int inputNumber = 0) {
-    if (inputNumber < inputCount) {
-      NodeSocket* inSocket = inSockets.Get(inputNumber);
+    NodeSocket* inSocket = inSockets.Get(inputNumber);
+    if (inSocket != nullptr) {
       if (out == nullptr) {
-        inSocket->connectedNode = nullptr;
-        inSocket->buffer = nullptr;
-        inSocket->connectedBufferIndex = -1;
-        return;
+        inSocket->disconnect();
       }
-      if (out->isInput) {
-        WDBGMSG("Trying to connect an input to an input!");
-        assert(false);
-        return;
+      else {
+        inSocket->connect(out);
       }
-      Node* outNode = out->connectedNode;
-      inSocket->connectedNode = outNode;
-      inSocket->buffer = outNode->outputs[out->ownIndex];
-      inSocket->connectedBufferIndex = out->ownIndex;
     }
   }
 
@@ -178,9 +176,7 @@ public:
       this
     });
     pGrahics->AttachControl(mUi);
-    mUi->setUp([&](NodeSocket* socket, int ownIndex) {
-      connectInput(socket, ownIndex);
-    });
+    mUi->setUp();
     uiReady = true;
   }
 

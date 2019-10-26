@@ -64,7 +64,7 @@ public:
   ~NodeUi() {
   }
 
-  void setUp(NodeSocketCallback callback) {
+  void setUp() {
     for (int i = 0; i < mParameters->GetSize(); i++) {
       ParameterCoupling* couple = mParameters->Get(i);
       double value = *(couple->value);
@@ -101,13 +101,13 @@ public:
     }
 
     for (int i = 0; i < mInSockets->GetSize(); i++) {
-      NodeSocketUi* socket = new NodeSocketUi(mGraphics, mInSockets->Get(i), callback);
+      NodeSocketUi* socket = new NodeSocketUi(mGraphics, mInSockets->Get(i));
       mGraphics->AttachControl(socket);
       mInSocketsUi.Add(socket);
     }
 
     for (int i = 0; i < mOutSockets->GetSize(); i++) {
-      NodeSocketUi* socket = new NodeSocketUi(mGraphics, mOutSockets->Get(i), callback);
+      NodeSocketUi* socket = new NodeSocketUi(mGraphics, mOutSockets->Get(i));
       mGraphics->AttachControl(socket);
       mOutSocketsUi.Add(socket);
     }

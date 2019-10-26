@@ -32,8 +32,8 @@ public:
       return;
     }
 
-    sample** buffer1 = inSockets.Get(0)->buffer;
-    sample** buffer2 = inSockets.Get(1)->buffer;
+    sample** buffer1 = inSockets.Get(0)->connectedTo->parentBuffer;
+    sample** buffer2 = inSockets.Get(1)->connectedTo->parentBuffer;
     buffer1 = buffer1 == nullptr ? emptyBuffer : buffer1;
     buffer2 = buffer2 == nullptr ? emptyBuffer : buffer2;
     parameters.Get(0)->update();

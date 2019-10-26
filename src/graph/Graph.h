@@ -4,15 +4,15 @@
 #include "IPlugConstants.h"
 #include "src/constants.h"
 #include "src/logger.h"
-#include "src/graph/Node.h"
-#include "src/graph/nodes/DummyNode.h"
+#include "src/graph/misc/MessageBus.h"
+#include "src/graph/nodes/io/InputNode.h"
+#include "src/graph/nodes/io/OutputNode.h"
 #include "src/graph/ui/GraphBackground.h"
 #include "src/graph/misc/Serializer.h"
 #include "src/graph/misc/ParameterManager.h"
 #include "src/graph/ui/NodeSocketUi.h"
 #include "src/graph/ui/CableLayer.h"
 #include "src/graph/ui/NodeGallery.h"
-#include "src/graph/misc/MessageBus.h"
 
 class Graph {
   MessageBus::Subscription<Node*> mNodeDelSub;
@@ -23,8 +23,9 @@ class Graph {
   WDL_PtrList<Node> nodes;
   WDL_Mutex isProcessing;
   /** Dummy nodes to get the audio blocks in and out of the graph */
-  DummyNode* input;
-  DummyNode* output;
+  InputNode* inputNode;
+  OutputNode* outputNode;
+
   int channelCount;
 
   GraphBackground* background;
@@ -44,8 +45,9 @@ public:
     cableLayer = nullptr;
     sampleRate = p_sampleRate;
     channelCount = p_channles;
-    input = new DummyNode(true, channelCount);
-    output = new DummyNode(false, channelCount);
+    inputNode = new InputNode(channelCount);
+    outputNode = new OutputNode(channelCount);
+
     // output->connectInput(input->outSockets.Get(0));
     mNodeDelSub.subscribe("NodeDeleted", [&](Node* param) {
       this->removeNode(param);
@@ -58,8 +60,8 @@ public:
   void testadd() {
     return;
     Node* test = NodeList::createNode("SimpleCabNode");
-    addNode(test, input, 0);
-    output->connectInput(test->outSockets.Get(0));
+    addNode(test, inputNode, 0);
+    outputNode->connectInput(test->outSockets.Get(0));
   }
 
   ~Graph() {
@@ -73,32 +75,22 @@ public:
      * processing chain is made, which will cause some artifacts anyways
      */
     WDL_MutexLock lock(&isProcessing);
-    input->CopyIn(in, nFrames);
+    inputNode->CopyIn(in, nFrames);
 
     int nodeCount = nodes.GetSize();
     for (int n = 0; n < nodeCount; n++) {
       nodes.Get(n)->BlockStart();
     }
 
-    if (output->inSockets.Get(0)->buffer == nullptr || nFrames > MAXBUFFER) {
-      // no out connected or too large of a block requested, so output nothing
-      for (int c = 0; c < channelCount; c++) {
-        for (int i = 0; i < nFrames; i++) {
-          out[c][i] = 0;
-        }
-      }
-      return;
-    }
     // TODO multiple passes to ensure all the nodes are computed is super dumb
     int attempts = 0;
-    while (!output->inSockets.Get(0)->connectedNode->isProcessed && attempts < 10) {
+    while (!outputNode->isProcessed && attempts < 10) {
       for (int n = 0; n < nodeCount; n++) {
         nodes.Get(n)->ProcessBlock(nFrames);
       }
       attempts++;
     }
-
-    output->CopyOut(out, nFrames);
+    outputNode->CopyOut(out, nFrames);
   }
 
   /** The graph needs to know about the graphics context to add and remove the controlls for the nodes */
@@ -116,10 +108,10 @@ public:
     for (int n = 0; n < nodes.GetSize(); n++) {
         nodes.Get(n)->setupUi(graphics);
     }
-    input->setupUi(graphics);
-    output->setupUi(graphics);
+    inputNode->setupUi(graphics);
+    outputNode->setupUi(graphics);
 
-    cableLayer = new CableLayer(graphics, &nodes, output);
+    cableLayer = new CableLayer(graphics, &nodes, outputNode);
     graphics->AttachControl(cableLayer);
 
     nodeGallery = new NodeGallery(graphics);
@@ -142,8 +134,8 @@ public:
     graphics->RemoveControl(cableLayer, true);
     cableLayer = nullptr;
 
-    input->cleanupUi(graphics);
-    output->cleanupUi(graphics);
+    inputNode->cleanupUi(graphics);
+    outputNode->cleanupUi(graphics);
 
     graphics = nullptr;
   }
@@ -155,8 +147,8 @@ public:
     for (int i = 0; i < nodes.GetSize(); i++) {
       nodes.Get(i)->mUi->translate(dX, dY);
     }
-    output->mUi->translate(dX, dY);
-    input->mUi->translate(dX, dY);
+    outputNode->mUi->translate(dX, dY);
+    inputNode->mUi->translate(dX, dY);
     // WDBGMSG("x %f y %f s %f\n", x, y, scale);
   }
 
@@ -193,15 +185,10 @@ public:
 
   void removeNode(Node* node) {
     WDL_MutexLock lock(&isProcessing);
-    if (node != nullptr) {
-      if (node == output->inSockets.Get(0)->connectedNode) {
-        output->connectInput(nullptr, 0);
-      }
-      node->cleanupUi(graphics);
-      paramManager.releaseNode(node);
-      nodes.DeletePtr(node, true);
-      nodes.Compact();
-    }
+    node->cleanupUi(graphics);
+    paramManager.releaseNode(node);
+    nodes.DeletePtr(node, true);
+    nodes.Compact();
   }
 
   void removeNode(int index) {
@@ -213,13 +200,13 @@ public:
      * TODO this shouldn't need a lock since we don't want stutter when autosaves etc
      * are in progress. Without it crashes about 50% of the time
      */
-    serializer::serialize(json, nodes, input, output);
+    serializer::serialize(json, nodes, inputNode, outputNode);
   }
 
   void deserialize(nlohmann::json& json) {
     removeAllNodes();
     WDL_MutexLock lock(&isProcessing);
-    serializer::deserialize(json, nodes, output, input, sampleRate, &paramManager, graphics);
+    serializer::deserialize(json, nodes, outputNode, inputNode, sampleRate, &paramManager, graphics);
     sortRenderStack();
   }
 

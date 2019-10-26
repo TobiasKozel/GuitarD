@@ -2,16 +2,21 @@
 #include "IControl.h"
 #include "src/constants.h"
 #include "src/graph/misc/NodeSocket.h"
+#include "src/graph/misc/MessageBus.h"
 
 using namespace iplug;
 using namespace igraphics;
 
-typedef std::function<void(NodeSocket* connectedTo, int ownIndex)> NodeSocketCallback;
+struct SocketConnectRequest {
+  NodeSocket* from;
+  NodeSocket* to;
+};
 
 class NodeSocketUi : public IControl {
+  MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
   int vol;
 public:
-  NodeSocketUi(IGraphics* g, NodeSocket* socket, NodeSocketCallback callback) :
+  NodeSocketUi(IGraphics* g, NodeSocket* socket) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
   {
     //mBitmap = g->LoadBitmap(bitmap, 1, false);
@@ -27,7 +32,6 @@ public:
     SetTargetAndDrawRECTs(mRECT);
     mBlend = EBlend::Clobber;
     mGraphics = g;
-    mCallback = callback;
     color.A = 255;
     if (socket->isInput) {
       color.R = 255;
@@ -35,7 +39,10 @@ public:
     else {
       color.B = 255;
     }
-    
+    onConnectionEvent.subscribe("socketConnection", [&](SocketConnectRequest req) {
+      if (req.to == this->mSocket) {
+      }
+    });
   }
 
   void Draw(IGraphics& g) override {
@@ -73,8 +80,16 @@ public:
     if (target != nullptr) {
       NodeSocketUi* targetUi = dynamic_cast<NodeSocketUi*>(target);
       if (targetUi != nullptr) {
-        if (!targetUi->mSocket->isInput && mSocket->isInput) {
-          mCallback(targetUi->mSocket, mSocket->ownIndex);
+        NodeSocket* targetSocket = targetUi->mSocket;
+        if (!targetSocket->isInput && mSocket->isInput) {
+          MessageBus::fireEvent<SocketConnectRequest>(
+            "socketConnection",
+            SocketConnectRequest{
+              mSocket,
+              targetSocket
+            }
+          );
+          // mCallback(targetUi->mSocket, mSocket->ownIndex);
         }
       }
     }
@@ -92,7 +107,6 @@ public:
    * Disconnect the input on double click
    */
   void OnMouseDblClick(float x, float y, const IMouseMod& mod) override {
-    mCallback(nullptr, mSocket->ownIndex);
     mGraphics->SetAllControlsDirty();
   }
 
@@ -101,7 +115,6 @@ protected:
   IBitmap mBitmap;
   IBlend mBlend;
   IGraphics* mGraphics;
-  NodeSocketCallback mCallback;
   IColor color;
   float mDiameter;
   float mRadius;

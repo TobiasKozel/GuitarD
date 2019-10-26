@@ -61,7 +61,7 @@ public:
     //  }
     //}
 
-    sample** buffer = inSockets.Get(0)->buffer;
+    sample** buffer = inSockets.Get(0)->connectedTo->parentBuffer;
 
     
     convolver.process(buffer[0], outputs[0][0], nFrames);

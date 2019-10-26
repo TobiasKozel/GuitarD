@@ -44,7 +44,7 @@ public:
     isProcessed = true;
     if (inputsReady() && !hasLastBuffer) {
       parameters.Get(0)->update();
-      sample** buffer = inSockets.Get(0)->buffer;
+      sample** buffer = inSockets.Get(0)->connectedTo->parentBuffer;
       for (int c = 0; c < channelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
           outputs[0][c][i] = prevBlock[c][i] * gain;

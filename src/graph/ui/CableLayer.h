@@ -33,8 +33,8 @@ public:
       }
       for (int i = 0; i < curNode->inputCount; i++) {
         curSock = curNode->inSockets.Get(i);
-        if (curSock->connectedNode != nullptr) {
-          tarSock = curSock->connectedNode->outSockets.Get(curSock->connectedBufferIndex);
+        if (curSock->connectedTo != nullptr) {
+          tarSock = curSock->connectedTo;
           g.DrawLine(
             mColor,
             curSock->X + socketRadius, curSock->Y + socketRadius,

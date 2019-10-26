@@ -37,7 +37,7 @@ namespace serializer {
         else {
           serialized["nodes"][i]["inputs"][prev] = {
             nodes.Find(cNode),
-            node->inSockets.Get(prev)->connectedBufferIndex
+            node->inSockets.Get(prev)->connectedSocketIndex
           };
         }
       }
@@ -66,7 +66,7 @@ namespace serializer {
     }
     serialized["output"]["inputs"][0] = {
       lastNodeIndex,
-      output->inSockets.Get(0)->connectedBufferIndex
+      output->inSockets.Get(0)->connectedSocketIndex
     };
   }
 
