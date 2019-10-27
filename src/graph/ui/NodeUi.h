@@ -205,13 +205,13 @@ public:
     }
     moveControl(this, dX, dY);
 
-    for (int i = 0; i < mInSocketsUi.GetSize(); i++) {
+    for (int i = 0; i < mInSockets->GetSize(); i++) {
       moveControl(mInSocketsUi.Get(i), dX, dY);
       mInSockets->Get(i)->X += dX;
       mInSockets->Get(i)->Y += dY;
     }
 
-    for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
+    for (int i = 0; i < mOutSockets->GetSize(); i++) {
       moveControl(mOutSocketsUi.Get(i), dX, dY);
       mOutSockets->Get(i)->X += dX;
       mOutSockets->Get(i)->Y += dY;
