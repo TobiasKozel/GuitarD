@@ -4,6 +4,7 @@
 #include "src/graph/misc/NodeSocket.h"
 #include "src/graph/ui/NodeSocketUi.h"
 #include "src/graph/misc/MessageBus.h"
+#include "src/graph/misc/GStructs.h"
 
 class Node;
 
@@ -27,6 +28,7 @@ using namespace igraphics;
  * since it will only exists as long as the UI window is open but is owned by the node
  */
 class NodeUi : public IControl {
+  MessageBus::Subscription<NodeSocket*> mNodeConnectBetweenEvent;
   IRECT mCloseButton;
   IRECT mDisconnectAllButton;
   WDL_PtrList<ParameterCoupling>* mParameters;
@@ -39,6 +41,7 @@ public:
   NodeUi(NodeUiParam pParam) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
   {
+    mDragging = false;
     X = pParam.X;
     Y = pParam.Y;
     mGraphics = pParam.pGraphics;
@@ -70,6 +73,15 @@ public:
     mDisconnectAllButton.B = mDisconnectAllButton.T + buttonH;
 
     mBlend = EBlend::Clobber;
+
+    mNodeConnectBetweenEvent.subscribe("NodeConnectBetween", [&](NodeSocket* socket) {
+      NodeSocket* prev = mInSockets->Get(0);
+      NodeSocket* next = mOutSockets->Get(0);
+      if (prev != nullptr && next != nullptr) {
+        prev->connect(socket->connectedTo);
+        next->connect(socket);
+      }
+    });
   }
 
   ~NodeUi() {
@@ -154,6 +166,11 @@ public:
   }
 
   void OnMouseUp(float x, float y, const IMouseMod& mod) {
+    if (mDragging) {
+      mDragging = false;
+      MessageBus::fireEvent<Coord2d>("NodeDraggedEnd", Coord2d{ x, y });
+      return;
+    }
     if (mCloseButton.Contains(IRECT(x, y, x, y))) {
       MessageBus::fireEvent<Node*>("NodeDeleted", mParentNode);
     }
@@ -163,6 +180,8 @@ public:
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
+    mDragging = true;
+    MessageBus::fireEvent<Coord2d>("NodeDragged", Coord2d {x, y});
     translate(dX, dY);
   }
 
@@ -211,6 +230,7 @@ private:
   }
 
 protected:
+  bool mDragging;
   float* X;
   float* Y;
   IBitmap mBitmap;

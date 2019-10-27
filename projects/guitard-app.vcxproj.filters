@@ -408,6 +408,9 @@
     <ClInclude Include="..\src\graph\nodes\fuzz\FuzzNode.h">
       <Filter>src\graph\nodes\distortion</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\misc\GStructs.h">
+      <Filter>src\graph\misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
