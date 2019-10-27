@@ -195,13 +195,13 @@ public:
   void removeNode(Node* node, bool reconnnect = false) {
     if (node == inputNode || node == outputNode) { return; }
     WDL_MutexLock lock(&isProcessing);
-    //if (reconnnect && node->inputCount == node->outputCount && node->inputCount == 1) {
-    //  NodeSocket* prevSock = node->inSockets.Get(0);
-    //  NodeSocket* nextSock = node->outSockets.Get(0);
-    //  if (prevSock->connectedNode != nullptr && nextSock->connectedNode != nullptr) {
-    //    nextSock->connectedTo->connect(prevSock->connectedTo);
-    //  }
-    //}
+    if (reconnnect) {
+      NodeSocket* prevSock = node->inSockets.Get(0);
+      NodeSocket* nextSock = node->outSockets.Get(0);
+      if (prevSock != nullptr && prevSock->connectedTo && nextSock != nullptr && nextSock->connectedTo) {
+        nextSock->connectedTo->connect(prevSock->connectedTo);
+      }
+    }
     node->cleanupUi(graphics);
     paramManager.releaseNode(node);
     nodes.DeletePtr(node, true);
