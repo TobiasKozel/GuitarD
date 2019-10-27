@@ -38,11 +38,14 @@ public:
   int channelCount;
   int maxBuffer;
 
+  bool mByPassed;
+
   /**
    * The constructor doesn't take any parameters since it can be instanciated from the NodeList
    */
   Node() {
     outputs = nullptr;
+    mByPassed = false;
     X = Y = 0;
   };
 
@@ -119,6 +122,20 @@ public:
     isProcessed = true;
   }
 
+  bool byPass() {
+    if (!mByPassed) { return false; }
+    iplug::sample** in = inSockets.Get(0)->connectedTo->parentBuffer;
+    for (int o = 0; o < outputCount; o++) {
+      for (int c = 0; c < channelCount; c++) {
+        for (int i = 0; i < maxBuffer; i++) {
+          outputs[o][c][i] = in[c][i];
+        }
+      }
+    }
+    isProcessed = true;
+    return true;
+  }
+
   /**
    * Check where the node is able to process a block
    */
@@ -169,7 +186,7 @@ public:
     mUi = new NodeUi(NodeUiParam {
       pGrahics,
       PNGGENERICBG_FN,
-      &X, &Y,
+      &X, &Y, &mByPassed,
       &parameters,
       &inSockets,
       &outSockets,

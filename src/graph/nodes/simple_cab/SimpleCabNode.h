@@ -45,7 +45,7 @@ public:
   }
 
   void ProcessBlock(int nFrames) {
-    if (!inputsReady() || isProcessed) { return; }
+    if (!inputsReady() || isProcessed || byPass()) { return; }
     //int prev = (int)*(parameters[0]->value);
     //parameters[0]->update();
     //int cur = (int)*(parameters[0]->value);

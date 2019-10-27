@@ -13,6 +13,7 @@ struct NodeUiParam {
   const char* pBg;
   float* X;
   float* Y;
+  bool* byPassed;
   WDL_PtrList<ParameterCoupling>* pParameters;
   WDL_PtrList<NodeSocket>* inSockets;
   WDL_PtrList<NodeSocket>* outSockets;
@@ -31,6 +32,7 @@ class NodeUi : public IControl {
   MessageBus::Subscription<NodeSocket*> mNodeConnectBetweenEvent;
   IRECT mCloseButton;
   IRECT mDisconnectAllButton;
+  IRECT mByPassButton;
   WDL_PtrList<ParameterCoupling>* mParameters;
   WDL_PtrList<NodeSocket>* mInSockets;
   WDL_PtrList<NodeSocket>* mOutSockets;
@@ -49,6 +51,8 @@ public:
     mInSockets = pParam.inSockets;
     mOutSockets = pParam.outSockets;
     mParentNode = pParam.node;
+    mBypassed = pParam.byPassed;
+
     mBitmap = mGraphics->LoadBitmap(pParam.pBg, 1, false);
     float w = mBitmap.W();
     float h = mBitmap.H();
@@ -72,9 +76,14 @@ public:
     mDisconnectAllButton.R = mDisconnectAllButton.L + buttonW;
     mDisconnectAllButton.B = mDisconnectAllButton.T + buttonH;
 
+    mByPassButton.L = rect.L;
+    mByPassButton.T = rect.T + buttonY;
+    mByPassButton.R = mByPassButton.L + buttonW;
+    mByPassButton.B = mByPassButton.T + buttonH;
+
     mBlend = EBlend::Clobber;
 
-    mNodeConnectBetweenEvent.subscribe("NodeConnectBetween", [&](NodeSocket* socket) {
+    mNodeConnectBetweenEvent.subscribe("NodeSpliceIn", [&](NodeSocket* socket) {
       NodeSocket* prev = mInSockets->Get(0);
       NodeSocket* next = mOutSockets->Get(0);
       if (prev != nullptr && next != nullptr) {
@@ -163,6 +172,7 @@ public:
     //g.FillRect(IColor(255, 10, 10, 10), mRECT);
     g.DrawRect(IColor(255, 0, 255, 0), mCloseButton);
     g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
+    g.DrawRect(IColor(255, 255, *mBypassed ? 0 : 255, 0), mByPassButton);
   }
 
   void OnMouseUp(float x, float y, const IMouseMod& mod) {
@@ -176,6 +186,10 @@ public:
     }
     if (mDisconnectAllButton.Contains(IRECT(x, y, x, y))) {
       MessageBus::fireEvent<Node*>("NodeDisconnectAll", mParentNode);
+    }
+    if (mByPassButton.Contains(IRECT(x, y, x, y))) {
+      *mBypassed = !*mBypassed;
+      mDirty = true;
     }
   }
 
@@ -208,6 +222,7 @@ public:
 
     mCloseButton.Translate(dX, dY);
     mDisconnectAllButton.Translate(dX, dY);
+    mByPassButton.Translate(dX, dY);
 
     mGraphics->SetAllControlsDirty();
   }
@@ -233,6 +248,7 @@ protected:
   bool mDragging;
   float* X;
   float* Y;
+  bool* mBypassed;
   IBitmap mBitmap;
   IBlend mBlend;
   IGraphics* mGraphics;

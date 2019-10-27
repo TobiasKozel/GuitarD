@@ -49,12 +49,12 @@ public:
           curSock = curNode->inSockets.Get(i);
           if (curSock->connectedTo != nullptr) {
             tarSock = curSock->connectedTo;
-            IRECT test;
-            test.L = min(tarSock->X, curSock->X);
-            test.R = max(tarSock->X, curSock->X);
-            test.T = min(tarSock->Y, curSock->Y);
-            test.B = max(tarSock->Y, curSock->Y);
-            if (test.Contains(IRECT{ pos.x, pos.y, pos.x, pos.y })) {
+            IRECT box;
+            box.L = min(tarSock->X, curSock->X);
+            box.R = max(tarSock->X, curSock->X);
+            box.T = min(tarSock->Y, curSock->Y);
+            box.B = max(tarSock->Y, curSock->Y);
+            if (box.Contains(IRECT{ pos.x, pos.y, pos.x, pos.y })) {
               mHighlightSocket = curSock;
             }
           }
@@ -64,7 +64,7 @@ public:
 
     mNodeDraggedEndEvent.subscribe("NodeDraggedEnd", [&](Coord2d pos) {
       if (mHighlightSocket != nullptr) {
-        MessageBus::fireEvent<NodeSocket*>("NodeConnectBetween", mHighlightSocket);
+        MessageBus::fireEvent<NodeSocket*>("NodeSpliceIn", mHighlightSocket);
       }
       mHighlightSocket = nullptr;
       mDirty = true;
