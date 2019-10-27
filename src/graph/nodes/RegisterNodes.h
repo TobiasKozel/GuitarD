@@ -10,6 +10,9 @@
 #include "src/graph/nodes/simple_reverb/SimpleReverbNode.h"
 #include "src/graph/nodes/simple_gate/SimpleGateNode.h"
 #include "src/graph/nodes/simple_compressor/SimpleComressorNode.h"
+#include "src/graph/nodes/fuzz/FuzzNode.h"
+#include "src/graph/nodes/bitcrusher/BitCrusherNode.h"
+#include "src/graph/nodes/overdrive/OverDriveNode.h"
 
 
 namespace NodeList {
@@ -42,6 +45,30 @@ namespace NodeList {
       []() { return new SimpleDriveNode("SimpleDriveNode"); },
       "SimpleDriveNode",
       "Simple Drive",
+      "asd",
+      "Distortion"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new OverDriveNode("OverDriveNode"); },
+        "OverDriveNode",
+        "Overdrive",
+        "asd",
+        "Distortion"
+      });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new FuzzNode("FuzzNode"); },
+      "FuzzNode",
+      "Fuzz",
+      "asd",
+      "Distortion"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new BitCrusherNode("BitCrusherNode"); },
+      "BitCrusherNode",
+      "Bitcrusher",
       "asd",
       "Distortion"
     });

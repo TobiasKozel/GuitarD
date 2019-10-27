@@ -336,11 +336,14 @@
     <ClInclude Include="..\src\graph\misc\ParameterManager.h" />
     <ClInclude Include="..\src\graph\misc\Serializer.h" />
     <ClInclude Include="..\src\graph\Node.h" />
+    <ClInclude Include="..\src\graph\nodes\bitcrusher\BitCrusherNode.h" />
     <ClInclude Include="..\src\graph\nodes\combine\CombineNode.h" />
     <ClInclude Include="..\src\graph\nodes\crybaby\CryBabyNode.h" />
     <ClInclude Include="..\src\graph\nodes\feedback\FeedbackNode.h" />
+    <ClInclude Include="..\src\graph\nodes\fuzz\FuzzNode.h" />
     <ClInclude Include="..\src\graph\nodes\io\InputNode.h" />
     <ClInclude Include="..\src\graph\nodes\io\OutputNode.h" />
+    <ClInclude Include="..\src\graph\nodes\overdrive\OverDriveNode.h" />
     <ClInclude Include="..\src\graph\nodes\RegisterNodes.h" />
     <ClInclude Include="..\src\graph\nodes\simple_cab\SimpleCabNode.h" />
     <ClInclude Include="..\src\graph\nodes\simple_compressor\SimpleComressorNode.h" />
