@@ -17,6 +17,7 @@
 class Graph {
   MessageBus::Subscription<Node*> mNodeDelSub;
   MessageBus::Subscription<NodeList::NodeInfo> mNodeAddEvent;
+  MessageBus::Subscription<bool> mAwaitAudioMutexEvent;
 
   iplug::igraphics::IGraphics* graphics;
   /** Holds all the nodes in the processing graph */
@@ -54,6 +55,10 @@ public:
     });
     mNodeAddEvent.subscribe("NodeAdd", [&](NodeList::NodeInfo info) {
       this->addNode(info.constructor(), nullptr, 0, 300, 300);
+    });
+
+    mAwaitAudioMutexEvent.subscribe("AwaitAudioMutex", [&](bool) {
+      WDL_MutexLock lock(&isProcessing);
     });
   }
 
@@ -189,14 +194,14 @@ public:
 
   void removeNode(Node* node, bool reconnnect = false) {
     if (node == inputNode || node == outputNode) { return; }
-    if (reconnnect && node->inputCount == node->outputCount && node->inputCount == 1) {
-      NodeSocket* prevSock = node->inSockets.Get(0);
-      NodeSocket* nextSock = node->outSockets.Get(0);
-      if (prevSock->connectedNode != nullptr && nextSock->connectedNode != nullptr) {
-        nextSock->connectedTo->connect(prevSock->connectedTo);
-      }
-    }
     WDL_MutexLock lock(&isProcessing);
+    //if (reconnnect && node->inputCount == node->outputCount && node->inputCount == 1) {
+    //  NodeSocket* prevSock = node->inSockets.Get(0);
+    //  NodeSocket* nextSock = node->outSockets.Get(0);
+    //  if (prevSock->connectedNode != nullptr && nextSock->connectedNode != nullptr) {
+    //    nextSock->connectedTo->connect(prevSock->connectedTo);
+    //  }
+    //}
     node->cleanupUi(graphics);
     paramManager.releaseNode(node);
     nodes.DeletePtr(node, true);

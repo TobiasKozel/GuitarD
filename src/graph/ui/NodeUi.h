@@ -29,7 +29,7 @@ using namespace igraphics;
  * since it will only exists as long as the UI window is open but is owned by the node
  */
 class NodeUi : public IControl {
-  MessageBus::Subscription<NodeSocket*> mNodeConnectBetweenEvent;
+  MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
   IRECT mCloseButton;
   IRECT mDisconnectAllButton;
   IRECT mByPassButton;
@@ -83,12 +83,15 @@ public:
 
     mBlend = EBlend::Clobber;
 
-    mNodeConnectBetweenEvent.subscribe("NodeSpliceIn", [&](NodeSocket* socket) {
-      NodeSocket* prev = mInSockets->Get(0);
-      NodeSocket* next = mOutSockets->Get(0);
-      if (prev != nullptr && next != nullptr) {
-        prev->connect(socket->connectedTo);
-        next->connect(socket);
+    mNodeSpliceInEvent.subscribe("NodeSpliceIn", [&](NodeSpliceInPair pair) {
+      if (mParentNode != pair.node) { return; }
+      NodeSocket* in = mInSockets->Get(0);
+      NodeSocket* out = mOutSockets->Get(0);
+      NodeSocket* prev = pair.socket->connectedTo;
+      if (in != nullptr && out != nullptr) {
+        pair.socket->disconnect();
+        in->connect(prev);
+        out->connect(pair.socket);
       }
     });
   }
@@ -178,7 +181,7 @@ public:
   void OnMouseUp(float x, float y, const IMouseMod& mod) {
     if (mDragging) {
       mDragging = false;
-      MessageBus::fireEvent<Coord2d>("NodeDraggedEnd", Coord2d{ x, y });
+      MessageBus::fireEvent<Node*>("NodeDraggedEnd", mParentNode);
       return;
     }
     if (mCloseButton.Contains(IRECT(x, y, x, y))) {

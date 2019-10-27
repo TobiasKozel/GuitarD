@@ -12,7 +12,7 @@ using namespace igraphics;
 class CableLayer : public IControl {
   MessageBus::Subscription<Node*> mDisconnectAllEvent;
   MessageBus::Subscription<Coord2d> mNodeDraggedEvent;
-  MessageBus::Subscription<Coord2d> mNodeDraggedEndEvent;
+  MessageBus::Subscription<Node*> mNodeDraggedEndEvent;
 public:
   CableLayer(IGraphics* g, WDL_PtrList<Node>* pNodes, Node* pOutNode) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
@@ -62,9 +62,9 @@ public:
       }
     });
 
-    mNodeDraggedEndEvent.subscribe("NodeDraggedEnd", [&](Coord2d pos) {
+    mNodeDraggedEndEvent.subscribe("NodeDraggedEnd", [&](Node* node) {
       if (mHighlightSocket != nullptr) {
-        MessageBus::fireEvent<NodeSocket*>("NodeSpliceIn", mHighlightSocket);
+        MessageBus::fireEvent<NodeSpliceInPair>("NodeSpliceIn", NodeSpliceInPair{ node, mHighlightSocket });
       }
       mHighlightSocket = nullptr;
       mDirty = true;

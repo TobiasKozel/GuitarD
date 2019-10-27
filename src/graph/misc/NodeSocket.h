@@ -1,5 +1,6 @@
 #pragma once
 #include "IPlugConstants.h"
+#include "src/graph/misc/MessageBus.h"
 
 class Node;
 
@@ -41,6 +42,7 @@ public:
   }
 
   void disconnect() {
+    MessageBus::fireEvent<bool>("AwaitAudioMutex", false);
     if (connectedTo != nullptr) {
       connectedTo->connectedTo = nullptr;
       connectedTo->connectedNode = nullptr;
@@ -53,6 +55,7 @@ public:
   }
 
   void connect(NodeSocket* to) {
+    MessageBus::fireEvent<bool>("AwaitAudioMutex", false);
     if (to->isInput == isInput) {
       WDBGMSG("Trying to connect an input to input / output to output!");
       return;
