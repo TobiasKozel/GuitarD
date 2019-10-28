@@ -13,6 +13,7 @@
 #include "src/graph/nodes/fuzz/FuzzNode.h"
 #include "src/graph/nodes/bitcrusher/BitCrusherNode.h"
 #include "src/graph/nodes/overdrive/OverDriveNode.h"
+#include "src/graph/nodes/paramerticeq/ParametricEqNode.h"
 
 
 namespace NodeList {
@@ -101,6 +102,14 @@ namespace NodeList {
       []() { return new CryBabyNode("CryBabyNode"); },
       "CryBabyNode",
       "Crybaby",
+      "asd",
+      "Filters"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new ParametricEqNode("ParametricEqNode"); },
+      "ParametricEqNode",
+      "Parametric Equalizer",
       "asd",
       "Filters"
     });

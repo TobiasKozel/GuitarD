@@ -411,6 +411,9 @@
     <ClInclude Include="..\src\graph\misc\GStructs.h">
       <Filter>src\graph\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\nodes\paramerticeq\ParametricEqNode.h">
+      <Filter>src\graph\nodes\filters</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

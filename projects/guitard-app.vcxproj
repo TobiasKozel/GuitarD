@@ -345,6 +345,7 @@
     <ClInclude Include="..\src\graph\nodes\io\InputNode.h" />
     <ClInclude Include="..\src\graph\nodes\io\OutputNode.h" />
     <ClInclude Include="..\src\graph\nodes\overdrive\OverDriveNode.h" />
+    <ClInclude Include="..\src\graph\nodes\paramerticeq\ParametricEqNode.h" />
     <ClInclude Include="..\src\graph\nodes\RegisterNodes.h" />
     <ClInclude Include="..\src\graph\nodes\simple_cab\SimpleCabNode.h" />
     <ClInclude Include="..\src\graph\nodes\simple_compressor\SimpleComressorNode.h" />
