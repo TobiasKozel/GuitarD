@@ -14,6 +14,7 @@ struct SocketConnectRequest {
 
 class NodeSocketUi : public IControl {
   MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
+  MessageBus::Subscription<SocketConnectRequest> onConnectionRedirectEvent;
   MessageBus::Subscription<Node*> onDisconnectAllEvent;
   MessageBus::Subscription<NodeSocket*> onDisconnectEvent;
   int vol;
@@ -48,7 +49,7 @@ public:
       }
     });
 
-    onConnectionEvent.subscribe("SocketRedirectConnection", [&](SocketConnectRequest req) {
+    onConnectionRedirectEvent.subscribe("SocketRedirectConnection", [&](SocketConnectRequest req) {
       if (req.from == this->mSocket->connectedTo) {
         this->mSocket->connect(req.to);
       }

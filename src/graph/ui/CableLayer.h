@@ -35,6 +35,7 @@ public:
     });
 
     mNodeDraggedEvent.subscribe("NodeDragged", [&](Coord2d pos) {
+      float socketRadius = SOCKETDIAMETER / 2;
       mHighlightSocket = nullptr;
       Node* curNode;
       NodeSocket* curSock;
@@ -50,10 +51,10 @@ public:
           if (curSock->connectedTo != nullptr) {
             tarSock = curSock->connectedTo;
             IRECT box;
-            box.L = min(tarSock->X, curSock->X);
-            box.R = max(tarSock->X, curSock->X);
-            box.T = min(tarSock->Y, curSock->Y);
-            box.B = max(tarSock->Y, curSock->Y);
+            box.L = min(tarSock->X, curSock->X) + socketRadius;
+            box.R = max(tarSock->X, curSock->X) + socketRadius;
+            box.T = min(tarSock->Y, curSock->Y) + socketRadius;
+            box.B = max(tarSock->Y, curSock->Y) + socketRadius;
             if (box.Contains(IRECT{ pos.x, pos.y, pos.x, pos.y })) {
               mHighlightSocket = curSock;
             }

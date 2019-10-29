@@ -12,6 +12,7 @@ namespace MessageBus {
   public:
     virtual ~BaseSubscription() { };
   protected:
+    bool subscribed;
     string mEventName;
   };
 
@@ -25,11 +26,13 @@ namespace MessageBus {
     function<void(T param)> mCallback;
 
     Subscription(string eventName, function<void(T param)> callback) {
-      mEventName = eventName;
+      subscribed = false;
       subscribe(eventName, callback);
     }
 
-    Subscription() { }
+    Subscription() {
+      subscribed = false;
+    }
 
     ~Subscription() {
       if (subscriptions.find(mEventName) != subscriptions.end()) {
@@ -38,6 +41,11 @@ namespace MessageBus {
     }
 
     void subscribe(string eventName, function<void(T param)> callback) {
+      if (subscribed) {
+        WDBGMSG("Trying to subcribe twice on the same Subscription!\n");
+        return;
+      }
+      subscribed = true;
       mEventName = eventName;
       mCallback = callback;
       if (subscriptions.find(eventName) == subscriptions.end()) {
