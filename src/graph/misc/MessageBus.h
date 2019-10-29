@@ -53,6 +53,10 @@ namespace MessageBus {
 
   template <class T>
   void fireEvent(string eventName, T param) {
+    if (subscriptions.find(eventName) == subscriptions.end()) {
+      WDBGMSG("Fired a event with not subscribers!\n");
+      return;
+    }
     SubsVector subs = subscriptions.at(eventName);
     for (int i = 0; i < subs.GetSize(); i++) {
       Subscription<T>* sub = dynamic_cast<Subscription<T>*>(subs.Get(i));

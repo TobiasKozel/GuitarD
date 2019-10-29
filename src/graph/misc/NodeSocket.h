@@ -43,14 +43,13 @@ public:
 
   void disconnect() {
     MessageBus::fireEvent<bool>("AwaitAudioMutex", false);
-    if (connectedTo != nullptr) {
-      connectedTo->connectedTo = nullptr;
-      connectedTo->connectedNode = nullptr;
-      connectedTo->connectedSocketIndex = -1;
-
-      connectedTo = nullptr;
+    if (isInput) {
       connectedNode = nullptr;
       connectedSocketIndex = -1;
+      connectedTo = nullptr;
+    }
+    else {
+      MessageBus::fireEvent<NodeSocket*>("DisconnectSocket", this);
     }
   }
 
@@ -60,16 +59,17 @@ public:
       WDBGMSG("Trying to connect an input to input / output to output!");
       return;
     }
-    if (connectedTo != nullptr) {
-      disconnect();
+    if (isInput) {
+      connectedTo = to;
+      connectedNode = to->parentNode;
+      connectedSocketIndex = to->index;
     }
-    to->connectedTo = this;
-    to->connectedNode = parentNode;
-    to->connectedSocketIndex = index;
+    else {
+      to->connectedTo = this;
+      to->connectedNode = parentNode;
+      to->connectedSocketIndex = index;
+    }
 
-    connectedTo = to;
-    connectedNode = to->parentNode;
-    connectedSocketIndex = to->index;
   }
 
   bool isInput;

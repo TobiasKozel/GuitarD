@@ -15,6 +15,7 @@ struct SocketConnectRequest {
 class NodeSocketUi : public IControl {
   MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
   MessageBus::Subscription<Node*> onDisconnectAllEvent;
+  MessageBus::Subscription<NodeSocket*> onDisconnectEvent;
   int vol;
 public:
   NodeSocketUi(IGraphics* g, NodeSocket* socket) :
@@ -49,6 +50,12 @@ public:
     onDisconnectAllEvent.subscribe("NodeDisconnectAll", [&](Node* node) {
       if (this->mSocket->parentNode == node) {
         mSocket->disconnect();
+      }
+    });
+
+    onDisconnectEvent.subscribe("DisconnectSocket", [&](NodeSocket * socket) {
+      if (this->mSocket->connectedTo == socket && this->mSocket->isInput) {
+        this->mSocket->disconnect();
       }
     });
   }
