@@ -41,9 +41,16 @@ public:
     else {
       color.B = 255;
     }
-    onConnectionEvent.subscribe("socketConnection", [&](SocketConnectRequest req) {
+
+    onConnectionEvent.subscribe("SocketConnect", [&](SocketConnectRequest req) {
       if (req.to == this->mSocket) {
         this->mSocket->connect(req.from);
+      }
+    });
+
+    onConnectionEvent.subscribe("SocketRedirectConnection", [&](SocketConnectRequest req) {
+      if (req.from == this->mSocket->connectedTo) {
+        this->mSocket->connect(req.to);
       }
     });
 
@@ -102,7 +109,7 @@ public:
       if (targetUi != nullptr) {
         NodeSocket* targetSocket = targetUi->mSocket;
         MessageBus::fireEvent<SocketConnectRequest>(
-          "socketConnection",
+          "SocketConnect",
           SocketConnectRequest{
             mSocket,
             targetSocket

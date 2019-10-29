@@ -196,11 +196,11 @@ public:
     if (node == inputNode || node == outputNode) { return; }
     WDL_MutexLock lock(&isProcessing);
     if (reconnnect) {
-      NodeSocket* prevSock = node->inSockets.Get(0);
-      NodeSocket* nextSock = node->outSockets.Get(0);
-      if (prevSock != nullptr && prevSock->connectedTo && nextSock != nullptr && nextSock->connectedTo) {
-        nextSock->connectedTo->connect(prevSock->connectedTo);
-      }
+      //MessageBus::fireEvent<SocketConnectRequest>(
+      //  "SocketRedirectConnection",
+      //  SocketConnectRequest {
+      //  }
+      //);
     }
     node->cleanupUi(graphics);
     paramManager.releaseNode(node);
