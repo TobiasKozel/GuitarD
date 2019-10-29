@@ -1,9 +1,9 @@
 #pragma once
 #include "thirdparty/json.hpp"
 #include "IGraphics.h"
-#include "src/graph/Node.h"
-#include "src/graph/misc/NodeList.h"
-#include "src/graph/misc/ParameterManager.h"
+#include "src/node/Node.h"
+#include "src/misc/NodeList.h"
+#include "src/parameter/ParameterManager.h"
 
 
 namespace serializer {

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "src/constants.h"
 #include "IPlugParameter.h"
 #include "IControl.h"
-#include "src/graph/Node.h"
-#include "src/graph/misc/ParameterCoupling.h"
-#include "src/graph/misc/MessageBus.h"
+#include "src/misc/constants.h"
+#include "src/node/Node.h"
+#include "src/parameter/ParameterCoupling.h"
+#include "src/misc/MessageBus.h"
 
 class ParameterManager {
   iplug::IParam* parameters[MAXDAWPARAMS];

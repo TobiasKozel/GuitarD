@@ -4,10 +4,9 @@
 #define FAUSTFLOAT iplug::sample
 
 #include "IPlugConstants.h"
-#include "src/constants.h"
-#include "src/logger.h"
-#include "src/graph/misc/ParameterCoupling.h"
-#include "src/graph/Node.h"
+#include "src/misc/constants.h"
+#include "src/parameter/ParameterCoupling.h"
+#include "src/node/Node.h"
 
 
 struct Meta {

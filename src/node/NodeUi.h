@@ -1,10 +1,10 @@
 #pragma once
 #include "IControl.h"
-#include "src/graph/misc/ParameterCoupling.h"
-#include "src/graph/misc/NodeSocket.h"
-#include "src/graph/ui/NodeSocketUi.h"
-#include "src/graph/misc/MessageBus.h"
-#include "src/graph/misc/GStructs.h"
+#include "src/parameter/ParameterCoupling.h"
+#include "src/node/NodeSocket.h"
+#include "src/node/NodeSocketUi.h"
+#include "src/misc/MessageBus.h"
+#include "src/misc/GStructs.h"
 
 class Node;
 

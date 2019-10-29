@@ -1,5 +1,5 @@
 #pragma once
-#include "src/graph/Node.h"
+#include "src/node/Node.h"
 
 class FeedbackNode : public Node {
   bool hasLastBuffer;

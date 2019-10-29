@@ -3,12 +3,11 @@
 #include <algorithm>
 #include "IPlugConstants.h"
 #include "IGraphics.h"
-#include "src/logger.h"
-#include "src/constants.h"
-#include "src/graph/ui/NodeUi.h"
-#include "src/graph/misc/NodeSocket.h"
-#include "src/graph/misc/ParameterCoupling.h"
-#include "src/graph/misc/MessageBus.h"
+#include "src/misc/constants.h"
+#include "src/node/NodeUi.h"
+#include "src/node/NodeSocket.h"
+#include "src/parameter/ParameterCoupling.h"
+#include "src/misc/MessageBus.h"
 
 /**
  * Virtual class which all nodes will derive from

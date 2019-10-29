@@ -303,24 +303,6 @@
     <ClInclude Include="..\src\faust\FaustHeadlessDsp.h">
       <Filter>src\faust</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\Node.h">
-      <Filter>src\graph</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\graph\Graph.h">
-      <Filter>src\graph</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\constants.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\graph\misc\ParameterManager.h">
-      <Filter>src\graph\misc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\graph\misc\Serializer.h">
-      <Filter>src\graph\misc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\simple_cab\SimpleCabNode.h">
-      <Filter>src\graph\nodes\cabs</Filter>
-    </ClInclude>
     <ClInclude Include="..\thirdparty\fftconvolver\AudioFFT.h">
       <Filter>thirdparty\convolver</Filter>
     </ClInclude>
@@ -333,86 +315,104 @@
     <ClInclude Include="..\thirdparty\fftconvolver\Utilities.h">
       <Filter>thirdparty\convolver</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\simple_drive\SimpleDriveNode.h">
-      <Filter>src\graph\nodes\distortion</Filter>
+    <ClInclude Include="..\src\nodes\RegisterNodes.h">
+      <Filter>src\nodes</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\crybaby\CryBabyNode.h">
-      <Filter>src\graph\nodes\filters</Filter>
+    <ClInclude Include="..\src\nodes\simple_gate\SimpleGateNode.h">
+      <Filter>src\nodes\dynamics</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\ui\GraphBackground.h">
-      <Filter>src\graph\ui</Filter>
+    <ClInclude Include="..\src\nodes\bitcrusher\BitCrusherNode.h">
+      <Filter>src\nodes\distortion</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\misc\ParameterCoupling.h">
-      <Filter>src\graph\misc</Filter>
+    <ClInclude Include="..\src\nodes\combine\CombineNode.h">
+      <Filter>src\nodes\tools</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\ui\NodeUi.h">
-      <Filter>src\graph\ui</Filter>
+    <ClInclude Include="..\src\nodes\crybaby\CryBabyNode.h">
+      <Filter>src\nodes\filters</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\ui\NodeSocketUi.h">
-      <Filter>src\graph\ui</Filter>
+    <ClInclude Include="..\src\nodes\feedback\FeedbackNode.h">
+      <Filter>src\nodes\tools</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\misc\NodeSocket.h">
-      <Filter>src\graph\misc</Filter>
+    <ClInclude Include="..\src\nodes\fuzz\FuzzNode.h">
+      <Filter>src\nodes\distortion</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\ui\CableLayer.h">
-      <Filter>src\graph\ui</Filter>
+    <ClInclude Include="..\src\nodes\io\OutputNode.h">
+      <Filter>src\nodes\io</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\ui\NodeGallery.h">
-      <Filter>src\graph\ui</Filter>
+    <ClInclude Include="..\src\nodes\io\InputNode.h">
+      <Filter>src\nodes\io</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\RegisterNodes.h">
-      <Filter>src\graph\nodes</Filter>
+    <ClInclude Include="..\src\nodes\overdrive\OverDriveNode.h">
+      <Filter>src\nodes\distortion</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\misc\NodeList.h">
-      <Filter>src\graph\misc</Filter>
+    <ClInclude Include="..\src\nodes\paramerticeq\ParametricEqNode.h">
+      <Filter>src\nodes\filters</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\misc\NodeInfo.h">
-      <Filter>src\graph\misc</Filter>
+    <ClInclude Include="..\src\nodes\simple_cab\SimpleCabNode.h">
+      <Filter>src\nodes\cabs</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\misc\MessageBus.h">
-      <Filter>src\graph\misc</Filter>
+    <ClInclude Include="..\src\nodes\simple_compressor\SimpleComressorNode.h">
+      <Filter>src\nodes\dynamics</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\io\InputNode.h">
-      <Filter>src\graph\nodes\io</Filter>
+    <ClInclude Include="..\src\nodes\simple_delay\SimpleDelayNode.h">
+      <Filter>src\nodes\reverb</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\io\OutputNode.h">
-      <Filter>src\graph\nodes\io</Filter>
+    <ClInclude Include="..\src\nodes\simple_drive\SimpleDriveNode.h">
+      <Filter>src\nodes\distortion</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\combine\CombineNode.h">
-      <Filter>src\graph\nodes\tools</Filter>
+    <ClInclude Include="..\src\nodes\simple_reverb\SimpleReverbNode.h">
+      <Filter>src\nodes\reverb</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\feedback\FeedbackNode.h">
-      <Filter>src\graph\nodes\tools</Filter>
+    <ClInclude Include="..\src\nodes\stereo_tool\StereoToolNode.h">
+      <Filter>src\nodes\tools</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\simple_gate\SimpleGateNode.h">
-      <Filter>src\graph\nodes\dynamics</Filter>
+    <ClInclude Include="..\src\graph\Graph.h">
+      <Filter>src\graph</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\simple_compressor\SimpleComressorNode.h">
-      <Filter>src\graph\nodes\dynamics</Filter>
+    <ClInclude Include="..\src\graph\Serializer.h">
+      <Filter>src\graph</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\stereo_tool\StereoToolNode.h">
-      <Filter>src\graph\nodes\tools</Filter>
+    <ClInclude Include="..\src\misc\GStructs.h">
+      <Filter>src\misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\simple_reverb\SimpleReverbNode.h">
-      <Filter>src\graph\nodes\reverbs</Filter>
+    <ClInclude Include="..\src\misc\MessageBus.h">
+      <Filter>src\misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\simple_delay\SimpleDelayNode.h">
-      <Filter>src\graph\nodes\reverbs</Filter>
+    <ClInclude Include="..\src\misc\NodeList.h">
+      <Filter>src\misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\overdrive\OverDriveNode.h">
-      <Filter>src\graph\nodes\distortion</Filter>
+    <ClInclude Include="..\src\misc\constants.h">
+      <Filter>src\misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\bitcrusher\BitCrusherNode.h">
-      <Filter>src\graph\nodes\distortion</Filter>
+    <ClInclude Include="..\src\node\NodeInfo.h">
+      <Filter>src\node</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\fuzz\FuzzNode.h">
-      <Filter>src\graph\nodes\distortion</Filter>
+    <ClInclude Include="..\src\node\NodeSocket.h">
+      <Filter>src\node</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\misc\GStructs.h">
-      <Filter>src\graph\misc</Filter>
+    <ClInclude Include="..\src\node\NodeSocketUi.h">
+      <Filter>src\node</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\nodes\paramerticeq\ParametricEqNode.h">
-      <Filter>src\graph\nodes\filters</Filter>
+    <ClInclude Include="..\src\node\NodeUi.h">
+      <Filter>src\node</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\node\Node.h">
+      <Filter>src\node</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\parameter\ParameterManager.h">
+      <Filter>src\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\parameter\ParameterCoupling.h">
+      <Filter>src\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\CableLayer.h">
+      <Filter>src\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\GraphBackground.h">
+      <Filter>src\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\NodeGallery.h">
+      <Filter>src\ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -452,18 +452,6 @@
     <Filter Include="src\faust">
       <UniqueIdentifier>{ad3ea073-4891-419e-9f43-ad68acf9a1cf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\graph">
-      <UniqueIdentifier>{ed898a12-2e15-45da-9fe2-a23a03581a7d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\graph\nodes">
-      <UniqueIdentifier>{b5e2264e-d950-4e17-bfa3-8119951e2764}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\graph\ui">
-      <UniqueIdentifier>{7811b4f4-42c3-4dff-bd81-efa8eeb06dea}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\graph\misc">
-      <UniqueIdentifier>{be3fbc2d-2fab-4854-a0d6-b437e3964a2d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="thirdparty">
       <UniqueIdentifier>{89a4599c-777c-47fe-92d1-9081f902c5ad}</UniqueIdentifier>
     </Filter>
@@ -473,26 +461,44 @@
     <Filter Include="WDL">
       <UniqueIdentifier>{fa23b9fb-6159-4e25-9eed-6ee81794c82c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\graph\nodes\io">
-      <UniqueIdentifier>{0497bf7b-1882-4bdb-95c1-7df9628ed51c}</UniqueIdentifier>
+    <Filter Include="src\nodes">
+      <UniqueIdentifier>{71704cd4-b9c0-4173-a0b4-802a4c46f7af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\graph\nodes\tools">
-      <UniqueIdentifier>{228a7621-721a-40ee-bbcf-affc12d80829}</UniqueIdentifier>
+    <Filter Include="src\nodes\dynamics">
+      <UniqueIdentifier>{e4c6ad13-b7e5-41a9-82c0-45cf2ba02f16}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\graph\nodes\dynamics">
-      <UniqueIdentifier>{1f92f0fc-bd8e-4b71-81a2-0950ed740bc7}</UniqueIdentifier>
+    <Filter Include="src\nodes\filters">
+      <UniqueIdentifier>{1ea58fa7-1ba4-47f9-8d14-467b32bd96b5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\graph\nodes\reverbs">
-      <UniqueIdentifier>{4a1c8031-cfb0-40d9-8a9d-c24223c80b85}</UniqueIdentifier>
+    <Filter Include="src\nodes\distortion">
+      <UniqueIdentifier>{14201511-3bcd-42a8-8d54-3efe1e1340c2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\graph\nodes\filters">
-      <UniqueIdentifier>{2ba76469-9b04-4493-921f-6456bf85e090}</UniqueIdentifier>
+    <Filter Include="src\nodes\reverb">
+      <UniqueIdentifier>{55a9ac16-808b-4daf-8019-0b954a18a110}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\graph\nodes\cabs">
-      <UniqueIdentifier>{c980bb6c-a4cd-4a99-8dc5-23d670e19ff4}</UniqueIdentifier>
+    <Filter Include="src\nodes\tools">
+      <UniqueIdentifier>{e917d7dd-e2b2-45d4-8221-7fa00ac56091}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\graph\nodes\distortion">
-      <UniqueIdentifier>{60257d00-7163-4bab-b0eb-191135f78e97}</UniqueIdentifier>
+    <Filter Include="src\nodes\io">
+      <UniqueIdentifier>{49d68225-dafa-49e8-a633-b2eae4808e45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\nodes\cabs">
+      <UniqueIdentifier>{cf2f14de-b486-4448-8cff-9dd56171f7b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph">
+      <UniqueIdentifier>{83ed5069-1795-4c69-b1de-334b674883b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\misc">
+      <UniqueIdentifier>{99c81da7-2d0f-4f74-8662-412800d26d08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\node">
+      <UniqueIdentifier>{05f6d460-2062-42dd-bf01-0f82907d9c7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\parameter">
+      <UniqueIdentifier>{3433c669-cab1-482f-9a92-edec6050e01d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ui">
+      <UniqueIdentifier>{751b4849-1bb3-45ed-9685-0eaa219383f3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

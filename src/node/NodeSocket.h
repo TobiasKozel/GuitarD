@@ -1,6 +1,6 @@
 #pragma once
 #include "IPlugConstants.h"
-#include "src/graph/misc/MessageBus.h"
+#include "src/misc/MessageBus.h"
 
 class Node;
 

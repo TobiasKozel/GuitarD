@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
 #include <functional>
-#include "src/graph/misc/NodeInfo.h"
+#include "src/node/NodeInfo.h"
 
 class Node;
 

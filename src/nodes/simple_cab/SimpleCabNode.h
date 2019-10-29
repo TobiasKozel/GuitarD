@@ -2,10 +2,10 @@
 #include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
 #include "resample.h"
 #include "config.h"
-#include "src/graph/Node.h"
-#include "src/graph/nodes/simple_cab/c.h"
-#include "src/graph/nodes/simple_cab/cident.h"
-#include "src/graph/nodes/simple_cab/clean.h"
+#include "src/node/Node.h"
+#include "src/nodes/simple_cab/c.h"
+#include "src/nodes/simple_cab/cident.h"
+#include "src/nodes/simple_cab/clean.h"
 
 class SimpleCabNode : public Node {
   fftconvolver::FFTConvolver convolver;

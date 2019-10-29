@@ -1,10 +1,9 @@
 #pragma once
 #include "IControl.h"
-#include "src/graph/Node.h"
-#include "src/graph/misc/NodeList.h"
+#include "src/node/Node.h"
+#include "src/misc/NodeList.h"
 #include "config.h"
-#include "src/logger.h"
-#include "src/graph/misc/MessageBus.h"
+#include "src/misc/MessageBus.h"
 
 using namespace iplug;
 using namespace igraphics;

@@ -1,7 +1,7 @@
 #pragma once
 #include "IControl.h"
 #include "config.h"
-#include "src/graph/misc/MessageBus.h"
+#include "src/misc/MessageBus.h"
 
 using namespace iplug;
 using namespace igraphics;

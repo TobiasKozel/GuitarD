@@ -1,7 +1,7 @@
 #include "GuitarD.h"
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
-#include "src/graph/nodes/RegisterNodes.h"
+#include "src/nodes/RegisterNodes.h"
 
 
 GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAMS, kNumPrograms)) {

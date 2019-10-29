@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/graph/Node.h"
+#include "src/node/Node.h"
 
 class OutputNode : public Node {
 public:
