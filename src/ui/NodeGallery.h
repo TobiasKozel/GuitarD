@@ -114,6 +114,7 @@ public:
         return &(elem->mInfo);
       }
     }
+    return nullptr;
   }
 
   IText mTitle;
