@@ -43,9 +43,11 @@ public:
    * The constructor doesn't take any parameters since it can be instanciated from the NodeList
    */
   Node() {
+    mUi = nullptr;
     outputs = nullptr;
     mByPassed = false;
     X = Y = 0;
+    rotation = 0;
   };
 
   /**

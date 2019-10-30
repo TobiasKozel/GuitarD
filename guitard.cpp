@@ -60,10 +60,16 @@ bool GuitarD::SerializeState(IByteChunk& chunk) const {
 
 int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
   WDL_String json_string;
-  chunk.GetStr(json_string, startPos);
-  nlohmann::json serialized = nlohmann::json::parse(json_string.Get());
-  graph->deserialize(serialized);
-  return 0;
+  int pos = chunk.GetStr(json_string, startPos);
+  try {
+    nlohmann::json serialized = nlohmann::json::parse(json_string.Get());
+    graph->deserialize(serialized);
+    return pos;
+
+  }
+  catch (...) {
+  }
+  return pos;
   return IPluginBase::UnserializeParams(chunk, startPos);
 }
 

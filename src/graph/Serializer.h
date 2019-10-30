@@ -76,10 +76,18 @@ namespace serializer {
   ) {
     
     output->connectInput(nullptr, 0);
-    input->mUi->setTranslation(
-      serialized["input"]["position"][0],
-      serialized["input"]["position"][1]
-    );
+
+    if (input->mUi != nullptr) {
+      input->mUi->setTranslation(
+        input->X = serialized["input"]["position"][0],
+        input->Y = serialized["input"]["position"][1]
+      );
+    }
+    else {
+      input->X = serialized["input"]["position"][0];
+      input->Y = serialized["input"]["position"][1];
+    }
+
     int expectedIndex = 0;
 
     // create all the nodes and setup the parameters in the first pass
@@ -144,10 +152,17 @@ namespace serializer {
     else if (outNodeIndex == InputNode) {
       output->connectInput(input->outSockets.Get(0));
     }
-    output->mUi->setTranslation(
-      serialized["output"]["position"][0],
-      output->Y = serialized["output"]["position"][1]
-    );
+
+    if (output->mUi != nullptr) {
+      output->mUi->setTranslation(
+        serialized["output"]["position"][0],
+        serialized["output"]["position"][1]
+      );
+    }
+    else {
+      output->X = serialized["output"]["position"][0];
+      output->Y = serialized["output"]["position"][1];
+    }
   }
 }
 
