@@ -87,16 +87,22 @@ public:
 
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
-    // HACK
-    // this will mean the control is attached twice once on toop of the drawing stack
-    mGraphics->AttachControl(this);
-    auto center = mRECT;
-    center.ScaleAboutCentre(0);
-    mStartX = center.L;
-    mStartY = center.T;
+    if (mod.C) {
+      MessageBus::fireEvent<NodeSocket*>("PreviewSocket", mSocket);
+    }
+    else {
+      // HACK
+      // this will mean the control is attached twice once on top of the drawing stack
+      mGraphics->AttachControl(this);
+      auto center = mRECT;
+      center.ScaleAboutCentre(0);
+      mStartX = center.L;
+      mStartY = center.T;
+    }
   }
 
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
+    if (mod.C) { return; }
     // this will get rid of the top most duplicate
     mGraphics->RemoveControl(this);
     mDragging = false;

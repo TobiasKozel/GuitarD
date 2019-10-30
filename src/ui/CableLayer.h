@@ -10,13 +10,21 @@ using namespace iplug;
 using namespace igraphics;
 
 class CableLayer : public IControl {
+
   MessageBus::Subscription<Node*> mDisconnectAllEvent;
   MessageBus::Subscription<Coord2d> mNodeDraggedEvent;
   MessageBus::Subscription<Node*> mNodeDraggedEndEvent;
+  MessageBus::Subscription<NodeSocket*> mPreviewSocketEvent;
+  MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
+
+  NodeSocket* mPreviewSocketPrev;
+  NodeSocket* mPreviewSocket;
 public:
   CableLayer(IGraphics* g, WDL_PtrList<Node>* pNodes, Node* pOutNode) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
+    mPreviewSocket = nullptr;
+    mPreviewSocketPrev = nullptr;
     SetTargetRECT(IRECT(0, 0, 0, 0));
     mNodes = pNodes;
     mOutNode = pOutNode;
@@ -70,6 +78,31 @@ public:
       mHighlightSocket = nullptr;
       mDirty = true;
     });
+
+    mPreviewSocketEvent.subscribe("PreviewSocket", [&](NodeSocket* socket) {
+      // TODO this is kinda shady and does not use the "SocketConnect" event
+      NodeSocket* outSocket = this->mOutNode->inSockets.Get(0);
+      if (socket == this->mPreviewSocket) {
+        // Connect the original socket again
+        if (this->mPreviewSocketPrev != nullptr) {
+          outSocket->connect(this->mPreviewSocketPrev);
+          this->mPreviewSocketPrev = nullptr;
+        }
+        this->mPreviewSocket = nullptr;
+      }
+      else {
+        // Save the currently connected socket and connect it to the one provided
+        this->mPreviewSocketPrev = outSocket->connectedTo;
+        this->mPreviewSocket = socket;
+        outSocket->connect(socket);
+      }
+      this->mDirty = true;
+    });
+
+    onConnectionEvent.subscribe("SocketConnect", [&](SocketConnectRequest req) {
+      mPreviewSocket = nullptr;
+      mPreviewSocketPrev = nullptr;
+    });
   }
 
   void Draw(IGraphics& g) override {
@@ -87,12 +120,22 @@ public:
         curSock = curNode->inSockets.Get(i);
         if (curSock->connectedTo != nullptr) {
           tarSock = curSock->connectedTo;
-          g.DrawLine(
-            curSock == mHighlightSocket ? mColorHighlight : mColor,
-            curSock->X + socketRadius, curSock->Y + socketRadius,
-            tarSock->X + socketRadius, tarSock->Y + socketRadius,
-            &mBlend, 5
-          );
+          if (tarSock == mPreviewSocket) {
+            g.DrawDottedLine(
+              curSock == mHighlightSocket ? mColorHighlight : mColor,
+              curSock->X + socketRadius, curSock->Y + socketRadius,
+              tarSock->X + socketRadius, tarSock->Y + socketRadius,
+              &mBlend, 5, 20
+            );
+          }
+          else {
+            g.DrawLine(
+              curSock == mHighlightSocket ? mColorHighlight : mColor,
+              curSock->X + socketRadius, curSock->Y + socketRadius,
+              tarSock->X + socketRadius, tarSock->Y + socketRadius,
+              &mBlend, 5
+            );
+          }
         }
       }
     }
