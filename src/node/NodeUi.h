@@ -29,16 +29,6 @@ using namespace igraphics;
  * since it will only exists as long as the UI window is open but is owned by the node
  */
 class NodeUi : public IControl {
-  MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
-  IRECT mCloseButton;
-  IRECT mDisconnectAllButton;
-  IRECT mByPassButton;
-  WDL_PtrList<ParameterCoupling>* mParameters;
-  WDL_PtrList<NodeSocket>* mInSockets;
-  WDL_PtrList<NodeSocket>* mOutSockets;
-  WDL_PtrList<NodeSocketUi> mInSocketsUi;
-  WDL_PtrList<NodeSocketUi> mOutSocketsUi;
-  Node* mParentNode;
 public:
   NodeUi(NodeUiParam pParam) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
@@ -99,7 +89,7 @@ public:
   ~NodeUi() {
   }
 
-  void setUp() {
+  virtual void setUp() {
     for (int i = 0; i < mParameters->GetSize(); i++) {
       ParameterCoupling* couple = mParameters->Get(i);
       double value = *(couple->value);
@@ -167,7 +157,7 @@ public:
     }
   }
 
-  void Draw(IGraphics& g) override {
+  virtual void Draw(IGraphics& g) override {
     // this will just draw the backround since all the controls are also registered
     // to the IGraphics class which will draw them
     // which means the rendering order is kinda hard to controll
@@ -175,10 +165,12 @@ public:
     //g.FillRect(IColor(255, 10, 10, 10), mRECT);
     g.DrawRect(IColor(255, 0, 255, 0), mCloseButton);
     g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
-    g.DrawRect(IColor(255, 255, *mBypassed ? 0 : 255, 0), mByPassButton);
+    if (mBypassed != nullptr) {
+      g.DrawRect(IColor(255, 255, *mBypassed ? 0 : 255, 0), mByPassButton);
+    }
   }
 
-  void OnMouseUp(float x, float y, const IMouseMod& mod) {
+  virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
     if (mDragging) {
       mDragging = false;
       MessageBus::fireEvent<Node*>("NodeDraggedEnd", mParentNode);
@@ -190,19 +182,21 @@ public:
     if (mDisconnectAllButton.Contains(IRECT(x, y, x, y))) {
       MessageBus::fireEvent<Node*>("NodeDisconnectAll", mParentNode);
     }
-    if (mByPassButton.Contains(IRECT(x, y, x, y))) {
-      *mBypassed = !*mBypassed;
-      mDirty = true;
+    if (mBypassed != nullptr) {
+      if (mByPassButton.Contains(IRECT(x, y, x, y))) {
+        *mBypassed = !*mBypassed;
+        mDirty = true;
+      }
     }
   }
 
-  void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
+  virtual void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     mDragging = true;
     MessageBus::fireEvent<Coord2d>("NodeDragged", Coord2d {x, y});
     translate(dX, dY);
   }
 
-  void translate(float dX, float dY) {
+  virtual void translate(float dX, float dY) {
     for (int i = 0; i < mParameters->GetSize(); i++) {
       moveControl(mParameters->Get(i)->control, dX, dY);
     }
@@ -248,6 +242,17 @@ private:
   }
 
 protected:
+  MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
+  IRECT mCloseButton;
+  IRECT mDisconnectAllButton;
+  IRECT mByPassButton;
+  WDL_PtrList<ParameterCoupling>* mParameters;
+  WDL_PtrList<NodeSocket>* mInSockets;
+  WDL_PtrList<NodeSocket>* mOutSockets;
+  WDL_PtrList<NodeSocketUi> mInSocketsUi;
+  WDL_PtrList<NodeSocketUi> mOutSocketsUi;
+  Node* mParentNode;
+
   bool mDragging;
   float* X;
   float* Y;

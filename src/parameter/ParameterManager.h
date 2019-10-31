@@ -90,8 +90,8 @@ public:
       }
       // TODO These seem to be leaking and also don't force vsts to update the names
       // works for AU though
-      //couple->parameter->SetLabel(couple->name);
-      //couple->parameter->SetDisplayText(1, couple->name);
+      couple->parameter->SetLabel(couple->name);
+      couple->parameter->SetDisplayText(1, couple->name);
       couple->parameterIdx = i;
       couple->parameter->Set(*(couple->value));
       WDBGMSG("Claimed param %i\n", i);
