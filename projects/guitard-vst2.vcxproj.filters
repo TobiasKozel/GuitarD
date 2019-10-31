@@ -77,6 +77,9 @@
     <ClCompile Include="..\thirdparty\fftconvolver\Utilities.cpp">
       <Filter>thirdparty\convolver</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\WDL\resample.cpp">
+      <Filter>WDL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../config.h" />
@@ -277,6 +280,9 @@
     </Filter>
     <Filter Include="thirdparty\convolver">
       <UniqueIdentifier>{0dedb1ce-a9a8-430e-a973-028759bca3bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WDL">
+      <UniqueIdentifier>{280521d9-5c76-41d5-92c5-fec76258f2cb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

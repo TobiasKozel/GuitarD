@@ -18,6 +18,7 @@ class NodeSocketUi : public IControl {
   MessageBus::Subscription<Node*> onDisconnectAllEvent;
   MessageBus::Subscription<NodeSocket*> onDisconnectEvent;
   int vol;
+  IMouseMod mMousDown;
 public:
   NodeSocketUi(IGraphics* g, NodeSocket* socket) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
@@ -87,6 +88,7 @@ public:
 
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
+    mMousDown = mod;
     if (mod.C) {
       MessageBus::fireEvent<NodeSocket*>("PreviewSocket", mSocket);
     }
@@ -102,7 +104,10 @@ public:
   }
 
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
-    if (mod.C) { return; }
+    if (mMousDown.C) {
+      mMousDown = IMouseMod();
+      return;
+    }
     // this will get rid of the top most duplicate
     mGraphics->RemoveControl(this);
     mDragging = false;
@@ -124,6 +129,7 @@ public:
         );
       }
     }
+    mMousDown = IMouseMod();
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
