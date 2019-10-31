@@ -61,15 +61,19 @@ public:
           curSock = curNode->inSockets.Get(i);
           if (curSock->connectedTo != nullptr) {
             tarSock = curSock->connectedTo;
+            float x1 = tarSock->X + socketRadius;
+            float x2 = curSock->X + socketRadius;
+            float y1 = tarSock->Y + socketRadius;
+            float y2 = curSock->Y + socketRadius;
             IRECT box;
-            box.L = min(tarSock->X, curSock->X) + socketRadius;
-            box.R = max(tarSock->X, curSock->X) + socketRadius;
-            box.T = min(tarSock->Y, curSock->Y) + socketRadius;
-            box.B = max(tarSock->Y, curSock->Y) + socketRadius;
+            box.L = min(x1, x2);
+            box.R = max(x1, x2);
+            box.T = min(y1, y2);
+            box.B = max(y1, y2);
             if (box.Contains(IRECT{ pos.x, pos.y, pos.x, pos.y })) {
-              float a = box.T - box.B;
-              float b = box.R - box.L;
-              float c = box.L * box.B - box.R * box.T;
+              float a = y1 - y2;
+              float b = x2 - x1;
+              float c = x1 * y2 - x2 * y1;
               float d = abs(a * pos.x + b * pos.y + c) / sqrt(a * a + b * b);
               if (d < 15) {
                 mHighlightSocket = curSock;
