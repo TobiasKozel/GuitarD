@@ -67,7 +67,14 @@ public:
             box.T = min(tarSock->Y, curSock->Y) + socketRadius;
             box.B = max(tarSock->Y, curSock->Y) + socketRadius;
             if (box.Contains(IRECT{ pos.x, pos.y, pos.x, pos.y })) {
-              mHighlightSocket = curSock;
+              float a = box.T - box.B;
+              float b = box.R - box.L;
+              float c = box.L * box.B - box.R * box.T;
+              float d = abs(a * pos.x + b * pos.y + c) / sqrt(a * a + b * b);
+              if (d < 15) {
+                mHighlightSocket = curSock;
+                break;
+              }
             }
           }
         }
