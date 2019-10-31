@@ -36,6 +36,9 @@ public:
     mColorHighlight.A = 255;
     mColorHighlight.G = 255;
 
+    mColorPreview.A = 100;
+    mColorPreview.R = 255;
+
     mHighlightSocket = nullptr;
     
     mDisconnectAllEvent.subscribe("NodeDisconnectAll", [&](Node*) {
@@ -120,13 +123,23 @@ public:
         curSock = curNode->inSockets.Get(i);
         if (curSock->connectedTo != nullptr) {
           tarSock = curSock->connectedTo;
-          if (tarSock == mPreviewSocket) {
+          if (tarSock == mPreviewSocket && curSock == mOutNode->inSockets.Get(0)) {
+            // Draw the temporary bypass
             g.DrawDottedLine(
               curSock == mHighlightSocket ? mColorHighlight : mColor,
               curSock->X + socketRadius, curSock->Y + socketRadius,
               tarSock->X + socketRadius, tarSock->Y + socketRadius,
               &mBlend, 5, 20
             );
+            if (mPreviewSocketPrev != nullptr) {
+              // draw the original connection slightly transparent
+              g.DrawLine(
+                curSock == mHighlightSocket ? mColorHighlight : mColorPreview,
+                curSock->X + socketRadius, curSock->Y + socketRadius,
+                mPreviewSocketPrev->X + socketRadius, mPreviewSocketPrev->Y + socketRadius,
+                &mBlend, 5
+              );
+            }
           }
           else {
             g.DrawLine(
@@ -153,6 +166,7 @@ private:
   Node* mOutNode;
   NodeSocket* mHighlightSocket;
   IColor mColor;
+  IColor mColorPreview;
   IColor mColorHighlight;
   IBlend mBlend;
 };
