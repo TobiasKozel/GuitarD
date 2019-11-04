@@ -6,8 +6,7 @@
 
 GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAMS, kNumPrograms)) {
   NodeList::registerNodes();
-  // TODO on mac garageband NOutChansConnected() reports zero for some reason
-  graph = new Graph(static_cast<int>(GetSampleRate()), 2);
+  graph = new Graph();
 
   // Gather a good amount of parameters to expose to the daw based on what nodes are on the canvas
   for (int i = 0; i < MAXDAWPARAMS; i++) {
@@ -37,6 +36,12 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
     this->graph->setupUi(pGraphics);
   };
 #endif
+}
+
+void GuitarD::OnReset() {
+  if (graph != nullptr) {
+    graph->OnReset(static_cast<int>(GetSampleRate()), NOutChansConnected());
+  }
 }
 
 void GuitarD::OnUIClose() {

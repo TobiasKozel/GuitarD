@@ -59,9 +59,9 @@ public:
 
 class InputNode : public Node {
 public:
-  InputNode(int channels, int psampleRate) : Node() {
+  InputNode() : Node() {
     mLastBlockSize = -1;
-    setup(psampleRate, MAXBUFFER, channels, 0, 1);
+    setup(48000, MAXBUFFER, 2, 0, 1);
   }
 
   void ProcessBlock(int) {}

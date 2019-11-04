@@ -68,6 +68,7 @@ public:
   virtual void compute(int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) = 0;
   virtual int getNumInputs() = 0;
   virtual int getNumOutputs() = 0;
+  virtual void instanceConstants(int samplingFreq) = 0;
 
   void setup(int p_samplerate = 48000, int p_maxBuffer = MAXBUFFER, int p_channels = 2, int p_inputs = 1, int p_outputs = 1) {
     Node::setup(p_samplerate, p_maxBuffer, p_channels, getNumInputs() / p_channels, getNumOutputs() / p_channels);
@@ -79,7 +80,6 @@ public:
      */
     buildUserInterface(&faustUi);
     init(p_samplerate);
-
     if (type == DefaultNodeName) {
       type = faustUi.name;
     }
@@ -89,6 +89,19 @@ public:
       parameters.Add(p);
       p->y = p->h * i - 80;
     }
+  }
+
+  void channelsChanged(int p_channels) override {
+    if (outputs != nullptr) {
+      WDBGMSG("Warning trying to change the channelcount on a faust node!\n");
+    }
+    else {
+      Node::channelsChanged(p_channels);
+    }
+  }
+
+  void samplerateChanged(int p_samplerate) override {
+    instanceConstants(p_samplerate);
   }
 
   /**

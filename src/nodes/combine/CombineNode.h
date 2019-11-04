@@ -72,12 +72,26 @@ public:
     p->x = 0;
     p->y = 0;
     parameters.Add(p);
+  }
+
+  void deleteBuffers() override {
+    Node::deleteBuffers();
+    if (emptyBuffer != nullptr) {
+      for (int c = 0; c < channelCount; c++) {
+        delete emptyBuffer[c];
+      }
+      emptyBuffer = nullptr;
+    }
+  }
+
+  void channelsChanged(int p_channels) override {
+    Node::channelsChanged(p_channels);
 
     // this will be used to do processing on a disconnected node
-    emptyBuffer = new sample* [channelCount];
+    emptyBuffer = new sample * [channelCount];
     for (int c = 0; c < channelCount; c++) {
-      emptyBuffer[c] = new sample[p_maxBuffer];
-      for (int i = 0; i < p_maxBuffer; i++) {
+      emptyBuffer[c] = new sample[maxBuffer];
+      for (int i = 0; i < maxBuffer; i++) {
         emptyBuffer[c][i] = 0;
       }
     }

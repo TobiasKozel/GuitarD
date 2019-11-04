@@ -55,25 +55,16 @@ public:
    * This is basically a delayed constructor with the only disadvatage: derived methods have to have the same parameters
    */
   virtual void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
-    samplerate = p_samplerate;
+    samplerate = 0;
+    channelCount = 0;
     maxBuffer = p_maxBuffer;
     inputCount = p_inputs;
     outputCount = p_outputs;
     isProcessed = false;
-    channelCount = p_channles;
     uiReady = false;
+    OnReset(p_samplerate, p_channles);
 
-    // A derived node might have already setup a custom output buffer
-    // Setup the output buffer only if there's none
-    if (outputs == nullptr) {
-      outputs = new iplug::sample** [p_outputs];
-      for (int i = 0; i < p_outputs; i++) {
-        outputs[i] = new iplug::sample* [p_channles];
-        for (int c = 0; c < p_channles; c++) {
-          outputs[i][c] = new iplug::sample[p_maxBuffer];
-        }
-      }
-    }
+
 
     // Setup the sockets for the node connections
     for (int i = 0; i < inputCount; i++) {
@@ -91,9 +82,7 @@ public:
     }
   }
 
-
-  virtual ~Node() {
-    // clean up the output buffers
+  virtual void deleteBuffers() {
     if (outputs != nullptr) {
       for (int i = 0; i < outputCount; i++) {
         for (int c = 0; c < channelCount; c++) {
@@ -102,7 +91,12 @@ public:
         delete outputs[i];
       }
       delete outputs;
+      outputs = nullptr;
     }
+  }
+
+  virtual ~Node() {
+    deleteBuffers();
     
     if (uiReady || mUi != nullptr) {
       WDBGMSG("Warning, UI of node was not cleaned up!\n");
@@ -217,5 +211,32 @@ public:
   }
 
   virtual void layoutChanged() { }
+
+  virtual void channelsChanged(int p_channels) {
+    if (outputs != nullptr) {
+      deleteBuffers();
+    }
+    outputs = new iplug::sample * *[outputCount];
+    for (int i = 0; i < outputCount; i++) {
+      outputs[i] = new iplug::sample * [p_channels];
+      for (int c = 0; c < p_channels; c++) {
+        outputs[i][c] = new iplug::sample[maxBuffer];
+      }
+    }
+    channelCount = p_channels;
+  }
+
+  virtual void samplerateChanged(int p_sampleRate) {
+    samplerate = p_sampleRate;
+  }
+
+  virtual void OnReset(int p_sampleRate, int p_channels) {
+    if (p_channels != channelCount) {
+      channelsChanged(p_channels);
+    }
+    if (p_sampleRate != samplerate) {
+      samplerateChanged(p_sampleRate);
+    }
+  }
 };
 

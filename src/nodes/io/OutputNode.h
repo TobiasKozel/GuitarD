@@ -4,8 +4,8 @@
 
 class OutputNode : public Node {
 public:
-  OutputNode(int channels) : Node() {
-    setup(0, MAXBUFFER, channels, 1, 0);
+  OutputNode() : Node() {
+    setup(0, MAXBUFFER, 2, 1, 0);
   }
 
   void ProcessBlock(int) {
@@ -36,5 +36,9 @@ public:
       }
     }
     isProcessed = true;
+  }
+
+  void OnReset(int p_sampleRate, int p_channels) override {
+    channelCount = p_channels;
   }
 };

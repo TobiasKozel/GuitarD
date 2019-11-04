@@ -38,15 +38,14 @@ public:
   ParameterManager paramManager;
 
 
-  Graph(int p_sampleRate, int p_channles = 2) {
+  Graph() {
     graphics = nullptr;
     background = nullptr;
     nodeGallery = nullptr;
     cableLayer = nullptr;
-    sampleRate = p_sampleRate;
-    channelCount = p_channles;
-    inputNode = new InputNode(channelCount, p_sampleRate);
-    outputNode = new OutputNode(channelCount);
+
+    inputNode = new InputNode();
+    outputNode = new OutputNode();
 
     // output->connectInput(input->outSockets.Get(0));
     mNodeDelSub.subscribe("NodeDeleted", [&](Node* param) {
@@ -71,6 +70,19 @@ public:
   ~Graph() {
     // TODO get rid of all the things
     // not a priority since there is no use case for multiple/dynamic graphs
+  }
+
+  void OnReset(int p_sampleRate, int p_channles = 2) {
+    if (p_sampleRate > 0 && p_channles > 0) {
+      WDL_MutexLock lock(&isProcessing);
+      sampleRate = p_sampleRate;
+      channelCount = p_channles;
+      inputNode->OnReset(p_sampleRate, p_channles);
+      outputNode->OnReset(p_sampleRate, p_channles);
+      for (int i = 0; i < nodes.GetSize(); i++) {
+        nodes.Get(i)->OnReset(p_sampleRate, p_channles);
+      }
+    }
   }
 
   void ProcessBlock(iplug::sample** in, iplug::sample** out, int nFrames) {

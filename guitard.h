@@ -25,6 +25,7 @@ public:
   Graph* graph;
   IVButtonControl* testButton;
   void OnUIClose() override;
+  void OnReset() override;
 
   bool SerializeState(IByteChunk& chunk) const override;
   int UnserializeState(const IByteChunk& chunk, int startPos) override;
