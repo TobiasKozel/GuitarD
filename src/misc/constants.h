@@ -20,3 +20,5 @@
 #define MAXBUFFER 512
 
 #define SOCKETDIAMETER 30
+
+#define DEBUGFONT iplug::igraphics::IText { 16, COLOR_WHITE, "Roboto-Regular", iplug::igraphics::EAlign::Center, iplug::igraphics::EVAlign::Middle, 0 }

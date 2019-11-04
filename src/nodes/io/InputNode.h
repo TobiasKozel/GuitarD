@@ -12,10 +12,13 @@ class InputNodeUi : public NodeUi {
   const char* mCurrentQuantizedPitch;
   int mTunerCentsOff;
   float mCurrentFrequency;
-  void update() {
-  }
+  void update() { }
+  iplug::igraphics::IText mBlocksizeText;
+  string mInfo;
 public:
   InputNodeUi(NodeUiParam param) : NodeUi(param) {
+    mInfo = "";
+    mBlocksizeText = DEBUGFONT;
     mCurrentFrequency = 440.f;
     mCurrentQuantizedPitch = mNotes[0];
     mTunerCentsOff = 0;
@@ -40,9 +43,11 @@ public:
   void Draw(IGraphics& g) override {
     g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
     g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
+    mInfo = "Blocksize: " + to_string(mParentNode->mLastBlockSize) + " Sample-Rate: " + to_string(mParentNode->samplerate);
+    g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
     if (mEnableTuner) {
-      g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
-      mDirty = true;
+      // g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
+      // mDirty = true;
     }
   }
 
@@ -54,13 +59,15 @@ public:
 
 class InputNode : public Node {
 public:
-  InputNode(int channels) : Node() {
-    setup(0, MAXBUFFER, channels, 0, 1);
+  InputNode(int channels, int psampleRate) : Node() {
+    mLastBlockSize = -1;
+    setup(psampleRate, MAXBUFFER, channels, 0, 1);
   }
 
   void ProcessBlock(int) {}
 
   void CopyIn(iplug::sample** in, int nFrames) {
+    mLastBlockSize = nFrames;
     for (int c = 0; c < channelCount; c++) {
       for (int i = 0; i < nFrames; i++) {
         outputs[0][c][i] = in[c][i];

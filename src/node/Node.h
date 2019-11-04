@@ -36,6 +36,7 @@ public:
   int samplerate;
   int channelCount;
   int maxBuffer;
+  int mLastBlockSize;
 
   bool mByPassed;
 

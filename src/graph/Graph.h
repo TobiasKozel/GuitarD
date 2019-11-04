@@ -45,7 +45,7 @@ public:
     cableLayer = nullptr;
     sampleRate = p_sampleRate;
     channelCount = p_channles;
-    inputNode = new InputNode(channelCount);
+    inputNode = new InputNode(channelCount, p_sampleRate);
     outputNode = new OutputNode(channelCount);
 
     // output->connectInput(input->outSockets.Get(0));
