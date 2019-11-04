@@ -79,6 +79,11 @@ public:
      * processing chain is made, which will cause some artifacts anyways
      */
     WDL_MutexLock lock(&isProcessing);
+    if (nFrames > MAXBUFFER) {
+      // TODO process this in smaller chunks, should be a simple for loop
+      outputNode->CopyOut(out, nFrames);
+      return;
+    }
     inputNode->CopyIn(in, nFrames);
 
     int nodeCount = nodes.GetSize();
