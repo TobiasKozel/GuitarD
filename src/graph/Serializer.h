@@ -43,10 +43,13 @@ namespace serializer {
       }
       serialized["nodes"][i]["parameters"] = nlohmann::json::array();
       for (int p = 0; p < node->parameters.GetSize(); p++) {
-        int idx = node->parameters.Get(p)->parameterIdx;
-        double val = *(node->parameters.Get(p)->value);
+        ParameterCoupling* para = node->parameters.Get(p);
+        const char* name = para->name;
+        double val = para->parameter != nullptr ? para->parameter->Value() : *(para->value);
+        int idx = para->parameterIdx;
         serialized["nodes"][i]["parameters"][p] = {
-          { "idx", idx },
+          { "name", name },
+          { "idx", idx},
           { "value", val }
         };
       }
@@ -100,12 +103,15 @@ namespace serializer {
         WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
       }
       nodes.Add(node);
-      int paramIdx = 0;
       for (auto param : sNode["parameters"]) {
-        if (paramIdx >= node->parameters.GetSize()) { break; }
-        node->parameters.Get(paramIdx)->parameterIdx = param["idx"];
-        *(node->parameters.Get(paramIdx)->value) = param["value"];
-        paramIdx++;
+        string name = param["name"];
+        for (int i = 0; i < node->parameters.GetSize(); i++) {
+          ParameterCoupling* para = node->parameters.Get(i);
+          if (para->name == name) {
+            para->parameterIdx = param["idx"];
+            *(para->value) = param["value"];
+          }
+        }
       }
       paramManager->claimNode(node);
       if (graphics != nullptr && graphics->WindowIsOpen()) {

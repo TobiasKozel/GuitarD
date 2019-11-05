@@ -38,7 +38,8 @@ public:
   int maxBuffer;
   int mLastBlockSize;
 
-  bool mByPassed;
+  double mByPassed;
+  double mStereo;
 
   /**
    * The constructor doesn't take any parameters since it can be instanciated from the NodeList
@@ -46,7 +47,8 @@ public:
   Node() {
     mUi = nullptr;
     outputs = nullptr;
-    mByPassed = false;
+    mByPassed = 0;
+    mStereo = 1;
     X = Y = 0;
     rotation = 0;
   };
@@ -119,7 +121,9 @@ public:
   }
 
   bool byPass() {
-    if (!mByPassed) { return false; }
+    // The first param will always be bypass
+    parameters.Get(0)->update();
+    if (mByPassed < 0.5) { return false; }
     iplug::sample** in = inSockets.Get(0)->connectedTo->parentBuffer;
     for (int o = 0; o < outputCount; o++) {
       for (int c = 0; c < channelCount; c++) {
@@ -162,6 +166,33 @@ public:
 
   virtual void ProcessBlock(int nFrames) = 0;
 
+  virtual void channelsChanged(int p_channels) {
+    if (outputs != nullptr) {
+      deleteBuffers();
+    }
+    outputs = new iplug::sample * *[outputCount];
+    for (int i = 0; i < outputCount; i++) {
+      outputs[i] = new iplug::sample * [p_channels];
+      for (int c = 0; c < p_channels; c++) {
+        outputs[i][c] = new iplug::sample[maxBuffer];
+      }
+    }
+    channelCount = p_channels;
+  }
+
+  virtual void samplerateChanged(int p_sampleRate) {
+    samplerate = p_sampleRate;
+  }
+
+  virtual void OnReset(int p_sampleRate, int p_channels) {
+    if (p_channels != channelCount) {
+      channelsChanged(p_channels);
+    }
+    if (p_sampleRate != samplerate) {
+      samplerateChanged(p_sampleRate);
+    }
+  }
+
   virtual void connectInput(NodeSocket* out, int inputNumber = 0) {
     NodeSocket* inSocket = inSockets.Get(inputNumber);
     if (inSocket != nullptr) {
@@ -174,6 +205,26 @@ public:
     }
   }
 
+  void addByPassParam() {
+    ParameterCoupling* p = new ParameterCoupling(
+      "Bypass", &mByPassed, 0.0, 0.0, 1.0, 1
+    );
+    p->x = -100;
+    p->y = -100;
+    parameters.Add(p);
+  }
+
+  void addStereoParam(ParameterCoupling* p = nullptr) {
+    if (p == nullptr) {
+      p = new ParameterCoupling(
+        "Stereo", &mStereo, 1.0, 0.0, 1.0, 1
+      );
+    }
+    p->x = -50;
+    p->y = -100;
+    parameters.Add(p);
+  }
+
   /**
    * Generic setup of the parameters to get something on the screen
    */
@@ -182,7 +233,7 @@ public:
     mUi = new NodeUi(NodeUiParam {
       pGrahics,
       PNGGENERICBG_FN,
-      &X, &Y, &mByPassed,
+      &X, &Y,
       &parameters,
       &inSockets,
       &outSockets,
@@ -211,32 +262,5 @@ public:
   }
 
   virtual void layoutChanged() { }
-
-  virtual void channelsChanged(int p_channels) {
-    if (outputs != nullptr) {
-      deleteBuffers();
-    }
-    outputs = new iplug::sample * *[outputCount];
-    for (int i = 0; i < outputCount; i++) {
-      outputs[i] = new iplug::sample * [p_channels];
-      for (int c = 0; c < p_channels; c++) {
-        outputs[i][c] = new iplug::sample[maxBuffer];
-      }
-    }
-    channelCount = p_channels;
-  }
-
-  virtual void samplerateChanged(int p_sampleRate) {
-    samplerate = p_sampleRate;
-  }
-
-  virtual void OnReset(int p_sampleRate, int p_channels) {
-    if (p_channels != channelCount) {
-      channelsChanged(p_channels);
-    }
-    if (p_sampleRate != samplerate) {
-      samplerateChanged(p_sampleRate);
-    }
-  }
 };
 

@@ -39,6 +39,9 @@ public:
     convolver.init(64, resampledIR, outSamples);
     convolver2.init(64, resampledIR, outSamples);
     //convolver.init(64, cleanIR, 3000);
+    mStereo = 0;
+    addByPassParam();
+    addStereoParam();
   }
 
   ~SimpleCabNode() {
@@ -47,6 +50,7 @@ public:
 
   void ProcessBlock(int nFrames) {
     if (!inputsReady() || isProcessed || byPass()) { return; }
+    parameters.Get(1)->update();
     //int prev = (int)*(parameters[0]->value);
     //parameters[0]->update();
     //int cur = (int)*(parameters[0]->value);
@@ -64,9 +68,16 @@ public:
 
     sample** buffer = inSockets.Get(0)->connectedTo->parentBuffer;
 
-    
+
     convolver.process(buffer[0], outputs[0][0], nFrames);
-    convolver2.process(buffer[1], outputs[0][1], nFrames);
+    if (mStereo) {
+      convolver2.process(buffer[1], outputs[0][1], nFrames);
+    }
+    else {
+      for (int i = 0; i < nFrames; i++) {
+        outputs[0][1][i] = outputs[0][0][i];
+      }
+    }
     
 
     isProcessed = true;

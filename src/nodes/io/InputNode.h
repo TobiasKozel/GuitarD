@@ -80,7 +80,7 @@ public:
     mUi = new InputNodeUi(NodeUiParam {
       pGrahics,
       PNGGENERICBG_FN,
-      &X, &Y, nullptr,
+      &X, &Y,
       &parameters,
       &inSockets,
       &outSockets,

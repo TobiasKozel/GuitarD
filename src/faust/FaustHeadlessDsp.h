@@ -84,10 +84,17 @@ public:
       type = faustUi.name;
     }
 
-    for (int i = 0; i < faustUi.params.GetSize(); i++) {
+    addByPassParam();
+
+    for (int i = 0, pos = 0; i < faustUi.params.GetSize(); i++) {
       ParameterCoupling* p = faustUi.params.Get(i);
+      if (p->name == "Stereo") {
+        addStereoParam(p);
+        continue;
+      }
+      p->y = p->h * pos - 80;
       parameters.Add(p);
-      p->y = p->h * i - 80;
+      pos++;
     }
   }
 
@@ -110,7 +117,7 @@ public:
    */
   virtual void ProcessBlock(int nFrames) {
     if (!inputsReady() || isProcessed || byPass()) { return; }
-    for (int i = 0; i < parameters.GetSize(); i++) {
+    for (int i = 1; i < parameters.GetSize(); i++) {
       parameters.Get(i)->update();
     }
     compute(nFrames, inSockets.Get(0)->connectedTo->parentBuffer, outputs[0]);

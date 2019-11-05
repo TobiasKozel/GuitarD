@@ -13,7 +13,6 @@ struct NodeUiParam {
   const char* pBg;
   float* X;
   float* Y;
-  bool* byPassed;
   WDL_PtrList<ParameterCoupling>* pParameters;
   WDL_PtrList<NodeSocket>* inSockets;
   WDL_PtrList<NodeSocket>* outSockets;
@@ -41,7 +40,6 @@ public:
     mInSockets = pParam.inSockets;
     mOutSockets = pParam.outSockets;
     mParentNode = pParam.node;
-    mBypassed = pParam.byPassed;
 
     mBitmap = mGraphics->LoadBitmap(pParam.pBg, 1, false);
     float w = mBitmap.W();
@@ -165,9 +163,6 @@ public:
     //g.FillRect(IColor(255, 10, 10, 10), mRECT);
     g.DrawRect(IColor(255, 0, 255, 0), mCloseButton);
     g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
-    if (mBypassed != nullptr) {
-      g.DrawRect(IColor(255, 255, *mBypassed ? 0 : 255, 0), mByPassButton);
-    }
   }
 
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
@@ -181,12 +176,6 @@ public:
     }
     if (mDisconnectAllButton.Contains(IRECT(x, y, x, y))) {
       MessageBus::fireEvent<Node*>("NodeDisconnectAll", mParentNode);
-    }
-    if (mBypassed != nullptr) {
-      if (mByPassButton.Contains(IRECT(x, y, x, y))) {
-        *mBypassed = !*mBypassed;
-        mDirty = true;
-      }
     }
   }
 
@@ -256,7 +245,6 @@ protected:
   bool mDragging;
   float* X;
   float* Y;
-  bool* mBypassed;
   IBitmap mBitmap;
   IBlend mBlend;
   IGraphics* mGraphics;
