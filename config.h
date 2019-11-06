@@ -55,7 +55,6 @@
 
 #define ROBOTO_FN "Roboto-Regular.ttf"
 
-#define PNGBACKGROUND_FN "background.png"
 #define PNGSTEREOSHAPERBG_FN "stereoshaper_bg.png"
 #define PNGSIMPLECABBG_FN "simplecab_bg.png"
 #define PNGGENERICBG_FN "generic_bg.png"

@@ -13,30 +13,37 @@ public:
   GraphBackground(IGraphics* g, BackgroundMoveCallback pCallback) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
-    mBitmap = g->LoadBitmap(PNGBACKGROUND_FN, 1, false);
-    mBlend = EBlend::Clobber;
     mGraphics = g;
     mY = mX = 0;
     mCallback = pCallback;
     mScale = 1.0;
     offsetX = offsetY = windowY = windowX = 0;
+    mColorBackground = IColor(255, COLORBACKGROUND);
+    mColorBackgroundDetail = IColor(255, COLORPANEL1);
   }
 
   void Draw(IGraphics& g) override {
-    g.FillRect(COLOR_GRAY, mRECT);
-    int x = offsetX % windowX;
-    int y = offsetY % windowY;
-    g.DrawBitmap(mBitmap, IRECT(x, y, windowX, windowY), 1, &mBlend);
-    g.DrawBitmap(mBitmap, IRECT(x - windowX, y, windowX, windowY), 1, &mBlend);
-    g.DrawBitmap(mBitmap, IRECT(x, y - windowY, windowX, windowY), 1, &mBlend);
-    g.DrawBitmap(mBitmap, IRECT(x - windowX, y - windowY, windowX, windowY), 1, &mBlend);
-
+    g.FillRect(mColorBackground, mRECT);
+    for (float y = fmod(offsetY, BACKGROUNDDETAILDIST) - BACKGROUNDDETAILDIST; y < windowY + BACKGROUNDDETAILDIST; y += BACKGROUNDDETAILDIST) {
+      for (float x = fmod(offsetX, BACKGROUNDDETAILDIST) - BACKGROUNDDETAILDIST; x < windowX + BACKGROUNDDETAILDIST; x += BACKGROUNDDETAILDIST) {
+        float x1 = x - (BACKGROUNDDETAILSIZE / 2);
+        float y1 = y - (BACKGROUNDDETAILWIDTH / 2);
+        g.FillRect(mColorBackgroundDetail, IRECT(
+          x1, y1, x1 + BACKGROUNDDETAILSIZE, y1 + BACKGROUNDDETAILWIDTH
+        ));
+        x1 = x - (BACKGROUNDDETAILWIDTH / 2);
+        y1 = y - (BACKGROUNDDETAILSIZE / 2);
+        g.FillRect(mColorBackgroundDetail, IRECT(
+          x1, y1, x1 + BACKGROUNDDETAILWIDTH, y1 + BACKGROUNDDETAILSIZE
+        ));
+      }
+    }
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     if (mod.L || mod.C) {
-      offsetX += static_cast<int>(dX);
-      offsetY += static_cast<int>(dY);
+      offsetX += (dX);
+      offsetY += (dY);
       mGraphics->SetAllControlsDirty();
       mCallback(dX, dY, 1.f);
     }
@@ -73,15 +80,15 @@ public:
   }
 
 protected:
-  IBitmap mBitmap;
-  IBlend mBlend;
   IGraphics* mGraphics;
   float mX;
   float mY;
-  int offsetX;
-  int offsetY;
+  float offsetX;
+  float offsetY;
   int windowX;
   int windowY;
   float mScale;
+  IColor mColorBackground;
+  IColor mColorBackgroundDetail;
   BackgroundMoveCallback mCallback;
 };

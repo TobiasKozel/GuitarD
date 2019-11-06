@@ -54,10 +54,10 @@ public:
 #define buttonY 0
 #define buttonW 40
 #define buttonH 40
-    mCloseButton.L = rect.R - buttonX;
-    mCloseButton.T = rect.T + buttonY;
-    mCloseButton.R = mCloseButton.L + buttonW;
-    mCloseButton.B = mCloseButton.T + buttonH;
+    mDeleteButton.L = rect.R - buttonX;
+    mDeleteButton.T = rect.T + buttonY;
+    mDeleteButton.R = mDeleteButton.L + buttonW;
+    mDeleteButton.B = mDeleteButton.T + buttonH;
 
     mDisconnectAllButton.L = rect.R - buttonW - buttonX;
     mDisconnectAllButton.T = rect.T + buttonY;
@@ -161,7 +161,7 @@ public:
     // which means the rendering order is kinda hard to controll
     g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
     //g.FillRect(IColor(255, 10, 10, 10), mRECT);
-    g.DrawRect(IColor(255, 0, 255, 0), mCloseButton);
+    g.DrawRect(IColor(255, 0, 255, 0), mDeleteButton);
     g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
   }
 
@@ -171,7 +171,7 @@ public:
       MessageBus::fireEvent<Node*>("NodeDraggedEnd", mParentNode);
       return;
     }
-    if (mCloseButton.Contains(IRECT(x, y, x, y))) {
+    if (mDeleteButton.Contains(IRECT(x, y, x, y))) {
       MessageBus::fireEvent<Node*>("NodeDeleted", mParentNode);
     }
     if (mDisconnectAllButton.Contains(IRECT(x, y, x, y))) {
@@ -206,7 +206,7 @@ public:
     *X += dX;
     *Y += dY;
 
-    mCloseButton.Translate(dX, dY);
+    mDeleteButton.Translate(dX, dY);
     mDisconnectAllButton.Translate(dX, dY);
     mByPassButton.Translate(dX, dY);
 
@@ -232,7 +232,7 @@ private:
 
 protected:
   MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
-  IRECT mCloseButton;
+  IRECT mDeleteButton;
   IRECT mDisconnectAllButton;
   IRECT mByPassButton;
   WDL_PtrList<ParameterCoupling>* mParameters;

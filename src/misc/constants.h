@@ -12,7 +12,7 @@
 #define MAXNODES 128
 
 // Amounts of daw params to register at start since dynamic amounts are not well supported
-#define MAXDAWPARAMS 128
+#define MAXDAWPARAMS 256
 
 // This is the name of a node if it wasn't overridden anywhere
 #define DefaultNodeName "DEFAULTNODENAME"
@@ -22,3 +22,10 @@
 #define SOCKETDIAMETER 30
 
 #define DEBUGFONT iplug::igraphics::IText { 16, COLOR_WHITE, "Roboto-Regular", iplug::igraphics::EAlign::Center, iplug::igraphics::EVAlign::Middle, 0 }
+
+#define COLORBACKGROUND 245, 245, 245
+#define COLORPANEL1 220, 220, 220
+#define COLORACCENT 233, 140, 36
+#define BACKGROUNDDETAILDIST  140
+#define BACKGROUNDDETAILSIZE  12
+#define BACKGROUNDDETAILWIDTH  1.5
