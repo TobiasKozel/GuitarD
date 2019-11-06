@@ -45,10 +45,10 @@ public:
     double invMix = 1 - mix;
     double pan1 = *(parameters.Get(0)->value);
     double pan2 = *(parameters.Get(1)->value);
-    double pan1l = min(1.0, max(-pan1 + 1.0, 0.0)) * mix;
-    double pan1r = min(1.0, max(+pan1 + 1.0, 0.0)) * mix;
-    double pan2l = min(1.0, max(-pan2 + 1.0, 0.0)) * invMix;
-    double pan2r = min(1.0, max(+pan2 + 1.0, 0.0)) * invMix;
+    double pan1l = min(1.0, max(-pan1 + 1.0, 0.0)) * invMix;
+    double pan1r = min(1.0, max(+pan1 + 1.0, 0.0)) * invMix;
+    double pan2l = min(1.0, max(-pan2 + 1.0, 0.0)) * mix;
+    double pan2r = min(1.0, max(+pan2 + 1.0, 0.0)) * mix;
 
     // do the math
     for (int i = 0; i < nFrames; i++) {
@@ -63,7 +63,6 @@ public:
 
   void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
     Node::setup(p_samplerate, p_maxBuffer, 2, 2, 1);
-    addByPassParam();
     ParameterCoupling* p = new ParameterCoupling(
       "PAN 1", &pan1, 0.0, -1.0, 1.0, 0.01
     );
