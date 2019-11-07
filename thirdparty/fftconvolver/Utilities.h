@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <cstring>
 #include <new>
+#include "src/misc/constants.h"
 
 
 namespace fftconvolver
@@ -184,7 +185,7 @@ private:
 /**
 * @brief Type of one sample
 */
-typedef double Sample;
+typedef WDL_RESAMPLE_TYPE Sample;
 
 
 /**

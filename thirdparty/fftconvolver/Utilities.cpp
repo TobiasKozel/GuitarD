@@ -72,27 +72,27 @@ void ComplexMultiplyAccumulate(Sample* FFTCONVOLVER_RESTRICT re,
                                const size_t len)
 {
 #if defined(FFTCONVOLVER_USE_SSE)
-//  const size_t end4 = 4 * (len / 4);
-//  for (size_t i=0; i<end4; i+=4)
-//  {
-//    const __m128 ra = _mm_load_ps(&reA[i]);
-//    const __m128 rb = _mm_load_ps(&reB[i]);
-//    const __m128 ia = _mm_load_ps(&imA[i]);
-//    const __m128 ib = _mm_load_ps(&imB[i]);
-//    __m128 real = _mm_load_ps(&re[i]);
-//    __m128 imag = _mm_load_ps(&im[i]);
-//    real = _mm_add_ps(real, _mm_mul_ps(ra, rb));
-//    real = _mm_sub_ps(real, _mm_mul_ps(ia, ib));
-//    _mm_store_ps(&re[i], real);
-//    imag = _mm_add_ps(imag, _mm_mul_ps(ra, ib));
-//    imag = _mm_add_ps(imag, _mm_mul_ps(ia, rb));
-//    _mm_store_ps(&im[i], imag);
-//  }
-//  for (size_t i=end4; i<len; ++i)
-//  {
-//    re[i] += reA[i] * reB[i] - imA[i] * imB[i];
-//    im[i] += reA[i] * imB[i] + imA[i] * reB[i];
-//  }
+  const size_t end4 = 4 * (len / 4);
+  for (size_t i=0; i<end4; i+=4)
+  {
+    const __m128 ra = _mm_load_ps(&reA[i]);
+    const __m128 rb = _mm_load_ps(&reB[i]);
+    const __m128 ia = _mm_load_ps(&imA[i]);
+    const __m128 ib = _mm_load_ps(&imB[i]);
+    __m128 real = _mm_load_ps(&re[i]);
+    __m128 imag = _mm_load_ps(&im[i]);
+    real = _mm_add_ps(real, _mm_mul_ps(ra, rb));
+    real = _mm_sub_ps(real, _mm_mul_ps(ia, ib));
+    _mm_store_ps(&re[i], real);
+    imag = _mm_add_ps(imag, _mm_mul_ps(ra, ib));
+    imag = _mm_add_ps(imag, _mm_mul_ps(ia, rb));
+    _mm_store_ps(&im[i], imag);
+  }
+  for (size_t i=end4; i<len; ++i)
+  {
+    re[i] += reA[i] * reB[i] - imA[i] * imB[i];
+    im[i] += reA[i] * imB[i] + imA[i] * reB[i];
+  }
 #else
   const size_t end4 = 4 * (len / 4);
   for (size_t i=0; i<end4; i+=4)
