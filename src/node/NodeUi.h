@@ -64,11 +64,6 @@ public:
     mDisconnectAllButton.R = mDisconnectAllButton.L + buttonW;
     mDisconnectAllButton.B = mDisconnectAllButton.T + buttonH;
 
-    mByPassButton.L = rect.L;
-    mByPassButton.T = rect.T + buttonY;
-    mByPassButton.R = mByPassButton.L + buttonW;
-    mByPassButton.B = mByPassButton.T + buttonH;
-
     mBlend = EBlend::Clobber;
 
     mNodeSpliceInEvent.subscribe("NodeSpliceIn", [&](NodeSpliceInPair pair) {
@@ -155,14 +150,19 @@ public:
     }
   }
 
+  virtual void DrawHeader(IGraphics& g) {
+    g.DrawRect(IColor(255, 0, 255, 0), mDeleteButton);
+    g.DrawRect(IColor(255, 0, 255, 0), mDeleteButton);
+    g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
+  }
+
   virtual void Draw(IGraphics& g) override {
     // this will just draw the backround since all the controls are also registered
     // to the IGraphics class which will draw them
     // which means the rendering order is kinda hard to controll
     g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
     //g.FillRect(IColor(255, 10, 10, 10), mRECT);
-    g.DrawRect(IColor(255, 0, 255, 0), mDeleteButton);
-    g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
+
   }
 
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
@@ -208,7 +208,6 @@ public:
 
     mDeleteButton.Translate(dX, dY);
     mDisconnectAllButton.Translate(dX, dY);
-    mByPassButton.Translate(dX, dY);
 
     mGraphics->SetAllControlsDirty();
   }
@@ -234,7 +233,6 @@ protected:
   MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
   IRECT mDeleteButton;
   IRECT mDisconnectAllButton;
-  IRECT mByPassButton;
   WDL_PtrList<ParameterCoupling>* mParameters;
   WDL_PtrList<NodeSocket>* mInSockets;
   WDL_PtrList<NodeSocket>* mOutSockets;

@@ -19,9 +19,8 @@
 
 #define MAXBUFFER 512
 
-#define FLOATCONV
+
 #ifdef FLOATCONV
-  #define WDL_RESAMPLE_TYPE float
   #define FFTCONVOLVER_USE_SSE
 #else
   #define WDL_RESAMPLE_TYPE double
