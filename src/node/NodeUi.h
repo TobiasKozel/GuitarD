@@ -102,7 +102,7 @@ public:
         );
       }
       else {
-        // use the callback to get tha value to the dsp, won't allow automation though
+        // use the callback to get the value to the dsp, won't allow automation though
         couple->control = new IVKnobControl(
           controlPos, [couple](IControl* pCaller) {
             *(couple->value) =

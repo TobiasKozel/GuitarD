@@ -44,6 +44,9 @@ public:
     nodeGallery = nullptr;
     cableLayer = nullptr;
 
+    sampleRate = 44101;
+    channelCount = 2;
+
     inputNode = new InputNode();
     outputNode = new OutputNode();
 

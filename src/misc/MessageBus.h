@@ -42,7 +42,7 @@ namespace MessageBus {
 
     void subscribe(string eventName, function<void(T param)> callback) {
       if (subscribed) {
-        WDBGMSG("Trying to subcribe twice on the same Subscription!\n");
+        WDBGMSG("Trying to subscribe twice on the same Subscription!\n");
         return;
       }
       subscribed = true;
@@ -65,7 +65,7 @@ namespace MessageBus {
       WDBGMSG("Fired a event with not subscribers!\n");
       return;
     }
-    SubsVector subs = subscriptions.at(eventName);
+    SubsVector &subs = subscriptions.find(eventName)->second;
     for (int i = 0; i < subs.GetSize(); i++) {
       Subscription<T>* sub = dynamic_cast<Subscription<T>*>(subs.Get(i));
       if (sub != nullptr) {

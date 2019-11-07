@@ -29,7 +29,7 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
       this->graph->layoutUi(pGraphics);
       return;
     }
-    pGraphics->SetSizeConstraints(400, 2000, 400, 1500);
+    pGraphics->SetSizeConstraints(400, PLUG_MAX_WIDTH, 400, PLUG_MAX_HEIGHT);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);
 
@@ -40,7 +40,9 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
 
 void GuitarD::OnReset() {
   if (graph != nullptr) {
-    graph->OnReset(static_cast<int>(GetSampleRate()), NOutChansConnected());
+    int sr = static_cast<int>(GetSampleRate());
+    int ch = MaxNChannels(ERoute::kOutput);
+    graph->OnReset(sr, ch);
   }
 }
 

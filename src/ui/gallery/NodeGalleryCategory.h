@@ -48,7 +48,7 @@ public:
     if (mOpen) {
       // Calculate own height
       mTitleRect = mRECT;
-      float columns = max(static_cast<int>(floor(mRECT.W() / GALLERYELEMENTWIDTH)), 1);
+      float columns = max(static_cast<int>(floor(mRECT.W() / (GALLERYELEMENTWIDTH + GALLERYELEMENTPADDING * 1.5))), 1);
       int rows = ceilf(mElements.GetSize() / columns);
       mRECT.B += rows * GALLERYELEMENTHEIGHT + rows * GALLERYELEMENTPADDING + GALLERYELEMENTPADDING;
       g.FillRect(mBack, mRECT);
