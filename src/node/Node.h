@@ -8,6 +8,7 @@
 #include "src/node/NodeSocket.h"
 #include "src/parameter/ParameterCoupling.h"
 #include "src/misc/MessageBus.h"
+#include "src/ui/theme.h"
 
 /**
  * Virtual class which all nodes will derive from

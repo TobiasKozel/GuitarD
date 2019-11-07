@@ -411,7 +411,16 @@
     <ClInclude Include="..\src\ui\GraphBackground.h">
       <Filter>src\ui</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ui\NodeGallery.h">
+    <ClInclude Include="..\src\ui\gallery\NodeGallery.h">
+      <Filter>src\ui\gallery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\gallery\NodeGalleryCategory.h">
+      <Filter>src\ui\gallery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\gallery\NodeGalleryElement.h">
+      <Filter>src\ui\gallery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\theme.h">
       <Filter>src\ui</Filter>
     </ClInclude>
   </ItemGroup>
@@ -499,6 +508,9 @@
     </Filter>
     <Filter Include="src\ui">
       <UniqueIdentifier>{751b4849-1bb3-45ed-9685-0eaa219383f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ui\gallery">
+      <UniqueIdentifier>{f835fb60-d345-459e-a62b-a90eebca75c6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

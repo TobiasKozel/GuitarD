@@ -1,6 +1,6 @@
 #pragma once
 #include "IControl.h"
-#include "config.h"
+#include "src/ui/theme.h"
 #include "src/misc/MessageBus.h"
 
 using namespace iplug;
@@ -19,7 +19,7 @@ public:
     mScale = 1.0;
     offsetX = offsetY = windowY = windowX = 0;
     mColorBackground = IColor(255, COLORBACKGROUND);
-    mColorBackgroundDetail = IColor(255, COLORPANEL1);
+    mColorBackgroundDetail = IColor(255, COLORBACKGROUNDDETAIL);
   }
 
   void Draw(IGraphics& g) override {

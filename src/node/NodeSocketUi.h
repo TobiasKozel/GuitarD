@@ -3,6 +3,7 @@
 #include "src/misc/constants.h"
 #include "src/node/NodeSocket.h"
 #include "src/misc/MessageBus.h"
+#include "src/ui/theme.h"
 
 using namespace iplug;
 using namespace igraphics;

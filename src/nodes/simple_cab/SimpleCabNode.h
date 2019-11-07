@@ -7,6 +7,80 @@
 #include "src/nodes/simple_cab/cident.h"
 #include "src/nodes/simple_cab/clean.h"
 
+class FileBrowser : public IDirBrowseControlBase
+{
+private:
+  WDL_String mLabel;
+  IBitmap mBitmap;
+public:
+  FileBrowser(const IRECT& bounds)
+    : IDirBrowseControlBase(bounds, ".wav")
+  {
+    WDL_String path;
+    //    DesktopPath(path);
+    path.Set(__FILE__);
+    path.remove_filepart();
+#ifdef OS_WIN
+    path.Append("\\resources\\img\\");
+#else
+    path.Append("/resources/img/");
+#endif
+    AddPath(path.Get(), "");
+
+    mLabel.Set("Click here to browse IR files...");
+  }
+
+  void Draw(IGraphics& g) override
+  {
+    g.FillRect(COLOR_TRANSLUCENT, mRECT);
+
+  }
+
+  void OnMouseDown(float x, float y, const IMouseMod& mod) override
+  {
+    SetUpMenu();
+
+    GetUI()->CreatePopupMenu(*this, mMainMenu, x, y);
+  }
+
+  void OnPopupMenuSelection(IPopupMenu* pSelectedMenu, int valIdx) override
+  {
+    if (pSelectedMenu)
+    {
+      IPopupMenu::Item* pItem = pSelectedMenu->GetChosenItem();
+      WDL_String* pStr = mFiles.Get(pItem->GetTag());
+      mLabel.Set(pStr);
+      mBitmap = GetUI()->LoadBitmap(pStr->Get());
+      SetTooltip(pStr->Get());
+      SetDirty(false);
+    }
+  }
+};
+
+class SimpleCabNodeUi : public NodeUi {
+  iplug::igraphics::IText mBlocksizeText;
+  string mInfo;
+public:
+  SimpleCabNodeUi(NodeUiParam param) : NodeUi(param) {
+    mInfo = "None";
+    mBlocksizeText = DEBUGFONT;
+  }
+
+  void OnDrop(const char* str) override {
+    mInfo = "Path: " + string(str);
+    mDirty = true;
+  }
+
+  void Draw(IGraphics& g) override {
+    g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
+    g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
+    g.DrawRect(IColor(255, 0, 255, 0), mDeleteButton);
+    g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
+  }
+
+
+};
+
 class SimpleCabNode : public Node {
   fftconvolver::FFTConvolver convolver;
   fftconvolver::FFTConvolver convolver2;
@@ -84,12 +158,17 @@ public:
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    //background = new NodeBackground(pGrahics, PNGSIMPLECABBG_FN, L, T,
-    //  [&](float x, float y) {
-    //  this->translate(x, y);
-    //});
-    //pGrahics->AttachControl(background);
-    Node::setupUi(pGrahics);
-    // uiReady = true;
+    mUi = new SimpleCabNodeUi(NodeUiParam{
+      pGrahics,
+      PNGGENERICBG_FN,
+      &X, &Y,
+      &parameters,
+      &inSockets,
+      &outSockets,
+      this
+    });
+    pGrahics->AttachControl(mUi);
+    mUi->setUp();
+    uiReady = true;
   }
 };

@@ -1,3 +1,5 @@
+#include "src/ui/theme.h"
+
 #define PLUG_NAME "GuitarD"
 #define PLUG_MFR "Tobias"
 #define PLUG_VERSION_HEX 0x00010000
@@ -52,9 +54,3 @@
 #define APP_COPY_AUV3 0
 #define APP_RESIZABLE 0
 #define APP_SIGNAL_VECTOR_SIZE 64
-
-#define ROBOTO_FN "Roboto-Regular.ttf"
-
-#define PNGSTEREOSHAPERBG_FN "stereoshaper_bg.png"
-#define PNGSIMPLECABBG_FN "simplecab_bg.png"
-#define PNGGENERICBG_FN "generic_bg.png"

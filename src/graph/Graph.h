@@ -11,7 +11,7 @@
 #include "src/parameter/ParameterManager.h"
 #include "src/node/NodeSocketUi.h"
 #include "src/ui/CableLayer.h"
-#include "src/ui/NodeGallery.h"
+#include "src/ui/gallery/NodeGallery.h"
 
 class Graph {
   MessageBus::Subscription<Node*> mNodeDelSub;
