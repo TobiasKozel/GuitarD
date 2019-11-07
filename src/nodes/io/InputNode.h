@@ -35,14 +35,10 @@ public:
       mDragging = false;
       return;
     }
-    if (mDisconnectAllButton.Contains(IRECT(x, y, x, y))) {
-      MessageBus::fireEvent<Node*>("NodeDisconnectAll", mParentNode);
-    }
   }
 
   void Draw(IGraphics& g) override {
     g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
-    g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
     mInfo = "Blocksize: " + to_string(mParentNode->mLastBlockSize) + " Sample-Rate: " + to_string(mParentNode->samplerate);
     g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
     if (mEnableTuner) {

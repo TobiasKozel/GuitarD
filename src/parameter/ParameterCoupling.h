@@ -48,7 +48,7 @@ struct ParameterCoupling {
     automation = 0;
     x = y = 0;
     asset = nullptr;
-    w = h = 70;
+    w = h = 60;
   }
 
   /**

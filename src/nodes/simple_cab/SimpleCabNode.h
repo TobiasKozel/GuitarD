@@ -76,8 +76,6 @@ public:
 
   void Draw(IGraphics& g) override {
     g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
-    g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
-    g.DrawRect(IColor(255, 0, 255, 0), mDeleteButton);
     g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
   }
 

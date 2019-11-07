@@ -21,17 +21,14 @@ class NodeSocketUi : public IControl {
   int vol;
   IMouseMod mMousDown;
 public:
-  NodeSocketUi(IGraphics* g, NodeSocket* socket) :
+  NodeSocketUi(IGraphics* g, NodeSocket* socket, float x, float y) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
   {
-    //mBitmap = g->LoadBitmap(bitmap, 1, false);
-    //mRECT.R = L + mBitmap.W();
-    //mRECT.B = T + mBitmap.H();
     mSocket = socket;
     mDiameter = SOCKETDIAMETER;
     mRadius = mDiameter * 0.5f;
-    mRECT.L = socket->X;
-    mRECT.T = socket->Y;
+    mRECT.L = x;
+    mRECT.T = y;
     mRECT.R = mRECT.L + mDiameter;
     mRECT.B = mRECT.T + mDiameter;
     SetTargetAndDrawRECTs(mRECT);
@@ -81,10 +78,13 @@ public:
     //vol = SkClampMax(avg * 50, 255);
     //g.DrawCircle(IColor(255, vol, 0, 0), mTargetRECT.L + mRadius, mTargetRECT.T + mRadius, 4, &mBlend, 10);
     //mDirty = true;
+
     g.DrawCircle(color, mTargetRECT.L + mRadius, mTargetRECT.T + mRadius, mRadius, &mBlend, 10);
     if (mDragging) {
       g.DrawLine(color, mStartX, mStartY, mCurrentX, mCurrentY, &mBlend, 5);
     }
+    mSocket->X = mTargetRECT.L;
+    mSocket->Y = mTargetRECT.T;
   }
 
 
@@ -105,13 +105,14 @@ public:
   }
 
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
+    mDragging = false;
     if (mMousDown.C) {
       mMousDown = IMouseMod();
       return;
     }
     // this will get rid of the top most duplicate
     mGraphics->RemoveControl(this);
-    mDragging = false;
+
     SetRECT(mTargetRECT);
     mGraphics->SetAllControlsDirty();
     IControl* target = mGraphics->GetControl(
@@ -134,8 +135,8 @@ public:
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
-    mDragging = true;
     SetRECT(mGraphics->GetBounds());
+    mDragging = true;
     mCurrentX = x;
     mCurrentY = y;
     mGraphics->SetAllControlsDirty();
@@ -151,7 +152,6 @@ public:
 
 protected:
   NodeSocket* mSocket;
-  IBitmap mBitmap;
   IBlend mBlend;
   IGraphics* mGraphics;
   IColor color;
@@ -160,6 +160,8 @@ protected:
   int mIndex;
   bool mOut;
   bool mDragging;
+
+  // This is used to draw a temporary line when trying to connect a node
   float mStartX;
   float mStartY;
   float mCurrentY;

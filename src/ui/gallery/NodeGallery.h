@@ -79,8 +79,10 @@ public:
         bounds.L = bounds.R * 0.5f;
         mRECT = bounds;
         mTargetRECT = bounds;
+        float top = mViewPort.T;
         mViewPort = bounds;
         mViewPort.Pad(-GALLERYPADDING);
+        mViewPort.T = top;
       }
       else {
         bounds.Pad(-GALLERYPADDING);

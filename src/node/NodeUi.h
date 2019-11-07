@@ -22,6 +22,14 @@ struct NodeUiParam {
 using namespace iplug;
 using namespace igraphics;
 
+struct NodeUiHeader {
+  bool hasByPass = false;
+  bool hasRemove = true;
+  IControl* bypass;
+  IControl* disconnect;
+  IControl* remove;
+};
+
 
 /**
  * This class represents a Node on the UI, it's seperate to the node itself
@@ -50,19 +58,6 @@ public:
     rect.T = *Y - h / 2;
     rect.B = *Y + h / 2;
     SetTargetAndDrawRECTs(rect);
-#define buttonX 40
-#define buttonY 0
-#define buttonW 40
-#define buttonH 40
-    mDeleteButton.L = rect.R - buttonX;
-    mDeleteButton.T = rect.T + buttonY;
-    mDeleteButton.R = mDeleteButton.L + buttonW;
-    mDeleteButton.B = mDeleteButton.T + buttonH;
-
-    mDisconnectAllButton.L = rect.R - buttonW - buttonX;
-    mDisconnectAllButton.T = rect.T + buttonY;
-    mDisconnectAllButton.R = mDisconnectAllButton.L + buttonW;
-    mDisconnectAllButton.B = mDisconnectAllButton.T + buttonH;
 
     mBlend = EBlend::Clobber;
 
@@ -77,12 +72,70 @@ public:
         out->connect(pair.socket);
       }
     });
+
+    mIconFont = ICONFONT;
   }
 
   ~NodeUi() {
   }
 
-  virtual void setUp() {
+  virtual void setUpHeader() {
+    IRECT m = mRECT;
+    m.B = m.T + NODEHEADERSIZE;
+
+    if (mHeader.hasByPass) {
+      mHeader.bypass = new ITextToggleControl(IRECT(
+        m.L + NODEHEADERBYPASSLEFT, m.T + NODEHEADERBYPASSTOP,
+        m.L + NODEHEADERBYPASSLEFT + NODEHEADERBYPASSSIZE,
+        m.T + NODEHEADERBYPASSTOP + NODEHEADERBYPASSSIZE
+      ), [&](IControl* pCaller) {
+        auto p = this->mParameters->Get(0);
+        bool bypassed = static_cast<bool>(p->control->GetValue());
+        p->control->SetValueFromUserInput(bypassed ? 0.0 : 1.0);
+      }, u8"\uf056", u8"\uf011", mIconFont);
+      mElements.Add(mHeader.bypass);
+      mGraphics->AttachControl(mHeader.bypass);
+    }
+
+
+    mHeader.disconnect = new IVButtonControl(IRECT(
+      m.R - NODEHEADERDISCONNECTRIGHT - NODEHEADERDISCONNECTSIZE,
+      m.T + NODEHEADERDISCONNECTTOP, m.R - NODEHEADERDISCONNECTRIGHT,
+      m.T + NODEHEADERDISCONNECTTOP + NODEHEADERDISCONNECTSIZE
+    ), [&](IControl* pCaller) {
+      MessageBus::fireEvent<Node*>("NodeDisconnectAll", this->mParentNode);
+    });
+    mElements.Add(mHeader.disconnect);
+    mGraphics->AttachControl(mHeader.disconnect);
+
+    mHeader.remove = new IVButtonControl(IRECT(
+      m.R - NODEHEADERREMOVERIGHT - NODEHEADERDISCONNECTSIZE,
+      m.T + NODEHEADERDISCONNECTTOP, m.R - NODEHEADERREMOVERIGHT,
+      m.T + NODEHEADERDISCONNECTTOP + NODEHEADERDISCONNECTSIZE
+    ), [&](IControl* pCaller) {
+      MessageBus::fireEvent<Node*>("NodeDeleted", this->mParentNode);
+    });
+    mElements.Add(mHeader.remove);
+    mGraphics->AttachControl(mHeader.remove);
+  }
+
+  virtual void setUpSockets() {
+    for (int i = 0; i < mInSockets->GetSize(); i++) {
+      NodeSocketUi* socket = new NodeSocketUi(mGraphics, mInSockets->Get(i), mRECT.L, mRECT.T + i * 50 + mRECT.H() * 0.5);
+      mGraphics->AttachControl(socket);
+      mInSocketsUi.Add(socket);
+      mElements.Add(socket);
+    }
+
+    for (int i = 0; i < mOutSockets->GetSize(); i++) {
+      NodeSocketUi* socket = new NodeSocketUi(mGraphics, mOutSockets->Get(i), mRECT.R - 30, mRECT.T + i * 50 + mRECT.H() * 0.5);
+      mGraphics->AttachControl(socket);
+      mOutSocketsUi.Add(socket);
+      mElements.Add(socket);
+    }
+  }
+
+  virtual void setUpControls() {
     for (int i = 0; i < mParameters->GetSize(); i++) {
       ParameterCoupling* couple = mParameters->Get(i);
       double value = *(couple->value);
@@ -105,10 +158,12 @@ public:
           }
         );
       }
-      mGraphics->AttachControl(couple->control);
       couple->control->SetValue(
         (value - couple->min) / (couple->max - couple->min)
       );
+      mGraphics->AttachControl(couple->control);
+      mElements.Add(couple->control);
+      if (i == 0 && mHeader.hasByPass) { couple->control->Hide(true); }
 
       // optinally hide the lables etc
       //IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);
@@ -116,19 +171,22 @@ public:
       //  vcontrol->SetShowLabel(false);
       //  vcontrol->SetShowValue(false);
       //}
-    }
 
-    for (int i = 0; i < mInSockets->GetSize(); i++) {
-      NodeSocketUi* socket = new NodeSocketUi(mGraphics, mInSockets->Get(i));
-      mGraphics->AttachControl(socket);
-      mInSocketsUi.Add(socket);
     }
+  }
 
-    for (int i = 0; i < mOutSockets->GetSize(); i++) {
-      NodeSocketUi* socket = new NodeSocketUi(mGraphics, mOutSockets->Get(i));
-      mGraphics->AttachControl(socket);
-      mOutSocketsUi.Add(socket);
+  virtual void setUp() {
+    for (int i = 0; i < mParameters->GetSize(); i++) {
+      ParameterCoupling* p = mParameters->Get(i);
+      if (p->name == "Bypass") {
+        mHeader.hasByPass = true;
+        break;
+      }
     }
+    mElements.Add(this);
+    setUpControls();
+    setUpSockets();
+    setUpHeader();
   }
 
   void cleanUp() {
@@ -148,12 +206,17 @@ public:
     for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
       mGraphics->RemoveControl(mOutSocketsUi.Get(i), true);
     }
+
+    if (mHeader.hasByPass) {
+      mGraphics->RemoveControl(mHeader.bypass, true);
+    }
+    mGraphics->RemoveControl(mHeader.disconnect, true);
+    mGraphics->RemoveControl(mHeader.remove, true);
+    
   }
 
   virtual void DrawHeader(IGraphics& g) {
-    g.DrawRect(IColor(255, 0, 255, 0), mDeleteButton);
-    g.DrawRect(IColor(255, 0, 255, 0), mDeleteButton);
-    g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
+    g.FillRect(IColor(255, NODEHEADERCOLOR), IRECT(mRECT.L, mRECT.T, mRECT.R, mRECT.T + NODEHEADERSIZE));
   }
 
   virtual void Draw(IGraphics& g) override {
@@ -161,6 +224,7 @@ public:
     // to the IGraphics class which will draw them
     // which means the rendering order is kinda hard to controll
     g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
+    DrawHeader(g);
     //g.FillRect(IColor(255, 10, 10, 10), mRECT);
 
   }
@@ -171,12 +235,6 @@ public:
       MessageBus::fireEvent<Node*>("NodeDraggedEnd", mParentNode);
       return;
     }
-    if (mDeleteButton.Contains(IRECT(x, y, x, y))) {
-      MessageBus::fireEvent<Node*>("NodeDeleted", mParentNode);
-    }
-    if (mDisconnectAllButton.Contains(IRECT(x, y, x, y))) {
-      MessageBus::fireEvent<Node*>("NodeDisconnectAll", mParentNode);
-    }
   }
 
   virtual void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
@@ -186,28 +244,22 @@ public:
   }
 
   virtual void translate(float dX, float dY) {
-    for (int i = 0; i < mParameters->GetSize(); i++) {
-      moveControl(mParameters->Get(i)->control, dX, dY);
+    for (int i = 0; i < mElements.GetSize(); i++) {
+      moveControl(mElements.Get(i), dX, dY);
     }
-    moveControl(this, dX, dY);
 
     for (int i = 0; i < mInSockets->GetSize(); i++) {
-      moveControl(mInSocketsUi.Get(i), dX, dY);
       mInSockets->Get(i)->X += dX;
       mInSockets->Get(i)->Y += dY;
     }
 
     for (int i = 0; i < mOutSockets->GetSize(); i++) {
-      moveControl(mOutSocketsUi.Get(i), dX, dY);
       mOutSockets->Get(i)->X += dX;
       mOutSockets->Get(i)->Y += dY;
     }
 
     *X += dX;
     *Y += dY;
-
-    mDeleteButton.Translate(dX, dY);
-    mDisconnectAllButton.Translate(dX, dY);
 
     mGraphics->SetAllControlsDirty();
   }
@@ -220,7 +272,6 @@ public:
 
 private:
   void moveControl(IControl* control, float x, float y) {
-    if (control == nullptr) { return; }
     IRECT rect = control->GetRECT();
     rect.T += y;
     rect.L += x;
@@ -231,13 +282,13 @@ private:
 
 protected:
   MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
-  IRECT mDeleteButton;
-  IRECT mDisconnectAllButton;
   WDL_PtrList<ParameterCoupling>* mParameters;
   WDL_PtrList<NodeSocket>* mInSockets;
   WDL_PtrList<NodeSocket>* mOutSockets;
   WDL_PtrList<NodeSocketUi> mInSocketsUi;
   WDL_PtrList<NodeSocketUi> mOutSocketsUi;
+  NodeUiHeader mHeader;
+  WDL_PtrList<IControl> mElements;
   Node* mParentNode;
 
   bool mDragging;
@@ -246,4 +297,5 @@ protected:
   IBitmap mBitmap;
   IBlend mBlend;
   IGraphics* mGraphics;
+  IText mIconFont;
 };

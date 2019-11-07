@@ -34,6 +34,7 @@ public:
   float X;
   float Y;
   float rotation;
+
   int samplerate;
   int channelCount;
   int maxBuffer;
@@ -72,15 +73,11 @@ public:
     // Setup the sockets for the node connections
     for (int i = 0; i < inputCount; i++) {
       NodeSocket* in = new NodeSocket(i, this);
-      in->X = X - 100;
-      in->Y = Y + (i * 50);
       inSockets.Add(in);
     }
 
     for (int i = 0; i < outputCount; i++) {
       NodeSocket* out = new NodeSocket(i, this, outputs[i]);
-      out->X = X + 100;
-      out->Y = Y + (i * 50);
       outSockets.Add(out);
     }
   }
@@ -207,12 +204,9 @@ public:
   }
 
   void addByPassParam() {
-    ParameterCoupling* p = new ParameterCoupling(
+    parameters.Add(new ParameterCoupling(
       "Bypass", &mByPassed, 0.0, 0.0, 1.0, 1
-    );
-    p->x = -100;
-    p->y = -100;
-    parameters.Add(p);
+    ));
   }
 
   void addStereoParam(ParameterCoupling* p = nullptr) {
@@ -221,8 +215,6 @@ public:
         "Stereo", &mStereo, 1.0, 0.0, 1.0, 1
       );
     }
-    p->x = -50;
-    p->y = -100;
     parameters.Add(p);
   }
 

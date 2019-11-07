@@ -1,5 +1,6 @@
 /** Resources */
 #define ROBOTO_FN "Roboto-Regular.ttf"
+#define ICON_FN "forkawesome-webfont.ttf"
 
 #define PNGSTEREOSHAPERBG_FN "stereoshaper_bg.png"
 #define PNGSIMPLECABBG_FN "simplecab_bg.png"
@@ -7,6 +8,7 @@
 
 
 #define DEBUGFONT iplug::igraphics::IText { 16, COLOR_WHITE, "Roboto-Regular", iplug::igraphics::EAlign::Center, iplug::igraphics::EVAlign::Middle, 0 }
+#define ICONFONT iplug::igraphics::IText {16.f, COLOR_WHITE, "ForkAwesome"}
 
 #define COLORACCENT 233, 140, 36
 
@@ -40,3 +42,14 @@
 
 /** Nodes */
 #define SOCKETDIAMETER 30
+#define NODEHEADERSIZE 20
+#define NODEHEADERCOLOR 30, 30, 30
+#define NODEHEADERBYPASSLEFT 6
+#define NODEHEADERBYPASSTOP 2
+#define NODEHEADERBYPASSSIZE 16
+
+#define NODEHEADERDISCONNECTRIGHT 26
+#define NODEHEADERDISCONNECTTOP 2
+#define NODEHEADERDISCONNECTSIZE 20
+
+#define NODEHEADERREMOVERIGHT 6
