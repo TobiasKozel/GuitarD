@@ -16,10 +16,12 @@ public:
   {
     mAccentColor = IColor(255, COLORACCENT);
     mBackgroundColor = IColor(255, GALLERYBACKGROUND);
+    mAddSignColor = IColor(255, COLORBACKGROUND);
     mPadding = 10;
     mGraphics = g;
     init();
     mIsOpen = false;
+    mDragging = false;
     OnResize();
     mOpenGalleryEvent.subscribe("OpenGallery", [&](bool open) {
       this->openGallery(open);
@@ -51,9 +53,21 @@ public:
       for (int i = 0; i < mCategories.GetSize(); i++) {
         mCategories.Get(i)->Draw(g);
       }
+      g.FillRect(mBackgroundColor, IRECT(mRECT.L, mRECT.T - 1, mRECT.R, mRECT.T + GALLERYPADDING));
+      g.FillRect(mBackgroundColor, IRECT(mRECT.L, mRECT.B - GALLERYPADDING, mRECT.R, mRECT.B + 1));
     }
     else {
       g.FillCircle(mAccentColor, mRECT);
+      float x1 = mRECT.L + GALLERYADDCIRCLERADIUS - (GALLERYADDSIGNSIZE / 2);
+      float y1 = mRECT.T + GALLERYADDCIRCLERADIUS - (GALLERYADDSIGNWIDTH / 2);
+      g.FillRect(mAddSignColor, IRECT(
+        x1, y1, x1 + GALLERYADDSIGNSIZE, y1 + GALLERYADDSIGNWIDTH
+      ));
+      x1 = mRECT.L + GALLERYADDCIRCLERADIUS - (GALLERYADDSIGNWIDTH / 2);
+      y1 = mRECT.T + GALLERYADDCIRCLERADIUS - (GALLERYADDSIGNSIZE / 2);
+      g.FillRect(mAddSignColor, IRECT(
+        x1, y1, x1 + GALLERYADDSIGNWIDTH, y1 + GALLERYADDSIGNSIZE
+      ));
     }
   }
 
@@ -70,8 +84,8 @@ public:
       }
       else {
         bounds.Pad(-GALLERYPADDING);
-        bounds.L = bounds.R - 60;
-        bounds.B = bounds.T + 60;
+        bounds.L = bounds.R - GALLERYADDCIRCLEDIAMETER;
+        bounds.B = bounds.T + GALLERYADDCIRCLEDIAMETER;
         mRECT = bounds;
         mTargetRECT = bounds;
         mViewPort = bounds;
@@ -81,23 +95,18 @@ public:
 
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
     if (!mIsOpen) { return; }
-    float scroll = d * 20;
-    if (mod.C) {
-      mViewPort.Translate(scroll, 0);
+    scroll(d * 20);
+  }
+
+  void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
+    scroll(dY);
+    if (dY < 2 && dX < 2) {
+      mDragging = true;
     }
-    else {
-      mViewPort.Translate(0, scroll);
-      if (mViewPort.T > 0) {
-        mViewPort.Translate(0, -mViewPort.T);
-      }
-      else {
-      }
-    }
-    mDirty = true;
   }
 
   void OnMouseUp(float x, float y, const IMouseMod& mod) {
-    if (mIsOpen) {
+    if (mIsOpen && !mDragging) {
       GalleryCategory* cat;
       for (int i = 0; i < mCategories.GetSize(); i++) {
         cat = mCategories.Get(i);
@@ -113,6 +122,7 @@ public:
     else {
       openGallery();
     }
+    mDragging = false;
   }
 
 private:
@@ -134,9 +144,23 @@ private:
       uniqueCat.at(i.second.categoryName)->addNode(i.second);
     }
   }
+
+  void scroll(float d) {
+    mViewPort.Translate(0, d);
+    if (mViewPort.T > GALLERYPADDING * 2) {
+      mViewPort.T = GALLERYPADDING * 2;
+      //mViewPort.Translate(0, -mViewPort.T);
+    }
+    else {
+    }
+    mDirty = true;
+  }
+
   IColor mAccentColor;
   IColor mBackgroundColor;
+  IColor mAddSignColor;
   bool mIsOpen;
+  bool mDragging;
   float mPadding;
   IGraphics* mGraphics;
   WDL_PtrList<GalleryCategory> mCategories;

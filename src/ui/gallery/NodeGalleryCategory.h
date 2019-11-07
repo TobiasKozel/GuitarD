@@ -41,7 +41,7 @@ public:
       mRECT.T = mPrev->mRECT.B + GALLERYCATEGORYPADDING;
     }
     else {
-      mRECT.T = mViewport->T + GALLERYCATEGORYPADDING;
+      mRECT.T = mViewport->T;
     }
     // Title is always visible
     mRECT.B = mRECT.T + GALLERYELEMENTTITLEHEIGHT;
