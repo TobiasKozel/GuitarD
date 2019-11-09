@@ -42,25 +42,25 @@ public:
       color.B = 255;
     }
 
-    onConnectionEvent.subscribe("SocketConnect", [&](SocketConnectRequest req) {
+    onConnectionEvent.subscribe(MessageBus::SocketConnect, [&](SocketConnectRequest req) {
       if (req.to == this->mSocket) {
         this->mSocket->connect(req.from);
       }
     });
 
-    onConnectionRedirectEvent.subscribe("SocketRedirectConnection", [&](SocketConnectRequest req) {
+    onConnectionRedirectEvent.subscribe(MessageBus::SocketRedirectConnection, [&](SocketConnectRequest req) {
       if (req.from == this->mSocket->connectedTo) {
         this->mSocket->connect(req.to);
       }
     });
 
-    onDisconnectAllEvent.subscribe("NodeDisconnectAll", [&](Node* node) {
+    onDisconnectAllEvent.subscribe(MessageBus::NodeDisconnectAll, [&](Node* node) {
       if (this->mSocket->parentNode == node) {
         mSocket->disconnect();
       }
     });
 
-    onDisconnectEvent.subscribe("DisconnectSocket", [&](NodeSocket * socket) {
+    onDisconnectEvent.subscribe(MessageBus::DisconnectSocket, [&](NodeSocket * socket) {
       if (this->mSocket->connectedTo == socket && this->mSocket->isInput) {
         this->mSocket->disconnect();
       }
@@ -91,7 +91,7 @@ public:
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
     mMousDown = mod;
     if (mod.C) {
-      MessageBus::fireEvent<NodeSocket*>("PreviewSocket", mSocket);
+      MessageBus::fireEvent<NodeSocket*>(MessageBus::PreviewSocket, mSocket);
     }
     else {
       // HACK
@@ -123,7 +123,7 @@ public:
       if (targetUi != nullptr) {
         NodeSocket* targetSocket = targetUi->mSocket;
         MessageBus::fireEvent<SocketConnectRequest>(
-          "SocketConnect",
+          MessageBus::SocketConnect,
           SocketConnectRequest{
             mSocket,
             targetSocket

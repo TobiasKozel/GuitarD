@@ -23,7 +23,7 @@ public:
     mIsOpen = false;
     mDragging = false;
     OnResize();
-    mOpenGalleryEvent.subscribe("OpenGallery", [&](bool open) {
+    mOpenGalleryEvent.subscribe(MessageBus::OpenGallery, [&](bool open) {
       this->openGallery(open);
     });
   }
@@ -115,7 +115,7 @@ public:
         if (cat->mRECT.Contains(IRECT(x, y, x, y))) {
           NodeList::NodeInfo* ret = cat->OnMouseDown(x, y, mod);
           if (ret != nullptr) {
-            MessageBus::fireEvent<NodeList::NodeInfo>("NodeAdd", *ret);
+            MessageBus::fireEvent<NodeList::NodeInfo>(MessageBus::NodeAdd, *ret);
           }
           mDirty = true;
         }

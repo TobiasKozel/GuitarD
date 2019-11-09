@@ -426,6 +426,9 @@
     <ClInclude Include="..\src\misc\HistoryStack.h">
       <Filter>src\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\misc\EventList.h">
+      <Filter>src\misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

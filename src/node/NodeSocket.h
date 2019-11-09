@@ -42,19 +42,19 @@ public:
   }
 
   void disconnect() {
-    MessageBus::fireEvent<bool>("AwaitAudioMutex", false);
+    MessageBus::fireEvent<bool>(MessageBus::AwaitAudioMutex, false);
     if (isInput) {
       connectedNode = nullptr;
       connectedSocketIndex = -1;
       connectedTo = nullptr;
     }
     else {
-      MessageBus::fireEvent<NodeSocket*>("DisconnectSocket", this);
+      MessageBus::fireEvent<NodeSocket*>(MessageBus::DisconnectSocket, this);
     }
   }
 
   void connect(NodeSocket* to) {
-    MessageBus::fireEvent<bool>("AwaitAudioMutex", false);
+    MessageBus::fireEvent<bool>(MessageBus::AwaitAudioMutex, false);
     if (to->isInput == isInput) {
       WDBGMSG("Trying to connect an input to input / output to output!");
       return;

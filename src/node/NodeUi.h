@@ -61,7 +61,7 @@ public:
 
     mBlend = EBlend::Clobber;
 
-    mNodeSpliceInEvent.subscribe("NodeSpliceIn", [&](NodeSpliceInPair pair) {
+    mNodeSpliceInEvent.subscribe(MessageBus::NodeSpliceIn, [&](NodeSpliceInPair pair) {
       if (mParentNode != pair.node) { return; }
       NodeSocket* in = mInSockets->Get(0);
       NodeSocket* out = mOutSockets->Get(0);
@@ -103,7 +103,7 @@ public:
       m.T + NODEHEADERDISCONNECTTOP, m.R - NODEHEADERDISCONNECTRIGHT,
       m.T + NODEHEADERDISCONNECTTOP + NODEHEADERDISCONNECTSIZE
     ), [&](IControl* pCaller) {
-      MessageBus::fireEvent<Node*>("NodeDisconnectAll", this->mParentNode);
+      MessageBus::fireEvent<Node*>(MessageBus::NodeDisconnectAll, this->mParentNode);
     });
     mElements.Add(mHeader.disconnect);
     mGraphics->AttachControl(mHeader.disconnect);
@@ -113,7 +113,7 @@ public:
       m.T + NODEHEADERDISCONNECTTOP, m.R - NODEHEADERREMOVERIGHT,
       m.T + NODEHEADERDISCONNECTTOP + NODEHEADERDISCONNECTSIZE
     ), [&](IControl* pCaller) {
-      MessageBus::fireEvent<Node*>("NodeDeleted", this->mParentNode);
+      MessageBus::fireEvent<Node*>(MessageBus::NodeDeleted, this->mParentNode);
     });
     mElements.Add(mHeader.remove);
     mGraphics->AttachControl(mHeader.remove);
@@ -232,14 +232,14 @@ public:
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
     if (mDragging) {
       mDragging = false;
-      MessageBus::fireEvent<Node*>("NodeDraggedEnd", mParentNode);
+      MessageBus::fireEvent<Node*>(MessageBus::NodeDraggedEnd, mParentNode);
       return;
     }
   }
 
   virtual void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     mDragging = true;
-    MessageBus::fireEvent<Coord2d>("NodeDragged", Coord2d {x, y});
+    MessageBus::fireEvent<Coord2d>(MessageBus::NodeDragged, Coord2d {x, y});
     translate(dX, dY);
   }
 

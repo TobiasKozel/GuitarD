@@ -55,26 +55,26 @@ public:
     outputNode = new OutputNode();
 
     // output->connectInput(input->outSockets.Get(0));
-    mNodeDelSub.subscribe("NodeDeleted", [&](Node* param) {
-      MessageBus::fireEvent("PushUndoState", false);
+    mNodeDelSub.subscribe(MessageBus::NodeDeleted, [&](Node* param) {
+      MessageBus::fireEvent(MessageBus::PushUndoState, false);
       this->removeNode(param, true);
     });
-    mNodeAddEvent.subscribe("NodeAdd", [&](NodeList::NodeInfo info) {
-      MessageBus::fireEvent("PushUndoState", false);
+    mNodeAddEvent.subscribe(MessageBus::NodeAdd, [&](NodeList::NodeInfo info) {
+      MessageBus::fireEvent(MessageBus::PushUndoState, false);
       this->addNode(info.constructor(), nullptr, 0, 300, 300);
     });
 
     // This might not even make sense
-    mAwaitAudioMutexEvent.subscribe("AwaitAudioMutex", [&](bool) {
+    mAwaitAudioMutexEvent.subscribe(MessageBus::AwaitAudioMutex, [&](bool) {
       //WDL_MutexLock lock(&isProcessing);
     });
 
-    mPushUndoState.subscribe("PushUndoState", [&](bool) {
+    mPushUndoState.subscribe(MessageBus::PushUndoState, [&](bool) {
       WDBGMSG("PushState");
       this->serialize(*HistoryStack::PushState());
     });
 
-    mPopUndoState.subscribe("PopUndoState", [&](bool redo) {
+    mPopUndoState.subscribe(MessageBus::PopUndoState, [&](bool redo) {
       nlohmann::json* state = HistoryStack::PopState(redo);
       if (state != nullptr) {
         WDBGMSG("PopState");
@@ -149,7 +149,7 @@ public:
 
     graphics->SetKeyHandlerFunc([&](const IKeyPress & key, bool isUp) {
       if (key.C && key.VK == kVK_Z && !isUp) {
-        MessageBus::fireEvent<bool>("PopUndoState", false);
+        MessageBus::fireEvent<bool>(MessageBus::PopUndoState, false);
         return true;
       }
       return false;
@@ -249,7 +249,7 @@ public:
       NodeSocket* nextSock = node->outSockets.Get(0);
       if (prevSock != nullptr && prevSock->connectedTo && nextSock != nullptr) {
         MessageBus::fireEvent<SocketConnectRequest>(
-          "SocketRedirectConnection",
+          MessageBus::SocketRedirectConnection,
           SocketConnectRequest {
             nextSock,
             prevSock->connectedTo

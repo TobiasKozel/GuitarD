@@ -41,11 +41,11 @@ public:
 
     mHighlightSocket = nullptr;
     
-    mDisconnectAllEvent.subscribe("NodeDisconnectAll", [&](Node*) {
+    mDisconnectAllEvent.subscribe(MessageBus::NodeDisconnectAll, [&](Node*) {
       this->mDirty = true;
     });
 
-    mNodeDraggedEvent.subscribe("NodeDragged", [&](Coord2d pos) {
+    mNodeDraggedEvent.subscribe(MessageBus::NodeDragged, [&](Coord2d pos) {
       float socketRadius = SOCKETDIAMETER / 2;
       mHighlightSocket = nullptr;
       Node* curNode;
@@ -85,16 +85,16 @@ public:
       }
     });
 
-    mNodeDraggedEndEvent.subscribe("NodeDraggedEnd", [&](Node* node) {
+    mNodeDraggedEndEvent.subscribe(MessageBus::NodeDraggedEnd, [&](Node* node) {
       if (mHighlightSocket != nullptr) {
-        MessageBus::fireEvent<NodeSpliceInPair>("NodeSpliceIn", NodeSpliceInPair{ node, mHighlightSocket });
+        MessageBus::fireEvent<NodeSpliceInPair>(MessageBus::NodeSpliceIn, NodeSpliceInPair{ node, mHighlightSocket });
       }
       mHighlightSocket = nullptr;
       mDirty = true;
     });
 
-    mPreviewSocketEvent.subscribe("PreviewSocket", [&](NodeSocket* socket) {
-      // TODO this is kinda shady and does not use the "SocketConnect" event
+    mPreviewSocketEvent.subscribe(MessageBus::PreviewSocket, [&](NodeSocket* socket) {
+      // TODO this is kinda shady and does not use the MessageBus::SocketConnect event
       NodeSocket* outSocket = this->mOutNode->inSockets.Get(0);
       if (socket == this->mPreviewSocket) {
         // Connect the original socket again
@@ -113,7 +113,7 @@ public:
       this->mDirty = true;
     });
 
-    onConnectionEvent.subscribe("SocketConnect", [&](SocketConnectRequest req) {
+    onConnectionEvent.subscribe(MessageBus::SocketConnect, [&](SocketConnectRequest req) {
       mPreviewSocket = nullptr;
       mPreviewSocketPrev = nullptr;
     });

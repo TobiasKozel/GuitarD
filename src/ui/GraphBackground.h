@@ -51,7 +51,7 @@ public:
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
     if (mod.R || mod.L) {
-      MessageBus::fireEvent<bool>("OpenGallery", mod.R);
+      MessageBus::fireEvent<bool>(MessageBus::OpenGallery, mod.R);
     }
   }
 

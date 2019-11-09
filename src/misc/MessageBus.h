@@ -4,24 +4,28 @@
 #include <string>
 #include <vector>
 #include "mutex.h"
+#include "EventList.h"
 
 using namespace std;
 
+/**
+ * This allows for easy communication between classes which don't know each other
+ * A list of events can be found in EventList.h
+ */
 namespace MessageBus {
-
   class BaseSubscription {
   public:
     virtual ~BaseSubscription() { };
   protected:
     bool subscribed;
-    string mEventName;
+    EVENTID mEventId;
   };
 
   typedef WDL_PtrList<BaseSubscription> SubsVector;
 
-  map<string, SubsVector> subscriptions;
+  SubsVector subscriptions[TOTALEVENTS];
 
-  WDL_Mutex unsubscribeLock;
+  WDL_Mutex eventLock;
 
   int globalSubs = 0;
 
@@ -30,9 +34,9 @@ namespace MessageBus {
   public:
     function<void(T param)> mCallback;
 
-    Subscription(string eventName, function<void(T param)> callback) {
+    Subscription(EVENTID pEventId, function<void(T param)> callback) {
       subscribed = false;
-      subscribe(eventName, callback);
+      subscribe(pEventId, callback);
     }
 
     Subscription() {
@@ -41,13 +45,11 @@ namespace MessageBus {
 
     ~Subscription() {
       globalSubs--;
-      WDL_MutexLock lock(&unsubscribeLock);
-      if (subscriptions.find(mEventName) != subscriptions.end()) {
-        subscriptions.find(mEventName)->second.DeletePtr(this);
-      }
+      WDL_MutexLock lock(&eventLock);
+      subscriptions[mEventId].DeletePtr(this);
     }
 
-    void subscribe(string eventName, function<void(T param)> callback) {
+    void subscribe(EVENTID pEventId, function<void(T param)> callback) {
       if (subscribed) {
         WDBGMSG("Trying to subscribe twice on the same Subscription!\n");
         return;
@@ -57,29 +59,22 @@ namespace MessageBus {
         // This probably means there's a leak
         WDBGMSG("Subcount %i\n", globalSubs);
       }
-      WDL_MutexLock lock(&unsubscribeLock);
       subscribed = true;
-      mEventName = eventName;
+      mEventId = pEventId;
       mCallback = callback;
-      if (subscriptions.find(eventName) == subscriptions.end()) {
-        SubsVector temp;
-        temp.Add(this);
-        subscriptions.insert(pair<string, SubsVector>(eventName, temp));
-      }
-      else {
-        subscriptions.find(eventName)->second.Add(this);
-      }
+      WDL_MutexLock lock(&eventLock);
+      subscriptions[mEventId].Add(this);
     }
   };
 
   template <class T>
-  void fireEvent(string eventName, T param) {
-    if (subscriptions.find(eventName) == subscriptions.end()) {
+  void fireEvent(EVENTID pEventId, T param) {
+    if (subscriptions[pEventId].GetSize() == 0) {
       WDBGMSG("Fired a event with not subscribers!\n");
       return;
     }
-    WDL_MutexLock lock(&unsubscribeLock);
-    SubsVector &subs = subscriptions.find(eventName)->second;
+    SubsVector &subs = subscriptions[pEventId];
+    WDL_MutexLock lock(&eventLock);
     for (int i = 0; i < subs.GetSize(); i++) {
       Subscription<T>* sub = dynamic_cast<Subscription<T>*>(subs.Get(i));
       if (sub != nullptr) {

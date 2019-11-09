@@ -13,7 +13,7 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
     graph->paramManager.addParameter(GetParam(i));
   }
 
-  mParamChanged.subscribe("ParametersChanged", [&](bool) {
+  mParamChanged.subscribe(MessageBus::ParametersChanged, [&](bool) {
     this->InformHostOfParameterDetailsChange();
   });
 
