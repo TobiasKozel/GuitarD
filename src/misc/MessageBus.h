@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include "mutex.h"
 
 using namespace std;
 
@@ -20,6 +21,10 @@ namespace MessageBus {
 
   map<string, SubsVector> subscriptions;
 
+  WDL_Mutex unsubscribeLock;
+
+  int globalSubs = 0;
+
   template <class T>
   class Subscription : public BaseSubscription {
   public:
@@ -35,6 +40,8 @@ namespace MessageBus {
     }
 
     ~Subscription() {
+      globalSubs--;
+      WDL_MutexLock lock(&unsubscribeLock);
       if (subscriptions.find(mEventName) != subscriptions.end()) {
         subscriptions.find(mEventName)->second.DeletePtr(this);
       }
@@ -45,6 +52,12 @@ namespace MessageBus {
         WDBGMSG("Trying to subscribe twice on the same Subscription!\n");
         return;
       }
+      globalSubs++;
+      if (globalSubs > 1000) {
+        // This probably means there's a leak
+        WDBGMSG("Subcount %i\n", globalSubs);
+      }
+      WDL_MutexLock lock(&unsubscribeLock);
       subscribed = true;
       mEventName = eventName;
       mCallback = callback;
@@ -65,6 +78,7 @@ namespace MessageBus {
       WDBGMSG("Fired a event with not subscribers!\n");
       return;
     }
+    WDL_MutexLock lock(&unsubscribeLock);
     SubsVector &subs = subscriptions.find(eventName)->second;
     for (int i = 0; i < subs.GetSize(); i++) {
       Subscription<T>* sub = dynamic_cast<Subscription<T>*>(subs.Get(i));

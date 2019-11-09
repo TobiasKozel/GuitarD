@@ -330,6 +330,7 @@
     <ClInclude Include="..\src\graph\Serializer.h" />
     <ClInclude Include="..\src\misc\constants.h" />
     <ClInclude Include="..\src\misc\GStructs.h" />
+    <ClInclude Include="..\src\misc\HistoryStack.h" />
     <ClInclude Include="..\src\misc\MessageBus.h" />
     <ClInclude Include="..\src\misc\NodeList.h" />
     <ClInclude Include="..\src\nodes\bitcrusher\BitCrusherNode.h" />

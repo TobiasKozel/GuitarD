@@ -19,6 +19,8 @@
 
 #define MAXBUFFER 512
 
+#define MAXUNDOS 8
+
 
 #ifdef FLOATCONV
   #define FFTCONVOLVER_USE_SSE

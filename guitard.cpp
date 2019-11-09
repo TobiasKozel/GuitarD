@@ -17,8 +17,11 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAM
     this->InformHostOfParameterDetailsChange();
   });
 
-
-#if IPLUG_EDITOR // All UI methods and member variables should be within an IPLUG_EDITOR guard, should you want distributed UI
+  /**
+   * Distributed UI won't work since the editor doesn't only afftect IParams
+   * Syncing them up and seperatinh the gui from the main classes would require some work and 
+   */
+#if IPLUG_EDITOR
   mMakeGraphicsFunc = [&]() {
     return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, 1.);
   };

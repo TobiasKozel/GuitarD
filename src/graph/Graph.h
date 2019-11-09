@@ -9,14 +9,16 @@
 #include "src/ui/GraphBackground.h"
 #include "src/graph/Serializer.h"
 #include "src/parameter/ParameterManager.h"
-#include "src/node/NodeSocketUi.h"
 #include "src/ui/CableLayer.h"
 #include "src/ui/gallery/NodeGallery.h"
+#include "src/misc/HistoryStack.h"
 
 class Graph {
   MessageBus::Subscription<Node*> mNodeDelSub;
   MessageBus::Subscription<NodeList::NodeInfo> mNodeAddEvent;
   MessageBus::Subscription<bool> mAwaitAudioMutexEvent;
+  MessageBus::Subscription<bool> mPushUndoState;
+  MessageBus::Subscription<bool> mPopUndoState;
 
   iplug::igraphics::IGraphics* graphics;
   /** Holds all the nodes in the processing graph */
@@ -27,6 +29,7 @@ class Graph {
   OutputNode* outputNode;
 
   int channelCount;
+  int sampleRate;
 
   GraphBackground* background;
 
@@ -44,6 +47,7 @@ public:
     nodeGallery = nullptr;
     cableLayer = nullptr;
 
+    /** Odd number to figure out if the DAW hasn't reported a samplerate */
     sampleRate = 44101;
     channelCount = 2;
 
@@ -52,14 +56,30 @@ public:
 
     // output->connectInput(input->outSockets.Get(0));
     mNodeDelSub.subscribe("NodeDeleted", [&](Node* param) {
+      MessageBus::fireEvent("PushUndoState", false);
       this->removeNode(param, true);
     });
     mNodeAddEvent.subscribe("NodeAdd", [&](NodeList::NodeInfo info) {
+      MessageBus::fireEvent("PushUndoState", false);
       this->addNode(info.constructor(), nullptr, 0, 300, 300);
     });
 
+    // This might not even make sense
     mAwaitAudioMutexEvent.subscribe("AwaitAudioMutex", [&](bool) {
-      WDL_MutexLock lock(&isProcessing);
+      //WDL_MutexLock lock(&isProcessing);
+    });
+
+    mPushUndoState.subscribe("PushUndoState", [&](bool) {
+      WDBGMSG("PushState");
+      this->serialize(*HistoryStack::PushState());
+    });
+
+    mPopUndoState.subscribe("PopUndoState", [&](bool redo) {
+      nlohmann::json* state = HistoryStack::PopState(redo);
+      if (state != nullptr) {
+        WDBGMSG("PopState");
+        this->deserialize(*state);
+      }
     });
   }
 
@@ -72,7 +92,6 @@ public:
 
   ~Graph() {
     // TODO get rid of all the things
-    // not a priority since there is no use case for multiple/dynamic graphs
   }
 
   void OnReset(int p_sampleRate, int p_channles = 2) {
@@ -127,6 +146,14 @@ public:
       WDBGMSG("Graphics context changed");
       graphics = pGraphics;
     }
+
+    graphics->SetKeyHandlerFunc([&](const IKeyPress & key, bool isUp) {
+      if (key.C && key.VK == kVK_Z && !isUp) {
+        MessageBus::fireEvent<bool>("PopUndoState", false);
+        return true;
+      }
+      return false;
+    });
 
     background = new GraphBackground(graphics, [&](float x, float y, float scale) {
       this->onViewPortChange(x, y, scale);
@@ -191,6 +218,9 @@ public:
     }
   }
 
+  /**
+   * Used to add nodes and push a state to the history stack
+   */
   void addNode(Node* node, Node* pInput = nullptr, int index = 0, float x = 0, float y = 0) {
     WDL_MutexLock lock(&isProcessing);
     node->X = x;
@@ -231,7 +261,6 @@ public:
     paramManager.releaseNode(node);
     nodes.DeletePtr(node, true);
     nodes.Compact();
-
   }
 
   void removeNode(int index) {
@@ -239,10 +268,7 @@ public:
   }
 
   void serialize(nlohmann::json& json) {
-    /**
-     * TODO this shouldn't need a lock since we don't want stutter when autosaves etc
-     * are in progress. Without it crashes about 50% of the time
-     */
+    /** TODO See if this crashes on garageband/logic without a mutex */
     serializer::serialize(json, nodes, inputNode, outputNode);
   }
 
@@ -254,9 +280,11 @@ public:
   }
 
 private:
-
+  /**
+   * This just removes the overlay IControls and adds them again to
+   * keep them on top of the layer stack
+   */
   void sortRenderStack() {
-    // keep the cable layer on top
     if (cableLayer != nullptr) {
       graphics->RemoveControl(cableLayer);
       graphics->AttachControl(cableLayer);
@@ -267,5 +295,4 @@ private:
     }
   }
 
-  int sampleRate;
 };

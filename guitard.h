@@ -8,12 +8,6 @@ const int kNumPrograms = 1;
 #include "src/misc/constants.h"
 #include "src/graph/Graph.h"
 
-enum EParams
-{
-  kGain = 0,
-  kNumParams
-};
-
 using namespace iplug;
 using namespace igraphics;
 
