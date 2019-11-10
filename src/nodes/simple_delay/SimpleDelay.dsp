@@ -4,8 +4,8 @@ import("misceffects.lib");
 
 
 scaleFreq = exp(log(20) + _ * (log(20000) - log(20))), 1 : max : si.smooth(0.999);
-linear2db(x) = 20*log10(x);// Max delay in seconds
-maxDelay = 1;
+linear2db(x) = 20*log10(x);
+maxDelay = 1; // Max delay in seconds
 time = vslider( "Time", 0.3, 0, maxDelay, 0.001) * ma.SR, 1 : max : si.smooth(0.999);
 dry = ba.db2linear(vslider("Dry", 0, -60, 0, 0.1));
 wet = ba.db2linear(vslider( "Wet", -8, -60, 0, 0.1));

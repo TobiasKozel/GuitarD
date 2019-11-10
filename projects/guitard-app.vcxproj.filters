@@ -429,6 +429,9 @@
     <ClInclude Include="..\src\misc\EventList.h">
       <Filter>src\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\phasetool\PhaseToolNode.h">
+      <Filter>src\nodes\tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

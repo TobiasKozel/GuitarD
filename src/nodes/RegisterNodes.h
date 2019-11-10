@@ -14,6 +14,7 @@
 #include "src/nodes/bitcrusher/BitCrusherNode.h"
 #include "src/nodes/overdrive/OverDriveNode.h"
 #include "src/nodes/paramerticeq/ParametricEqNode.h"
+#include "src/nodes/phasetool/PhaseToolNode.h"
 
 
 namespace NodeList {
@@ -38,6 +39,14 @@ namespace NodeList {
       []() { return new FeedbackNode("FeedbackNode"); },
       "FeedbackNode",
       "Feedback",
+      "asd",
+      "Tools"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new PhaseToolNode("PhaseToolNode"); },
+      "PhaseToolNode",
+      "Phase Tool",
       "asd",
       "Tools"
     });
