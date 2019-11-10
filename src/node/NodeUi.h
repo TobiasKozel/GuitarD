@@ -187,6 +187,7 @@ public:
     setUpControls();
     setUpSockets();
     setUpHeader();
+    translate(0, 0);
   }
 
   void cleanUp() {

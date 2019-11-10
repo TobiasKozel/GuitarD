@@ -42,6 +42,9 @@ public:
       color.B = 255;
     }
 
+    mSocket->X = mTargetRECT.L;
+    mSocket->Y = mTargetRECT.T;
+
     onConnectionEvent.subscribe(MessageBus::SocketConnect, [&](SocketConnectRequest req) {
       if (req.to == this->mSocket) {
         this->mSocket->connect(req.from);
@@ -83,8 +86,6 @@ public:
     if (mDragging) {
       g.DrawLine(color, mStartX, mStartY, mCurrentX, mCurrentY, &mBlend, 5);
     }
-    mSocket->X = mTargetRECT.L;
-    mSocket->Y = mTargetRECT.T;
   }
 
 

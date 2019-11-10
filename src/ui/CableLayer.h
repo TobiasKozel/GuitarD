@@ -25,6 +25,7 @@ public:
   {
     mPreviewSocket = nullptr;
     mPreviewSocketPrev = nullptr;
+    mHighlightSocket = nullptr;
     SetTargetRECT(IRECT(0, 0, 0, 0));
     mNodes = pNodes;
     mOutNode = pOutNode;
@@ -39,7 +40,7 @@ public:
     mColorPreview.A = 100;
     mColorPreview.R = 255;
 
-    mHighlightSocket = nullptr;
+    
     
     mDisconnectAllEvent.subscribe(MessageBus::NodeDisconnectAll, [&](Node*) {
       this->mDirty = true;

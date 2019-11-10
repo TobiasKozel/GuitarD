@@ -27,6 +27,7 @@ public:
     mOpenGalleryEvent.subscribe(MessageBus::OpenGallery, [&](bool open) {
       this->openGallery(open);
     });
+    avgExecutiontime = 0;
     mStats = DEBUGFONT;
   }
 
@@ -75,8 +76,7 @@ public:
       avgExecutiontime = (59 * avgExecutiontime + stats->executionTime) / 60.0;
       string time = to_string(avgExecutiontime);
       g.DrawText(mStats, time.c_str(), mRECT);
-      WDBGMSG("TEST %ld\n", avgExecutiontime);
-      mDirty = true;
+      // mDirty = true;
     }
   }
 
