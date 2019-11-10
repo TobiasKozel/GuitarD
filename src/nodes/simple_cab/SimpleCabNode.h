@@ -6,8 +6,6 @@
 #include "resample.h"
 #include "config.h"
 #include "src/node/Node.h"
-#include "c.h"
-#include "cident.h"
 #include "clean.h"
 
 class FileBrowser : public IDirBrowseControlBase
@@ -83,8 +81,8 @@ public:
 };
 
 class SimpleCabNode : public Node {
-  fftconvolver::FFTConvolver convolver;
-  fftconvolver::FFTConvolver convolver2;
+  fftconvolver::TwoStageFFTConvolver convolver;
+  fftconvolver::TwoStageFFTConvolver convolver2;
   WDL_Resampler mResampler;
   WDL_RESAMPLE_TYPE* resampledIR;
   WDL_RESAMPLE_TYPE selectedIr;
@@ -113,14 +111,14 @@ public:
     mResampler.SetFeedMode(true);
     mResampler.SetRates(48000, p_samplerate);
     WDL_RESAMPLE_TYPE* test;
-    int inSamples = mResampler.ResamplePrepare(3000, 1, &test);
-    for (int i = 0; i < 3000; i++) {
-      test[i] = cleanIR[i];
+    int inSamples = mResampler.ResamplePrepare(cleanIRLength, 1, &test);
+    for (int i = 0; i < cleanIRLength; i++) {
+      test[i] = cleanIR[i] * (48000 / p_samplerate) * 0.1;
     }
-    resampledIR = new WDL_RESAMPLE_TYPE[10000];
-    int outSamples = mResampler.ResampleOut(resampledIR, inSamples, 8000, 1);
-    convolver.init(64, resampledIR, outSamples);
-    convolver2.init(64, resampledIR, outSamples);
+    resampledIR = new WDL_RESAMPLE_TYPE[cleanIRLength * ((48000 / p_samplerate))];
+    int outSamples = mResampler.ResampleOut(resampledIR, inSamples, cleanIRLength, 1);
+    convolver.init(128, 1024 * 4, resampledIR, outSamples);
+    convolver2.init(128, 1024 * 4, resampledIR, outSamples);
     mStereo = 0;
     addByPassParam();
     addStereoParam();

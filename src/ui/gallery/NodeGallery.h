@@ -76,7 +76,7 @@ public:
       avgExecutiontime = (59 * avgExecutiontime + stats->executionTime) / 60.0;
       string time = to_string(avgExecutiontime);
       g.DrawText(mStats, time.c_str(), mRECT);
-      // mDirty = true;
+      mDirty = true;
     }
   }
 

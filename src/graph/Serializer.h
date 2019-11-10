@@ -86,8 +86,10 @@ namespace serializer {
         input->Y = serialized["input"]["position"][1]
       );
     }
-    //input->X = serialized["input"]["position"][0];
-    //input->Y = serialized["input"]["position"][1];
+    else {
+      input->X = serialized["input"]["position"][0];
+      input->Y = serialized["input"]["position"][1];
+    }
 
     int expectedIndex = 0;
 
@@ -164,6 +166,10 @@ namespace serializer {
         serialized["output"]["position"][0],
         serialized["output"]["position"][1]
       );
+    }
+    else {
+      output->X = serialized["output"]["position"][0];
+      output->Y = serialized["output"]["position"][1];
     }
   }
 }
