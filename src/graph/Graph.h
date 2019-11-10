@@ -1,4 +1,5 @@
 #pragma once
+#include <chrono>
 #include "mutex.h"
 #include "thirdparty/json.hpp"
 #include "IPlugConstants.h"
@@ -12,6 +13,7 @@
 #include "src/ui/CableLayer.h"
 #include "src/ui/gallery/NodeGallery.h"
 #include "src/misc/HistoryStack.h"
+#include "GraphStats.h"
 
 class Graph {
   MessageBus::Subscription<Node*> mNodeDelSub;
@@ -19,6 +21,7 @@ class Graph {
   MessageBus::Subscription<bool> mAwaitAudioMutexEvent;
   MessageBus::Subscription<bool> mPushUndoState;
   MessageBus::Subscription<bool> mPopUndoState;
+  MessageBus::Subscription<GraphStats**> mReturnStats;
 
   iplug::igraphics::IGraphics* graphics;
   /** Holds all the nodes in the processing graph */
@@ -36,6 +39,8 @@ class Graph {
   CableLayer* cableLayer;
 
   NodeGallery* nodeGallery;
+
+  GraphStats mStats;
 
 public:
   ParameterManager paramManager;
@@ -81,6 +86,10 @@ public:
         this->deserialize(*state);
       }
     });
+
+    mReturnStats.subscribe(MessageBus::GetGraphStats, [&](GraphStats** stats) {
+      *stats = &mStats;
+    });
   }
 
   void testadd() {
@@ -112,6 +121,7 @@ public:
      * I don't really like the mutex here, but it should only be locked if a change to the
      * processing chain is made, which will cause some artifacts anyways
      */
+    auto start = std::chrono::high_resolution_clock::now();
     WDL_MutexLock lock(&isProcessing);
     if (nFrames > MAXBUFFER) {
       // TODO process this in smaller chunks, should be a simple for loop
@@ -138,6 +148,9 @@ public:
     }
 
     outputNode->CopyOut(out, nFrames);
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
+    mStats.executionTime = duration.count();
   }
 
   /** The graph needs to know about the graphics context to add and remove the controlls for the nodes */

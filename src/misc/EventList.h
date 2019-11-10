@@ -17,6 +17,7 @@ namespace MessageBus {
     ParametersChanged,
     PushUndoState,
     PopUndoState,
+    GetGraphStats,
     TOTALEVENTS
   };
 }

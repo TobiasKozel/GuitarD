@@ -7,7 +7,7 @@
 #define PNGGENERICBG_FN "generic_bg.png"
 
 
-#define DEBUGFONT iplug::igraphics::IText { 16, COLOR_WHITE, "Roboto-Regular", iplug::igraphics::EAlign::Center, iplug::igraphics::EVAlign::Middle, 0 }
+#define DEBUGFONT iplug::igraphics::IText { 16, COLOR_BLACK, "Roboto-Regular", iplug::igraphics::EAlign::Center, iplug::igraphics::EVAlign::Middle, 0 }
 #define ICONFONT iplug::igraphics::IText {16.f, COLOR_WHITE, "ForkAwesome"}
 
 #define COLORACCENT 233, 140, 36

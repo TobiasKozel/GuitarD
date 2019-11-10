@@ -4,6 +4,7 @@
 #include "src/misc/MessageBus.h"
 #include "NodeGalleryCategory.h"
 #include "src/ui/theme.h"
+#include "src/graph/GraphStats.h"
 
 using namespace iplug;
 using namespace igraphics;
@@ -26,6 +27,7 @@ public:
     mOpenGalleryEvent.subscribe(MessageBus::OpenGallery, [&](bool open) {
       this->openGallery(open);
     });
+    mStats = DEBUGFONT;
   }
 
   ~NodeGallery() {
@@ -68,6 +70,13 @@ public:
       g.FillRect(mAddSignColor, IRECT(
         x1, y1, x1 + GALLERYADDSIGNWIDTH, y1 + GALLERYADDSIGNSIZE
       ));
+      GraphStats* stats;
+      MessageBus::fireEvent<GraphStats**>(MessageBus::GetGraphStats, &stats);
+      avgExecutiontime = (59 * avgExecutiontime + stats->executionTime) / 60.0;
+      string time = to_string(avgExecutiontime);
+      g.DrawText(mStats, time.c_str(), mRECT);
+      WDBGMSG("TEST %ld\n", avgExecutiontime);
+      mDirty = true;
     }
   }
 
@@ -168,5 +177,7 @@ private:
   WDL_PtrList<GalleryCategory> mCategories;
   IRECT mViewPort;
   IRECT mViewPortBounds;
+  IText mStats;
+  long long avgExecutiontime;
   MessageBus::Subscription<bool> mOpenGalleryEvent;
 };
