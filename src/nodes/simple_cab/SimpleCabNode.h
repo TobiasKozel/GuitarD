@@ -7,6 +7,9 @@
 #include "config.h"
 #include "src/node/Node.h"
 #include "clean.h"
+#include "thirdparty/threadpool.h"
+
+#define useThreadPool
 
 class FileBrowser : public IDirBrowseControlBase
 {
@@ -86,14 +89,23 @@ class SimpleCabNode : public Node {
   WDL_Resampler mResampler;
   WDL_RESAMPLE_TYPE* resampledIR;
   WDL_RESAMPLE_TYPE selectedIr;
-  WDL_RESAMPLE_TYPE* conversionBufferIn;
-  WDL_RESAMPLE_TYPE* conversionBufferOut;
+  WDL_RESAMPLE_TYPE* conversionBufferLIn;
+  WDL_RESAMPLE_TYPE* conversionBufferLOut;
+  WDL_RESAMPLE_TYPE* conversionBufferRIn;
+  WDL_RESAMPLE_TYPE* conversionBufferROut;
+
+#ifdef useThreadPool
+  ctpl::thread_pool tPool;
+#endif
+  
 public:
   SimpleCabNode(std::string pType) : Node() {
     type = pType;
     resampledIR = nullptr;
-    conversionBufferIn = nullptr;
-    conversionBufferOut = nullptr;
+    conversionBufferLIn = nullptr;
+    conversionBufferLOut = nullptr;
+    conversionBufferRIn = nullptr;
+    conversionBufferROut = nullptr;
     selectedIr = 0;
   }
 
@@ -101,8 +113,10 @@ public:
   void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
     Node::setup(p_samplerate, p_maxBuffer, 2, 1, 1);
 #ifdef FLOATCONV
-    conversionBufferIn = new WDL_RESAMPLE_TYPE[p_maxBuffer];
-    conversionBufferOut = new WDL_RESAMPLE_TYPE[p_maxBuffer];
+    conversionBufferLIn = new WDL_RESAMPLE_TYPE[p_maxBuffer];
+    conversionBufferLOut = new WDL_RESAMPLE_TYPE[p_maxBuffer];
+    conversionBufferRIn = new WDL_RESAMPLE_TYPE[p_maxBuffer];
+    conversionBufferROut = new WDL_RESAMPLE_TYPE[p_maxBuffer];
 #endif
     //ParameterCoupling* p = new ParameterCoupling("IR", &selectedIr, 0.0, 0.0, 2.0, 1.0);
     //parameters.Add(p);
@@ -122,13 +136,18 @@ public:
     mStereo = 0;
     addByPassParam();
     addStereoParam();
+#ifdef useThreadPool
+    tPool.resize(2);
+#endif
   }
 
   ~SimpleCabNode() {
     delete resampledIR;
 #ifdef FLOATCONV
-    delete conversionBufferIn;
-    delete conversionBufferOut;
+    delete conversionBufferLIn;
+    delete conversionBufferLOut;
+    delete conversionBufferRIn;
+    delete conversionBufferROut;
 #endif
   }
 
@@ -153,27 +172,41 @@ public:
     sample** buffer = inSockets.Get(0)->connectedTo->parentBuffer;
 
 #ifdef FLOATCONV
-    for (int i = 0; i < nFrames; i++) {
-      conversionBufferIn[i] = buffer[0][i];
-    }
-    convolver.process(conversionBufferIn, conversionBufferOut, nFrames);
-    for (int i = 0; i < nFrames; i++) {
-      outputs[0][0][i] = conversionBufferOut[i];
-    }
+    std::future<void> right;
     if (mStereo) {
-      for (int i = 0; i < nFrames; i++) {
-        conversionBufferIn[i] = buffer[1][i];
-      }
-      convolver2.process(conversionBufferIn, conversionBufferOut, nFrames);
-      for (int i = 0; i < nFrames; i++) {
-        outputs[0][1][i] = conversionBufferOut[i];
-      }
+#ifdef useThreadPool
+      right = tPool.push([&](int id) {
+#endif
+        for (int i = 0; i < nFrames; i++) {
+          conversionBufferRIn[i] = buffer[1][i];
+        }
+        convolver2.process(conversionBufferRIn, conversionBufferROut, nFrames);
+        for (int i = 0; i < nFrames; i++) {
+          outputs[0][1][i] = conversionBufferROut[i];
+        }
+#ifdef useThreadPool
+      });
+#endif
     }
-    else {
+
+    for (int i = 0; i < nFrames; i++) {
+      conversionBufferLIn[i] = buffer[0][i];
+    }
+    convolver.process(conversionBufferLIn, conversionBufferLOut, nFrames);
+    for (int i = 0; i < nFrames; i++) {
+      outputs[0][0][i] = conversionBufferLOut[i];
+    }
+
+    if(!mStereo) {
       for (int i = 0; i < nFrames; i++) {
         outputs[0][1][i] = outputs[0][0][i];
       }
     }
+#ifdef useThreadPool
+    else {
+      right.wait();
+    }
+#endif
 #else
     convolver.process(buffer[0], outputs[0][0], nFrames);
     if (mStereo) {
