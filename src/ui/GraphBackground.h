@@ -59,11 +59,19 @@ public:
     // mRECT.Translate(-x, -y);
     // mRECT.Scale(1 - d / 10.f);
     // mRECT.Translate(x, y);
-    mScale += d / 20.f;
-    WDBGMSG("scale %f \n", mScale);
-    if (mScale > 0.3 && mScale < 2) {
-      // TODO sucks hard, at least some kind of scaling
-      mGraphics->Resize(windowX, windowY, mScale);
+    // WDBGMSG("scale %f \n", mScale);
+    float newScale = mScale + d / 20.f;
+    if (newScale > 0.3 && newScale < 2) {
+      // TODOG sucks hard, at least some kind of scaling
+      float w = mGraphics->Width();
+      float h = mGraphics->Height();
+      
+      w = (float) (w * mScale);
+      h = (float) (h * mScale);
+      w = (int) (w / newScale);
+      h = (int) (h / newScale);
+      mGraphics->Resize(w, h, newScale);
+      mScale = newScale;
     }
     //mCallback(mX, mY, mScale);
   }
