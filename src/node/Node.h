@@ -200,18 +200,18 @@ public:
     samplerate = p_sampleRate;
   }
 
-  /** Called on DAW transport e.g. to clear dsp buffer and cut reverbs */
+  /** Called on DAW transport e.g. to clear dsp buffers and cut reverbs */
   virtual void OnTransport() { }
 
   /** Called from the graph to either signal a change in samplerate/channel count or transport */
   virtual void OnReset(int p_sampleRate, int p_channels) {
     bool isTransport = true;
-    if (p_channels != channelCount) {
-      OnChannelsChanged(p_channels);
-      isTransport = false;
-    }
     if (p_sampleRate != samplerate) {
       OnSamplerateChanged(p_sampleRate);
+      isTransport = false;
+    }
+    if (p_channels != channelCount) {
+      OnChannelsChanged(p_channels);
       isTransport = false;
     }
     if (isTransport) {

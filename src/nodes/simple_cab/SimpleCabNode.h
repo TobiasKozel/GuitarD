@@ -1,7 +1,5 @@
 #pragma once
-
-
-
+#include <omp.h>
 #include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
 #include "resample.h"
 #include "config.h"
@@ -9,7 +7,8 @@
 #include "clean.h"
 #include "thirdparty/threadpool.h"
 
-#define useThreadPool
+// #define useThreadPool
+// #define useOpenMP
 
 class FileBrowser : public IDirBrowseControlBase
 {
@@ -84,15 +83,12 @@ public:
 };
 
 class SimpleCabNode : public Node {
-  fftconvolver::TwoStageFFTConvolver convolver;
-  fftconvolver::TwoStageFFTConvolver convolver2;
+  fftconvolver::TwoStageFFTConvolver* convolvers[8];
   WDL_Resampler mResampler;
   WDL_RESAMPLE_TYPE* resampledIR;
   WDL_RESAMPLE_TYPE selectedIr;
-  WDL_RESAMPLE_TYPE* conversionBufferLIn;
-  WDL_RESAMPLE_TYPE* conversionBufferLOut;
-  WDL_RESAMPLE_TYPE* conversionBufferRIn;
-  WDL_RESAMPLE_TYPE* conversionBufferROut;
+  WDL_RESAMPLE_TYPE** conversionBufferIn;
+  WDL_RESAMPLE_TYPE** conversionBufferOut;
 
 #ifdef useThreadPool
   ctpl::thread_pool tPool;
@@ -102,37 +98,15 @@ public:
   SimpleCabNode(std::string pType) : Node() {
     type = pType;
     resampledIR = nullptr;
-    conversionBufferLIn = nullptr;
-    conversionBufferLOut = nullptr;
-    conversionBufferRIn = nullptr;
-    conversionBufferROut = nullptr;
-    selectedIr = 0;
+    conversionBufferIn = nullptr;
+    conversionBufferOut = nullptr;
+    selectedIr = 1;
   }
 
-  // TODO FIX THIS MESS
+  // TODOG FIX THIS MESS
   void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
     Node::setup(p_samplerate, p_maxBuffer, 2, 1, 1);
-#ifdef FLOATCONV
-    conversionBufferLIn = new WDL_RESAMPLE_TYPE[p_maxBuffer];
-    conversionBufferLOut = new WDL_RESAMPLE_TYPE[p_maxBuffer];
-    conversionBufferRIn = new WDL_RESAMPLE_TYPE[p_maxBuffer];
-    conversionBufferROut = new WDL_RESAMPLE_TYPE[p_maxBuffer];
-#endif
-    //ParameterCoupling* p = new ParameterCoupling("IR", &selectedIr, 0.0, 0.0, 2.0, 1.0);
-    //parameters.Add(p);
-    mResampler.SetMode(true, 0, true);
-    mResampler.SetFilterParms();
-    mResampler.SetFeedMode(true);
-    mResampler.SetRates(48000, p_samplerate);
-    WDL_RESAMPLE_TYPE* test;
-    int inSamples = mResampler.ResamplePrepare(cleanIRLength, 1, &test);
-    for (int i = 0; i < cleanIRLength; i++) {
-      test[i] = cleanIR[i] * (48000 / p_samplerate) * 0.1;
-    }
-    resampledIR = new WDL_RESAMPLE_TYPE[cleanIRLength * ((48000 / p_samplerate))];
-    int outSamples = mResampler.ResampleOut(resampledIR, inSamples, cleanIRLength, 1);
-    convolver.init(128, 1024 * 4, resampledIR, outSamples);
-    convolver2.init(128, 1024 * 4, resampledIR, outSamples);
+
     mStereo = 0;
     addByPassParam();
     addStereoParam();
@@ -141,60 +115,83 @@ public:
 #endif
   }
 
-  ~SimpleCabNode() {
-    delete resampledIR;
+
+  void createBuffers() override {
+    Node::createBuffers();
+    for (int c = 0; c < channelCount; c++) {
+      convolvers[c] = new fftconvolver::TwoStageFFTConvolver();
+    }
 #ifdef FLOATCONV
-    delete conversionBufferLIn;
-    delete conversionBufferLOut;
-    delete conversionBufferRIn;
-    delete conversionBufferROut;
+    conversionBufferIn = new WDL_RESAMPLE_TYPE * [channelCount];
+    conversionBufferOut = new WDL_RESAMPLE_TYPE * [channelCount];
+    for (int c = 0; c < channelCount; c++) {
+      conversionBufferIn[c] = new WDL_RESAMPLE_TYPE[maxBuffer];
+      conversionBufferOut[c] = new WDL_RESAMPLE_TYPE[maxBuffer];
+    }
+#endif
+    mResampler.SetMode(true, 0, true);
+    mResampler.SetFilterParms();
+    mResampler.SetFeedMode(true);
+    mResampler.SetRates(48000, samplerate);
+    WDL_RESAMPLE_TYPE* test;
+    int inSamples = mResampler.ResamplePrepare(cleanIRLength, 1, &test);
+    for (int i = 0; i < cleanIRLength; i++) {
+      test[i] = cleanIR[i] * (48000 / samplerate) * 0.1;
+    }
+    resampledIR = new WDL_RESAMPLE_TYPE[cleanIRLength * ((48000 / samplerate))];
+    int outSamples = mResampler.ResampleOut(resampledIR, inSamples, cleanIRLength, 1);
+    for (int c = 0; c < channelCount; c++) {
+      convolvers[c]->init(128, 1024 * 4, resampledIR, outSamples);
+    }
+  }
+
+  void deleteBuffers() override {
+    Node::deleteBuffers();
+    delete resampledIR;
+    resampledIR = nullptr;
+    for (int c = 0; c < channelCount; c++) {
+      delete convolvers[c];
+    }
+#ifdef FLOATCONV
+    for (int c = 0; c < channelCount; c++) {
+      delete conversionBufferIn[c];
+      delete conversionBufferOut[c];
+    }
+    delete conversionBufferIn;
+    delete conversionBufferOut;
+    conversionBufferIn = nullptr;
+    conversionBufferOut = nullptr;
 #endif
   }
 
   void ProcessBlock(int nFrames) {
     if (!inputsReady() || isProcessed || byPass()) { return; }
     parameters.Get(1)->update();
-    //int prev = (int)*(parameters[0]->value);
-    //parameters[0]->update();
-    //int cur = (int)*(parameters[0]->value);
-    //if (prev != cur) {
-    //  if (cur == 0) {
-    //    convolver.init(64, cleanIR, 3000);
-    //  }
-    //  if (cur == 1) {
-    //    convolver.init(64, stackIR, 4500);
-    //  }
-    //  if (cur == 2) {
-    //    convolver.init(64, driveIR, 4200);
-    //  }
-    //}
 
     sample** buffer = inSockets.Get(0)->connectedTo->parentBuffer;
 
 #ifdef FLOATCONV
+    /**                           THREADPOOLING ATTEMPT                           */
+#ifdef useThreadPool
     std::future<void> right;
     if (mStereo) {
-#ifdef useThreadPool
       right = tPool.push([&](int id) {
-#endif
         for (int i = 0; i < nFrames; i++) {
-          conversionBufferRIn[i] = buffer[1][i];
+          conversionBufferIn[1][i] = buffer[1][i];
         }
-        convolver2.process(conversionBufferRIn, conversionBufferROut, nFrames);
+        convolvers[1]->process(conversionBufferIn[1], conversionBufferOut[1], nFrames);
         for (int i = 0; i < nFrames; i++) {
-          outputs[0][1][i] = conversionBufferROut[i];
+          outputs[0][1][i] = conversionBufferOut[1][i];
         }
-#ifdef useThreadPool
       });
-#endif
     }
 
     for (int i = 0; i < nFrames; i++) {
-      conversionBufferLIn[i] = buffer[0][i];
+      conversionBufferIn[0][i] = buffer[0][i];
     }
-    convolver.process(conversionBufferLIn, conversionBufferLOut, nFrames);
+    convolvers[0]->process(conversionBufferIn[0], conversionBufferOut[0], nFrames);
     for (int i = 0; i < nFrames; i++) {
-      outputs[0][0][i] = conversionBufferLOut[i];
+      outputs[0][0][i] = conversionBufferOut[0][i];
     }
 
     if(!mStereo) {
@@ -202,11 +199,54 @@ public:
         outputs[0][1][i] = outputs[0][0][i];
       }
     }
-#ifdef useThreadPool
     else {
       right.wait();
     }
+
+#else
+    /**                           OPENMP ATTEMPT                           */
+#ifdef useOpenMP
+    if (mStereo) {
+      #pragma omp parallel num_threads(2)
+      {
+        int id = omp_get_thread_num();
+        for (int i = 0; i < nFrames; i++) {
+          conversionBufferIn[id][i] = buffer[id][i];
+        }
+        convolvers[id]->process(conversionBufferIn[id], conversionBufferOut[id], nFrames);
+        for (int i = 0; i < nFrames; i++) {
+          outputs[0][id][i] = conversionBufferOut[id][i];
+        }
+      }
+    }
+#else
+    /**                           REFERENCE                           */
+    for (int i = 0; i < nFrames; i++) {
+      conversionBufferIn[0][i] = buffer[0][i];
+    }
+    convolvers[0]->process(conversionBufferIn[0], conversionBufferOut[0], nFrames);
+    for (int i = 0; i < nFrames; i++) {
+      outputs[0][0][i] = conversionBufferOut[0][i];
+    }
+
+    if (!mStereo) {
+      for (int i = 0; i < nFrames; i++) {
+        outputs[0][1][i] = outputs[0][0][i];
+      }
+    }
+    else {
+      for (int i = 0; i < nFrames; i++) {
+        conversionBufferIn[1][i] = buffer[1][i];
+      }
+      convolvers[1]->process(conversionBufferIn[1], conversionBufferOut[1], nFrames);
+      for (int i = 0; i < nFrames; i++) {
+        outputs[0][1][i] = conversionBufferOut[1][i];
+      }
+    }
 #endif
+
+#endif
+    
 #else
     convolver.process(buffer[0], outputs[0][0], nFrames);
     if (mStereo) {
