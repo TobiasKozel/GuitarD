@@ -22,6 +22,9 @@ public:
     mColorBackgroundDetail = IColor(255, COLORBACKGROUNDDETAIL);
   }
 
+  /**
+   * Draw the simple background shapes
+   */
   void Draw(IGraphics& g) override {
     int windowX = g.Width();
     int windowY = g.Height();
@@ -58,13 +61,9 @@ public:
   }
 
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
-    // mRECT.Translate(-x, -y);
-    // mRECT.Scale(1 - d / 10.f);
-    // mRECT.Translate(x, y);
-    // WDBGMSG("scale %f \n", mScale);
+    // TODOG sucks hard, at least some kind of scaling
     float newScale = mScale + d / 20.f;
     if (newScale > 0.3 && newScale < 2) {
-      // TODOG sucks hard, at least some kind of scaling
       float w = mGraphics->Width();
       float h = mGraphics->Height();
       
@@ -75,7 +74,6 @@ public:
       mGraphics->Resize(w, h, newScale);
       mScale = newScale;
     }
-    //mCallback(mX, mY, mScale);
   }
 
   void OnResize() override {

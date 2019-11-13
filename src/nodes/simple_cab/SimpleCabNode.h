@@ -136,9 +136,9 @@ public:
     WDL_RESAMPLE_TYPE* test;
     int inSamples = mResampler.ResamplePrepare(cleanIRLength, 1, &test);
     for (int i = 0; i < cleanIRLength; i++) {
-      test[i] = cleanIR[i] * (48000 / samplerate) * 0.2;
+      test[i] = cleanIR[i] * (samplerate / 48000.f) * 0.2;
     }
-    resampledIR = new WDL_RESAMPLE_TYPE[cleanIRLength * ((48000 / samplerate))];
+    resampledIR = new WDL_RESAMPLE_TYPE[ceil(cleanIRLength * ((samplerate / 48000.f)))];
     int outSamples = mResampler.ResampleOut(resampledIR, inSamples, cleanIRLength, 1);
     for (int c = 0; c < channelCount; c++) {
       convolvers[c]->init(128, 1024 * 4, resampledIR, outSamples);
