@@ -136,6 +136,7 @@ public:
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
+    if (mMousDown.C) { return; }
     SetRECT(mGraphics->GetBounds());
     mDragging = true;
     mCurrentX = x;
