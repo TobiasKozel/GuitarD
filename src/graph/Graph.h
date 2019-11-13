@@ -58,6 +58,7 @@ public:
 
     inputNode = new InputNode();
     outputNode = new OutputNode();
+    outputNode->connectInput(inputNode->outSockets.Get(0));
 
     // output->connectInput(input->outSockets.Get(0));
     mNodeDelSub.subscribe(MessageBus::NodeDeleted, [&](Node* param) {

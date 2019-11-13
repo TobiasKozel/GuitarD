@@ -82,6 +82,22 @@ public:
     }
   }
 
+  /** create all the needed buffers for the dsp */
+  virtual void createBuffers() {
+    if (outputs != nullptr) {
+      WDBGMSG("Trying to create a new dsp buffer without cleanung up the old one");
+      assert(true);
+    }
+    outputs = new iplug::sample * *[outputCount];
+    for (int i = 0; i < outputCount; i++) {
+      outputs[i] = new iplug::sample * [channelCount];
+      for (int c = 0; c < channelCount; c++) {
+        outputs[i][c] = new iplug::sample[maxBuffer];
+      }
+    }
+  }
+
+  /** Delets all the allocated buffers */
   virtual void deleteBuffers() {
     if (outputs != nullptr) {
       for (int i = 0; i < outputCount; i++) {
@@ -95,6 +111,7 @@ public:
     }
   }
 
+  /** Should do all the required cleanup */
   virtual ~Node() {
     deleteBuffers();
     
@@ -107,6 +124,7 @@ public:
     outSockets.Empty(true);
   }
 
+  /** Will fill all the output buffers with silence */
   void outputSilence() {
     for (int o = 0; o < outputCount; o++) {
       for (int c = 0; c < channelCount; c++) {
@@ -118,6 +136,7 @@ public:
     isProcessed = true;
   }
 
+  /** Will return true if the node is bypassed and also do the bypassing of buffers */
   bool byPass() {
     // The first param will always be bypass
     parameters.Get(0)->update();
@@ -134,9 +153,7 @@ public:
     return true;
   }
 
-  /**
-   * Check where the node is able to process a block
-   */
+  /** Check where the node is able to process a block */
   virtual bool inputsReady() {
     /**
      * If one input isn't connected, skip the processing and output silence
@@ -158,39 +175,51 @@ public:
     return true;
   }
 
+  /** Main Processing, only takes a blocksize since it knows its inputs */
+  virtual void ProcessBlock(int nFrames) = 0;
+
+
+
+
+
+  /**                  Signals from outside                  */
+
+  /** Signals a new audio block is about to processed */
   virtual void BlockStart() {
     isProcessed = false;
   }
 
-  virtual void ProcessBlock(int nFrames) = 0;
-
-  virtual void channelsChanged(int p_channels) {
-    if (outputs != nullptr) {
-      deleteBuffers();
-    }
-    outputs = new iplug::sample * *[outputCount];
-    for (int i = 0; i < outputCount; i++) {
-      outputs[i] = new iplug::sample * [p_channels];
-      for (int c = 0; c < p_channels; c++) {
-        outputs[i][c] = new iplug::sample[maxBuffer];
-      }
-    }
+  /** Called if the daw changed the channelcount*/
+  virtual void OnChannelsChanged(int p_channels) {
+    deleteBuffers();
     channelCount = p_channels;
+    createBuffers();
   }
 
-  virtual void samplerateChanged(int p_sampleRate) {
+  virtual void OnSamplerateChanged(int p_sampleRate) {
     samplerate = p_sampleRate;
   }
 
+  /** Called on DAW transport e.g. to clear dsp buffer and cut reverbs */
+  virtual void OnTransport() { }
+
+  /** Called from the graph to either signal a change in samplerate/channel count or transport */
   virtual void OnReset(int p_sampleRate, int p_channels) {
+    bool isTransport = true;
     if (p_channels != channelCount) {
-      channelsChanged(p_channels);
+      OnChannelsChanged(p_channels);
+      isTransport = false;
     }
     if (p_sampleRate != samplerate) {
-      samplerateChanged(p_sampleRate);
+      OnSamplerateChanged(p_sampleRate);
+      isTransport = false;
+    }
+    if (isTransport) {
+      OnTransport();
     }
   }
 
+  /** Connects a given socket to a input at a given index of this node */
   virtual void connectInput(NodeSocket* out, int inputNumber = 0) {
     NodeSocket* inSocket = inSockets.Get(inputNumber);
     if (inSocket != nullptr) {
@@ -203,12 +232,14 @@ public:
     }
   }
 
+  /** Generic function to call when the node can be bypassed*/
   void addByPassParam() {
     parameters.Add(new ParameterCoupling(
       "Bypass", &mByPassed, 0.0, 0.0, 1.0, 1
     ));
   }
 
+  /** Generic function to call when the node can switch between mono/stereo */
   void addStereoParam(ParameterCoupling* p = nullptr) {
     if (p == nullptr) {
       p = new ParameterCoupling(
@@ -217,6 +248,12 @@ public:
     }
     parameters.Add(p);
   }
+
+
+
+
+  /**                 UI STUFF                */
+
 
   /**
    * Generic setup of the parameters to get something on the screen
@@ -237,6 +274,9 @@ public:
     uiReady = true;
   }
 
+  /**
+   * Cleans up the IControls for all the parameters
+   */
   virtual void cleanupUi(iplug::igraphics::IGraphics* pGrahics) {
     /**
      * The param value gets only synced to the dsp value when the node is processed
@@ -254,6 +294,7 @@ public:
     uiReady = false;
   }
 
+  /** Called if the ui is resized TODOG move over to NodeUI */
   virtual void layoutChanged() { }
 };
 
