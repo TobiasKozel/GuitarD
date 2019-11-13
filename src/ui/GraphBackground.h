@@ -47,10 +47,8 @@ public:
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     if (mod.L || mod.C) {
-      offsetX += (dX);
-      offsetY += (dY);
+      translate(dX, dY);
       mGraphics->SetAllControlsDirty();
-      mCallback(dX, dY, 1.f);
     }
   }
 
@@ -67,11 +65,13 @@ public:
       float w = mGraphics->Width();
       float h = mGraphics->Height();
       
-      w = (float) (w * mScale);
-      h = (float) (h * mScale);
-      w = (int) (w / newScale);
-      h = (int) (h / newScale);
+      w = round((w * mScale) / newScale);
+      h = round((h * mScale) / newScale);
+
+      float dX = ((x * mScale) / newScale) - x;
+      float dY = ((y * mScale) / newScale) - y;
       mGraphics->Resize(w, h, newScale);
+      translate(dX, dY);
       mScale = newScale;
     }
   }
@@ -87,6 +87,12 @@ public:
   float mScale;
 
 protected:
+  void translate(float dX, float dY) {
+    offsetX += (dX);
+    offsetY += (dY);
+    mCallback(dX, dY, 1.f);
+  }
+
   IGraphics* mGraphics;
   float mX;
   float mY;
