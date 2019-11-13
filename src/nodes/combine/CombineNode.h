@@ -96,7 +96,7 @@ public:
   }
 
   void createBuffers() override {
-    Node:createBuffers();
+    Node::createBuffers();
     // this will be used to do processing on a disconnected node
     emptyBuffer = new sample * [channelCount];
     for (int c = 0; c < channelCount; c++) {

@@ -60,8 +60,8 @@ public:
         }
         for (int i = 0; i < curNode->inputCount; i++) {
           curSock = curNode->inSockets.Get(i);
-          if (curSock->connectedTo != nullptr) {
-            tarSock = curSock->connectedTo;
+          tarSock = curSock->connectedTo;
+          if (tarSock != nullptr) {
             float x1 = tarSock->X + socketRadius;
             float x2 = curSock->X + socketRadius;
             float y1 = tarSock->Y + socketRadius;
@@ -87,11 +87,22 @@ public:
     });
 
     mNodeDraggedEndEvent.subscribe(MessageBus::NodeDraggedEnd, [&](Node* node) {
-      if (mHighlightSocket != nullptr) {
-        MessageBus::fireEvent<NodeSpliceInPair>(MessageBus::NodeSpliceIn, NodeSpliceInPair{ node, mHighlightSocket });
-      }
+      NodeSocket* target = mHighlightSocket;
       mHighlightSocket = nullptr;
       mDirty = true;
+      if (target != nullptr) {
+        if (target->parentNode == node) {
+          return;
+        }
+        Node* targetNode = target->parentNode;
+        for (int i = 0; i < targetNode->inputCount; i++) {
+          if (targetNode->inSockets.Get(i)->connectedTo != nullptr &&
+              targetNode->inSockets.Get(i)->connectedTo->parentNode == node) {
+            return;
+          }
+        }
+        MessageBus::fireEvent<NodeSpliceInPair>(MessageBus::NodeSpliceIn, NodeSpliceInPair{ node, target });
+      }
     });
 
     mPreviewSocketEvent.subscribe(MessageBus::PreviewSocket, [&](NodeSocket* socket) {

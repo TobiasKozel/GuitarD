@@ -88,7 +88,7 @@ public:
       WDBGMSG("Trying to create a new dsp buffer without cleanung up the old one");
       assert(true);
     }
-    outputs = new iplug::sample * *[outputCount];
+    outputs = new iplug::sample **[outputCount];
     for (int i = 0; i < outputCount; i++) {
       outputs[i] = new iplug::sample * [channelCount];
       for (int c = 0; c < channelCount; c++) {
