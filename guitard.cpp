@@ -62,7 +62,6 @@ void GuitarD::OnUIClose() {
 bool GuitarD::SerializeState(IByteChunk& chunk) const {
   nlohmann::json serialized = {
     {"version", PLUG_VERSION_STR},
-    {"ui_scale", 1.0} // TODO get the proper scale
   };
   graph->serialize(serialized);
   chunk.PutStr(serialized.dump(4).c_str());

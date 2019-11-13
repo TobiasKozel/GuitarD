@@ -42,6 +42,10 @@ class Graph {
 
   GraphStats mStats;
 
+  int width;
+  int height;
+  float scale;
+
 public:
   ParameterManager paramManager;
 
@@ -51,6 +55,8 @@ public:
     background = nullptr;
     nodeGallery = nullptr;
     cableLayer = nullptr;
+
+    width = height = scale = 0;
 
     /** Odd number to figure out if the DAW hasn't reported a samplerate */
     sampleRate = 44101;
@@ -161,6 +167,7 @@ public:
       graphics = pGraphics;
     }
 
+    
     graphics->SetKeyHandlerFunc([&](const IKeyPress & key, bool isUp) {
       if (key.C && key.VK == kVK_Z && !isUp) {
         MessageBus::fireEvent<bool>(MessageBus::PopUndoState, false);
@@ -186,10 +193,22 @@ public:
     nodeGallery = new NodeGallery(graphics);
     graphics->AttachControl(nodeGallery);
 
+    scaleUi();
+
     testadd();
   }
 
+  void scaleUi() {
+    if (width != 0 && height != 0 && scale != 0 && graphics != nullptr) {
+      background->mScale = scale;
+      graphics->Resize(width, height, scale);
+    }
+  }
+
   void cleanupUi() {
+    width = graphics->Width();
+    height = graphics->Height();
+    scale = graphics->GetDrawScale();
     for (int n = 0; n < nodes.GetSize(); n++) {
       nodes.Get(n)->cleanupUi(graphics);
     }
@@ -283,14 +302,23 @@ public:
 
   void serialize(nlohmann::json& json) {
     /** TODO See if this crashes on garageband/logic without a mutex */
+    json["scale"] = scale;
+    json["width"] = width;
+    json["height"] = height;
     serializer::serialize(json, nodes, inputNode, outputNode);
   }
 
   void deserialize(nlohmann::json& json) {
     removeAllNodes();
+    if (json.find("width") != json.end()) {
+      scale = json["scale"];
+      width = json["width"];
+      height = json["height"];
+    }
     WDL_MutexLock lock(&isProcessing);
     serializer::deserialize(json, nodes, outputNode, inputNode, sampleRate, &paramManager, graphics);
     sortRenderStack();
+    scaleUi();
   }
 
 private:

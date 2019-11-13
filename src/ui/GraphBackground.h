@@ -17,12 +17,14 @@ public:
     mY = mX = 0;
     mCallback = pCallback;
     mScale = 1.0;
-    offsetX = offsetY = windowY = windowX = 0;
+    offsetX = offsetY = 0;
     mColorBackground = IColor(255, COLORBACKGROUND);
     mColorBackgroundDetail = IColor(255, COLORBACKGROUNDDETAIL);
   }
 
   void Draw(IGraphics& g) override {
+    int windowX = g.Width();
+    int windowY = g.Height();
     g.FillRect(mColorBackground, mRECT);
     for (float y = fmod(offsetY, BACKGROUNDDETAILDIST) - BACKGROUNDDETAILDIST; y < windowY + BACKGROUNDDETAILDIST; y += BACKGROUNDDETAILDIST) {
       for (float x = fmod(offsetX, BACKGROUNDDETAILDIST) - BACKGROUNDDETAILDIST; x < windowX + BACKGROUNDDETAILDIST; x += BACKGROUNDDETAILDIST) {
@@ -79,15 +81,12 @@ public:
   void OnResize() override {
     if (mGraphics != nullptr) {
       IRECT bounds = mGraphics->GetBounds();
-      // keep track of the window size so the background alsoways fills the screen
-      //bounds.R += 200;
-      //bounds.B += 200;
-      windowX = static_cast<int>(bounds.R);
-      windowY = static_cast<int>(bounds.B);
       mRECT = bounds;
       mTargetRECT = bounds;
     }
   }
+
+  float mScale;
 
 protected:
   IGraphics* mGraphics;
@@ -95,9 +94,6 @@ protected:
   float mY;
   float offsetX;
   float offsetY;
-  int windowX;
-  int windowY;
-  float mScale;
   IColor mColorBackground;
   IColor mColorBackgroundDetail;
   BackgroundMoveCallback mCallback;
