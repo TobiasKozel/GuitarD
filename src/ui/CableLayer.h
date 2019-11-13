@@ -67,16 +67,16 @@ public:
             float y1 = tarSock->Y + socketRadius;
             float y2 = curSock->Y + socketRadius;
             IRECT box;
-            box.L = min(x1, x2);
-            box.R = max(x1, x2);
-            box.T = min(y1, y2);
-            box.B = max(y1, y2);
+            box.L = min(x1, x2) - SPLICEINDISTANCE;
+            box.R = max(x1, x2) + SPLICEINDISTANCE;
+            box.T = min(y1, y2) - SPLICEINDISTANCE;
+            box.B = max(y1, y2) + SPLICEINDISTANCE;
             if (box.Contains(IRECT{ pos.x, pos.y, pos.x, pos.y })) {
               float a = y1 - y2;
               float b = x2 - x1;
               float c = x1 * y2 - x2 * y1;
               float d = abs(a * pos.x + b * pos.y + c) / sqrt(a * a + b * b);
-              if (d < 15) {
+              if (d < SPLICEINDISTANCE) {
                 mHighlightSocket = curSock;
                 break;
               }

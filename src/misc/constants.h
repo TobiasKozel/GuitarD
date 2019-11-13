@@ -21,6 +21,8 @@
 
 #define MAXUNDOS 8
 
+#define SPLICEINDISTANCE 14
+
 
 #ifdef FLOATCONV
   #define FFTCONVOLVER_USE_SSE

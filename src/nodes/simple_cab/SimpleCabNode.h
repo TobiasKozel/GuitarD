@@ -136,7 +136,7 @@ public:
     WDL_RESAMPLE_TYPE* test;
     int inSamples = mResampler.ResamplePrepare(cleanIRLength, 1, &test);
     for (int i = 0; i < cleanIRLength; i++) {
-      test[i] = cleanIR[i] * (48000 / samplerate) * 0.1;
+      test[i] = cleanIR[i] * (48000 / samplerate) * 0.2;
     }
     resampledIR = new WDL_RESAMPLE_TYPE[cleanIRLength * ((48000 / samplerate))];
     int outSamples = mResampler.ResampleOut(resampledIR, inSamples, cleanIRLength, 1);
