@@ -2,9 +2,9 @@
 #define ROBOTO_FN "Roboto-Regular.ttf"
 #define ICON_FN "forkawesome-webfont.ttf"
 
-#define PNGSTEREOSHAPERBG_FN "stereoshaper_bg.png"
-#define PNGSIMPLECABBG_FN "simplecab_bg.png"
-#define PNGGENERICBG_FN "generic_bg.png"
+//#define PNGSTEREOSHAPERBG_FN "stereoshaper_bg.png"
+//#define PNGSIMPLECABBG_FN "simplecab_bg.png"
+//#define PNGGENERICBG_FN "generic_bg.png"
 
 
 #define DEBUGFONT iplug::igraphics::IText { 16, COLOR_BLACK, "Roboto-Regular", iplug::igraphics::EAlign::Center, iplug::igraphics::EVAlign::Middle, 0 }

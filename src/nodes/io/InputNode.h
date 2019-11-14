@@ -67,7 +67,8 @@ public:
     }
     mUi = new InputNodeUi(NodeUiParam {
       pGrahics,
-      PNGGENERICBG_FN,
+      IColor(255, 100, 150, 100),
+      250, 150,
       &X, &Y,
       &parameters,
       &inSockets,

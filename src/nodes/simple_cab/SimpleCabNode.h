@@ -78,7 +78,7 @@ public:
   }
 
   void Draw(IGraphics& g) override {
-    g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
+    NodeUi::Draw(g);
     g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
   }
 
@@ -267,7 +267,8 @@ public:
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     mUi = new SimpleCabNodeUi(NodeUiParam{
       pGrahics,
-      PNGGENERICBG_FN,
+      IColor(255, 150, 100, 100),
+      300, 300,
       &X, &Y,
       &parameters,
       &inSockets,

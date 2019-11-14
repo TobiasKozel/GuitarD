@@ -10,7 +10,9 @@ class Node;
 
 struct NodeUiParam {
   iplug::igraphics::IGraphics* pGraphics;
-  const char* pBg;
+  IColor color;
+  float width;
+  float height;
   float* X;
   float* Y;
   WDL_PtrList<ParameterCoupling>* pParameters;
@@ -48,10 +50,10 @@ public:
     mInSockets = pParam.inSockets;
     mOutSockets = pParam.outSockets;
     mParentNode = pParam.node;
+    mColor = pParam.color;
 
-    mBitmap = mGraphics->LoadBitmap(pParam.pBg, 1, false);
-    float w = mBitmap.W();
-    float h = mBitmap.H();
+    float w = pParam.width;
+    float h = pParam.height;
     IRECT rect;
     rect.L = *X - w / 2;
     rect.R = *X + w / 2;
@@ -59,10 +61,13 @@ public:
     rect.B = *Y + h / 2;
     SetTargetAndDrawRECTs(rect);
 
-    mBlend = EBlend::Clobber;
-
     mNodeSpliceInEvent.subscribe(MessageBus::NodeSpliceIn, [&](NodeSpliceInPair pair) {
       if (mParentNode != pair.node) { return; }
+      /**
+       * Splice in only works on nodes with at least one in and output
+       * Since there's no way to choose from multiple ones, the first ones will
+       * always be used
+       */
       NodeSocket* in = mInSockets->Get(0);
       NodeSocket* out = mOutSockets->Get(0);
       NodeSocket* prev = pair.socket->connectedTo;
@@ -224,10 +229,8 @@ public:
     // this will just draw the backround since all the controls are also registered
     // to the IGraphics class which will draw them
     // which means the rendering order is kinda hard to controll
-    g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
+    g.FillRect(mColor, mRECT);
     DrawHeader(g);
-    //g.FillRect(IColor(255, 10, 10, 10), mRECT);
-
   }
 
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
@@ -295,8 +298,7 @@ protected:
   bool mDragging;
   float* X;
   float* Y;
-  IBitmap mBitmap;
-  IBlend mBlend;
+  IColor mColor;
   IGraphics* mGraphics;
   IText mIconFont;
 };

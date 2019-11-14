@@ -261,13 +261,8 @@ public:
   virtual void setupUi(iplug::igraphics::IGraphics* pGrahics) {
 
     mUi = new NodeUi(NodeUiParam {
-      pGrahics,
-      PNGGENERICBG_FN,
-      &X, &Y,
-      &parameters,
-      &inSockets,
-      &outSockets,
-      this
+      pGrahics, IColor(255, 100, 100, 100), 300, 300, &X, &Y,
+      &parameters, &inSockets, &outSockets, this
     });
     pGrahics->AttachControl(mUi);
     mUi->setUp();
