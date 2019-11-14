@@ -59,8 +59,8 @@
       allowLocationSimulation = "YES">
       <PathRunnable
          runnableDebuggingMode = "0"
-         BundleIdentifier = "com.example.apple-samplecode.AUv3Host686EDA2T8T"
-         FilePath = "/Applications/AUv3Host.app">
+         BundleIdentifier = "com.apple.garageband10"
+         FilePath = "/Applications/GarageBand.app">
       </PathRunnable>
       <MacroExpansion>
          <BuildableReference
