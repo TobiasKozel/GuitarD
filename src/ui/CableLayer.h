@@ -9,6 +9,10 @@
 using namespace iplug;
 using namespace igraphics;
 
+/**
+ * This control is a non clickable overlay over the whole plugin window to draw all the node connections
+ * It also handles the splice in logic
+ */
 class CableLayer : public IControl {
 
   MessageBus::Subscription<Node*> mDisconnectAllEvent;
@@ -16,6 +20,7 @@ class CableLayer : public IControl {
   MessageBus::Subscription<Node*> mNodeDraggedEndEvent;
   MessageBus::Subscription<NodeSocket*> mPreviewSocketEvent;
   MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
+  MessageBus::Subscription<Node*> mNodeDeleteEvent;
 
   NodeSocket* mPreviewSocketPrev;
   NodeSocket* mPreviewSocket;
@@ -108,6 +113,7 @@ public:
     mPreviewSocketEvent.subscribe(MessageBus::PreviewSocket, [&](NodeSocket* socket) {
       // TODO this is kinda shady and does not use the MessageBus::SocketConnect event
       NodeSocket* outSocket = this->mOutNode->inSockets.Get(0);
+      if (outSocket->connectedTo == socket) { return; }
       if (socket == this->mPreviewSocket) {
         // Connect the original socket again
         if (this->mPreviewSocketPrev != nullptr) {
@@ -128,6 +134,12 @@ public:
     onConnectionEvent.subscribe(MessageBus::SocketConnect, [&](SocketConnectRequest req) {
       mPreviewSocket = nullptr;
       mPreviewSocketPrev = nullptr;
+    });
+
+    mNodeDeleteEvent.subscribe(MessageBus::NodeDeleted, [&](Node* param) {
+      this->mPreviewSocketPrev = nullptr;
+      this->mPreviewSocket = nullptr;
+      this->mDirty = true;
     });
   }
 
