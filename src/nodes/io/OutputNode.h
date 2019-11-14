@@ -1,6 +1,12 @@
 #pragma once
 
 #include "src/node/Node.h"
+class OutputNodeUi : public NodeUi {
+public:
+  OutputNodeUi(NodeUiParam param) : NodeUi(param) {
+  }
+};
+
 
 class OutputNode : public Node {
 public:
@@ -40,5 +46,25 @@ public:
 
   void OnReset(int p_sampleRate, int p_channels) override {
     channelCount = p_channels;
+  }
+
+  void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+    if (X == Y && X == 0) {
+      // Place it at the screen edge if no position is set
+      Y = pGrahics->Height() / 2;
+      X = pGrahics->Width();
+    }
+    mUi = new OutputNodeUi(NodeUiParam{
+      pGrahics,
+      PNGGENERICBG_FN,
+      &X, &Y,
+      &parameters,
+      &inSockets,
+      &outSockets,
+      this
+    });
+    pGrahics->AttachControl(mUi);
+    mUi->setUp();
+    uiReady = true;
   }
 };

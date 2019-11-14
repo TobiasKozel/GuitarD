@@ -30,26 +30,14 @@ public:
     }
   }
 
-  void OnMouseUp(float x, float y, const IMouseMod& mod) override {
-    if (mDragging) {
-      mDragging = false;
-      return;
-    }
-  }
-
   void Draw(IGraphics& g) override {
-    g.DrawBitmap(mBitmap, mRECT, 1, &mBlend);
+    NodeUi::Draw(g);
     mInfo = "Blocksize: " + to_string(mParentNode->mLastBlockSize) + " Sample-Rate: " + to_string(mParentNode->samplerate);
     g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
     if (mEnableTuner) {
       // g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
       // mDirty = true;
     }
-  }
-
-  void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
-    mDragging = true;
-    translate(dX, dY);
   }
 };
 
@@ -73,6 +61,10 @@ public:
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+    if (X == Y && X == 0) {
+      // Place it at the screen edge if no position is set
+      Y = pGrahics->Height() / 2;
+    }
     mUi = new InputNodeUi(NodeUiParam {
       pGrahics,
       PNGGENERICBG_FN,
