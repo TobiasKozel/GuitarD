@@ -1,5 +1,4 @@
 #pragma once
-#include <omp.h>
 #include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
 #include "resample.h"
 #include "config.h"
@@ -9,6 +8,10 @@
 
 // #define useThreadPool
 // #define useOpenMP
+
+#ifdef useOpenMP
+#include <omp.h>
+#endif
 
 class FileBrowser : public IDirBrowseControlBase
 {
