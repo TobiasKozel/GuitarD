@@ -28,9 +28,12 @@
 #define PLUG_HAS_UI 1
 #define PLUG_WIDTH 900
 #define PLUG_HEIGHT 550
-#define PLUG_MAX_WIDTH 2400
-#define PLUG_MAX_HEIGHT 1400
-#define PLUG_FPS 90
+#define PLUG_MAX_WIDTH 4000
+#define PLUG_MAX_HEIGHT 4000
+#define PLUG_MIN_WIDTH 100
+#define PLUG_MIN_HEIGHT 100
+
+#define PLUG_FPS 60
 #define PLUG_SHARED_RESOURCES 0
 
 #define AUV2_ENTRY GuitarD_Entry

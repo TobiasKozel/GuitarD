@@ -20,6 +20,8 @@ public:
     offsetX = offsetY = 0;
     mColorBackground = IColor(255, COLORBACKGROUND);
     mColorBackgroundDetail = IColor(255, COLORBACKGROUNDDETAIL);
+    storeSize();
+    triggeredScale = false;
   }
 
   /**
@@ -61,16 +63,25 @@ public:
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
     // TODOG sucks hard, at least some kind of scaling
     float newScale = mScale + d / 20.f;
-    if (newScale > 0.3 && newScale < 2) {
-      float w = mGraphics->Width();
-      float h = mGraphics->Height();
-      
-      w = round((w * mScale) / newScale);
-      h = round((h * mScale) / newScale);
+    float w = lastWidth;
+    float h = lastHeight;
+    if (newScale > 0.45 && newScale < 2) {
+      if (w / newScale >= PLUG_MAX_WIDTH && h / newScale >= PLUG_MAX_HEIGHT) {
+        return;
+      }
+      if (w / newScale <= PLUG_MIN_WIDTH && h / newScale <= PLUG_MIN_HEIGHT) {
+        return;
+      }
+
+      lastWidth = ((w * mScale) / newScale);
+      lastHeight = ((h * mScale) / newScale);
 
       float dX = ((x * mScale) / newScale) - x;
       float dY = ((y * mScale) / newScale) - y;
-      mGraphics->Resize(w, h, newScale);
+
+
+      triggeredScale = true;
+      mGraphics->Resize(ceil(lastWidth), ceil(lastHeight), newScale);
       translate(dX, dY);
       mScale = newScale;
     }
@@ -78,6 +89,10 @@ public:
 
   void OnResize() override {
     if (mGraphics != nullptr) {
+      if (!triggeredScale) {
+        storeSize();
+      }
+      triggeredScale = false;
       IRECT bounds = mGraphics->GetBounds();
       mRECT = bounds;
       mTargetRECT = bounds;
@@ -93,11 +108,19 @@ protected:
     mCallback(dX, dY, 1.f);
   }
 
+  void storeSize() {
+    lastHeight = mGraphics->Height();
+    lastWidth = mGraphics->Width();
+  }
+
   IGraphics* mGraphics;
   float mX;
   float mY;
   float offsetX;
   float offsetY;
+  float lastWidth;
+  float lastHeight;
+  bool triggeredScale;
   IColor mColorBackground;
   IColor mColorBackgroundDetail;
   BackgroundMoveCallback mCallback;
