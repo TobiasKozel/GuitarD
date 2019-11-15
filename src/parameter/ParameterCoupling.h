@@ -32,6 +32,9 @@ struct ParameterCoupling {
   // This value is only used for params which coudln't claim a DAW parameter
   double baseValue;
 
+  double mAdd;
+  double mMul;
+
   // Bounds and so on 
   double min;
   double max;
@@ -54,6 +57,7 @@ struct ParameterCoupling {
     double p_default = 0.5, double p_min = 0, double p_max = 1, double p_stepSize = 0.01, Type p_type = Auto) {
     value = p_proprety;
     defaultVal = p_default;
+    baseValue = p_default;
     min = p_min;
     max = p_max;
     stepSize = p_stepSize;
@@ -61,7 +65,7 @@ struct ParameterCoupling {
     parameterIdx = iplug::kNoParameter;
     parameter = nullptr;
     control = nullptr;
-    baseValue = automation = 0;
+    automation = 0;
     x = y = 0;
     asset = nullptr;
     w = h = 60;
@@ -70,6 +74,11 @@ struct ParameterCoupling {
     if (p_type == Auto) {
       if (max == 20000) {
         type = Frequency;
+        if (min <= 0.) {
+          min = 0.00000001;
+        }
+        mAdd = std::log(min);
+        mMul = std::log(max / min);
       }
       else if (min == 0 && max == 1 && stepSize == 1) {
         type = Boolean;
@@ -97,8 +106,12 @@ struct ParameterCoupling {
       *value = parameter->Value() + automation;
     }
     else {
-      // maybe handle nonlinear scalings base don type here
-      *value = baseValue + automation;
+      if (type == Frequency) {
+        *value = std::exp(mAdd + ((baseValue - min) / max) * mMul) + automation;
+      }
+      else {
+        *value = baseValue + automation;
+      }
     }
   }
 };

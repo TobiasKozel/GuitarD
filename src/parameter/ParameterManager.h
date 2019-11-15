@@ -83,11 +83,6 @@ public:
       case ParameterCoupling::Boolean:
         couple->parameter->InitBool(couple->name, couple->defaultVal == 1.0);
         break;
-      case ParameterCoupling::Linear:
-        couple->parameter->InitDouble(
-          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
-        );
-        break;
       case ParameterCoupling::Frequency:
         couple->parameter->InitFrequency(
           couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
@@ -103,7 +98,11 @@ public:
           couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
         );
         break;
+      case ParameterCoupling::Linear:
       default:
+        couple->parameter->InitDouble(
+          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+        );
         break;
       }
       // TODO These seem to be leaking and also don't force vsts to update the names

@@ -171,7 +171,7 @@ public:
             // TODOG Add a label and handle nonlinear scalings according to the type
             couple->baseValue =
               (pCaller->GetValue() * (couple->max - couple->min)) + couple->min;
-          }
+          }, couple->name, DEFAULT_STYLE, true, true
         );
       }
       couple->control->SetValue(
