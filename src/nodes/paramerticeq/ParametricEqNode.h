@@ -16,23 +16,37 @@ public:
     }
   }
 
+#define scaleLog(v, lw) log10(v * (100 / lw)) * lw - lw - 30
+#define drawGuide(cr, cg, cb, v) g.DrawLine(IColor(255, cr, cg, cb), x + v, y - 100, x + v, y + 100)
+  void DrawDebug(IGraphics& g, float x, float y, float w) {
+    float logW = w / 3.f;
+    float lowPassF = scaleLog(*(mParamsByName.at("lowF")->value), logW);
+    drawGuide(255, 0, 0, lowPassF);
+    float highPassF = scaleLog(*(mParamsByName.at("highF")->value), logW);
+    drawGuide(0, 0, 255, highPassF);
+
+    float f1 = scaleLog(*(mParamsByName.at("f1")->value), logW);
+    drawGuide(0, 255, 0, f1);
+    float f2 = scaleLog(*(mParamsByName.at("f2")->value), logW);
+    drawGuide(255, 0, 255, f2);
+  }
+
 #define STEPSIZE 8
   void Draw(IGraphics& g) override {
     NodeUi::Draw(g);
     float x = mRECT.L;
     int i = 0;
     float y = mRECT.T + mRECT.H() / 2.f;
-    float width = mRECT.W();
-    float logW = width / 3.f;
-    // g.DrawLine(IColor(255, 255, 0, 0), x, y - 10 * *(mParamsByName.at("lowF")->value), x + 60, y);
-    float lowPassF = log10(*(mParamsByName.at("lowF")->value) * (100 / logW)) * logW - logW - 30;
-    g.DrawLine(IColor(255, 255, 0, 0), x + lowPassF, y - 100, x + lowPassF, y + 100);
-    //while (x < mRECT.R) {
-    //  g.DrawLine(IColor(255, 255, 0, 0), x, y - 100, x, y + 100);
-    //  x += STEPSIZE;
-    //  i++;
-    //}
+    float w = mRECT.W();
+    DrawDebug(g, x, y, w);
+    float logW = w / 3.f;
 
+    while (x < mRECT.R) {
+      float offset = 0;
+      g.DrawLine(IColor(255, 255, 0, 0), x, y + offset, x + STEPSIZE, y + offset);
+      x += STEPSIZE;
+      i++;
+    }
     // DEBUG this only needs to be set dirty when the mouse moves
     mDirty = true;
   }

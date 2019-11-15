@@ -10,11 +10,11 @@ highf = vslider("highF", minf, minf, maxf, 1) : si.smooth(0.999);
 highq = vslider("highQ", 1, 0.1, 5, 0.1) : si.smooth(0.999);
 
 peak1 = vslider("peak1", 0, minb, maxb, 1) : si.smooth(0.999);
-f1 = vslider("f1", 400, minf, maxf, 1) : si.smooth(0.999);
+f1 = vslider("f1", 300, minf, maxf, 1) : si.smooth(0.999);
 q1 = vslider("q1", 300, 0, maxq, 1) : si.smooth(0.999);
 
 peak2 = vslider("peak2", 0, minb, maxb, 0.1) : si.smooth(0.999);
-f2 = ba.lin2LogGain(vslider("f2", 0.5, 0, 1, 0.01)) * maxf + 20 : si.smooth(0.999);
+f2 = vslider("f2", 3000, minf, maxf, 1) : si.smooth(0.999);
 q2 = vslider("q2", 500, 0, maxq, 1) : si.smooth(0.999);
 
 lowf = vslider("lowF", maxf, minf, maxf, 1) : si.smooth(0.999);
