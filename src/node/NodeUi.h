@@ -169,7 +169,7 @@ public:
         couple->control = new IVKnobControl(
           controlPos, [couple](IControl* pCaller) {
             // TODOG Add a label and handle nonlinear scalings according to the type
-            *(couple->value) =
+            couple->baseValue =
               (pCaller->GetValue() * (couple->max - couple->min)) + couple->min;
           }
         );

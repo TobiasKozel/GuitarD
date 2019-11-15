@@ -5,6 +5,8 @@
 /**
  * Struct/Class used to pair up a daw IParam if one is available and always a IControl + dsp parameter to be altered
  * Also contains the value bounds, stepsize, name and IParam index
+ * A ParameterCoupling can also exist wihtout a IParam which basically allows an unlimited
+ * amount of IControls
  */
 struct ParameterCoupling {
   enum Type {
@@ -27,6 +29,8 @@ struct ParameterCoupling {
 
   // this will be added on top of the actual value to allow internal automation eventually
   double automation;
+  // This value is only used for params which coudln't claim a DAW parameter
+  double baseValue;
 
   // Bounds and so on 
   double min;
@@ -57,7 +61,7 @@ struct ParameterCoupling {
     parameterIdx = iplug::kNoParameter;
     parameter = nullptr;
     control = nullptr;
-    automation = 0;
+    baseValue = automation = 0;
     x = y = 0;
     asset = nullptr;
     w = h = 60;
@@ -83,7 +87,6 @@ struct ParameterCoupling {
     else {
       type = p_type;
     }
-    
   }
 
   /**
@@ -94,7 +97,8 @@ struct ParameterCoupling {
       *value = parameter->Value() + automation;
     }
     else {
-      // this is a bit akward
+      // maybe handle nonlinear scalings base don type here
+      *value = baseValue + automation;
     }
   }
 };
