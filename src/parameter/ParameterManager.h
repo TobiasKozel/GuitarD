@@ -78,20 +78,38 @@ public:
       parametersLeft--;
       parametersClaimed[i] = true;
       couple->parameter = parameters[i];
-      if (couple->stepSize == couple->max == 1.0 && couple->min == 0.0) {
-        couple->parameter->InitBool(
-          couple->name, couple->defaultVal == 1.0
-        );
-      }
-      else {
+      switch (couple->type)
+      {
+      case ParameterCoupling::Boolean:
+        couple->parameter->InitBool(couple->name, couple->defaultVal == 1.0);
+        break;
+      case ParameterCoupling::Linear:
         couple->parameter->InitDouble(
           couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
         );
+        break;
+      case ParameterCoupling::Frequency:
+        couple->parameter->InitFrequency(
+          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+        );
+        break;
+      case ParameterCoupling::Gain:
+        couple->parameter->InitGain(
+          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+        );
+        break;
+      case ParameterCoupling::Percentage:
+        couple->parameter->InitPercentage(
+          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+        );
+        break;
+      default:
+        break;
       }
       // TODO These seem to be leaking and also don't force vsts to update the names
       // works for AU though
-      couple->parameter->SetLabel(couple->name);
-      couple->parameter->SetDisplayText(1, couple->name);
+      //couple->parameter->SetLabel(couple->name);
+      //couple->parameter->SetDisplayText(1, couple->name);
       couple->parameterIdx = i;
       couple->parameter->Set(*(couple->value));
       WDBGMSG("Claimed param %i\n", i);

@@ -1,11 +1,23 @@
 #pragma once
 #include "IPlugParameter.h"
 
+
 /**
  * Struct/Class used to pair up a daw IParam if one is available and always a IControl + dsp parameter to be altered
  * Also contains the value bounds, stepsize, name and IParam index
  */
 struct ParameterCoupling {
+  enum Type {
+    Auto,
+    Linear,
+    Boolean,
+    Frequency,
+    Gain,
+    Seconds,
+    Miliseconds,
+    Percentage
+  };
+  Type type;
   // Param object for outside daw automation
   iplug::IParam* parameter;
   // Index of the Param
@@ -35,7 +47,7 @@ struct ParameterCoupling {
   const char* asset;
 
   ParameterCoupling(const char* p_name = nullptr, double* p_proprety = nullptr,
-    double p_default = 0.5, double p_min = 0, double p_max = 1, double p_stepSize = 0.01) {
+    double p_default = 0.5, double p_min = 0, double p_max = 1, double p_stepSize = 0.01, Type p_type = Auto) {
     value = p_proprety;
     defaultVal = p_default;
     min = p_min;
@@ -49,6 +61,29 @@ struct ParameterCoupling {
     x = y = 0;
     asset = nullptr;
     w = h = 60;
+
+    // Do some assumptions for the correct type
+    if (p_type == Auto) {
+      if (max == 20000) {
+        type = Frequency;
+      }
+      else if (min == 0 && max == 1 && stepSize == 1) {
+        type = Boolean;
+      }
+      else if (max >= 0 && min > -130 && min < -40) {
+        type = Gain;
+      }
+      else if (min == 0 && max == 100) {
+        type = Percentage;
+      }
+      else {
+        type = Linear;
+      }
+    }
+    else {
+      type = p_type;
+    }
+    
   }
 
   /**

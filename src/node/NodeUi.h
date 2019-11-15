@@ -16,6 +16,7 @@ struct NodeUiParam {
   float* X;
   float* Y;
   WDL_PtrList<ParameterCoupling>* pParameters;
+
   WDL_PtrList<NodeSocket>* inSockets;
   WDL_PtrList<NodeSocket>* outSockets;
   Node* node;
@@ -60,6 +61,15 @@ public:
     rect.T = *Y - h / 2;
     rect.B = *Y + h / 2;
     SetTargetAndDrawRECTs(rect);
+
+    for (int i = 0; i < mParameters->GetSize(); i++) {
+      /**
+       * Keep them around in a map for convenient use
+       * Only do this in the UI though
+       */
+      ParameterCoupling* p = mParameters->Get(i);
+      mParamsByName.insert(pair<const char*, ParameterCoupling*>(p->name, p));
+    }
 
     mNodeSpliceInEvent.subscribe(MessageBus::NodeSpliceIn, [&](NodeSpliceInPair pair) {
       if (mParentNode != pair.node) { return; }
@@ -158,6 +168,7 @@ public:
         // use the callback to get the value to the dsp, won't allow automation though
         couple->control = new IVKnobControl(
           controlPos, [couple](IControl* pCaller) {
+            // TODOG Add a label and handle nonlinear scalings according to the type
             *(couple->value) =
               (pCaller->GetValue() * (couple->max - couple->min)) + couple->min;
           }
@@ -287,6 +298,7 @@ private:
 protected:
   MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
   WDL_PtrList<ParameterCoupling>* mParameters;
+  map<const char*, ParameterCoupling*> mParamsByName;
   WDL_PtrList<NodeSocket>* mInSockets;
   WDL_PtrList<NodeSocket>* mOutSockets;
   WDL_PtrList<NodeSocketUi> mInSocketsUi;

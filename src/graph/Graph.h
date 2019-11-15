@@ -100,9 +100,8 @@ public:
   }
 
   void testadd() {
-    return;
-    Node* test = NodeList::createNode("SimpleCabNode");
-    addNode(test, inputNode, 0);
+    Node* test = NodeList::createNode("ParametricEqNode");
+    addNode(test, inputNode, 0, 500, 300);
     outputNode->connectInput(test->outSockets.Get(0));
   }
 

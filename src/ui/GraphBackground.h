@@ -61,7 +61,12 @@ public:
   }
 
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
-    // TODOG sucks hard, at least some kind of scaling
+    /**
+     * TODOG sucks hard, at least some kind of scaling
+     * We're essentially using the renderer to scale the graph (and everything else)
+     * This also changes the window size, so here's some counter scaling
+     * to keep it roughly the same. It does some resizeing because of rounding errors though.
+     */
     float newScale = mScale + d / 20.f;
     float w = lastWidth;
     float h = lastHeight;
