@@ -100,6 +100,7 @@ public:
   }
 
   void testadd() {
+    return;
     Node* test = NodeList::createNode("ParametricEqNode");
     addNode(test, inputNode, 0, 500, 300);
     outputNode->connectInput(test->outSockets.Get(0));
@@ -228,7 +229,8 @@ public:
   }
 
   /**
-   * Called via a callback from the background
+   * Called via a callback from the background to move around all the nodes
+   * creating the illusion of a viewport
    */
   void onViewPortChange(float dX = 0, float dY = 0, float scale = 1) {
     for (int i = 0; i < nodes.GetSize(); i++) {
@@ -300,7 +302,11 @@ public:
   }
 
   void serialize(nlohmann::json& json) {
-    /** TODO See if this crashes on garageband/logic without a mutex */
+    if (graphics != nullptr) {
+      width = graphics->Width();
+      height = graphics->Height();
+      scale = graphics->GetDrawScale();
+    }
     json["scale"] = scale;
     json["width"] = width;
     json["height"] = height;
