@@ -53,14 +53,7 @@ public:
     mParentNode = pParam.node;
     mColor = pParam.color;
 
-    float w = pParam.width;
-    float h = pParam.height;
-    IRECT rect;
-    rect.L = *X - w / 2;
-    rect.R = *X + w / 2;
-    rect.T = *Y - h / 2;
-    rect.B = *Y + h / 2;
-    SetTargetAndDrawRECTs(rect);
+    setUpDimensions(pParam.width, pParam.height);
 
     for (int i = 0; i < mParameters->GetSize(); i++) {
       /**
@@ -94,8 +87,18 @@ public:
   ~NodeUi() {
   }
 
+  virtual void setUpDimensions(float w, float h) {
+    IRECT rect;
+    rect.L = *X - w / 2;
+    rect.R = *X + w / 2;
+    rect.T = *Y - h / 2;
+    rect.B = *Y + h / 2;
+    SetTargetAndDrawRECTs(rect);
+    mRECT.Pad(NODESHADOWBOUNDS);
+  }
+
   virtual void setUpHeader() {
-    IRECT m = mRECT;
+    IRECT m = mTargetRECT;
     m.B = m.T + NODEHEADERSIZE;
 
     if (mHeader.hasByPass) {
@@ -233,14 +236,29 @@ public:
   }
 
   virtual void DrawHeader(IGraphics& g) {
-    g.FillRect(IColor(255, NODEHEADERCOLOR), IRECT(mRECT.L, mRECT.T, mRECT.R, mRECT.T + NODEHEADERSIZE));
+    g.FillRect(IColor(255, NODEHEADERCOLOR), IRECT(mTargetRECT.L, mTargetRECT.T, mTargetRECT.R, mTargetRECT.T + NODEHEADERSIZE));
+  }
+
+  virtual void DrawShadow(IGraphics& g) {
+    return;
+    if (!mRenderedShadow)
+    {
+      g.StartLayer(this, mRECT);
+      g.FillRoundRect(COLOR_BLACK, mTargetRECT.GetPadded(-1), NODESHADOWROUND);
+      mShadowLayer = g.EndLayer();
+      g.ApplyLayerDropShadow(mShadowLayer, IShadow(NODESHADOWCOLOR, NODESHADOWBLUR, NODESHADOWDIST, NODESHADOWDIST, 1.0, true));
+      mRenderedShadow = true;
+    }
+    g.DrawFittedLayer(mShadowLayer, mRECT, &mBlend);
   }
 
   virtual void Draw(IGraphics& g) override {
     // this will just draw the backround since all the controls are also registered
     // to the IGraphics class which will draw them
     // which means the rendering order is kinda hard to controll
-    g.FillRect(mColor, mRECT);
+    DrawShadow(g);
+    // g.FillRoundRect(mColor, mTargetRECT, NODESHADOWROUND);
+    g.FillRect(mColor, mTargetRECT);
     DrawHeader(g);
   }
 
@@ -279,6 +297,10 @@ public:
     mGraphics->SetAllControlsDirty();
   }
 
+  virtual void OnResize() override {
+    // mRenderedShadow = false;
+  }
+
   void setTranslation(float x, float y) {
     float dX = x - *X;
     float dY = y - *Y;
@@ -287,12 +309,18 @@ public:
 
 private:
   void moveControl(IControl* control, float x, float y) {
-    IRECT rect = control->GetRECT();
+    IRECT rect = control->GetTargetRECT();
     rect.T += y;
     rect.L += x;
     rect.B += y;
     rect.R += x;
-    control->SetTargetAndDrawRECTs(rect);
+    control->SetTargetRECT(rect);
+    rect = control->GetRECT();
+    rect.T += y;
+    rect.L += x;
+    rect.B += y;
+    rect.R += x;
+    control->SetRECT(rect);
   }
 
 protected:
@@ -306,6 +334,10 @@ protected:
   NodeUiHeader mHeader;
   WDL_PtrList<IControl> mElements;
   Node* mParentNode;
+
+  ILayerPtr mShadowLayer;
+  IBlend mBlend = { EBlend::Default, 1 };
+  bool mRenderedShadow = false;
 
   bool mDragging;
   float* X;

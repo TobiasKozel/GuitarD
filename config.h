@@ -31,7 +31,7 @@
 #define PLUG_MIN_WIDTH 100
 #define PLUG_MIN_HEIGHT 100
 
-#define PLUG_FPS 60
+#define PLUG_FPS 90
 #define PLUG_SHARED_RESOURCES 0
 
 #define AUV2_ENTRY GuitarD_Entry
@@ -60,6 +60,8 @@
 
 #define ROBOTO_FN "Roboto-Regular.ttf"
 #define ICON_FN "forkawesome-webfont.ttf"
+
+#define SVGBITTERBG_FN "bitter.svg"
 
 //#define PNGSTEREOSHAPERBG_FN "stereoshaper_bg.png"
 //#define PNGSIMPLECABBG_FN "simplecab_bg.png"

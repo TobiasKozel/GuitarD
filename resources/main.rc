@@ -150,7 +150,9 @@ END
 BEGIN
     "#include ""..\\config.h""\r\n"
     "ROBOTO_FN TTF ROBOTO_FN\r\n"
-    "ICON_FN TTF ICON_FN\0"
+    "ICON_FN TTF ICON_FN\r\n"
+    "SVGBITTERBG_FN SVG SVGBITTERBG_FN\r\n"
+    "\0"
 END
 
 #endif    // APSTUDIO_INVOKED
@@ -232,6 +234,8 @@ END
 #include "..\config.h"
 ROBOTO_FN TTF ROBOTO_FN
 ICON_FN TTF ICON_FN
+SVGBITTERBG_FN SVG SVGBITTERBG_FN
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

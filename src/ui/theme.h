@@ -1,4 +1,6 @@
+#pragma once
 #include "config.h"
+#include "IPlugStructs.h"
 
 #define DEBUGFONT iplug::igraphics::IText { 16, COLOR_BLACK, "Roboto-Regular", iplug::igraphics::EAlign::Center, iplug::igraphics::EVAlign::Middle, 0 }
 #define ICONFONT iplug::igraphics::IText {16.f, COLOR_WHITE, "ForkAwesome"}
@@ -46,3 +48,9 @@
 #define NODEHEADERDISCONNECTSIZE 20
 
 #define NODEHEADERREMOVERIGHT 6
+
+#define NODESHADOWDIST 2.f
+#define NODESHADOWBOUNDS 15.f
+#define NODESHADOWBLUR 15.f
+#define NODESHADOWROUND 15.f
+const iplug::igraphics::IColor NODESHADOWCOLOR(255, 0, 0, 0);
