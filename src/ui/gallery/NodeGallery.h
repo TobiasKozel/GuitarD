@@ -23,7 +23,6 @@ public:
     mGraphics = g;
     init();
     mIsOpen = false;
-    mDragging = false;
     OnResize();
     mOpenGalleryEvent.subscribe(mBus, MessageBus::OpenGallery, [&](bool open) {
       this->openGallery(open);
@@ -112,13 +111,11 @@ public:
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     scroll(dY);
-    if (dY < 2 && dX < 2) {
-      mDragging = true;
-    }
+    mDistanceDragged += abs(dX) + abs(dY);
   }
 
   void OnMouseUp(float x, float y, const IMouseMod& mod) {
-    if (mIsOpen && !mDragging) {
+    if (mIsOpen && mDistanceDragged < 4) {
       GalleryCategory* cat;
       for (int i = 0; i < mCategories.GetSize(); i++) {
         cat = mCategories.Get(i);
@@ -134,7 +131,7 @@ public:
     else {
       openGallery();
     }
-    mDragging = false;
+    mDistanceDragged = -1;
   }
 
 private:
@@ -172,7 +169,7 @@ private:
   IColor mBackgroundColor;
   IColor mAddSignColor;
   bool mIsOpen;
-  bool mDragging;
+  int mDistanceDragged = -1;
   float mPadding;
   IGraphics* mGraphics;
   WDL_PtrList<GalleryCategory> mCategories;
