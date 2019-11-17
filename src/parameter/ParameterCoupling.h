@@ -29,7 +29,7 @@ struct ParameterCoupling {
 
   // this will be added on top of the actual value to allow internal automation eventually
   double automation;
-  // This value is only used for params which coudln't claim a DAW parameter
+  // This value is only used for params which coudln't claim a DAW parameter to act as the one provided by the IParam
   double baseValue;
 
   double mAdd;
@@ -53,6 +53,9 @@ struct ParameterCoupling {
   // custom image or something, prolly doesn't belong here
   const char* asset;
 
+  bool showLable;
+  bool showValue;
+
   ParameterCoupling(const char* p_name = nullptr, double* p_proprety = nullptr,
     double p_default = 0.5, double p_min = 0, double p_max = 1, double p_stepSize = 0.01, Type p_type = Auto) {
     value = p_proprety;
@@ -69,6 +72,9 @@ struct ParameterCoupling {
     x = y = 0;
     asset = nullptr;
     w = h = 60;
+    showLable = true;
+    showValue = false;
+
 
     // Do some assumptions for the correct type
     if (p_type == Auto) {
@@ -98,6 +104,16 @@ struct ParameterCoupling {
     }
   }
 
+  void setPos(float pX, float pY, float size = -1, bool pShowLable = true, bool pShowValue = true) {
+    x = pX;
+    y = pY;
+    if (size > 0) {
+      w = h = size;
+    }
+    showLable = pShowLable;
+    showValue = pShowValue;
+  }
+
   /**
    * This should only be called from the audio thread since the value might tear on 32bit
    */
@@ -106,6 +122,7 @@ struct ParameterCoupling {
       *value = parameter->Value() + automation;
     }
     else {
+      // TODOG handle the other types here as well
       if (type == Frequency) {
         *value = std::exp(mAdd + ((baseValue - min) / max) * mMul) + automation;
       }

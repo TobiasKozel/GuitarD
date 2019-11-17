@@ -88,8 +88,9 @@ public:
 
 
       triggeredScale = true;
+
       mGraphics->Resize(ceil(lastWidth), ceil(lastHeight), newScale);
-      translate(dX, dY);
+      translate(dX, dY);  
       mScale = newScale;
     }
   }

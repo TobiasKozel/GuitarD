@@ -191,10 +191,10 @@ public:
         // use the callback to get the value to the dsp, won't allow automation though
         couple->control = new IVKnobControl(
           controlPos, [couple](IControl* pCaller) {
-            // TODOG Add a label and handle nonlinear scalings according to the type
-            couple->baseValue =
-              (pCaller->GetValue() * (couple->max - couple->min)) + couple->min;
-          }, couple->name, DEFAULT_STYLE, true, true
+          // TODOG Add a label and handle nonlinear scalings according to the type
+          couple->baseValue =
+            (pCaller->GetValue() * (couple->max - couple->min)) + couple->min;
+        }, couple->name, DEFAULT_STYLE, true, true
         );
       }
       couple->control->SetValue(
@@ -205,11 +205,13 @@ public:
       if (i == 0 && mHeader.hasByPass) { couple->control->Hide(true); }
 
       // optinally hide the lables etc
-      //IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);
-      //if (vcontrol != nullptr) {
-      //  vcontrol->SetShowLabel(false);
-      //  vcontrol->SetShowValue(false);
-      //}
+      if (!couple->showLable || !couple->showValue) {
+        IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);
+        if (vcontrol != nullptr) {
+          vcontrol->SetShowLabel(couple->showLable);
+          vcontrol->SetShowValue(couple->showValue);
+        }
+      }
 
     }
   }
@@ -288,7 +290,6 @@ public:
     }
     g.DrawFittedLayer(mCachedBgLayer, mRECT, &mBlend);
 #endif
-    mGraphics->SetAllControlsDirty();
   }
 
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
@@ -340,6 +341,9 @@ public:
     translate(dX, dY);
   }
 
+  map<const char*, ParameterCoupling*> mParamsByName;
+
+
 private:
   void moveControl(IControl* control, float x, float y) {
     IRECT rect = control->GetTargetRECT();
@@ -360,7 +364,6 @@ protected:
   MessageBus::Bus* mBus;
   MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
   WDL_PtrList<ParameterCoupling>* mParameters;
-  map<const char*, ParameterCoupling*> mParamsByName;
   WDL_PtrList<NodeSocket>* mInSockets;
   WDL_PtrList<NodeSocket>* mOutSockets;
   WDL_PtrList<NodeSocketUi> mInSocketsUi;

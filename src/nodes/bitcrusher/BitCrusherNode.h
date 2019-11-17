@@ -1,29 +1,27 @@
 #pragma once
 #include "BitCrusher.h"
-
-class BitCrusherNodeUi : public NodeUi {
-public:
-  BitCrusherNodeUi(NodeUiParam param) : NodeUi(param) {
-  }
-
-  ~BitCrusherNodeUi() {
-  }
-};
-
-
 class BitCrusherNode : public BitCrusher {
 public:
   BitCrusherNode(std::string pType) {
     type = pType;
   }
-
+#define BITTERW 250
+#define BITTERH 240
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    mUi = new BitCrusherNodeUi(NodeUiParam{
+    mUi = new NodeUi(NodeUiParam{
       mBus, pGrahics,
-      250, 240,
+      BITTERW, BITTERH,
       &X, &Y, &parameters, &inSockets, &outSockets, this
     });
     mUi->setSvg(SVGBITTERBG_FN);
+    float left1 = BITTERW * 0.26 - BITTERW / 2;
+    float left2 = BITTERW * 0.68 - BITTERW / 2;
+    float top1 = BITTERW * 0.35 - BITTERH / 2;
+    float top2 = BITTERW * 0.7 - BITTERH / 2;
+    float size = 60;
+    mUi->mParamsByName.at("Bits")->setPos(left1, top1, size, false);
+    mUi->mParamsByName.at("Downsampling Factor")->setPos(left2, top1, size, false);
+    mUi->mParamsByName.at("Mix")->setPos(left1, top2, size, false);
     pGrahics->AttachControl(mUi);
     mUi->setUp();
     uiReady = true;
