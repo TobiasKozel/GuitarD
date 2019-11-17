@@ -73,7 +73,7 @@ struct ParameterCoupling {
     asset = nullptr;
     w = h = 60;
     showLable = true;
-    showValue = false;
+    showValue = true;
 
 
     // Do some assumptions for the correct type

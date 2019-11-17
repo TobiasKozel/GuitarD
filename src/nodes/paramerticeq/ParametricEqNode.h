@@ -34,14 +34,14 @@ public:
 #define STEPSIZE 8
   void Draw(IGraphics& g) override {
     NodeUi::Draw(g);
-    float x = mRECT.L;
+    float x = mTargetRECT.L;
     int i = 0;
-    float y = mRECT.T + mRECT.H() / 2.f;
-    float w = mRECT.W();
+    float y = mTargetRECT.T + mTargetRECT.H() / 2.f;
+    float w = mTargetRECT.W();
     DrawDebug(g, x, y, w);
     float logW = w / 3.f;
 
-    while (x < mRECT.R) {
+    while (x < mTargetRECT.R) {
       float offset = 0;
       g.DrawLine(IColor(255, 255, 0, 0), x, y + offset, x + STEPSIZE, y + offset);
       x += STEPSIZE;
