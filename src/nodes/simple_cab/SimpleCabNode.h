@@ -266,16 +266,11 @@ public:
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     mUi = new SimpleCabNodeUi(NodeUiParam{
-      mBus,
-      pGrahics,
-      IColor(255, 150, 100, 100),
+      mBus, pGrahics,
       300, 300,
-      &X, &Y,
-      &parameters,
-      &inSockets,
-      &outSockets,
-      this
+      &X, &Y, &parameters, &inSockets, &outSockets, this
     });
+    mUi->setColor(IColor(255, 150, 100, 100));
     pGrahics->AttachControl(mUi);
     mUi->setUp();
     uiReady = true;

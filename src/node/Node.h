@@ -264,9 +264,10 @@ public:
   virtual void setupUi(iplug::igraphics::IGraphics* pGrahics) {
 
     mUi = new NodeUi(NodeUiParam {
-      mBus, pGrahics, IColor(255, 100, 100, 100), 300, 300, &X, &Y,
+      mBus, pGrahics, 300, 300, &X, &Y,
       &parameters, &inSockets, &outSockets, this
     });
+    mUi->setColor(IColor(255, 100, 100, 100));
     pGrahics->AttachControl(mUi);
     mUi->setUp();
     uiReady = true;

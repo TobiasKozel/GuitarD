@@ -11,7 +11,6 @@ class Node;
 struct NodeUiParam {
   MessageBus::Bus* pBus;
   iplug::igraphics::IGraphics* pGraphics;
-  IColor color;
   float width;
   float height;
   float* X;
@@ -53,7 +52,6 @@ public:
     mInSockets = pParam.inSockets;
     mOutSockets = pParam.outSockets;
     mParentNode = pParam.node;
-    mColor = pParam.color;
 
     setUpDimensions(pParam.width, pParam.height);
 
@@ -96,7 +94,23 @@ public:
     rect.T = *Y - h / 2;
     rect.B = *Y + h / 2;
     SetTargetAndDrawRECTs(rect);
+#ifdef NODESSHADOW
+    // The RECT needs to be bigger to allow the shadow
     mRECT.Pad(NODESHADOWBOUNDS);
+#endif
+    
+  }
+
+  virtual void setColor(IColor c) {
+    mSvgBg = false;
+    mColor = c;
+  }
+
+  virtual void setSvg(const char* path) {
+    bgSVG = mGraphics->LoadSVG(path);
+    if (bgSVG.IsValid()) {
+      mSvgBg = true;
+    }
   }
 
   virtual void setUpHeader() {
@@ -141,14 +155,18 @@ public:
 
   virtual void setUpSockets() {
     for (int i = 0; i < mInSockets->GetSize(); i++) {
-      NodeSocketUi* socket = new NodeSocketUi(mBus, mGraphics, mInSockets->Get(i), mRECT.L, mRECT.T + i * 50 + mRECT.H() * 0.5);
+      NodeSocketUi* socket = new NodeSocketUi(
+        mBus, mGraphics, mInSockets->Get(i), mTargetRECT.L, mTargetRECT.T + i * 50 + mTargetRECT.H() * 0.5
+      );
       mGraphics->AttachControl(socket);
       mInSocketsUi.Add(socket);
       mElements.Add(socket);
     }
 
     for (int i = 0; i < mOutSockets->GetSize(); i++) {
-      NodeSocketUi* socket = new NodeSocketUi(mBus, mGraphics, mOutSockets->Get(i), mRECT.R - 30, mRECT.T + i * 50 + mRECT.H() * 0.5);
+      NodeSocketUi* socket = new NodeSocketUi(
+        mBus, mGraphics, mOutSockets->Get(i), mTargetRECT.R - 30, mTargetRECT.T + i * 50 + mTargetRECT.H() * 0.5
+      );
       mGraphics->AttachControl(socket);
       mOutSocketsUi.Add(socket);
       mElements.Add(socket);
@@ -241,27 +259,37 @@ public:
     g.FillRect(IColor(255, NODEHEADERCOLOR), IRECT(mTargetRECT.L, mTargetRECT.T, mTargetRECT.R, mTargetRECT.T + NODEHEADERSIZE));
   }
 
-  virtual void DrawShadow(IGraphics& g) {
-    return;
-    if (!mRenderedShadow)
-    {
-      g.StartLayer(this, mRECT);
-      g.FillRoundRect(COLOR_BLACK, mTargetRECT.GetPadded(-1), NODESHADOWROUND);
-      mShadowLayer = g.EndLayer();
-      g.ApplyLayerDropShadow(mShadowLayer, IShadow(NODESHADOWCOLOR, NODESHADOWBLUR, NODESHADOWDIST, NODESHADOWDIST, 1.0, true));
-      mRenderedShadow = true;
+  virtual void DrawBg(IGraphics& g) {
+    if (mSvgBg) {
+      g.DrawSVG(bgSVG, mTargetRECT);
     }
-    g.DrawFittedLayer(mShadowLayer, mRECT, &mBlend);
+    else {
+#ifdef NODESROUNDEDCORNER
+      g.FillRoundRect(mColor, mTargetRECT, NODESHADOWROUND);
+#else
+      g.FillRect(mColor, mTargetRECT);
+#endif
+    }
   }
 
   virtual void Draw(IGraphics& g) override {
-    // this will just draw the backround since all the controls are also registered
-    // to the IGraphics class which will draw them
-    // which means the rendering order is kinda hard to controll
-    DrawShadow(g);
-    // g.FillRoundRect(mColor, mTargetRECT, NODESHADOWROUND);
-    g.FillRect(mColor, mTargetRECT);
-    DrawHeader(g);
+#if defined(NODESSHADOW) || defined (NODESCACHEBG)
+    if (!mBgIsCached) {
+      g.StartLayer(this, mRECT);
+#endif
+      // This part will always run
+      DrawBg(g);
+      DrawHeader(g);
+#if defined(NODESSHADOW) || defined(NODESCACHEBG)
+      mCachedBgLayer = g.EndLayer();
+#ifdef NODESSHADOW
+      g.ApplyLayerDropShadow(mCachedBgLayer, IShadow(NODESHADOWCOLOR, NODESHADOWBLUR, NODESHADOWDIST, NODESHADOWDIST, 1.0, true));
+#endif
+      mBgIsCached = true;
+    }
+    g.DrawFittedLayer(mCachedBgLayer, mRECT, &mBlend);
+#endif
+    mGraphics->SetAllControlsDirty();
   }
 
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
@@ -279,6 +307,7 @@ public:
   }
 
   virtual void translate(float dX, float dY) {
+    mNoScale = true;
     for (int i = 0; i < mElements.GetSize(); i++) {
       moveControl(mElements.Get(i), dX, dY);
     }
@@ -300,7 +329,10 @@ public:
   }
 
   virtual void OnResize() override {
-    // mRenderedShadow = false;
+    if (!mNoScale) {
+      mBgIsCached = false;
+    }
+    mNoScale  = false;
   }
 
   void setTranslation(float x, float y) {
@@ -334,18 +366,22 @@ protected:
   WDL_PtrList<NodeSocket>* mOutSockets;
   WDL_PtrList<NodeSocketUi> mInSocketsUi;
   WDL_PtrList<NodeSocketUi> mOutSocketsUi;
+
   NodeUiHeader mHeader;
   WDL_PtrList<IControl> mElements;
   Node* mParentNode;
 
-  ILayerPtr mShadowLayer;
+  ILayerPtr mCachedBgLayer;
+  bool mBgIsCached = false;
+  bool mSvgBg = false;
   IBlend mBlend = { EBlend::Default, 1 };
-  bool mRenderedShadow = false;
+  bool mNoScale = false;
 
   bool mDragging;
   float* X;
   float* Y;
   IColor mColor;
+  ISVG bgSVG = ISVG(nullptr);
   IGraphics* mGraphics;
   IText mIconFont;
 };

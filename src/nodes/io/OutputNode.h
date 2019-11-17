@@ -56,16 +56,11 @@ public:
       X = pGrahics->Width();
     }
     mUi = new OutputNodeUi(NodeUiParam{
-      mBus,
-      pGrahics,
-      IColor(255, 100, 150, 100),
+      mBus, pGrahics,
       250, 150,
-      &X, &Y,
-      &parameters,
-      &inSockets,
-      &outSockets,
-      this
+      &X, &Y, &parameters, &inSockets, &outSockets, this
     });
+    mUi->setColor(IColor(255, 100, 150, 100));
     pGrahics->AttachControl(mUi);
     mUi->setUp();
     uiReady = true;

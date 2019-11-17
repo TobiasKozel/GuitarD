@@ -64,16 +64,11 @@ public:
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     mUi = new ParametricEqNodeUi(NodeUiParam{
-      mBus,
-      pGrahics,
-      IColor(255, 100, 100, 150),
+      mBus, pGrahics,
       300, 250,
-      &X, &Y,
-      &parameters,
-      &inSockets,
-      &outSockets,
-      this
-      });
+      &X, &Y, &parameters, &inSockets, &outSockets, this
+    });
+    mUi->setColor(IColor(255, 100, 100, 150));
     pGrahics->AttachControl(mUi);
     mUi->setUp();
     uiReady = true;
