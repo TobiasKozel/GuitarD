@@ -31,6 +31,21 @@ namespace MessageBus {
     WDL_Mutex eventLock;
     int globalSubs = 0;
   public:
+    Bus() {}
+    ~Bus() {
+      /**
+       * If the destructor is called, the plugin was probably destroyed
+       * The bus is not responible for the lifetimes of it's subsriptions
+       * so just clean out all the references and call it a day
+       */
+    
+      for (int i = 0; i < TOTALEVENTS; i++) {
+        if (subscriptions[i].GetSize() > 0) {
+          subscriptions[i].Empty(false);
+        }
+      }
+      globalSubs = 0;
+    }
     template <class T>
     void fireEvent(EVENTID pEventId, T param) {
       if (subscriptions[pEventId].GetSize() == 0) {
@@ -58,9 +73,11 @@ namespace MessageBus {
     }
 
     void removeSubscriber(BaseSubscription* sub, EVENTID pEventId) {
-      WDL_MutexLock lock(&eventLock);
-      subscriptions[pEventId].DeletePtr(sub);
-      globalSubs--;
+      if (globalSubs > 0) {
+        WDL_MutexLock lock(&eventLock);
+        subscriptions[pEventId].DeletePtr(sub);
+        globalSubs--;
+      }
     }
   };
 
