@@ -102,14 +102,14 @@ public:
   }
 
   virtual void setColor(IColor c) {
-    mSvgBg = false;
+    mUseSvgBg = false;
     mColor = c;
   }
 
   virtual void setSvg(const char* path) {
-    bgSVG = mGraphics->LoadSVG(path);
-    if (bgSVG.IsValid()) {
-      mSvgBg = true;
+    mSvgBg = mGraphics->LoadSVG(path);
+    if (mSvgBg.IsValid()) {
+      mUseSvgBg = true;
     }
   }
 
@@ -252,7 +252,6 @@ public:
     }
     mGraphics->RemoveControl(mHeader.disconnect, true);
     mGraphics->RemoveControl(mHeader.remove, true);
-    
   }
 
   virtual void DrawHeader(IGraphics& g) {
@@ -260,8 +259,8 @@ public:
   }
 
   virtual void DrawBg(IGraphics& g) {
-    if (mSvgBg) {
-      g.DrawSVG(bgSVG, mTargetRECT);
+    if (mUseSvgBg) {
+      g.DrawSVG(mSvgBg, mTargetRECT);
     }
     else {
 #ifdef NODESROUNDEDCORNER
@@ -373,7 +372,7 @@ protected:
 
   ILayerPtr mCachedBgLayer;
   bool mBgIsCached = false;
-  bool mSvgBg = false;
+  bool mUseSvgBg = false;
   IBlend mBlend = { EBlend::Default, 1 };
   bool mNoScale = false;
 
@@ -381,7 +380,7 @@ protected:
   float* X;
   float* Y;
   IColor mColor;
-  ISVG bgSVG = ISVG(nullptr);
+  ISVG mSvgBg = ISVG(nullptr);
   IGraphics* mGraphics;
   IText mIconFont;
 };
