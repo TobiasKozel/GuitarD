@@ -9,10 +9,12 @@ using namespace igraphics;
 typedef std::function<void(float x, float y, float scale)> BackgroundMoveCallback;
 
 class GraphBackground : public IControl {
+  MessageBus::Bus* mBus;
 public:
-  GraphBackground(IGraphics* g, BackgroundMoveCallback pCallback) :
+  GraphBackground(MessageBus::Bus* pBus, IGraphics* g, BackgroundMoveCallback pCallback) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
+    mBus = pBus;
     mGraphics = g;
     mY = mX = 0;
     mCallback = pCallback;
@@ -56,7 +58,7 @@ public:
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
     if (mod.R || mod.L) {
-      MessageBus::fireEvent<bool>(MessageBus::OpenGallery, mod.R);
+      mBus->fireEvent<bool>(MessageBus::OpenGallery, mod.R);
     }
   }
 

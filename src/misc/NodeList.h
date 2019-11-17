@@ -18,6 +18,8 @@ namespace NodeList {
   }
 
   void registerNode(NodeInfo info) {
-    nodelist.insert(std::pair<std::string, NodeInfo>(info.name, info));
+    if (nodelist.find(info.name) == nodelist.end()) {
+      nodelist.insert(std::pair<std::string, NodeInfo>(info.name, info));
+    }
   }
 };

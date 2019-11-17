@@ -14,7 +14,7 @@ using namespace igraphics;
  * It also handles the splice in logic
  */
 class CableLayer : public IControl {
-
+  MessageBus::Bus* mBus;
   MessageBus::Subscription<Node*> mDisconnectAllEvent;
   MessageBus::Subscription<Coord2d> mNodeDraggedEvent;
   MessageBus::Subscription<Node*> mNodeDraggedEndEvent;
@@ -25,9 +25,10 @@ class CableLayer : public IControl {
   NodeSocket* mPreviewSocketPrev;
   NodeSocket* mPreviewSocket;
 public:
-  CableLayer(IGraphics* g, WDL_PtrList<Node>* pNodes, Node* pOutNode) :
+  CableLayer(MessageBus::Bus* pBus, IGraphics* g, WDL_PtrList<Node>* pNodes, Node* pOutNode) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
+    mBus = pBus;
     mPreviewSocket = nullptr;
     mPreviewSocketPrev = nullptr;
     mHighlightSocket = nullptr;
@@ -47,11 +48,11 @@ public:
 
     
     
-    mDisconnectAllEvent.subscribe(MessageBus::NodeDisconnectAll, [&](Node*) {
+    mDisconnectAllEvent.subscribe(mBus, MessageBus::NodeDisconnectAll, [&](Node*) {
       this->mDirty = true;
     });
 
-    mNodeDraggedEvent.subscribe(MessageBus::NodeDragged, [&](Coord2d pos) {
+    mNodeDraggedEvent.subscribe(mBus, MessageBus::NodeDragged, [&](Coord2d pos) {
       float socketRadius = SOCKETDIAMETER / 2;
       mHighlightSocket = nullptr;
       Node* curNode;
@@ -91,7 +92,7 @@ public:
       }
     });
 
-    mNodeDraggedEndEvent.subscribe(MessageBus::NodeDraggedEnd, [&](Node* node) {
+    mNodeDraggedEndEvent.subscribe(mBus, MessageBus::NodeDraggedEnd, [&](Node* node) {
       NodeSocket* target = mHighlightSocket;
       mHighlightSocket = nullptr;
       mDirty = true;
@@ -106,11 +107,11 @@ public:
             return;
           }
         }
-        MessageBus::fireEvent<NodeSpliceInPair>(MessageBus::NodeSpliceIn, NodeSpliceInPair{ node, target });
+        this->mBus->fireEvent<NodeSpliceInPair>(MessageBus::NodeSpliceIn, NodeSpliceInPair{ node, target });
       }
     });
 
-    mPreviewSocketEvent.subscribe(MessageBus::PreviewSocket, [&](NodeSocket* socket) {
+    mPreviewSocketEvent.subscribe(mBus, MessageBus::PreviewSocket, [&](NodeSocket* socket) {
       // TODO this is kinda shady and does not use the MessageBus::SocketConnect event
       NodeSocket* outSocket = this->mOutNode->inSockets.Get(0);
       if (outSocket->connectedTo == socket) { return; }
@@ -131,12 +132,12 @@ public:
       this->mDirty = true;
     });
 
-    onConnectionEvent.subscribe(MessageBus::SocketConnect, [&](SocketConnectRequest req) {
+    onConnectionEvent.subscribe(mBus, MessageBus::SocketConnect, [&](SocketConnectRequest req) {
       mPreviewSocket = nullptr;
       mPreviewSocketPrev = nullptr;
     });
 
-    mNodeDeleteEvent.subscribe(MessageBus::NodeDeleted, [&](Node* param) {
+    mNodeDeleteEvent.subscribe(mBus, MessageBus::NodeDeleted, [&](Node* param) {
       this->mPreviewSocketPrev = nullptr;
       this->mPreviewSocket = nullptr;
       this->mDirty = true;

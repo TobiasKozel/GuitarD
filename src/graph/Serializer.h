@@ -1,6 +1,5 @@
 #pragma once
 #include "thirdparty/json.hpp"
-#include "IGraphics.h"
 #include "src/node/Node.h"
 #include "src/misc/NodeList.h"
 #include "src/parameter/ParameterManager.h"
@@ -75,7 +74,7 @@ namespace serializer {
 
   void deserialize(
     nlohmann::json& serialized, WDL_PtrList<Node>& nodes, Node* output, Node* input, int sampleRate,
-    ParameterManager* paramManager, iplug::igraphics::IGraphics* graphics
+    ParameterManager* paramManager, MessageBus::Bus* pBus
   ) {
     
     output->connectInput(nullptr, 0);
@@ -100,7 +99,7 @@ namespace serializer {
       if (node == nullptr) { continue; }
       node->X = sNode["position"][0];
       node->Y = sNode["position"][1];
-      node->setup(sampleRate);
+      node->setup(pBus, sampleRate);
       if (expectedIndex != sNode["idx"]) {
         WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
       }
@@ -116,9 +115,6 @@ namespace serializer {
         }
       }
       paramManager->claimNode(node);
-      if (graphics != nullptr && graphics->WindowIsOpen()) {
-        node->setupUi(graphics);
-      }
       expectedIndex++;
     }
 

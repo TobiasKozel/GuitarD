@@ -43,9 +43,9 @@ public:
 
 class InputNode : public Node {
 public:
-  InputNode() : Node() {
+  InputNode(MessageBus::Bus* pBus) : Node() {
     mLastBlockSize = -1;
-    setup(48000, MAXBUFFER, 2, 0, 1);
+    setup(pBus, 48000, MAXBUFFER, 2, 0, 1);
   }
 
   void ProcessBlock(int) {}
@@ -66,6 +66,7 @@ public:
       Y = pGrahics->Height() / 2;
     }
     mUi = new InputNodeUi(NodeUiParam {
+      mBus,
       pGrahics,
       IColor(255, 100, 150, 100),
       250, 150,

@@ -476,7 +476,6 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="..\config\GuitarD-mac.xcconfig" />
-    <None Include="..\src\graph\GraphStats.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

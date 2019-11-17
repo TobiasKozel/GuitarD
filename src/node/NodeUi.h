@@ -9,6 +9,7 @@
 class Node;
 
 struct NodeUiParam {
+  MessageBus::Bus* pBus;
   iplug::igraphics::IGraphics* pGraphics;
   IColor color;
   float width;
@@ -46,6 +47,7 @@ public:
     mDragging = false;
     X = pParam.X;
     Y = pParam.Y;
+    mBus = pParam.pBus;
     mGraphics = pParam.pGraphics;
     mParameters = pParam.pParameters;
     mInSockets = pParam.inSockets;
@@ -64,7 +66,7 @@ public:
       mParamsByName.insert(pair<const char*, ParameterCoupling*>(p->name, p));
     }
 
-    mNodeSpliceInEvent.subscribe(MessageBus::NodeSpliceIn, [&](NodeSpliceInPair pair) {
+    mNodeSpliceInEvent.subscribe(mBus, MessageBus::NodeSpliceIn, [&](NodeSpliceInPair pair) {
       if (mParentNode != pair.node) { return; }
       /**
        * Splice in only works on nodes with at least one in and output
@@ -121,7 +123,7 @@ public:
       m.T + NODEHEADERDISCONNECTTOP, m.R - NODEHEADERDISCONNECTRIGHT,
       m.T + NODEHEADERDISCONNECTTOP + NODEHEADERDISCONNECTSIZE
     ), [&](IControl* pCaller) {
-      MessageBus::fireEvent<Node*>(MessageBus::NodeDisconnectAll, this->mParentNode);
+      mBus->fireEvent<Node*>(MessageBus::NodeDisconnectAll, this->mParentNode);
     });
     mElements.Add(mHeader.disconnect);
     mGraphics->AttachControl(mHeader.disconnect);
@@ -131,7 +133,7 @@ public:
       m.T + NODEHEADERDISCONNECTTOP, m.R - NODEHEADERREMOVERIGHT,
       m.T + NODEHEADERDISCONNECTTOP + NODEHEADERDISCONNECTSIZE
     ), [&](IControl* pCaller) {
-      MessageBus::fireEvent<Node*>(MessageBus::NodeDeleted, this->mParentNode);
+      mBus->fireEvent<Node*>(MessageBus::NodeDeleted, this->mParentNode);
     });
     mElements.Add(mHeader.remove);
     mGraphics->AttachControl(mHeader.remove);
@@ -139,14 +141,14 @@ public:
 
   virtual void setUpSockets() {
     for (int i = 0; i < mInSockets->GetSize(); i++) {
-      NodeSocketUi* socket = new NodeSocketUi(mGraphics, mInSockets->Get(i), mRECT.L, mRECT.T + i * 50 + mRECT.H() * 0.5);
+      NodeSocketUi* socket = new NodeSocketUi(mBus, mGraphics, mInSockets->Get(i), mRECT.L, mRECT.T + i * 50 + mRECT.H() * 0.5);
       mGraphics->AttachControl(socket);
       mInSocketsUi.Add(socket);
       mElements.Add(socket);
     }
 
     for (int i = 0; i < mOutSockets->GetSize(); i++) {
-      NodeSocketUi* socket = new NodeSocketUi(mGraphics, mOutSockets->Get(i), mRECT.R - 30, mRECT.T + i * 50 + mRECT.H() * 0.5);
+      NodeSocketUi* socket = new NodeSocketUi(mBus, mGraphics, mOutSockets->Get(i), mRECT.R - 30, mRECT.T + i * 50 + mRECT.H() * 0.5);
       mGraphics->AttachControl(socket);
       mOutSocketsUi.Add(socket);
       mElements.Add(socket);
@@ -265,14 +267,14 @@ public:
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
     if (mDragging) {
       mDragging = false;
-      MessageBus::fireEvent<Node*>(MessageBus::NodeDraggedEnd, mParentNode);
+      mBus->fireEvent<Node*>(MessageBus::NodeDraggedEnd, mParentNode);
       return;
     }
   }
 
   virtual void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     mDragging = true;
-    MessageBus::fireEvent<Coord2d>(MessageBus::NodeDragged, Coord2d {x, y});
+    mBus->fireEvent<Coord2d>(MessageBus::NodeDragged, Coord2d {x, y});
     translate(dX, dY);
   }
 
@@ -324,6 +326,7 @@ private:
   }
 
 protected:
+  MessageBus::Bus* mBus;
   MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
   WDL_PtrList<ParameterCoupling>* mParameters;
   map<const char*, ParameterCoupling*> mParamsByName;

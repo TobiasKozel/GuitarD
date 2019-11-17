@@ -64,6 +64,7 @@ public:
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     mUi = new ParametricEqNodeUi(NodeUiParam{
+      mBus,
       pGrahics,
       IColor(255, 100, 100, 150),
       300, 250,

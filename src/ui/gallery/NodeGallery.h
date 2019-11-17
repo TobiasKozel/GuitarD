@@ -4,17 +4,18 @@
 #include "src/misc/MessageBus.h"
 #include "NodeGalleryCategory.h"
 #include "src/ui/theme.h"
-#include "src/graph/GraphStats.h"
 
 using namespace iplug;
 using namespace igraphics;
 
 
 class NodeGallery : public IControl {
+  MessageBus::Bus* mBus;
 public:
-  NodeGallery(IGraphics* g) :
+  NodeGallery(MessageBus::Bus* pBus, IGraphics* g) :
     IControl(IRECT(), kNoParameter)
   {
+    mBus = pBus;
     mAccentColor = IColor(255, COLORACCENT);
     mBackgroundColor = IColor(255, GALLERYBACKGROUND);
     mAddSignColor = IColor(255, COLORBACKGROUND);
@@ -24,7 +25,7 @@ public:
     mIsOpen = false;
     mDragging = false;
     OnResize();
-    mOpenGalleryEvent.subscribe(MessageBus::OpenGallery, [&](bool open) {
+    mOpenGalleryEvent.subscribe(mBus, MessageBus::OpenGallery, [&](bool open) {
       this->openGallery(open);
     });
     avgExecutiontime = 0;
@@ -72,7 +73,7 @@ public:
         x1, y1, x1 + GALLERYADDSIGNWIDTH, y1 + GALLERYADDSIGNSIZE
       ));
       GraphStats* stats;
-      MessageBus::fireEvent<GraphStats**>(MessageBus::GetGraphStats, &stats);
+      mBus->fireEvent<GraphStats**>(MessageBus::GetGraphStats, &stats);
       avgExecutiontime = (59 * avgExecutiontime + stats->executionTime) / 60.0;
       string time = to_string(avgExecutiontime);
       g.DrawText(mStats, time.c_str(), mRECT);
@@ -124,7 +125,7 @@ public:
         if (cat->mRECT.Contains(IRECT(x, y, x, y))) {
           NodeList::NodeInfo* ret = cat->OnMouseDown(x, y, mod);
           if (ret != nullptr) {
-            MessageBus::fireEvent<NodeList::NodeInfo>(MessageBus::NodeAdd, *ret);
+            mBus->fireEvent<NodeList::NodeInfo>(MessageBus::NodeAdd, *ret);
           }
           mDirty = true;
         }

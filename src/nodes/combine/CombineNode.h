@@ -61,8 +61,8 @@ public:
     isProcessed = true;
   }
 
-  void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
-    Node::setup(p_samplerate, p_maxBuffer, 2, 2, 1);
+  void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
+    Node::setup(pBus, p_samplerate, p_maxBuffer, 2, 2, 1);
     ParameterCoupling* p = new ParameterCoupling(
       "PAN 1", &pan1, 0.0, -1.0, 1.0, 0.01
     );

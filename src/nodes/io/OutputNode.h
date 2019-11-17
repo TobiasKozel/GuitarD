@@ -11,8 +11,8 @@ public:
 
 class OutputNode : public Node {
 public:
-  OutputNode() : Node() {
-    setup(0, MAXBUFFER, 2, 1, 0);
+  OutputNode(MessageBus::Bus* pBus) : Node() {
+    setup(pBus, 0, MAXBUFFER, 2, 1, 0);
   }
 
   void ProcessBlock(int) {
@@ -56,6 +56,7 @@ public:
       X = pGrahics->Width();
     }
     mUi = new OutputNodeUi(NodeUiParam{
+      mBus,
       pGrahics,
       IColor(255, 100, 150, 100),
       250, 150,

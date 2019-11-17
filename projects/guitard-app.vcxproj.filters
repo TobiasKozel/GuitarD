@@ -540,9 +540,6 @@
     <None Include="..\config\GuitarD-win.props">
       <Filter>config</Filter>
     </None>
-    <None Include="..\src\graph\GraphStats.h">
-      <Filter>src\graph</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\resources\GuitarD.ico">

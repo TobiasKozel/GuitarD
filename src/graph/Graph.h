@@ -13,9 +13,9 @@
 #include "src/ui/CableLayer.h"
 #include "src/ui/gallery/NodeGallery.h"
 #include "src/misc/HistoryStack.h"
-#include "GraphStats.h"
 
 class Graph {
+  MessageBus::Bus* mBus;
   MessageBus::Subscription<Node*> mNodeDelSub;
   MessageBus::Subscription<NodeList::NodeInfo> mNodeAddEvent;
   MessageBus::Subscription<bool> mAwaitAudioMutexEvent;
@@ -50,7 +50,8 @@ public:
   ParameterManager paramManager;
 
 
-  Graph() {
+  Graph(MessageBus::Bus* pBus) : paramManager(pBus) {
+    mBus = pBus;
     graphics = nullptr;
     background = nullptr;
     nodeGallery = nullptr;
@@ -62,31 +63,31 @@ public:
     sampleRate = 44101;
     channelCount = 2;
 
-    inputNode = new InputNode();
-    outputNode = new OutputNode();
+    inputNode = new InputNode(mBus);
+    outputNode = new OutputNode(mBus);
     outputNode->connectInput(inputNode->outSockets.Get(0));
 
     // output->connectInput(input->outSockets.Get(0));
-    mNodeDelSub.subscribe(MessageBus::NodeDeleted, [&](Node* param) {
-      MessageBus::fireEvent(MessageBus::PushUndoState, false);
+    mNodeDelSub.subscribe(mBus, MessageBus::NodeDeleted, [&](Node* param) {
+      mBus->fireEvent(MessageBus::PushUndoState, false);
       this->removeNode(param, true);
     });
-    mNodeAddEvent.subscribe(MessageBus::NodeAdd, [&](NodeList::NodeInfo info) {
-      MessageBus::fireEvent(MessageBus::PushUndoState, false);
+    mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](NodeList::NodeInfo info) {
+      mBus->fireEvent(MessageBus::PushUndoState, false);
       this->addNode(info.constructor(), nullptr, 0, 300, 300);
     });
 
     // This might not even make sense
-    mAwaitAudioMutexEvent.subscribe(MessageBus::AwaitAudioMutex, [&](bool) {
+    mAwaitAudioMutexEvent.subscribe(mBus, MessageBus::AwaitAudioMutex, [&](bool) {
       //WDL_MutexLock lock(&isProcessing);
     });
 
-    mPushUndoState.subscribe(MessageBus::PushUndoState, [&](bool) {
+    mPushUndoState.subscribe(mBus, MessageBus::PushUndoState, [&](bool) {
       WDBGMSG("PushState");
       this->serialize(*HistoryStack::PushState());
     });
 
-    mPopUndoState.subscribe(MessageBus::PopUndoState, [&](bool redo) {
+    mPopUndoState.subscribe(mBus, MessageBus::PopUndoState, [&](bool redo) {
       nlohmann::json* state = HistoryStack::PopState(redo);
       if (state != nullptr) {
         WDBGMSG("PopState");
@@ -94,7 +95,7 @@ public:
       }
     });
 
-    mReturnStats.subscribe(MessageBus::GetGraphStats, [&](GraphStats** stats) {
+    mReturnStats.subscribe(mBus, MessageBus::GetGraphStats, [&](GraphStats** stats) {
       *stats = &mStats;
     });
   }
@@ -169,13 +170,13 @@ public:
     
     graphics->SetKeyHandlerFunc([&](const IKeyPress & key, bool isUp) {
       if (key.C && key.VK == kVK_Z && !isUp) {
-        MessageBus::fireEvent<bool>(MessageBus::PopUndoState, false);
+        this->mBus->fireEvent<bool>(MessageBus::PopUndoState, false);
         return true;
       }
       return false;
     });
 
-    background = new GraphBackground(graphics, [&](float x, float y, float scale) {
+    background = new GraphBackground(mBus, graphics, [&](float x, float y, float scale) {
       this->onViewPortChange(x, y, scale);
     });
     graphics->AttachControl(background);
@@ -186,10 +187,10 @@ public:
     inputNode->setupUi(graphics);
     outputNode->setupUi(graphics);
 
-    cableLayer = new CableLayer(graphics, &nodes, outputNode);
+    cableLayer = new CableLayer(mBus, graphics, &nodes, outputNode);
     graphics->AttachControl(cableLayer);
 
-    nodeGallery = new NodeGallery(graphics);
+    nodeGallery = new NodeGallery(mBus, graphics);
     graphics->AttachControl(nodeGallery);
 
     scaleUi();
@@ -258,7 +259,7 @@ public:
     WDL_MutexLock lock(&isProcessing);
     node->X = x;
     node->Y = y;
-    node->setup(sampleRate);
+    node->setup(mBus, sampleRate);
     paramManager.claimNode(node);
     node->setupUi(graphics);
     if (pInput != nullptr) {
@@ -281,7 +282,7 @@ public:
       NodeSocket* prevSock = node->inSockets.Get(0);
       NodeSocket* nextSock = node->outSockets.Get(0);
       if (prevSock != nullptr && prevSock->connectedTo && nextSock != nullptr) {
-        MessageBus::fireEvent<SocketConnectRequest>(
+        mBus->fireEvent<SocketConnectRequest>(
           MessageBus::SocketRedirectConnection,
           SocketConnectRequest {
             nextSock,
@@ -320,9 +321,15 @@ public:
       height = json["height"];
     }
     WDL_MutexLock lock(&isProcessing);
-    serializer::deserialize(json, nodes, outputNode, inputNode, sampleRate, &paramManager, graphics);
-    sortRenderStack();
-    scaleUi();
+    serializer::deserialize(json, nodes, outputNode, inputNode, sampleRate, &paramManager, mBus);
+    if (graphics != nullptr && graphics->WindowIsOpen()) {
+      for (int i = 0; i < nodes.GetSize(); i++) {
+        nodes.Get(i)->setupUi(graphics);
+      }
+      sortRenderStack();
+      scaleUi();
+    }
+
   }
 
 private:

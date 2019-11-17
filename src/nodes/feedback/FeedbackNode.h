@@ -10,8 +10,8 @@ public:
     type = pType;
   }
 
-  void setup(int p_samplerate = 48000, int p_maxBuffer = MAXBUFFER, int p_channels = 2, int p_inputs = 1, int p_outputs = 1) {
-    Node::setup(p_samplerate, p_maxBuffer, p_channels, p_inputs, p_outputs);
+  void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAXBUFFER, int p_channels = 2, int p_inputs = 1, int p_outputs = 1) {
+    Node::setup(pBus, p_samplerate, p_maxBuffer, p_channels, p_inputs, p_outputs);
     ParameterCoupling* p = new ParameterCoupling("Gain", &gain, 0.0, 0.0, 3.0, 0.01);
     parameters.Add(p);
     prevBlock = new sample * [p_channels];

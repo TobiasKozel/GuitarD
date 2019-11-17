@@ -15,6 +15,7 @@
  */
 class Node {
 protected:
+  MessageBus::Bus* mBus;
   bool uiReady;
 public:
   std::string type;
@@ -57,8 +58,10 @@ public:
 
   /**
    * This is basically a delayed constructor with the only disadvatage: derived methods have to have the same parameters
+   * The derived class will call this with the desired paramters, except for the samplerate
    */
-  virtual void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
+  virtual void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAXBUFFER, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
+    mBus = pBus;
     samplerate = 0;
     channelCount = 0;
     maxBuffer = p_maxBuffer;
@@ -72,12 +75,12 @@ public:
 
     // Setup the sockets for the node connections
     for (int i = 0; i < inputCount; i++) {
-      NodeSocket* in = new NodeSocket(i, this);
+      NodeSocket* in = new NodeSocket(mBus, i, this);
       inSockets.Add(in);
     }
 
     for (int i = 0; i < outputCount; i++) {
-      NodeSocket* out = new NodeSocket(i, this, outputs[i]);
+      NodeSocket* out = new NodeSocket(mBus, i, this, outputs[i]);
       outSockets.Add(out);
     }
   }
@@ -261,7 +264,7 @@ public:
   virtual void setupUi(iplug::igraphics::IGraphics* pGrahics) {
 
     mUi = new NodeUi(NodeUiParam {
-      pGrahics, IColor(255, 100, 100, 100), 300, 300, &X, &Y,
+      mBus, pGrahics, IColor(255, 100, 100, 100), 300, 300, &X, &Y,
       &parameters, &inSockets, &outSockets, this
     });
     pGrahics->AttachControl(mUi);

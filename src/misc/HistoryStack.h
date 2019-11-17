@@ -6,6 +6,7 @@
 
 using namespace std;
 using namespace nlohmann;
+// TODOG make this instance specific so multiple plugins don't share the same undo stack
 namespace HistoryStack {
   json* states[MAXUNDOS] = { nullptr };
   int index = 0;

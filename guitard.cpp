@@ -6,14 +6,14 @@
 
 GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAMS, kNumPrograms)) {
   NodeList::registerNodes();
-  graph = new Graph();
+  graph = new Graph(&mBus);
 
   // Gather a good amount of parameters to expose to the daw based on what nodes are on the canvas
   for (int i = 0; i < MAXDAWPARAMS; i++) {
     graph->paramManager.addParameter(GetParam(i));
   }
 
-  mParamChanged.subscribe(MessageBus::ParametersChanged, [&](bool) {
+  mParamChanged.subscribe(&mBus, MessageBus::ParametersChanged, [&](bool) {
     this->InformHostOfParameterDetailsChange();
   });
 

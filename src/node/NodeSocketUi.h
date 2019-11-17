@@ -8,11 +8,6 @@
 using namespace iplug;
 using namespace igraphics;
 
-struct SocketConnectRequest {
-  NodeSocket* from;
-  NodeSocket* to;
-};
-
 class NodeSocketUi : public IControl {
   MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
   MessageBus::Subscription<SocketConnectRequest> onConnectionRedirectEvent;
@@ -21,9 +16,10 @@ class NodeSocketUi : public IControl {
   int vol;
   IMouseMod mMousDown;
 public:
-  NodeSocketUi(IGraphics* g, NodeSocket* socket, float x, float y) :
+  NodeSocketUi(MessageBus::Bus* pBus, IGraphics* g, NodeSocket* socket, float x, float y) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
   {
+    mBus = pBus;
     mSocket = socket;
     mDiameter = SOCKETDIAMETER;
     mRadius = mDiameter * 0.5f;
@@ -45,25 +41,25 @@ public:
     mSocket->X = mTargetRECT.L;
     mSocket->Y = mTargetRECT.T;
 
-    onConnectionEvent.subscribe(MessageBus::SocketConnect, [&](SocketConnectRequest req) {
+    onConnectionEvent.subscribe(mBus, MessageBus::SocketConnect, [&](SocketConnectRequest req) {
       if (req.to == this->mSocket) {
         this->mSocket->connect(req.from);
       }
     });
 
-    onConnectionRedirectEvent.subscribe(MessageBus::SocketRedirectConnection, [&](SocketConnectRequest req) {
+    onConnectionRedirectEvent.subscribe(mBus, MessageBus::SocketRedirectConnection, [&](SocketConnectRequest req) {
       if (req.from == this->mSocket->connectedTo) {
         this->mSocket->connect(req.to);
       }
     });
 
-    onDisconnectAllEvent.subscribe(MessageBus::NodeDisconnectAll, [&](Node* node) {
+    onDisconnectAllEvent.subscribe(mBus, MessageBus::NodeDisconnectAll, [&](Node* node) {
       if (this->mSocket->parentNode == node) {
         mSocket->disconnect();
       }
     });
 
-    onDisconnectEvent.subscribe(MessageBus::DisconnectSocket, [&](NodeSocket * socket) {
+    onDisconnectEvent.subscribe(mBus, MessageBus::DisconnectSocket, [&](NodeSocket * socket) {
       if (this->mSocket->connectedTo == socket && this->mSocket->isInput) {
         this->mSocket->disconnect();
       }
@@ -92,7 +88,7 @@ public:
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
     mMousDown = mod;
     if (mod.C) {
-      MessageBus::fireEvent<NodeSocket*>(MessageBus::PreviewSocket, mSocket);
+      mBus->fireEvent<NodeSocket*>(MessageBus::PreviewSocket, mSocket);
     }
     else {
       // HACK
@@ -123,7 +119,7 @@ public:
       NodeSocketUi* targetUi = dynamic_cast<NodeSocketUi*>(target);
       if (targetUi != nullptr) {
         NodeSocket* targetSocket = targetUi->mSocket;
-        MessageBus::fireEvent<SocketConnectRequest>(
+        mBus->fireEvent<SocketConnectRequest>(
           MessageBus::SocketConnect,
           SocketConnectRequest{
             mSocket,
@@ -153,6 +149,7 @@ public:
   }
 
 protected:
+  MessageBus::Bus* mBus;
   NodeSocket* mSocket;
   IBlend mBlend;
   IGraphics* mGraphics;

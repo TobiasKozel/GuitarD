@@ -31,6 +31,7 @@ public:
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     mUi = new BitCrusherNodeUi(NodeUiParam{
+      mBus,
       pGrahics,
       IColor(255, 100, 150, 100),
       250, 190,

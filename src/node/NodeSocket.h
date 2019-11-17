@@ -11,7 +11,8 @@ public:
    * (Nodes only have an output buffer)
    */
 
-  NodeSocket(int pIndex, Node* pNode) {
+  NodeSocket(MessageBus::Bus* pBus, int pIndex, Node* pNode) {
+    mBus = pBus;
     isInput = true;
     connectedTo = nullptr;
     parentNode = pNode;
@@ -26,7 +27,8 @@ public:
    * Constructor if it's a output socket, will need to know
    * the buffer since other sockets will read from it
    */
-  NodeSocket(int pIndex, Node* pNode, iplug::sample** pBuffer) {
+  NodeSocket(MessageBus::Bus* pBus, int pIndex, Node* pNode, iplug::sample** pBuffer) {
+    mBus = pBus;
     isInput = false;
     connectedTo = nullptr;
     parentNode = pNode;
@@ -42,19 +44,19 @@ public:
   }
 
   void disconnect() {
-    MessageBus::fireEvent<bool>(MessageBus::AwaitAudioMutex, false);
+    mBus->fireEvent<bool>(MessageBus::AwaitAudioMutex, false);
     if (isInput) {
       connectedNode = nullptr;
       connectedSocketIndex = -1;
       connectedTo = nullptr;
     }
     else {
-      MessageBus::fireEvent<NodeSocket*>(MessageBus::DisconnectSocket, this);
+      mBus->fireEvent<NodeSocket*>(MessageBus::DisconnectSocket, this);
     }
   }
 
   void connect(NodeSocket* to) {
-    MessageBus::fireEvent<bool>(MessageBus::AwaitAudioMutex, false);
+    mBus->fireEvent<bool>(MessageBus::AwaitAudioMutex, false);
     if (to->isInput == isInput) {
       WDBGMSG("Trying to connect an input to input / output to output!");
       return;
@@ -82,4 +84,5 @@ public:
 
   Node* connectedNode;
   int connectedSocketIndex;
+  MessageBus::Bus* mBus;
 };

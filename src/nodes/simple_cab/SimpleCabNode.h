@@ -107,8 +107,8 @@ public:
   }
 
   // TODOG FIX THIS MESS
-  void setup(int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
-    Node::setup(p_samplerate, p_maxBuffer, 2, 1, 1);
+  void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAXBUFFER, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
+    Node::setup(pBus, p_samplerate, p_maxBuffer, 2, 1, 1);
 
     mStereo = 0;
     addByPassParam();
@@ -266,6 +266,7 @@ public:
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     mUi = new SimpleCabNodeUi(NodeUiParam{
+      mBus,
       pGrahics,
       IColor(255, 150, 100, 100),
       300, 300,

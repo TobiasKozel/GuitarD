@@ -8,12 +8,14 @@
 #include "src/misc/MessageBus.h"
 
 class ParameterManager {
+  MessageBus::Bus* mBus;
   iplug::IParam* parameters[MAXDAWPARAMS];
   bool parametersClaimed[MAXDAWPARAMS];
   int parametersLeft;
 
 public:
-  ParameterManager() {
+  ParameterManager(MessageBus::Bus* pBus) {
+    mBus = pBus;
     parametersLeft = 0;
     for (int i = 0; i < MAXDAWPARAMS; i++) {
       parameters[i] = nullptr;
@@ -48,7 +50,7 @@ public:
         gotAllPamams = false;
       }
     }
-    MessageBus::fireEvent<bool>(MessageBus::ParametersChanged, false);
+    mBus->fireEvent<bool>(MessageBus::ParametersChanged, false);
     return gotAllPamams;
   }
 
@@ -124,7 +126,7 @@ public:
     for (int i = 0; i < node->parameters.GetSize(); i++) {
       releaseParameter(node->parameters.Get(i));
     }
-    MessageBus::fireEvent<bool>(MessageBus::ParametersChanged, false);
+    mBus->fireEvent<bool>(MessageBus::ParametersChanged, false);
   }
 
   void releaseParameter(ParameterCoupling* couple) {
