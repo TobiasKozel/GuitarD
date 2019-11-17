@@ -73,7 +73,7 @@ public:
         x1, y1, x1 + GALLERYADDSIGNWIDTH, y1 + GALLERYADDSIGNSIZE
       ));
       GraphStats* stats;
-      mBus->fireEvent<GraphStats**>(MessageBus::GetGraphStats, &stats);
+      MessageBus::fireEvent<GraphStats**>(mBus, MessageBus::GetGraphStats, &stats);
       avgExecutiontime = (59 * avgExecutiontime + stats->executionTime) / 60.0;
       string time = to_string(avgExecutiontime);
       g.DrawText(mStats, time.c_str(), mRECT);
@@ -125,7 +125,7 @@ public:
         if (cat->mRECT.Contains(IRECT(x, y, x, y))) {
           NodeList::NodeInfo* ret = cat->OnMouseDown(x, y, mod);
           if (ret != nullptr) {
-            mBus->fireEvent<NodeList::NodeInfo>(MessageBus::NodeAdd, *ret);
+            MessageBus::fireEvent<NodeList::NodeInfo>(mBus, MessageBus::NodeAdd, *ret);
           }
           mDirty = true;
         }

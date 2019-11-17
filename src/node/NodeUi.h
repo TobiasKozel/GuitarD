@@ -123,7 +123,7 @@ public:
       m.T + NODEHEADERDISCONNECTTOP, m.R - NODEHEADERDISCONNECTRIGHT,
       m.T + NODEHEADERDISCONNECTTOP + NODEHEADERDISCONNECTSIZE
     ), [&](IControl* pCaller) {
-      mBus->fireEvent<Node*>(MessageBus::NodeDisconnectAll, this->mParentNode);
+      MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDisconnectAll, this->mParentNode);
     });
     mElements.Add(mHeader.disconnect);
     mGraphics->AttachControl(mHeader.disconnect);
@@ -133,7 +133,7 @@ public:
       m.T + NODEHEADERDISCONNECTTOP, m.R - NODEHEADERREMOVERIGHT,
       m.T + NODEHEADERDISCONNECTTOP + NODEHEADERDISCONNECTSIZE
     ), [&](IControl* pCaller) {
-      mBus->fireEvent<Node*>(MessageBus::NodeDeleted, this->mParentNode);
+      MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDeleted, this->mParentNode);
     });
     mElements.Add(mHeader.remove);
     mGraphics->AttachControl(mHeader.remove);
@@ -267,14 +267,14 @@ public:
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
     if (mDragging) {
       mDragging = false;
-      mBus->fireEvent<Node*>(MessageBus::NodeDraggedEnd, mParentNode);
+      MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDraggedEnd, mParentNode);
       return;
     }
   }
 
   virtual void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     mDragging = true;
-    mBus->fireEvent<Coord2d>(MessageBus::NodeDragged, Coord2d {x, y});
+    MessageBus::fireEvent<Coord2d>(mBus, MessageBus::NodeDragged, Coord2d {x, y});
     translate(dX, dY);
   }
 

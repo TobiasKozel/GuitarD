@@ -88,7 +88,7 @@ public:
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
     mMousDown = mod;
     if (mod.C) {
-      mBus->fireEvent<NodeSocket*>(MessageBus::PreviewSocket, mSocket);
+      MessageBus::fireEvent<NodeSocket*>(mBus, MessageBus::PreviewSocket, mSocket);
     }
     else {
       // HACK
@@ -119,7 +119,8 @@ public:
       NodeSocketUi* targetUi = dynamic_cast<NodeSocketUi*>(target);
       if (targetUi != nullptr) {
         NodeSocket* targetSocket = targetUi->mSocket;
-        mBus->fireEvent<SocketConnectRequest>(
+        MessageBus::fireEvent<SocketConnectRequest>(
+          mBus,
           MessageBus::SocketConnect,
           SocketConnectRequest{
             mSocket,

@@ -25,7 +25,46 @@ namespace MessageBus {
 
   typedef WDL_PtrList<BaseSubscription> SubsVector;
 
-  class Bus;
+  // The bus object knows about all the subscribers and relays the events
+  class Bus {
+  public:
+    SubsVector subscriptions[TOTALEVENTS];
+    WDL_Mutex eventLock;
+    int globalSubs = 0;
+    Bus() {}
+    ~Bus() {
+      /**
+       * If the destructor is called, the plugin was probably destroyed
+       * The bus is not responible for the lifetimes of it's subsriptions
+       * so just clean out all the references and call it a day
+       */
+
+      for (int i = 0; i < TOTALEVENTS; i++) {
+        if (subscriptions[i].GetSize() > 0) {
+          subscriptions[i].Empty(false);
+        }
+      }
+      globalSubs = 0;
+    }
+
+    void addSubscriber(BaseSubscription* sub, EVENTID pEventId) {
+      WDL_MutexLock lock(&eventLock);
+      subscriptions[pEventId].Add(sub);
+      globalSubs++;
+      if (globalSubs > 1000) {
+        // This probably means there's a leak
+        WDBGMSG("Subcount %i\n", globalSubs);
+      }
+    }
+
+    void removeSubscriber(BaseSubscription* sub, EVENTID pEventId) {
+      if (globalSubs > 0) {
+        WDL_MutexLock lock(&eventLock);
+        subscriptions[pEventId].DeletePtr(sub);
+        globalSubs--;
+      }
+    }
+  };
 
   // Actual implementation based on the data type to pass over the Bus
   template <class T>
@@ -61,60 +100,19 @@ namespace MessageBus {
     }
   };
 
-  // The bus object knows about all the subscribers and relays the events
-  class Bus {
-    SubsVector subscriptions[TOTALEVENTS];
-    WDL_Mutex eventLock;
-    int globalSubs = 0;
-  public:
-    Bus() {}
-    ~Bus() {
-      /**
-       * If the destructor is called, the plugin was probably destroyed
-       * The bus is not responible for the lifetimes of it's subsriptions
-       * so just clean out all the references and call it a day
-       */
-
-      for (int i = 0; i < TOTALEVENTS; i++) {
-        if (subscriptions[i].GetSize() > 0) {
-          subscriptions[i].Empty(false);
-        }
-      }
-      globalSubs = 0;
+  template <class T>
+  void fireEvent(Bus* b, EVENTID pEventId, T param) {
+    if (b->subscriptions[pEventId].GetSize() == 0) {
+      WDBGMSG("Fired a event with not subscribers!\n");
+      return;
     }
-
-    template <class T>
-    void fireEvent(EVENTID pEventId, T param) {
-      if (subscriptions[pEventId].GetSize() == 0) {
-        WDBGMSG("Fired a event with not subscribers!\n");
-        return;
-      }
-      SubsVector& subs = subscriptions[pEventId];
-      WDL_MutexLock lock(&eventLock);
-      for (int i = 0; i < subs.GetSize(); i++) {
-        Subscription<T>* sub = dynamic_cast<Subscription<T>*>(subs.Get(i));
-        if (sub != nullptr) {
-          sub->mCallback(param);
-        }
+    SubsVector& subs = b->subscriptions[pEventId];
+    WDL_MutexLock lock(&b->eventLock);
+    for (int i = 0; i < subs.GetSize(); i++) {
+      Subscription<T>* sub = dynamic_cast<Subscription<T>*>(subs.Get(i));
+      if (sub != nullptr) {
+        sub->mCallback(param);
       }
     }
-
-    void addSubscriber(BaseSubscription* sub, EVENTID pEventId) {
-      WDL_MutexLock lock(&eventLock);
-      subscriptions[pEventId].Add(sub);
-      globalSubs++;
-      if (globalSubs > 1000) {
-        // This probably means there's a leak
-        WDBGMSG("Subcount %i\n", globalSubs);
-      }
-    }
-
-    void removeSubscriber(BaseSubscription* sub, EVENTID pEventId) {
-      if (globalSubs > 0) {
-        WDL_MutexLock lock(&eventLock);
-        subscriptions[pEventId].DeletePtr(sub);
-        globalSubs--;
-      }
-    }
-  };
+  }
 }

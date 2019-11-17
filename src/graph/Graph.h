@@ -69,11 +69,11 @@ public:
 
     // output->connectInput(input->outSockets.Get(0));
     mNodeDelSub.subscribe(mBus, MessageBus::NodeDeleted, [&](Node* param) {
-      mBus->fireEvent(MessageBus::PushUndoState, false);
+      MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
       this->removeNode(param, true);
     });
     mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](NodeList::NodeInfo info) {
-      mBus->fireEvent(MessageBus::PushUndoState, false);
+      MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
       this->addNode(info.constructor(), nullptr, 0, 300, 300);
     });
 
@@ -170,7 +170,7 @@ public:
     
     graphics->SetKeyHandlerFunc([&](const IKeyPress & key, bool isUp) {
       if (key.C && key.VK == kVK_Z && !isUp) {
-        this->mBus->fireEvent<bool>(MessageBus::PopUndoState, false);
+        MessageBus::fireEvent<bool>(this->mBus, MessageBus::PopUndoState, false);
         return true;
       }
       return false;
@@ -282,7 +282,8 @@ public:
       NodeSocket* prevSock = node->inSockets.Get(0);
       NodeSocket* nextSock = node->outSockets.Get(0);
       if (prevSock != nullptr && prevSock->connectedTo && nextSock != nullptr) {
-        mBus->fireEvent<SocketConnectRequest>(
+        MessageBus::fireEvent<SocketConnectRequest>(
+          mBus,
           MessageBus::SocketRedirectConnection,
           SocketConnectRequest {
             nextSock,

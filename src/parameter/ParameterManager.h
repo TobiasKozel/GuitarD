@@ -50,7 +50,7 @@ public:
         gotAllPamams = false;
       }
     }
-    mBus->fireEvent<bool>(MessageBus::ParametersChanged, false);
+    MessageBus::fireEvent<bool>(mBus, MessageBus::ParametersChanged, false);
     return gotAllPamams;
   }
 
@@ -126,7 +126,7 @@ public:
     for (int i = 0; i < node->parameters.GetSize(); i++) {
       releaseParameter(node->parameters.Get(i));
     }
-    mBus->fireEvent<bool>(MessageBus::ParametersChanged, false);
+    MessageBus::fireEvent<bool>(mBus, MessageBus::ParametersChanged, false);
   }
 
   void releaseParameter(ParameterCoupling* couple) {

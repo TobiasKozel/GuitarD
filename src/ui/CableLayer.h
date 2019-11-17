@@ -107,7 +107,7 @@ public:
             return;
           }
         }
-        this->mBus->fireEvent<NodeSpliceInPair>(MessageBus::NodeSpliceIn, NodeSpliceInPair{ node, target });
+        MessageBus::fireEvent<NodeSpliceInPair>(this->mBus, MessageBus::NodeSpliceIn, NodeSpliceInPair{ node, target });
       }
     });
 
