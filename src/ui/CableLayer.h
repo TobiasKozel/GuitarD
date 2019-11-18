@@ -21,32 +21,27 @@ class CableLayer : public IControl {
   MessageBus::Subscription<NodeSocket*> mPreviewSocketEvent;
   MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
   MessageBus::Subscription<Node*> mNodeDeleteEvent;
+  MessageBus::Subscription<ConnectionDragData*> mConnectionDragEvent;
 
   NodeSocket* mPreviewSocketPrev;
   NodeSocket* mPreviewSocket;
+
+  ConnectionDragData* mConnectionDragData;
 public:
-  CableLayer(MessageBus::Bus* pBus, IGraphics* g, WDL_PtrList<Node>* pNodes, Node* pOutNode) :
+  CableLayer(MessageBus::Bus* pBus, IGraphics* g, WDL_PtrList<Node>* pNodes, Node* pOutNode, Node* pInNode) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
     mBus = pBus;
     mPreviewSocket = nullptr;
     mPreviewSocketPrev = nullptr;
     mHighlightSocket = nullptr;
+    mConnectionDragData = nullptr;
     SetTargetRECT(IRECT(0, 0, 0, 0));
     mNodes = pNodes;
     mOutNode = pOutNode;
+    mInNode = pInNode;
     mGraphics = g;
     mBlend = EBlend::Clobber;
-    mColor.A = 255;
-    mColor.R = 255;
-
-    mColorHighlight.A = 255;
-    mColorHighlight.G = 255;
-
-    mColorPreview.A = 100;
-    mColorPreview.R = 255;
-
-    
     
     mDisconnectAllEvent.subscribe(mBus, MessageBus::NodeDisconnectAll, [&](Node*) {
       this->mDirty = true;
@@ -142,6 +137,23 @@ public:
       this->mPreviewSocket = nullptr;
       this->mDirty = true;
     });
+
+    mConnectionDragEvent.subscribe(mBus, MessageBus::ConnectionDragged, [&](ConnectionDragData* d) {
+      if (d->dragging) {
+        this->mConnectionDragData = d;
+        this->mDirty = true;
+      }
+      else {
+        this->mConnectionDragData = nullptr;
+      }
+    });
+  }
+
+  inline void DrawSocket(IGraphics& g, NodeSocket* s) {
+    float x = s->X + SOCKETRADIUS;
+    float y = s->Y + SOCKETRADIUS;
+    g.FillCircle(SOCKETCOLOR, x, y, SOCKETRADIUS * 0.5 * SOCKETOUTLINESIZE, &mBlend);
+    g.FillCircle(SOCKETCOLORINNER, x, y, SOCKETRADIUS * 0.4, &mBlend);
   }
 
   void Draw(IGraphics& g) override {
@@ -149,6 +161,7 @@ public:
     NodeSocket* curSock;
     NodeSocket* tarSock;
     float socketRadius = SOCKETDIAMETER / 2;
+    // Draw all the connections between nodes
     for (int n = 0; n < mNodes->GetSize() + 1; n++) {
       curNode = mNodes->Get(n);
       if (curNode == nullptr) {
@@ -162,32 +175,62 @@ public:
           if (tarSock == mPreviewSocket && curSock == mOutNode->inSockets.Get(0)) {
             // Draw the temporary bypass
             g.DrawDottedLine(
-              curSock == mHighlightSocket ? mColorHighlight : mColor,
+              curSock == mHighlightSocket ? CABLECOLORSPLICE : CABLECOLOR,
               curSock->X + socketRadius, curSock->Y + socketRadius,
               tarSock->X + socketRadius, tarSock->Y + socketRadius,
-              &mBlend, 5, 20
+              &mBlend, CABLETHICKNESS, CABLEPREVIEWDASHDIST
             );
             if (mPreviewSocketPrev != nullptr) {
               // draw the original connection slightly transparent
               g.DrawLine(
-                curSock == mHighlightSocket ? mColorHighlight : mColorPreview,
+                curSock == mHighlightSocket ? CABLECOLORSPLICE : CABLECOLORPREVIEW,
                 curSock->X + socketRadius, curSock->Y + socketRadius,
                 mPreviewSocketPrev->X + socketRadius, mPreviewSocketPrev->Y + socketRadius,
-                &mBlend, 5
+                &mBlend, CABLETHICKNESS
               );
             }
           }
           else {
             g.DrawLine(
-              curSock == mHighlightSocket ? mColorHighlight : mColor,
+              curSock == mHighlightSocket ? CABLECOLORSPLICE : CABLECOLOR,
               curSock->X + socketRadius, curSock->Y + socketRadius,
               tarSock->X + socketRadius, tarSock->Y + socketRadius,
-              &mBlend, 5
+              &mBlend, CABLETHICKNESS
             );
           }
         }
       }
     }
+
+    // Draw a new connection from the user to start socket;
+    if (mConnectionDragData != nullptr) {
+      g.DrawLine(
+        CABLECOLOR, mConnectionDragData->startX, mConnectionDragData->startY,
+        mConnectionDragData->currentX, mConnectionDragData->currentY, &mBlend, CABLETHICKNESS
+      );
+    }
+
+    // Draw all the sockets
+    for (int n = 0; n < mNodes->GetSize(); n++) {
+      curNode = mNodes->Get(n);
+      for (int i = 0; i < curNode->outputCount; i++) {
+        curSock = curNode->outSockets.Get(i);
+        if (curSock != nullptr) {
+          DrawSocket(g, curSock);
+        }
+      }
+      for (int i = 0; i < curNode->inputCount; i++) {
+        curSock = curNode->inSockets.Get(i);
+        if (curSock != nullptr) {
+          DrawSocket(g, curSock);
+        }
+      }
+    }
+    DrawSocket(g, mOutNode->inSockets.Get(0));
+    DrawSocket(g, mInNode->outSockets.Get(0));
+
+
+    
     // g.FillRect(COLOR_GRAY, mRECT);
   }
 
@@ -200,9 +243,7 @@ private:
   IGraphics* mGraphics;
   WDL_PtrList<Node>* mNodes;
   Node* mOutNode;
+  Node* mInNode;
   NodeSocket* mHighlightSocket;
-  IColor mColor;
-  IColor mColorPreview;
-  IColor mColorHighlight;
   IBlend mBlend;
 };

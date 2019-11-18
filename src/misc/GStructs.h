@@ -24,3 +24,11 @@ struct SocketConnectRequest {
   NodeSocket* from;
   NodeSocket* to;
 };
+
+struct ConnectionDragData {
+  bool dragging = false;
+  float startY;
+  float startX;
+  float currentY;
+  float currentX;
+};

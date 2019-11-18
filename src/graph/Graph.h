@@ -187,7 +187,7 @@ public:
     inputNode->setupUi(graphics);
     outputNode->setupUi(graphics);
 
-    cableLayer = new CableLayer(mBus, graphics, &nodes, outputNode);
+    cableLayer = new CableLayer(mBus, graphics, &nodes, outputNode, inputNode);
     graphics->AttachControl(cableLayer);
 
     nodeGallery = new NodeGallery(mBus, graphics);

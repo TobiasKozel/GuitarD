@@ -36,7 +36,6 @@
 
 
 /** Nodes */
-#define SOCKETDIAMETER 30
 #define NODEHEADERSIZE 20
 #define NODEHEADERCOLOR 30, 30, 30
 #define NODEHEADERBYPASSLEFT 6
@@ -57,3 +56,19 @@
 #define NODESHADOWBLUR 15.f
 #define NODESHADOWROUND 15.f
 const iplug::igraphics::IColor NODESHADOWCOLOR(255, 0, 0, 0);
+
+/** NODE SOCKETS */
+#define SOCKETDIAMETER 30
+#define SOCKETRADIUS SOCKETDIAMETER * 0.5
+#define SOCKETATIVESIZE SOCKETRADIUS * 0.7
+#define SOCKETOUTLINESIZE 1.1
+const iplug::igraphics::IColor SOCKETCOLOR(255, 40, 40, 40);
+const iplug::igraphics::IColor SOCKETCOLORINNER(255, 250, 250, 250);
+const iplug::igraphics::IColor SOCKETCOLORACITVE(255, 250, 150, 0);
+
+/**   CABLE LAYER */
+#define CABLETHICKNESS 5
+#define CABLEPREVIEWDASHDIST 20
+const iplug::igraphics::IColor CABLECOLOR(255, 40, 40, 40);
+const iplug::igraphics::IColor CABLECOLORSPLICE(255, 250, 150, 0);
+const iplug::igraphics::IColor CABLECOLORPREVIEW(150, 40, 40, 40);

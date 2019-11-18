@@ -22,7 +22,7 @@ public:
     mBus = pBus;
     mSocket = socket;
     mDiameter = SOCKETDIAMETER;
-    mRadius = mDiameter * 0.5f;
+    mRadius = SOCKETDIAMETER * 0.5f;
     mRECT.L = x;
     mRECT.T = y;
     mRECT.R = mRECT.L + mDiameter;
@@ -30,13 +30,6 @@ public:
     SetTargetAndDrawRECTs(mRECT);
     mBlend = EBlend::Clobber;
     mGraphics = g;
-    color.A = 255;
-    if (socket->isInput) {
-      color.R = 255;
-    }
-    else {
-      color.B = 255;
-    }
 
     mSocket->X = mTargetRECT.L;
     mSocket->Y = mTargetRECT.T;
@@ -67,20 +60,13 @@ public:
   }
 
   void Draw(IGraphics& g) override {
-    // g.DrawBitmap(mBitmap, GetRECT(), 1, &mBlend);
-    //double avg = 0;
-    //if (mSocket->buffer != nullptr) {
-    //  for (int i = 0; i < 64; i++) {
-    //    avg += abs(mSocket->buffer[0][i]);
-    //  }
-    //}
-    //vol = SkClampMax(avg * 50, 255);
-    //g.DrawCircle(IColor(255, vol, 0, 0), mTargetRECT.L + mRadius, mTargetRECT.T + mRadius, 4, &mBlend, 10);
-    //mDirty = true;
-
-    g.DrawCircle(color, mTargetRECT.L + mRadius, mTargetRECT.T + mRadius, mRadius, &mBlend, 10);
-    if (mDragging) {
-      g.DrawLine(color, mStartX, mStartY, mCurrentX, mCurrentY, &mBlend, 5);
+    // This doesn't do the actual drawing since it needs to stay on top of the
+    // layer stack. It's drawn in the cable layer and only a control to handle input
+    if (mDragData.dragging) {
+      // This is just a nice highlight around the socket beeing dragged
+      g.FillCircle(SOCKETCOLORACITVE, mDragData.startX,
+        mDragData.startY, SOCKETATIVESIZE, &mBlend
+      );
     }
   }
 
@@ -91,24 +77,22 @@ public:
       MessageBus::fireEvent<NodeSocket*>(mBus, MessageBus::PreviewSocket, mSocket);
     }
     else {
-      // HACK
-      // this will mean the control is attached twice once on top of the drawing stack
-      mGraphics->AttachControl(this);
       auto center = mRECT;
       center.ScaleAboutCentre(0);
-      mStartX = center.L;
-      mStartY = center.T;
+      mDragData.startX = center.L;
+      mDragData.startY = center.T;
     }
   }
 
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
-    mDragging = false;
+    mDragData.dragging = false;
+    MessageBus::fireEvent<ConnectionDragData*>(
+      mBus, MessageBus::ConnectionDragged, &mDragData
+    );
     if (mMousDown.C) {
       mMousDown = IMouseMod();
       return;
     }
-    // this will get rid of the top most duplicate
-    mGraphics->RemoveControl(this);
 
     SetRECT(mTargetRECT);
     mGraphics->SetAllControlsDirty();
@@ -134,11 +118,15 @@ public:
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     if (mMousDown.C) { return; }
-    SetRECT(mGraphics->GetBounds());
-    mDragging = true;
-    mCurrentX = x;
-    mCurrentY = y;
-    mGraphics->SetAllControlsDirty();
+    if (!mDragData.dragging) {
+      SetRECT(mGraphics->GetBounds());
+      mDragData.dragging = true;
+    }
+    mDragData.currentX = x;
+    mDragData.currentY = y;
+    MessageBus::fireEvent<ConnectionDragData*>(
+      mBus, MessageBus::ConnectionDragged, &mDragData
+    );
   }
 
   /**
@@ -150,21 +138,13 @@ public:
   }
 
 protected:
+  ConnectionDragData mDragData;
   MessageBus::Bus* mBus;
   NodeSocket* mSocket;
   IBlend mBlend;
   IGraphics* mGraphics;
-  IColor color;
   float mDiameter;
   float mRadius;
   int mIndex;
   bool mOut;
-  bool mDragging;
-
-  // This is used to draw a temporary line when trying to connect a node
-  float mStartX;
-  float mStartY;
-  float mCurrentY;
-  float mCurrentX;
-
 };

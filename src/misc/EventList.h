@@ -18,6 +18,7 @@ namespace MessageBus {
     PushUndoState,
     PopUndoState,
     GetGraphStats,
+    ConnectionDragged,
     TOTALEVENTS
   };
 }
