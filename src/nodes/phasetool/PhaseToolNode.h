@@ -6,4 +6,9 @@ class PhaseToolNode : public PhaseTool {
   PhaseToolNode(std::string pType) {
     type = pType;
   }
+
+  void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+    Node::setupUi(pGrahics);
+    mUi->setColor(CATEGORYCOLORTOOLS);
+  }
 };

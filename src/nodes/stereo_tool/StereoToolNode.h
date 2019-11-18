@@ -22,5 +22,6 @@ class StereoToolNode : public StereoTool {
     //parameters[2]->x = 175;
     //parameters[2]->y = 80;
     Node::setupUi(pGrahics);
+    mUi->setColor(CATEGORYCOLORTOOLS);
   }
 };

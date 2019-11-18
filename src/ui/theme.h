@@ -72,3 +72,10 @@ const iplug::igraphics::IColor SOCKETCOLORACITVE(255, 250, 150, 0);
 const iplug::igraphics::IColor CABLECOLOR(255, 40, 40, 40);
 const iplug::igraphics::IColor CABLECOLORSPLICE(255, 250, 150, 0);
 const iplug::igraphics::IColor CABLECOLORPREVIEW(150, 40, 40, 40);
+
+/** Color scheme */
+const iplug::igraphics::IColor CATEGORYCOLORTOOLS(255, 100, 100, 220);
+const iplug::igraphics::IColor CATEGORYCOLORFILTER(255, 50, 150, 70);
+const iplug::igraphics::IColor CATEGORYCOLORDISTORTION(255, 200, 80, 60);
+const iplug::igraphics::IColor CATEGORYCOLORDYNAMICS(255, 120, 50, 130);
+const iplug::igraphics::IColor CATEGORYCOLORSPATIAL(255, 60, 50, 160);

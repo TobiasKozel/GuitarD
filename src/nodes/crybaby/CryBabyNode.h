@@ -6,6 +6,9 @@ public:
   CryBabyNode(std::string pType) {
     type = pType;
   }
-  //parameters[0]->y = 100;
-  //parameters[0]->x = 100;
+
+  void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+    Node::setupUi(pGrahics);
+    mUi->setColor(CATEGORYCOLORFILTER);
+  }
 };

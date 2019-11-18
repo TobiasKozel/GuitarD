@@ -54,4 +54,9 @@ public:
       hasLastBuffer = true;
     }
   }
+
+  void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+    Node::setupUi(pGrahics);
+    mUi->setColor(CATEGORYCOLORTOOLS);
+  }
 };

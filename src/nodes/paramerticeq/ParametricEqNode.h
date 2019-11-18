@@ -68,7 +68,7 @@ public:
       300, 250,
       &X, &Y, &parameters, &inSockets, &outSockets, this
     });
-    mUi->setColor(IColor(255, 100, 100, 150));
+    mUi->setColor(CATEGORYCOLORFILTER);
     pGrahics->AttachControl(mUi);
     mUi->setUp();
     uiReady = true;
