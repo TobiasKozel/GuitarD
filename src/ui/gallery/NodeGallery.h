@@ -60,34 +60,34 @@ public:
 
   void Draw(IGraphics& g) override {
     if (mIsOpen) {
-      g.FillRect(Theme::Gallery::COLOR_GALLERY_BACKGROUND, mRECT);
+      g.FillRect(Theme::Gallery::BACKGROUND, mRECT);
       for (int i = 0; i < mCategories.GetSize(); i++) {
         mCategories.Get(i)->Draw(g);
       }
       /** Some trickery to give the scroll list padding*/
-      g.FillRect(Theme::Gallery::COLOR_GALLERY_BACKGROUND, IRECT(
+      g.FillRect(Theme::Gallery::BACKGROUND, IRECT(
         mRECT.L, mRECT.T - 1, mRECT.R, mRECT.T + Theme::Gallery::PADDING
       ));
-      g.FillRect(Theme::Gallery::COLOR_GALLERY_BACKGROUND, IRECT(
+      g.FillRect(Theme::Gallery::BACKGROUND, IRECT(
         mRECT.L, mRECT.B - Theme::Gallery::PADDING, mRECT.R, mRECT.B + 1
       ));
     }
     else {
       g.FillCircle(Theme::Colors::ACCENT, mRECT);
-      float x1 = mRECT.L + Theme::Gallery::GALLERY_ADD_CIRCLE_RADIUS - (Theme::Gallery::BUTTON_SIZE / 2);
-      float y1 = mRECT.T + Theme::Gallery::GALLERY_ADD_CIRCLE_RADIUS - (Theme::Gallery::BUTTON_ICON_SIZE / 2);
-      g.FillRect(COLOR_BACKGROUND, IRECT(
+      float x1 = mRECT.L + Theme::Gallery::ADD_CIRCLE_RADIUS - (Theme::Gallery::BUTTON_SIZE / 2);
+      float y1 = mRECT.T + Theme::Gallery::ADD_CIRCLE_RADIUS - (Theme::Gallery::BUTTON_ICON_SIZE / 2);
+      g.FillRect(Theme::Gallery::BACKGROUND, IRECT(
         x1, y1, x1 + Theme::Gallery::BUTTON_SIZE, y1 + Theme::Gallery::BUTTON_ICON_SIZE
       ));
-      x1 = mRECT.L + Theme::Gallery::GALLERY_ADD_CIRCLE_RADIUS - (Theme::Gallery::BUTTON_ICON_SIZE / 2);
-      y1 = mRECT.T + Theme::Gallery::GALLERY_ADD_CIRCLE_RADIUS - (Theme::Gallery::BUTTON_SIZE / 2);
-      g.FillRect(COLOR_BACKGROUND, IRECT(
+      x1 = mRECT.L + Theme::Gallery::ADD_CIRCLE_RADIUS - (Theme::Gallery::BUTTON_ICON_SIZE / 2);
+      y1 = mRECT.T + Theme::Gallery::ADD_CIRCLE_RADIUS - (Theme::Gallery::BUTTON_SIZE / 2);
+      g.FillRect(Theme::Gallery::BACKGROUND, IRECT(
         x1, y1, x1 + Theme::Gallery::BUTTON_ICON_SIZE, y1 + Theme::Gallery::BUTTON_SIZE
       ));
       GraphStats* stats;
       MessageBus::fireEvent<GraphStats**>(mBus, MessageBus::GetGraphStats, &stats);
       avgExecutiontime = static_cast<long long> ((59 * avgExecutiontime + stats->executionTime) / 60.0);
-      string time = to_string(avgExecutiontime);
+      const string time = to_string(avgExecutiontime);
       g.DrawText(mStats, time.c_str(), mRECT);
       mDirty = true;
     }
@@ -108,8 +108,8 @@ public:
       }
       else {
         bounds.Pad(-Theme::Gallery::PADDING);
-        bounds.L = bounds.R - Theme::Gallery::GALLERY_ADD_CIRCLE_DIAMETER;
-        bounds.B = bounds.T + Theme::Gallery::GALLERY_ADD_CIRCLE_DIAMETER;
+        bounds.L = bounds.R - Theme::Gallery::ADD_CIRCLE_DIAMETER;
+        bounds.B = bounds.T + Theme::Gallery::ADD_CIRCLE_DIAMETER;
         mRECT = bounds;
         mTargetRECT = bounds;
         mViewPort = bounds;

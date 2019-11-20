@@ -18,9 +18,9 @@ namespace Theme {
   }
 
   namespace Gallery {
-    const float GALLERY_ADD_CIRCLE_DIAMETER = 48.f;
-    const float GALLERY_ADD_CIRCLE_RADIUS = GALLERY_ADD_CIRCLE_DIAMETER * 0.5f;
-    const IColor COLOR_GALLERY_BACKGROUND(255, 180, 180, 180);
+    const float ADD_CIRCLE_DIAMETER = 48.f;
+    const float ADD_CIRCLE_RADIUS = ADD_CIRCLE_DIAMETER * 0.5f;
+    const IColor BACKGROUND(255, 180, 180, 180);
     const float BUTTON_SIZE = 18;
     const float BUTTON_ICON_SIZE = 3;
     const float PADDING = 10;
