@@ -2,56 +2,56 @@
 
 #include "constants.h"
 #include "thirdparty/json.hpp"
-#include "ptrlist.h"
 
 using namespace std;
 using namespace nlohmann;
 // TODOG make this instance specific so multiple plugins don't share the same undo stack
-namespace HistoryStack {
+class HistoryStack {
   json* states[MAX_UNDOS] = { nullptr };
-  int index = 0;
-  int undos = 0;
-  int redos = 0;
+  int mIndex = 0;
+  int mUndos = 0;
+  int mRedos = 0;
 
+public:
   void ClearStack() {
     for (int i = 0; i < MAX_UNDOS; i++) {
       if (states[i] != nullptr) {
         delete states[i];
       }
     }
-    undos = redos = index = 0;
+    mUndos = mRedos = mIndex = 0;
   }
 
-  json* PushState() {
-    json* state = states[index];
+  json* pushState() {
+    json* state = states[mIndex];
     if (state != nullptr) {
       delete state;
     }
-    states[index] = state = new json();
+    states[mIndex] = state = new json();
 
-    redos = 0;
-    undos++;
-    if (undos >= MAX_UNDOS) {
-      undos = MAX_UNDOS;
+    mRedos = 0;
+    mUndos++;
+    if (mUndos >= MAX_UNDOS) {
+      mUndos = MAX_UNDOS;
     }
-    index++;
-    if (index >= MAX_UNDOS) {
-      index = 0;
+    mIndex++;
+    if (mIndex >= MAX_UNDOS) {
+      mIndex = 0;
     }
     return state;
   }
 
-  json* PopState(bool redo = false) {
+  json* popState(const bool redo = false) {
     if (!redo) {
       // A PushState has to happen here for the redo to work
       // redos++;
-      if (undos > 0) {
-        index--;
-        if (index < 0) {
-          index = MAX_UNDOS - 1;
+      if (mUndos > 0) {
+        mIndex--;
+        if (mIndex < 0) {
+          mIndex = MAX_UNDOS - 1;
         }
-        undos--;
-        return states[index];
+        mUndos--;
+        return states[mIndex];
       }
       else {
         // Nothing to undo
@@ -59,12 +59,12 @@ namespace HistoryStack {
       }
     }
     else {
-      if (redos > 0) {
-        index++;
-        if (index >= MAX_UNDOS) {
-          index = 0;
+      if (mRedos > 0) {
+        mIndex++;
+        if (mIndex >= MAX_UNDOS) {
+          mIndex = 0;
         }
-        return states[index];
+        return states[mIndex];
       }
       else {
         // Nothing to redo
@@ -72,4 +72,4 @@ namespace HistoryStack {
       }
     }
   }
-}
+};

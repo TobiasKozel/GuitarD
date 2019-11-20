@@ -5,7 +5,7 @@
 #include "src/parameter/ParameterManager.h"
 
 
-namespace serializer {
+namespace Serializer {
 
   enum SpecialNode {
     NoNode = -2,

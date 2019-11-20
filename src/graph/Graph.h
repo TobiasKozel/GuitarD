@@ -38,6 +38,8 @@ class Graph {
   CableLayer* mCableLayer = nullptr;
   NodeGallery* mNodeGallery = nullptr;
 
+  HistoryStack mHistoryStack;
+
   GraphStats mStats;
 
   /** Editor window properties */
@@ -74,11 +76,11 @@ public:
 
     mPushUndoState.subscribe(mBus, MessageBus::PushUndoState, [&](bool) {
       WDBGMSG("PushState");
-      this->serialize(*HistoryStack::PushState());
+      this->serialize(*(mHistoryStack.pushState()));
     });
 
     mPopUndoState.subscribe(mBus, MessageBus::PopUndoState, [&](bool redo) {
-      nlohmann::json* state = HistoryStack::PopState(redo);
+      nlohmann::json* state = mHistoryStack.popState(redo);
       if (state != nullptr) {
         WDBGMSG("PopState");
         this->deserialize(*state);
@@ -298,7 +300,7 @@ public:
     json["scale"] = mWindowScale;
     json["width"] = mWindowWidth;
     json["height"] = mWindowHeight;
-    serializer::serialize(json, nodes, inputNode, outputNode);
+    Serializer::serialize(json, nodes, inputNode, outputNode);
   }
 
   void deserialize(nlohmann::json& json) {
@@ -309,7 +311,7 @@ public:
       mWindowHeight = json["height"];
     }
     WDL_MutexLock lock(&isProcessing);
-    serializer::deserialize(json, nodes, outputNode, inputNode, sampleRate, &paramManager, mBus);
+    Serializer::deserialize(json, nodes, outputNode, inputNode, sampleRate, &paramManager, mBus);
     if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
       for (int i = 0; i < nodes.GetSize(); i++) {
         nodes.Get(i)->setupUi(mGraphics);
