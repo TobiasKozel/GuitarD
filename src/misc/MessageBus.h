@@ -19,8 +19,8 @@ namespace MessageBus {
   public:
     virtual ~BaseSubscription() { };
   protected:
-    bool subscribed;
-    EVENTID mEventId;
+    bool subscribed = false;
+    MESSAGE_ID mEventId = TOTAL_MESSAGE_IDS;
   };
 
   typedef WDL_PtrList<BaseSubscription> SubsVector;
@@ -28,9 +28,9 @@ namespace MessageBus {
   // The bus object knows about all the subscribers and relays the events
   class Bus {
   public:
-    SubsVector subscriptions[TOTALEVENTS];
-    WDL_Mutex eventLock;
-    int globalSubs = 0;
+    SubsVector mSubscriptions[TOTAL_MESSAGE_IDS];
+    WDL_Mutex mMutex;
+    int mSubCount = 0;
     Bus() {}
     ~Bus() {
       /**
@@ -39,29 +39,29 @@ namespace MessageBus {
        * so just clean out all the references and call it a day
        */
 
-      for (int i = 0; i < TOTALEVENTS; i++) {
-        if (subscriptions[i].GetSize() > 0) {
-          subscriptions[i].Empty(false);
+      for (int i = 0; i < TOTAL_MESSAGE_IDS; i++) {
+        if (mSubscriptions[i].GetSize() > 0) {
+          mSubscriptions[i].Empty(false);
         }
       }
-      globalSubs = 0;
+      mSubCount = 0;
     }
 
-    void addSubscriber(BaseSubscription* sub, EVENTID pEventId) {
-      WDL_MutexLock lock(&eventLock);
-      subscriptions[pEventId].Add(sub);
-      globalSubs++;
-      if (globalSubs > 1000) {
+    void addSubscriber(BaseSubscription* sub, const MESSAGE_ID pEventId) {
+      WDL_MutexLock lock(&mMutex);
+      mSubscriptions[pEventId].Add(sub);
+      mSubCount++;
+      if (mSubCount > 1000) {
         // This probably means there's a leak
-        WDBGMSG("Subcount %i\n", globalSubs);
+        WDBGMSG("Subcount %i\n", mSubCount);
       }
     }
 
-    void removeSubscriber(BaseSubscription* sub, EVENTID pEventId) {
-      if (globalSubs > 0) {
-        WDL_MutexLock lock(&eventLock);
-        subscriptions[pEventId].DeletePtr(sub);
-        globalSubs--;
+    void removeSubscriber(BaseSubscription* sub, const MESSAGE_ID pEventId) {
+      if (mSubCount > 0) {
+        WDL_MutexLock lock(&mMutex);
+        mSubscriptions[pEventId].DeletePtr(sub);
+        mSubCount--;
       }
     }
   };
@@ -70,11 +70,11 @@ namespace MessageBus {
   template <class T>
   class Subscription : public BaseSubscription {
     // The bus it is subscribed to
-    Bus* mBus;
+    Bus* mBus = nullptr;
   public:
     function<void(T param)> mCallback;
 
-    Subscription(Bus* pBus, EVENTID pEventId, function<void(T param)> callback) {
+    Subscription(Bus* pBus, const MESSAGE_ID pEventId, function<void(T param)> callback) {
       subscribed = false;
       subscribe(pBus, pEventId, callback);
     }
@@ -87,7 +87,7 @@ namespace MessageBus {
       mBus->removeSubscriber(this, mEventId);
     }
 
-    void subscribe(Bus* pBus, EVENTID pEventId, function<void(T param)> callback) {
+    void subscribe(Bus* pBus, const MESSAGE_ID pEventId, function<void(T param)> callback) {
       if (subscribed) {
         WDBGMSG("Trying to subscribe twice on the same Subscription!\n");
         return;
@@ -101,13 +101,13 @@ namespace MessageBus {
   };
 
   template <class T>
-  void fireEvent(Bus* b, EVENTID pEventId, T param) {
-    if (b->subscriptions[pEventId].GetSize() == 0) {
+  void fireEvent(Bus* b, const MESSAGE_ID pEventId, T param) {
+    if (b->mSubscriptions[pEventId].GetSize() == 0) {
       WDBGMSG("Fired a event with not subscribers!\n");
       return;
     }
-    SubsVector& subs = b->subscriptions[pEventId];
-    WDL_MutexLock lock(&b->eventLock);
+    SubsVector& subs = b->mSubscriptions[pEventId];
+    WDL_MutexLock lock(&b->mMutex);
     for (int i = 0; i < subs.GetSize(); i++) {
       Subscription<T>* sub = dynamic_cast<Subscription<T>*>(subs.Get(i));
       if (sub != nullptr) {

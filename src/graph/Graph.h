@@ -3,7 +3,6 @@
 #include "mutex.h"
 #include "thirdparty/json.hpp"
 #include "IPlugConstants.h"
-#include "src/misc/constants.h"
 #include "src/misc/MessageBus.h"
 #include "src/nodes/io/InputNode.h"
 #include "src/nodes/io/OutputNode.h"
@@ -15,7 +14,7 @@
 #include "src/misc/HistoryStack.h"
 
 class Graph {
-  MessageBus::Bus* mBus;
+  MessageBus::Bus* mBus = nullptr;
   MessageBus::Subscription<Node*> mNodeDelSub;
   MessageBus::Subscription<NodeList::NodeInfo> mNodeAddEvent;
   MessageBus::Subscription<bool> mAwaitAudioMutexEvent;
@@ -23,7 +22,7 @@ class Graph {
   MessageBus::Subscription<bool> mPopUndoState;
   MessageBus::Subscription<GraphStats**> mReturnStats;
 
-  iplug::igraphics::IGraphics* graphics;
+  iplug::igraphics::IGraphics* mGraphics = nullptr;
   /** Holds all the nodes in the processing graph */
   WDL_PtrList<Node> nodes;
   WDL_Mutex isProcessing;
@@ -31,48 +30,39 @@ class Graph {
   InputNode* inputNode;
   OutputNode* outputNode;
 
-  int channelCount;
-  int sampleRate;
+  int channelCount = 2;
+  int sampleRate = 44101;
 
-  GraphBackground* background;
-
-  CableLayer* cableLayer;
-
-  NodeGallery* nodeGallery;
+  /** Control elements */
+  GraphBackground* mBackground = nullptr;
+  CableLayer* mCableLayer = nullptr;
+  NodeGallery* mNodeGallery = nullptr;
 
   GraphStats mStats;
 
-  int width;
-  int height;
-  float scale;
+  /** Editor window properties */
+  int mWindowWidth = 0;
+  int mWindowHeight = 0;
+  float mWindowScale = 0;
 
 public:
   ParameterManager paramManager;
 
 
-  Graph(MessageBus::Bus* pBus) : paramManager(pBus) {
+  explicit Graph(MessageBus::Bus* pBus) : paramManager(pBus) {
     mBus = pBus;
-    graphics = nullptr;
-    background = nullptr;
-    nodeGallery = nullptr;
-    cableLayer = nullptr;
-
-    width = height = scale = 0;
-
-    /** Odd number to figure out if the DAW hasn't reported a samplerate */
-    sampleRate = 44101;
-    channelCount = 2;
-
+    
     inputNode = new InputNode(mBus);
     outputNode = new OutputNode(mBus);
-    outputNode->connectInput(inputNode->outSockets.Get(0));
+    outputNode->connectInput(inputNode->mSocketsOut.Get(0));
 
     // output->connectInput(input->outSockets.Get(0));
     mNodeDelSub.subscribe(mBus, MessageBus::NodeDeleted, [&](Node* param) {
       MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
       this->removeNode(param, true);
     });
-    mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](NodeList::NodeInfo info) {
+
+    mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo info) {
       MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
       this->addNode(info.constructor(), nullptr, 0, 300, 300);
     });
@@ -103,50 +93,46 @@ public:
   void testadd() {
     Node* test = NodeList::createNode("BitCrusherNode");
     addNode(test, inputNode, 0, 500, 300);
-    outputNode->connectInput(test->outSockets.Get(0));
+    outputNode->connectInput(test->mSocketsOut.Get(0));
   }
 
   ~Graph() {
-    // TODO get rid of all the things
+    // TODOG get rid of all the things
   }
 
-  void OnReset(int p_sampleRate, int p_channles = 2) {
-    if (p_sampleRate > 0 && p_channles > 0) {
+  void OnReset(const int pSampleRate, const int pChannels = 2) {
+    if (pSampleRate > 0 && pChannels > 0) {
       WDL_MutexLock lock(&isProcessing);
-      sampleRate = p_sampleRate;
-      channelCount = p_channles;
-      inputNode->OnReset(p_sampleRate, p_channles);
-      outputNode->OnReset(p_sampleRate, p_channles);
+      sampleRate = pSampleRate;
+      channelCount = pChannels;
+      inputNode->OnReset(pSampleRate, pChannels);
+      outputNode->OnReset(pSampleRate, pChannels);
       for (int i = 0; i < nodes.GetSize(); i++) {
-        nodes.Get(i)->OnReset(p_sampleRate, p_channles);
+        nodes.Get(i)->OnReset(pSampleRate, pChannels);
       }
     }
   }
 
-  void ProcessBlock(iplug::sample** in, iplug::sample** out, int nFrames) {
-    /**
-     * I don't really like the mutex here, but it should only be locked if a change to the
-     * processing chain is made, which will cause some artifacts anyways
-     */
-    auto start = std::chrono::high_resolution_clock::now();
+  void ProcessBlock(iplug::sample** in, iplug::sample** out, const int nFrames) {
+    const auto start = std::chrono::high_resolution_clock::now();
     WDL_MutexLock lock(&isProcessing);
-    if (nFrames > MAXBUFFER) {
-      // TODO process this in smaller chunks, should be a simple for loop
+    if (nFrames > MAX_BUFFER) {
+      // TODOG process this in smaller chunks, should be a simple for loop
       outputNode->CopyOut(out, nFrames);
       return;
     }
     inputNode->CopyIn(in, nFrames);
 
-    int nodeCount = nodes.GetSize();
+    const int nodeCount = nodes.GetSize();
     for (int n = 0; n < nodeCount; n++) {
       nodes.Get(n)->BlockStart();
     }
 
     outputNode->BlockStart();
 
-    // TODO multiple passes to ensure all the nodes are computed is super dumb
+    // TODOG multiple passes to ensure all the nodes are computed is super dumb
     int attempts = 0;
-    while (!outputNode->isProcessed && attempts < 10) {
+    while (!outputNode->mIsProcessed && attempts < 10) {
       for (int n = 0; n < nodeCount; n++) {
         nodes.Get(n)->ProcessBlock(nFrames);
       }
@@ -155,20 +141,21 @@ public:
     }
 
     outputNode->CopyOut(out, nFrames);
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
+    const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
+      std::chrono::high_resolution_clock::now() - start
+    );
     mStats.executionTime = duration.count();
   }
 
-  /** The graph needs to know about the graphics context to add and remove the controlls for the nodes */
+  /** The graph needs to know about the graphics context to add and remove the controls for the nodes */
   void setupUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
-    if (pGraphics != nullptr && pGraphics != graphics) {
+    if (pGraphics != nullptr && pGraphics != mGraphics) {
       WDBGMSG("Graphics context changed");
-      graphics = pGraphics;
+      mGraphics = pGraphics;
     }
 
     
-    graphics->SetKeyHandlerFunc([&](const IKeyPress & key, bool isUp) {
+    mGraphics->SetKeyHandlerFunc([&](const IKeyPress & key, const bool isUp) {
       if (key.C && key.VK == kVK_Z && !isUp) {
         MessageBus::fireEvent<bool>(this->mBus, MessageBus::PopUndoState, false);
         return true;
@@ -176,63 +163,63 @@ public:
       return false;
     });
 
-    background = new GraphBackground(mBus, graphics, [&](float x, float y, float scale) {
+    mBackground = new GraphBackground(mBus, mGraphics, [&](float x, float y, float scale) {
       this->onViewPortChange(x, y, scale);
     });
-    graphics->AttachControl(background);
+    mGraphics->AttachControl(mBackground);
 
     for (int n = 0; n < nodes.GetSize(); n++) {
-        nodes.Get(n)->setupUi(graphics);
+        nodes.Get(n)->setupUi(mGraphics);
     }
-    inputNode->setupUi(graphics);
-    outputNode->setupUi(graphics);
+    inputNode->setupUi(mGraphics);
+    outputNode->setupUi(mGraphics);
 
-    cableLayer = new CableLayer(mBus, graphics, &nodes, outputNode, inputNode);
-    graphics->AttachControl(cableLayer);
+    mCableLayer = new CableLayer(mBus, mGraphics, &nodes, outputNode, inputNode);
+    mGraphics->AttachControl(mCableLayer);
 
-    nodeGallery = new NodeGallery(mBus, graphics);
-    graphics->AttachControl(nodeGallery);
+    mNodeGallery = new NodeGallery(mBus, mGraphics);
+    mGraphics->AttachControl(mNodeGallery);
 
     scaleUi();
 
     testadd();
   }
 
-  void scaleUi() {
-    if (width != 0 && height != 0 && scale != 0 && graphics != nullptr) {
-      background->mScale = scale;
-      graphics->Resize(width, height, scale);
+  void scaleUi() const {
+    if (mWindowWidth != 0 && mWindowHeight != 0 && mWindowScale != 0 && mGraphics != nullptr) {
+      mBackground->mScale = mWindowScale;
+      mGraphics->Resize(mWindowWidth, mWindowHeight, mWindowScale);
     }
   }
 
   void cleanupUi() {
-    width = graphics->Width();
-    height = graphics->Height();
-    scale = graphics->GetDrawScale();
+    mWindowWidth = mGraphics->Width();
+    mWindowHeight = mGraphics->Height();
+    mWindowScale = mGraphics->GetDrawScale();
     for (int n = 0; n < nodes.GetSize(); n++) {
-      nodes.Get(n)->cleanupUi(graphics);
+      nodes.Get(n)->cleanupUi(mGraphics);
     }
 
-    graphics->RemoveControl(nodeGallery, true);
-    nodeGallery = nullptr;
+    mGraphics->RemoveControl(mNodeGallery, true);
+    mNodeGallery = nullptr;
 
-    graphics->RemoveControl(background, true);
-    background = nullptr;
+    mGraphics->RemoveControl(mBackground, true);
+    mBackground = nullptr;
 
-    graphics->RemoveControl(cableLayer, true);
-    cableLayer = nullptr;
+    mGraphics->RemoveControl(mCableLayer, true);
+    mCableLayer = nullptr;
 
-    inputNode->cleanupUi(graphics);
-    outputNode->cleanupUi(graphics);
+    inputNode->cleanupUi(mGraphics);
+    outputNode->cleanupUi(mGraphics);
 
-    graphics = nullptr;
+    mGraphics = nullptr;
   }
 
   /**
    * Called via a callback from the background to move around all the nodes
    * creating the illusion of a viewport
    */
-  void onViewPortChange(float dX = 0, float dY = 0, float scale = 1) {
+  void onViewPortChange(const float dX = 0, const float dY = 0, float scale = 1) const {
     for (int i = 0; i < nodes.GetSize(); i++) {
       nodes.Get(i)->mUi->translate(dX, dY);
     }
@@ -242,10 +229,10 @@ public:
   }
 
   void layoutUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
-    if (pGraphics != nullptr && pGraphics != graphics) {
+    if (pGraphics != nullptr && pGraphics != mGraphics) {
       WDBGMSG("Graphics context changed");
-      graphics = pGraphics;
-      // Todo find out whether the context ever changes
+      mGraphics = pGraphics;
+      // TODOG find out whether the context ever changes
     }
     for (int n = 0; n < nodes.GetSize(); n++) {
       nodes.Get(n)->layoutChanged();
@@ -255,15 +242,15 @@ public:
   /**
    * Used to add nodes and push a state to the history stack
    */
-  void addNode(Node* node, Node* pInput = nullptr, int index = 0, float x = 0, float y = 0) {
+  void addNode(Node* node, Node* pInput = nullptr, const int index = 0, const float x = 0, const float y = 0) {
     WDL_MutexLock lock(&isProcessing);
-    node->X = x;
-    node->Y = y;
+    node->mX = x;
+    node->mY = y;
     node->setup(mBus, sampleRate);
     paramManager.claimNode(node);
-    node->setupUi(graphics);
+    node->setupUi(mGraphics);
     if (pInput != nullptr) {
-      node->connectInput(pInput->outSockets.Get(index));
+      node->connectInput(pInput->mSocketsOut.Get(index));
     }
     nodes.Add(node);
     sortRenderStack();
@@ -275,12 +262,12 @@ public:
     }
   }
 
-  void removeNode(Node* node, bool reconnnect = false) {
+  void removeNode(Node* node, const bool reconnect = false) {
     if (node == inputNode || node == outputNode) { return; }
     WDL_MutexLock lock(&isProcessing);
-    if (reconnnect) {
-      NodeSocket* prevSock = node->inSockets.Get(0);
-      NodeSocket* nextSock = node->outSockets.Get(0);
+    if (reconnect) {
+      NodeSocket* prevSock = node->mSocketsIn.Get(0);
+      NodeSocket* nextSock = node->mSocketsOut.Get(0);
       if (prevSock != nullptr && prevSock->connectedTo && nextSock != nullptr) {
         MessageBus::fireEvent<SocketConnectRequest>(
           mBus,
@@ -292,40 +279,40 @@ public:
         );
       }
     }
-    node->cleanupUi(graphics);
+    node->cleanupUi(mGraphics);
     paramManager.releaseNode(node);
     nodes.DeletePtr(node, true);
     nodes.Compact();
   }
 
-  void removeNode(int index) {
+  void removeNode(const int index) {
     removeNode(nodes.Get(index));
   }
 
   void serialize(nlohmann::json& json) {
-    if (graphics != nullptr) {
-      width = graphics->Width();
-      height = graphics->Height();
-      scale = graphics->GetDrawScale();
+    if (mGraphics != nullptr) {
+      mWindowWidth = mGraphics->Width();
+      mWindowHeight = mGraphics->Height();
+      mWindowScale = mGraphics->GetDrawScale();
     }
-    json["scale"] = scale;
-    json["width"] = width;
-    json["height"] = height;
+    json["scale"] = mWindowScale;
+    json["width"] = mWindowWidth;
+    json["height"] = mWindowHeight;
     serializer::serialize(json, nodes, inputNode, outputNode);
   }
 
   void deserialize(nlohmann::json& json) {
     removeAllNodes();
     if (json.find("width") != json.end()) {
-      scale = json["scale"];
-      width = json["width"];
-      height = json["height"];
+      mWindowScale = json["scale"];
+      mWindowWidth = json["width"];
+      mWindowHeight = json["height"];
     }
     WDL_MutexLock lock(&isProcessing);
     serializer::deserialize(json, nodes, outputNode, inputNode, sampleRate, &paramManager, mBus);
-    if (graphics != nullptr && graphics->WindowIsOpen()) {
+    if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
       for (int i = 0; i < nodes.GetSize(); i++) {
-        nodes.Get(i)->setupUi(graphics);
+        nodes.Get(i)->setupUi(mGraphics);
       }
       sortRenderStack();
       scaleUi();
@@ -338,14 +325,14 @@ private:
    * This just removes the overlay IControls and adds them again to
    * keep them on top of the layer stack
    */
-  void sortRenderStack() {
-    if (cableLayer != nullptr) {
-      graphics->RemoveControl(cableLayer);
-      graphics->AttachControl(cableLayer);
+  void sortRenderStack() const {
+    if (mCableLayer != nullptr) {
+      mGraphics->RemoveControl(mCableLayer);
+      mGraphics->AttachControl(mCableLayer);
     }
-    if (nodeGallery != nullptr) {
-      graphics->RemoveControl(nodeGallery);
-      graphics->AttachControl(nodeGallery);
+    if (mNodeGallery != nullptr) {
+      mGraphics->RemoveControl(mNodeGallery);
+      mGraphics->AttachControl(mNodeGallery);
     }
   }
 

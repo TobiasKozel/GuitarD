@@ -1,14 +1,11 @@
 #pragma once
 
-#include <algorithm>
 #include "IPlugConstants.h"
 #include "IGraphics.h"
-#include "src/misc/constants.h"
 #include "src/node/NodeUi.h"
 #include "src/node/NodeSocket.h"
 #include "src/parameter/ParameterCoupling.h"
 #include "src/misc/MessageBus.h"
-#include "src/ui/theme.h"
 
 /**
  * Virtual class which all nodes will derive from
@@ -16,29 +13,29 @@
 class Node {
 protected:
   MessageBus::Bus* mBus;
-  bool uiReady;
+  bool mUiReady;
 public:
-  std::string type;
+  std::string mType;
 
-  WDL_PtrList<ParameterCoupling> parameters;
+  WDL_PtrList<ParameterCoupling> mParameters;
   // The dsp will get the data from the buffer inside the socket
-  WDL_PtrList<NodeSocket> inSockets;
-  WDL_PtrList<NodeSocket> outSockets;
+  WDL_PtrList<NodeSocket> mSocketsIn;
+  WDL_PtrList<NodeSocket> mSocketsOut;
 
   // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
-  iplug::sample*** outputs;
-  int inputCount;
-  int outputCount;
+  iplug::sample*** mBuffersOut;
+  int mInputCount;
+  int mOutputCount;
   NodeUi* mUi;
-  bool isProcessed;
+  bool mIsProcessed;
   
-  float X;
-  float Y;
+  float mX;
+  float mY;
   float rotation;
 
-  int samplerate;
-  int channelCount;
-  int maxBuffer;
+  int mSampleRate;
+  int mChannelCount;
+  int mMaxBuffer;
   int mLastBlockSize;
 
   double mByPassed;
@@ -49,10 +46,10 @@ public:
    */
   Node() {
     mUi = nullptr;
-    outputs = nullptr;
+    mBuffersOut = nullptr;
     mByPassed = 0;
     mStereo = 1;
-    X = Y = 0;
+    mX = mY = 0;
     rotation = 0;
   };
 
@@ -60,57 +57,57 @@ public:
    * This is basically a delayed constructor with the only disadvatage: derived methods have to have the same parameters
    * The derived class will call this with the desired paramters, except for the samplerate
    */
-  virtual void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAXBUFFER, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
+  virtual void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAX_BUFFER, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
     mBus = pBus;
-    samplerate = 0;
-    channelCount = 0;
-    maxBuffer = p_maxBuffer;
-    inputCount = p_inputs;
-    outputCount = p_outputs;
-    isProcessed = false;
-    uiReady = false;
+    mSampleRate = 0;
+    mChannelCount = 0;
+    mMaxBuffer = p_maxBuffer;
+    mInputCount = p_inputs;
+    mOutputCount = p_outputs;
+    mIsProcessed = false;
+    mUiReady = false;
     OnReset(p_samplerate, p_channles);
 
 
 
     // Setup the sockets for the node connections
-    for (int i = 0; i < inputCount; i++) {
+    for (int i = 0; i < mInputCount; i++) {
       NodeSocket* in = new NodeSocket(mBus, i, this);
-      inSockets.Add(in);
+      mSocketsIn.Add(in);
     }
 
-    for (int i = 0; i < outputCount; i++) {
-      NodeSocket* out = new NodeSocket(mBus, i, this, outputs[i]);
-      outSockets.Add(out);
+    for (int i = 0; i < mOutputCount; i++) {
+      NodeSocket* out = new NodeSocket(mBus, i, this, mBuffersOut[i]);
+      mSocketsOut.Add(out);
     }
   }
 
   /** create all the needed buffers for the dsp */
   virtual void createBuffers() {
-    if (outputs != nullptr) {
+    if (mBuffersOut != nullptr) {
       WDBGMSG("Trying to create a new dsp buffer without cleanung up the old one");
       assert(true);
     }
-    outputs = new iplug::sample **[outputCount];
-    for (int i = 0; i < outputCount; i++) {
-      outputs[i] = new iplug::sample * [channelCount];
-      for (int c = 0; c < channelCount; c++) {
-        outputs[i][c] = new iplug::sample[maxBuffer];
+    mBuffersOut = new iplug::sample **[mOutputCount];
+    for (int i = 0; i < mOutputCount; i++) {
+      mBuffersOut[i] = new iplug::sample * [mChannelCount];
+      for (int c = 0; c < mChannelCount; c++) {
+        mBuffersOut[i][c] = new iplug::sample[mMaxBuffer];
       }
     }
   }
 
   /** Delets all the allocated buffers */
   virtual void deleteBuffers() {
-    if (outputs != nullptr) {
-      for (int i = 0; i < outputCount; i++) {
-        for (int c = 0; c < channelCount; c++) {
-          delete outputs[i][c];
+    if (mBuffersOut != nullptr) {
+      for (int i = 0; i < mOutputCount; i++) {
+        for (int c = 0; c < mChannelCount; c++) {
+          delete mBuffersOut[i][c];
         }
-        delete outputs[i];
+        delete mBuffersOut[i];
       }
-      delete outputs;
-      outputs = nullptr;
+      delete mBuffersOut;
+      mBuffersOut = nullptr;
     }
   }
 
@@ -118,41 +115,41 @@ public:
   virtual ~Node() {
     deleteBuffers();
     
-    if (uiReady || mUi != nullptr) {
+    if (mUiReady || mUi != nullptr) {
       WDBGMSG("Warning, UI of node was not cleaned up!\n");
     }
 
-    parameters.Empty(true);
-    inSockets.Empty(true);
-    outSockets.Empty(true);
+    mParameters.Empty(true);
+    mSocketsIn.Empty(true);
+    mSocketsOut.Empty(true);
   }
 
   /** Will fill all the output buffers with silence */
   void outputSilence() {
-    for (int o = 0; o < outputCount; o++) {
-      for (int c = 0; c < channelCount; c++) {
-        for (int i = 0; i < maxBuffer; i++) {
-          outputs[o][c][i] = 0;
+    for (int o = 0; o < mOutputCount; o++) {
+      for (int c = 0; c < mChannelCount; c++) {
+        for (int i = 0; i < mMaxBuffer; i++) {
+          mBuffersOut[o][c][i] = 0;
         }
       }
     }
-    isProcessed = true;
+    mIsProcessed = true;
   }
 
   /** Will return true if the node is bypassed and also do the bypassing of buffers */
   bool byPass() {
     // The first param will always be bypass
-    parameters.Get(0)->update();
+    mParameters.Get(0)->update();
     if (mByPassed < 0.5) { return false; }
-    iplug::sample** in = inSockets.Get(0)->connectedTo->parentBuffer;
-    for (int o = 0; o < outputCount; o++) {
-      for (int c = 0; c < channelCount; c++) {
-        for (int i = 0; i < maxBuffer; i++) {
-          outputs[o][c][i] = in[c][i];
+    iplug::sample** in = mSocketsIn.Get(0)->connectedTo->parentBuffer;
+    for (int o = 0; o < mOutputCount; o++) {
+      for (int c = 0; c < mChannelCount; c++) {
+        for (int i = 0; i < mMaxBuffer; i++) {
+          mBuffersOut[o][c][i] = in[c][i];
         }
       }
     }
-    isProcessed = true;
+    mIsProcessed = true;
     return true;
   }
 
@@ -162,15 +159,15 @@ public:
      * If one input isn't connected, skip the processing and output silence
      * If that's not desired, this function has to be overidden
      */
-    for (int i = 0; i < inSockets.GetSize(); i++) {
-      if (inSockets.Get(i)->connectedTo == nullptr) {
+    for (int i = 0; i < mSocketsIn.GetSize(); i++) {
+      if (mSocketsIn.Get(i)->connectedTo == nullptr) {
         outputSilence();
         return false;
       }
     }
 
-    for (int i = 0; i < inputCount; i++) {
-      if (!inSockets.Get(i)->connectedTo->parentNode->isProcessed) {
+    for (int i = 0; i < mInputCount; i++) {
+      if (!mSocketsIn.Get(i)->connectedTo->parentNode->mIsProcessed) {
         // A node isn't ready so return false
         return false;
       }
@@ -189,18 +186,18 @@ public:
 
   /** Signals a new audio block is about to processed */
   virtual void BlockStart() {
-    isProcessed = false;
+    mIsProcessed = false;
   }
 
   /** Called if the daw changed the channelcount*/
   virtual void OnChannelsChanged(int p_channels) {
     deleteBuffers();
-    channelCount = p_channels;
+    mChannelCount = p_channels;
     createBuffers();
   }
 
   virtual void OnSamplerateChanged(int p_sampleRate) {
-    samplerate = p_sampleRate;
+    mSampleRate = p_sampleRate;
   }
 
   /** Called on DAW transport e.g. to clear dsp buffers and cut reverbs */
@@ -209,11 +206,11 @@ public:
   /** Called from the graph to either signal a change in samplerate/channel count or transport */
   virtual void OnReset(int p_sampleRate, int p_channels) {
     bool isTransport = true;
-    if (p_sampleRate != samplerate) {
+    if (p_sampleRate != mSampleRate) {
       OnSamplerateChanged(p_sampleRate);
       isTransport = false;
     }
-    if (p_channels != channelCount) {
+    if (p_channels != mChannelCount) {
       OnChannelsChanged(p_channels);
       isTransport = false;
     }
@@ -224,7 +221,7 @@ public:
 
   /** Connects a given socket to a input at a given index of this node */
   virtual void connectInput(NodeSocket* out, int inputNumber = 0) {
-    NodeSocket* inSocket = inSockets.Get(inputNumber);
+    NodeSocket* inSocket = mSocketsIn.Get(inputNumber);
     if (inSocket != nullptr) {
       if (out == nullptr) {
         inSocket->disconnect();
@@ -237,7 +234,7 @@ public:
 
   /** Generic function to call when the node can be bypassed*/
   void addByPassParam() {
-    parameters.Add(new ParameterCoupling(
+    mParameters.Add(new ParameterCoupling(
       "Bypass", &mByPassed, 0.0, 0.0, 1.0, 1
     ));
   }
@@ -249,7 +246,7 @@ public:
         "Stereo", &mStereo, 1.0, 0.0, 1.0, 1
       );
     }
-    parameters.Add(p);
+    mParameters.Add(p);
   }
 
 
@@ -264,13 +261,13 @@ public:
   virtual void setupUi(iplug::igraphics::IGraphics* pGrahics) {
 
     mUi = new NodeUi(NodeUiParam {
-      mBus, pGrahics, 300, 300, &X, &Y,
-      &parameters, &inSockets, &outSockets, this
+      mBus, pGrahics, 300, 300, &mX, &mY,
+      &mParameters, &mSocketsIn, &mSocketsOut, this
     });
     mUi->setColor(IColor(255, 100, 100, 100));
     pGrahics->AttachControl(mUi);
     mUi->setUp();
-    uiReady = true;
+    mUiReady = true;
   }
 
   /**
@@ -282,15 +279,15 @@ public:
      * If the node is not connected this won't happen, so always do the update when the
      * Gui window is closed just in case
      */
-    for (int i = 0; i < parameters.GetSize(); i++) {
-      parameters.Get(i)->update();
+    for (int i = 0; i < mParameters.GetSize(); i++) {
+      mParameters.Get(i)->update();
     }
     if (mUi != nullptr) {
       mUi->cleanUp();
       pGrahics->RemoveControl(mUi, true);
       mUi = nullptr;
     }
-    uiReady = false;
+    mUiReady = false;
   }
 
   /** Called if the ui is resized TODOG move over to NodeUI */

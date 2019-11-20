@@ -4,8 +4,8 @@
 
 /**
  * Struct/Class used to pair up a daw IParam if one is available and always a IControl + dsp parameter to be altered
- * Also contains the value bounds, stepsize, name and IParam index
- * A ParameterCoupling can also exist wihtout a IParam which basically allows an unlimited
+ * Also contains the value bounds, step size, name and IParam index
+ * A ParameterCoupling can also exist without a IParam which basically allows an unlimited
  * amount of IControls
  */
 struct ParameterCoupling {
@@ -29,7 +29,7 @@ struct ParameterCoupling {
 
   // this will be added on top of the actual value to allow internal automation eventually
   double automation;
-  // This value is only used for params which coudln't claim a DAW parameter to act as the one provided by the IParam
+  // This value is only used for params which couldn't claim a DAW parameter to act as the one provided by the IParam
   double baseValue;
 
   double mAdd;
@@ -53,31 +53,33 @@ struct ParameterCoupling {
   // custom image or something, prolly doesn't belong here
   const char* asset;
 
-  bool showLable;
+  bool showLabel;
   bool showValue;
 
-  ParameterCoupling(const char* p_name = nullptr, double* p_proprety = nullptr,
-    double p_default = 0.5, double p_min = 0, double p_max = 1, double p_stepSize = 0.01, Type p_type = Auto) {
-    value = p_proprety;
-    defaultVal = p_default;
-    baseValue = p_default;
-    min = p_min;
-    max = p_max;
-    stepSize = p_stepSize;
-    name = p_name;
+  explicit ParameterCoupling(const char* pName = nullptr, double* pProperty = nullptr,
+                    const double pDefault = 0.5, const double pMin = 0, const double pMax = 1,
+                    const double pStepSize = 0.01, const Type pType = Auto) {
+    value = pProperty;
+    defaultVal = pDefault;
+    baseValue = pDefault;
+    min = pMin;
+    max = pMax;
+    stepSize = pStepSize;
+    name = pName;
     parameterIdx = iplug::kNoParameter;
+    parameter = nullptr;
     parameter = nullptr;
     control = nullptr;
     automation = 0;
     x = y = 0;
     asset = nullptr;
     w = h = 60;
-    showLable = true;
+    showLabel = true;
     showValue = true;
 
 
     // Do some assumptions for the correct type
-    if (p_type == Auto) {
+    if (pType == Auto) {
       if (max == 20000) {
         type = Frequency;
         if (min <= 0.) {
@@ -100,24 +102,25 @@ struct ParameterCoupling {
       }
     }
     else {
-      type = p_type;
+      type = pType;
     }
   }
 
-  void setPos(float pX, float pY, float size = -1, bool pShowLable = true, bool pShowValue = true) {
+  void setPos(const float pX, const float pY, const float size = -1, const bool pShowLabel = true, const bool pShowValue = true) {
     x = pX;
     y = pY;
     if (size > 0) {
       w = h = size;
     }
-    showLable = pShowLable;
+    showLabel = pShowLabel;
     showValue = pShowValue;
   }
 
   /**
    * This should only be called from the audio thread since the value might tear on 32bit
    */
-  void update() {
+  void update() const
+  {
     if (parameter != nullptr) {
       *value = parameter->Value() + automation;
     }

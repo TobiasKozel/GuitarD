@@ -9,15 +9,15 @@
 
 class ParameterManager {
   MessageBus::Bus* mBus;
-  iplug::IParam* parameters[MAXDAWPARAMS];
-  bool parametersClaimed[MAXDAWPARAMS];
+  iplug::IParam* parameters[MAX_DAW_PARAMS];
+  bool parametersClaimed[MAX_DAW_PARAMS];
   int parametersLeft;
 
 public:
   ParameterManager(MessageBus::Bus* pBus) {
     mBus = pBus;
     parametersLeft = 0;
-    for (int i = 0; i < MAXDAWPARAMS; i++) {
+    for (int i = 0; i < MAX_DAW_PARAMS; i++) {
       parameters[i] = nullptr;
       parametersClaimed[i] = true;
     }
@@ -41,8 +41,8 @@ public:
    */
   bool claimNode(Node* node) {
     bool gotAllPamams = true;
-    for (int i = 0; i < node->parameters.GetSize(); i++) {
-      if (!claimParameter(node->parameters.Get(i))) {
+    for (int i = 0; i < node->mParameters.GetSize(); i++) {
+      if (!claimParameter(node->mParameters.Get(i))) {
         /**
          * this means the manager has no free parameters left and the control cannot be automated from the daw
          */
@@ -62,7 +62,7 @@ public:
       int i = couple->parameterIdx;
       if (i == iplug::kNoParameter) {
         // if there's no parameter index set, go look for one
-        for (i = 0; i < MAXDAWPARAMS; i++) {
+        for (i = 0; i < MAX_DAW_PARAMS; i++) {
           if (!parametersClaimed[i]) {
             // found one
             break;
@@ -123,14 +123,14 @@ public:
   }
 
   void releaseNode(Node* node) {
-    for (int i = 0; i < node->parameters.GetSize(); i++) {
-      releaseParameter(node->parameters.Get(i));
+    for (int i = 0; i < node->mParameters.GetSize(); i++) {
+      releaseParameter(node->mParameters.Get(i));
     }
     MessageBus::fireEvent<bool>(mBus, MessageBus::ParametersChanged, false);
   }
 
   void releaseParameter(ParameterCoupling* couple) {
-    for (int i = 0; i < MAXDAWPARAMS; i++) {
+    for (int i = 0; i < MAX_DAW_PARAMS; i++) {
       if (parameters[i] == couple->parameter) {
         parametersClaimed[i] = false;
         parameters[i]->SetLabel("Released");

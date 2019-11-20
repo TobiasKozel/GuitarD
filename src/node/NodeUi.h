@@ -205,10 +205,10 @@ public:
       if (i == 0 && mHeader.hasByPass) { couple->control->Hide(true); }
 
       // optinally hide the lables etc
-      if (!couple->showLable || !couple->showValue) {
+      if (!couple->showLabel || !couple->showValue) {
         IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);
         if (vcontrol != nullptr) {
-          vcontrol->SetShowLabel(couple->showLable);
+          vcontrol->SetShowLabel(couple->showLabel);
           vcontrol->SetShowValue(couple->showValue);
         }
       }

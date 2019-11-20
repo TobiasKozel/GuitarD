@@ -4,7 +4,7 @@
 class SimpleDelayNode : public SimpleDelay {
 public:
   SimpleDelayNode(std::string pType) {
-    type = pType;
+    mType = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

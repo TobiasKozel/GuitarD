@@ -4,12 +4,12 @@
 #include "src/nodes/RegisterNodes.h"
 
 
-GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAXDAWPARAMS, kNumPrograms)) {
+GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAX_DAW_PARAMS, kNumPrograms)) {
   NodeList::registerNodes();
   graph = new Graph(&mBus);
 
   // Gather a good amount of parameters to expose to the daw based on what nodes are on the canvas
-  for (int i = 0; i < MAXDAWPARAMS; i++) {
+  for (int i = 0; i < MAX_DAW_PARAMS; i++) {
     graph->paramManager.addParameter(GetParam(i));
   }
 

@@ -4,7 +4,7 @@
 class SimpleGateNode : public SimpleGate {
 public:
   SimpleGateNode(std::string pType) {
-    type = pType;
+    mType = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

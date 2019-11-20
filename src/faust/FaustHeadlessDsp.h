@@ -21,12 +21,12 @@ struct UI {
   const char* name;
 
   UI() {
-    name = DefaultNodeName;
+    name = DEFAULT_NODE_NAME;
   }
 
   void openVerticalBox(const char* key) {
     // NOTE This only is the name of the module if it has one box!
-    if (name != DefaultNodeName) {
+    if (name != DEFAULT_NODE_NAME) {
       WDBGMSG("openVerticalBox called multiple times. The node Type might be wrong!");
       assert(false);
     }
@@ -71,7 +71,7 @@ public:
   virtual void instanceConstants(int samplingFreq) = 0;
   virtual void instanceClear() = 0;
 
-  void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAXBUFFER, int p_channels = 2, int p_inputs = 1, int p_outputs = 1) {
+  void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAX_BUFFER, int p_channels = 2, int p_inputs = 1, int p_outputs = 1) {
     Node::setup(pBus, p_samplerate, p_maxBuffer, p_channels, getNumInputs() / p_channels, getNumOutputs() / p_channels);
     
     /**
@@ -81,8 +81,8 @@ public:
      */
     buildUserInterface(&faustUi);
     init(p_samplerate);
-    if (type == DefaultNodeName) {
-      type = faustUi.name;
+    if (mType == DEFAULT_NODE_NAME) {
+      mType = faustUi.name;
     }
 
     addByPassParam();
@@ -94,13 +94,13 @@ public:
         continue;
       }
       p->y = p->h * pos - 80;
-      parameters.Add(p);
+      mParameters.Add(p);
       pos++;
     }
   }
 
   void OnChannelsChanged(int p_channels) override {
-    if (outputs != nullptr) {
+    if (mBuffersOut != nullptr) {
       WDBGMSG("Warning trying to change the channelcount on a faust node!\n");
     }
     else {
@@ -121,12 +121,12 @@ public:
    * A node might have multiple inputs so the right ones have to be forwarded
    */
   virtual void ProcessBlock(int nFrames) {
-    if (!inputsReady() || isProcessed || byPass()) { return; }
-    for (int i = 1; i < parameters.GetSize(); i++) {
-      parameters.Get(i)->update();
+    if (!inputsReady() || mIsProcessed || byPass()) { return; }
+    for (int i = 1; i < mParameters.GetSize(); i++) {
+      mParameters.Get(i)->update();
     }
-    compute(nFrames, inSockets.Get(0)->connectedTo->parentBuffer, outputs[0]);
-    isProcessed = true;
+    compute(nFrames, mSocketsIn.Get(0)->connectedTo->parentBuffer, mBuffersOut[0]);
+    mIsProcessed = true;
   }
 };
 

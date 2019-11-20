@@ -9,19 +9,19 @@
 
 
 // Max amount of nodes in the graph
-#define MAXNODES 128
+#define MAX_NODES 128
 
 // Amounts of daw params to register at start since dynamic amounts are not well supported
-#define MAXDAWPARAMS 256
+#define MAX_DAW_PARAMS 256
 
 // This is the name of a node if it wasn't overridden anywhere
-#define DefaultNodeName "DEFAULTNODENAME"
+#define DEFAULT_NODE_NAME "DEFAULTNODENAME"
 
-#define MAXBUFFER 512
+#define MAX_BUFFER 512
 
-#define MAXUNDOS 8
+#define MAX_UNDOS 8
 
-#define SPLICEINDISTANCE 14
+#define SPLICEIN_DISTANCE 14
 
 
 #ifdef FLOATCONV

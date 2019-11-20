@@ -32,7 +32,7 @@ public:
 
   void Draw(IGraphics& g) override {
     NodeUi::Draw(g);
-    mInfo = "Blocksize: " + to_string(mParentNode->mLastBlockSize) + " Sample-Rate: " + to_string(mParentNode->samplerate);
+    mInfo = "Blocksize: " + to_string(mParentNode->mLastBlockSize) + " Sample-Rate: " + to_string(mParentNode->mSampleRate);
     g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
     if (mEnableTuner) {
       // g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
@@ -45,34 +45,34 @@ class InputNode : public Node {
 public:
   InputNode(MessageBus::Bus* pBus) : Node() {
     mLastBlockSize = -1;
-    setup(pBus, 48000, MAXBUFFER, 2, 0, 1);
+    setup(pBus, 48000, MAX_BUFFER, 2, 0, 1);
   }
 
   void ProcessBlock(int) {}
 
   void CopyIn(iplug::sample** in, int nFrames) {
     mLastBlockSize = nFrames;
-    for (int c = 0; c < channelCount; c++) {
+    for (int c = 0; c < mChannelCount; c++) {
       for (int i = 0; i < nFrames; i++) {
-        outputs[0][c][i] = in[c][i];
+        mBuffersOut[0][c][i] = in[c][i];
       }
     }
-    isProcessed = true;
+    mIsProcessed = true;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    if (X == Y && X == 0) {
+    if (mX == mY && mX == 0) {
       // Place it at the screen edge if no position is set
-      Y = pGrahics->Height() / 2;
+      mY = pGrahics->Height() / 2;
     }
     mUi = new InputNodeUi(NodeUiParam {
       mBus, pGrahics,
       250, 150,
-      &X, &Y, &parameters, &inSockets, &outSockets, this
+      &mX, &mY, &mParameters, &mSocketsIn, &mSocketsOut, this
     });
     mUi->setColor(IColor(255, 100, 150, 100));
     pGrahics->AttachControl(mUi);
     mUi->setUp();
-    uiReady = true;
+    mUiReady = true;
   }
 };

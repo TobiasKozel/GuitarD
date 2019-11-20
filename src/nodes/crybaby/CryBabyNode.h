@@ -4,7 +4,7 @@
 class CryBabyNode : public CryBaby {
 public:
   CryBabyNode(std::string pType) {
-    type = pType;
+    mType = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

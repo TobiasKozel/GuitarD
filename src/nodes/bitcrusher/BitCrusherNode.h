@@ -3,7 +3,7 @@
 class BitCrusherNode : public BitCrusher {
 public:
   BitCrusherNode(std::string pType) {
-    type = pType;
+    mType = pType;
   }
 #define BITTERW 250
 #define BITTERH 240
@@ -11,7 +11,7 @@ public:
     mUi = new NodeUi(NodeUiParam{
       mBus, pGrahics,
       BITTERW, BITTERH,
-      &X, &Y, &parameters, &inSockets, &outSockets, this
+      &mX, &mY, &mParameters, &mSocketsIn, &mSocketsOut, this
     });
     mUi->setSvg(SVGBITTERBG_FN);
     float left1 = BITTERW * 0.26 - BITTERW / 2;
@@ -24,6 +24,6 @@ public:
     mUi->mParamsByName.at("Mix")->setPos(left1, top2, size, false);
     pGrahics->AttachControl(mUi);
     mUi->setUp();
-    uiReady = true;
+    mUiReady = true;
   }
 };

@@ -99,7 +99,7 @@ class SimpleCabNode : public Node {
   
 public:
   SimpleCabNode(std::string pType) : Node() {
-    type = pType;
+    mType = pType;
     resampledIR = nullptr;
     conversionBufferIn = nullptr;
     conversionBufferOut = nullptr;
@@ -107,7 +107,7 @@ public:
   }
 
   // TODOG FIX THIS MESS
-  void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAXBUFFER, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
+  void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAX_BUFFER, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
     Node::setup(pBus, p_samplerate, p_maxBuffer, 2, 1, 1);
 
     mStereo = 0;
@@ -121,29 +121,29 @@ public:
 
   void createBuffers() override {
     Node::createBuffers();
-    for (int c = 0; c < channelCount; c++) {
+    for (int c = 0; c < mChannelCount; c++) {
       convolvers[c] = new fftconvolver::TwoStageFFTConvolver();
     }
 #ifdef FLOATCONV
-    conversionBufferIn = new WDL_RESAMPLE_TYPE * [channelCount];
-    conversionBufferOut = new WDL_RESAMPLE_TYPE * [channelCount];
-    for (int c = 0; c < channelCount; c++) {
-      conversionBufferIn[c] = new WDL_RESAMPLE_TYPE[maxBuffer];
-      conversionBufferOut[c] = new WDL_RESAMPLE_TYPE[maxBuffer];
+    conversionBufferIn = new WDL_RESAMPLE_TYPE * [mChannelCount];
+    conversionBufferOut = new WDL_RESAMPLE_TYPE * [mChannelCount];
+    for (int c = 0; c < mChannelCount; c++) {
+      conversionBufferIn[c] = new WDL_RESAMPLE_TYPE[mMaxBuffer];
+      conversionBufferOut[c] = new WDL_RESAMPLE_TYPE[mMaxBuffer];
     }
 #endif
     mResampler.SetMode(true, 0, true);
     mResampler.SetFilterParms();
     mResampler.SetFeedMode(true);
-    mResampler.SetRates(48000, samplerate);
+    mResampler.SetRates(48000, mSampleRate);
     WDL_RESAMPLE_TYPE* test;
     int inSamples = mResampler.ResamplePrepare(cleanIRLength, 1, &test);
     for (int i = 0; i < cleanIRLength; i++) {
-      test[i] = cleanIR[i] * (48000.f / (float) samplerate ) * 0.2;
+      test[i] = cleanIR[i] * (48000.f / (float) mSampleRate ) * 0.2;
     }
-    resampledIR = new WDL_RESAMPLE_TYPE[ceil(cleanIRLength * ((samplerate / 48000.f)))];
+    resampledIR = new WDL_RESAMPLE_TYPE[ceil(cleanIRLength * ((mSampleRate / 48000.f)))];
     int outSamples = mResampler.ResampleOut(resampledIR, inSamples, cleanIRLength, 1);
-    for (int c = 0; c < channelCount; c++) {
+    for (int c = 0; c < mChannelCount; c++) {
       convolvers[c]->init(128, 1024 * 4, resampledIR, outSamples);
     }
   }
@@ -152,11 +152,11 @@ public:
     Node::deleteBuffers();
     delete resampledIR;
     resampledIR = nullptr;
-    for (int c = 0; c < channelCount; c++) {
+    for (int c = 0; c < mChannelCount; c++) {
       delete convolvers[c];
     }
 #ifdef FLOATCONV
-    for (int c = 0; c < channelCount; c++) {
+    for (int c = 0; c < mChannelCount; c++) {
       delete conversionBufferIn[c];
       delete conversionBufferOut[c];
     }
@@ -168,10 +168,10 @@ public:
   }
 
   void ProcessBlock(int nFrames) {
-    if (!inputsReady() || isProcessed || byPass()) { return; }
-    parameters.Get(1)->update();
+    if (!inputsReady() || mIsProcessed || byPass()) { return; }
+    mParameters.Get(1)->update();
 
-    sample** buffer = inSockets.Get(0)->connectedTo->parentBuffer;
+    sample** buffer = mSocketsIn.Get(0)->connectedTo->parentBuffer;
 
 #ifdef FLOATCONV
     /**                           THREADPOOLING ATTEMPT                           */
@@ -229,12 +229,12 @@ public:
     }
     convolvers[0]->process(conversionBufferIn[0], conversionBufferOut[0], nFrames);
     for (int i = 0; i < nFrames; i++) {
-      outputs[0][0][i] = conversionBufferOut[0][i];
+      mBuffersOut[0][0][i] = conversionBufferOut[0][i];
     }
 
     if (!mStereo) {
       for (int i = 0; i < nFrames; i++) {
-        outputs[0][1][i] = outputs[0][0][i];
+        mBuffersOut[0][1][i] = mBuffersOut[0][0][i];
       }
     }
     else {
@@ -243,7 +243,7 @@ public:
       }
       convolvers[1]->process(conversionBufferIn[1], conversionBufferOut[1], nFrames);
       for (int i = 0; i < nFrames; i++) {
-        outputs[0][1][i] = conversionBufferOut[1][i];
+        mBuffersOut[0][1][i] = conversionBufferOut[1][i];
       }
     }
 #endif
@@ -261,18 +261,18 @@ public:
       }
     }
 #endif
-    isProcessed = true;
+    mIsProcessed = true;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     mUi = new SimpleCabNodeUi(NodeUiParam{
       mBus, pGrahics,
       300, 300,
-      &X, &Y, &parameters, &inSockets, &outSockets, this
+      &mX, &mY, &mParameters, &mSocketsIn, &mSocketsOut, this
     });
     mUi->setColor(IColor(255, 150, 100, 100));
     pGrahics->AttachControl(mUi);
     mUi->setUp();
-    uiReady = true;
+    mUiReady = true;
   }
 };

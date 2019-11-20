@@ -10,13 +10,13 @@ public:
   CombineNode(std::string pType) : Node() {
     pan1 = pan2 = 0;
     mix = 0.5;
-    type = pType;
+    mType = pType;
   }
 
   void ProcessBlock(int nFrames) {
-    if (isProcessed) { return; }
-    NodeSocket* s1 = inSockets.Get(0);
-    NodeSocket* s2 = inSockets.Get(1);
+    if (mIsProcessed) { return; }
+    NodeSocket* s1 = mSocketsIn.Get(0);
+    NodeSocket* s2 = mSocketsIn.Get(1);
 
     // see which inputs are connected
     bool has1 = s1->connectedNode != nullptr;
@@ -26,7 +26,7 @@ public:
       return;
     }
 
-    if ((has1 && !s1->connectedNode->isProcessed) || has2 && !s2->connectedNode->isProcessed) {
+    if ((has1 && !s1->connectedNode->mIsProcessed) || has2 && !s2->connectedNode->mIsProcessed) {
       // skip until inputs are ready
       return;
     }
@@ -36,15 +36,15 @@ public:
     sample** buffer2 = has2 ? s2->connectedTo->parentBuffer : emptyBuffer;
 
     // Update the params
-    parameters.Get(0)->update();
-    parameters.Get(1)->update();
-    parameters.Get(2)->update();
+    mParameters.Get(0)->update();
+    mParameters.Get(1)->update();
+    mParameters.Get(2)->update();
 
     // prepare the values
-    double mix = *(parameters.Get(2)->value);
+    double mix = *(mParameters.Get(2)->value);
     double invMix = 1 - mix;
-    double pan1 = *(parameters.Get(0)->value);
-    double pan2 = *(parameters.Get(1)->value);
+    double pan1 = *(mParameters.Get(0)->value);
+    double pan2 = *(mParameters.Get(1)->value);
     double pan1l = min(1.0, max(-pan1 + 1.0, 0.0)) * invMix;
     double pan1r = min(1.0, max(+pan1 + 1.0, 0.0)) * invMix;
     double pan2l = min(1.0, max(-pan2 + 1.0, 0.0)) * mix;
@@ -52,13 +52,13 @@ public:
 
     // do the math
     for (int i = 0; i < nFrames; i++) {
-      outputs[0][0][i] = buffer1[0][i] * pan1l + buffer2[0][i] * pan2l;
+      mBuffersOut[0][0][i] = buffer1[0][i] * pan1l + buffer2[0][i] * pan2l;
     }
     for (int i = 0; i < nFrames; i++) {
-      outputs[0][1][i] = buffer1[1][i] * pan1r + buffer2[1][i] * pan2r;
+      mBuffersOut[0][1][i] = buffer1[1][i] * pan1r + buffer2[1][i] * pan2r;
     }
 
-    isProcessed = true;
+    mIsProcessed = true;
   }
 
   void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
@@ -68,27 +68,27 @@ public:
     );
     p->x = -100;
     p->y = -100;
-    parameters.Add(p);
+    mParameters.Add(p);
 
     p = new ParameterCoupling(
       "PAN 2", &pan2, 0.0, -1.0, 1.0, 0.01
     );
     p->x = -100;
     p->y = 100;
-    parameters.Add(p);
+    mParameters.Add(p);
 
     p = new ParameterCoupling(
       "MIX", &mix, 0.5, 0.0, 1.0, 0.01
     );
     p->x = 0;
     p->y = 0;
-    parameters.Add(p);
+    mParameters.Add(p);
   }
 
   void deleteBuffers() override {
     Node::deleteBuffers();
     if (emptyBuffer != nullptr) {
-      for (int c = 0; c < channelCount; c++) {
+      for (int c = 0; c < mChannelCount; c++) {
         delete emptyBuffer[c];
       }
       emptyBuffer = nullptr;
@@ -98,10 +98,10 @@ public:
   void createBuffers() override {
     Node::createBuffers();
     // this will be used to do processing on a disconnected node
-    emptyBuffer = new sample * [channelCount];
-    for (int c = 0; c < channelCount; c++) {
-      emptyBuffer[c] = new sample[maxBuffer];
-      for (int i = 0; i < maxBuffer; i++) {
+    emptyBuffer = new sample * [mChannelCount];
+    for (int c = 0; c < mChannelCount; c++) {
+      emptyBuffer[c] = new sample[mMaxBuffer];
+      for (int i = 0; i < mMaxBuffer; i++) {
         emptyBuffer[c][i] = 0;
       }
     }

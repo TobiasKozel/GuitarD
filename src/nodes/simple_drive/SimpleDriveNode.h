@@ -4,7 +4,7 @@
 class SimpleDriveNode : public SimpleDrive {
 public:
   SimpleDriveNode(std::string pType) {
-    type = pType;
+    mType = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

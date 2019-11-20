@@ -4,7 +4,7 @@
 class PhaseToolNode : public PhaseTool {
  public:
   PhaseToolNode(std::string pType) {
-    type = pType;
+    mType = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

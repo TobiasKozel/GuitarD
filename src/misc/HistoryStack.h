@@ -8,13 +8,13 @@ using namespace std;
 using namespace nlohmann;
 // TODOG make this instance specific so multiple plugins don't share the same undo stack
 namespace HistoryStack {
-  json* states[MAXUNDOS] = { nullptr };
+  json* states[MAX_UNDOS] = { nullptr };
   int index = 0;
   int undos = 0;
   int redos = 0;
 
   void ClearStack() {
-    for (int i = 0; i < MAXUNDOS; i++) {
+    for (int i = 0; i < MAX_UNDOS; i++) {
       if (states[i] != nullptr) {
         delete states[i];
       }
@@ -31,11 +31,11 @@ namespace HistoryStack {
 
     redos = 0;
     undos++;
-    if (undos >= MAXUNDOS) {
-      undos = MAXUNDOS;
+    if (undos >= MAX_UNDOS) {
+      undos = MAX_UNDOS;
     }
     index++;
-    if (index >= MAXUNDOS) {
+    if (index >= MAX_UNDOS) {
       index = 0;
     }
     return state;
@@ -48,7 +48,7 @@ namespace HistoryStack {
       if (undos > 0) {
         index--;
         if (index < 0) {
-          index = MAXUNDOS - 1;
+          index = MAX_UNDOS - 1;
         }
         undos--;
         return states[index];
@@ -61,7 +61,7 @@ namespace HistoryStack {
     else {
       if (redos > 0) {
         index++;
-        if (index >= MAXUNDOS) {
+        if (index >= MAX_UNDOS) {
           index = 0;
         }
         return states[index];

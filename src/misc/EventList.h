@@ -1,7 +1,7 @@
 #pragma once
 
 namespace MessageBus {
-  enum EVENTID {
+  enum MESSAGE_ID {
     NodeAdd,
     NodeDeleted,
     NodeDisconnectAll,
@@ -19,6 +19,6 @@ namespace MessageBus {
     PopUndoState,
     GetGraphStats,
     ConnectionDragged,
-    TOTALEVENTS
+    TOTAL_MESSAGE_IDS
   };
 }

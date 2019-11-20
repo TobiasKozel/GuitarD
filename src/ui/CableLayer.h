@@ -59,8 +59,8 @@ public:
           // only happens for the last node
           curNode = mOutNode;
         }
-        for (int i = 0; i < curNode->inputCount; i++) {
-          curSock = curNode->inSockets.Get(i);
+        for (int i = 0; i < curNode->mInputCount; i++) {
+          curSock = curNode->mSocketsIn.Get(i);
           tarSock = curSock->connectedTo;
           if (tarSock != nullptr) {
             float x1 = tarSock->X + socketRadius;
@@ -68,16 +68,16 @@ public:
             float y1 = tarSock->Y + socketRadius;
             float y2 = curSock->Y + socketRadius;
             IRECT box;
-            box.L = min(x1, x2) - SPLICEINDISTANCE;
-            box.R = max(x1, x2) + SPLICEINDISTANCE;
-            box.T = min(y1, y2) - SPLICEINDISTANCE;
-            box.B = max(y1, y2) + SPLICEINDISTANCE;
+            box.L = min(x1, x2) - SPLICEIN_DISTANCE;
+            box.R = max(x1, x2) + SPLICEIN_DISTANCE;
+            box.T = min(y1, y2) - SPLICEIN_DISTANCE;
+            box.B = max(y1, y2) + SPLICEIN_DISTANCE;
             if (box.Contains(IRECT{ pos.x, pos.y, pos.x, pos.y })) {
               float a = y1 - y2;
               float b = x2 - x1;
               float c = x1 * y2 - x2 * y1;
               float d = abs(a * pos.x + b * pos.y + c) / sqrt(a * a + b * b);
-              if (d < SPLICEINDISTANCE) {
+              if (d < SPLICEIN_DISTANCE) {
                 mHighlightSocket = curSock;
                 break;
               }
@@ -96,9 +96,9 @@ public:
           return;
         }
         Node* targetNode = target->parentNode;
-        for (int i = 0; i < targetNode->inputCount; i++) {
-          if (targetNode->inSockets.Get(i)->connectedTo != nullptr &&
-              targetNode->inSockets.Get(i)->connectedTo->parentNode == node) {
+        for (int i = 0; i < targetNode->mInputCount; i++) {
+          if (targetNode->mSocketsIn.Get(i)->connectedTo != nullptr &&
+              targetNode->mSocketsIn.Get(i)->connectedTo->parentNode == node) {
             return;
           }
         }
@@ -108,7 +108,7 @@ public:
 
     mPreviewSocketEvent.subscribe(mBus, MessageBus::PreviewSocket, [&](NodeSocket* socket) {
       // TODO this is kinda shady and does not use the MessageBus::SocketConnect event
-      NodeSocket* outSocket = this->mOutNode->inSockets.Get(0);
+      NodeSocket* outSocket = this->mOutNode->mSocketsIn.Get(0);
       if (outSocket->connectedTo == socket) { return; }
       if (socket == this->mPreviewSocket) {
         // Connect the original socket again
@@ -168,11 +168,11 @@ public:
         // only happens for the last node
         curNode = mOutNode;
       }
-      for (int i = 0; i < curNode->inputCount; i++) {
-        curSock = curNode->inSockets.Get(i);
+      for (int i = 0; i < curNode->mInputCount; i++) {
+        curSock = curNode->mSocketsIn.Get(i);
         if (curSock->connectedTo != nullptr) {
           tarSock = curSock->connectedTo;
-          if (tarSock == mPreviewSocket && curSock == mOutNode->inSockets.Get(0)) {
+          if (tarSock == mPreviewSocket && curSock == mOutNode->mSocketsIn.Get(0)) {
             // Draw the temporary bypass
             g.DrawDottedLine(
               curSock == mHighlightSocket ? CABLECOLORSPLICE : CABLECOLOR,
@@ -213,21 +213,21 @@ public:
     // Draw all the sockets
     for (int n = 0; n < mNodes->GetSize(); n++) {
       curNode = mNodes->Get(n);
-      for (int i = 0; i < curNode->outputCount; i++) {
-        curSock = curNode->outSockets.Get(i);
+      for (int i = 0; i < curNode->mOutputCount; i++) {
+        curSock = curNode->mSocketsOut.Get(i);
         if (curSock != nullptr) {
           DrawSocket(g, curSock);
         }
       }
-      for (int i = 0; i < curNode->inputCount; i++) {
-        curSock = curNode->inSockets.Get(i);
+      for (int i = 0; i < curNode->mInputCount; i++) {
+        curSock = curNode->mSocketsIn.Get(i);
         if (curSock != nullptr) {
           DrawSocket(g, curSock);
         }
       }
     }
-    DrawSocket(g, mOutNode->inSockets.Get(0));
-    DrawSocket(g, mInNode->outSockets.Get(0));
+    DrawSocket(g, mOutNode->mSocketsIn.Get(0));
+    DrawSocket(g, mInNode->mSocketsOut.Get(0));
 
 
     

@@ -59,18 +59,18 @@ public:
 class ParametricEqNode : public ParametricEq {
 public:
   ParametricEqNode(std::string pType) {
-    type = pType;
+    mType = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     mUi = new ParametricEqNodeUi(NodeUiParam{
       mBus, pGrahics,
       300, 250,
-      &X, &Y, &parameters, &inSockets, &outSockets, this
+      &mX, &mY, &mParameters, &mSocketsIn, &mSocketsOut, this
     });
     mUi->setColor(CATEGORYCOLORFILTER);
     pGrahics->AttachControl(mUi);
     mUi->setUp();
-    uiReady = true;
+    mUiReady = true;
   }
 };
