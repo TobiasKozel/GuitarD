@@ -52,69 +52,63 @@ public:
    * This will provide one of the reserved daw parameters. If one is free, it will return true
    */
   bool claimParameter(ParameterCoupling* couple) {
-    if (mParametersLeft > 0) {
-      int i = couple->parameterIdx;
-      if (i == iplug::kNoParameter) {
-        // if there's no parameter index set, go look for one
-        for (i = 0; i < MAX_DAW_PARAMS; i++) {
-          if (!mParametersClaimed[i]) {
-            // found one
-            break;
-          }
-        }
-      } else {
-        if (MAX_DAW_PARAMS <= i || mParametersClaimed[i]) {
-          WDBGMSG("Could not claim a prefered DAW parameter!\n");
-          // This is bad and means a preset will not load correctly
-          couple->parameter = nullptr;
-          couple->parameterIdx = iplug::kNoParameter;
-          couple->baseValue = *(couple->value);
-          return false;
+    int i = couple->parameterIdx;
+    if (i == iplug::kNoParameter && mParametersLeft > 0) {
+      // if there's no parameter index set, go look for one
+      for (i = 0; i < MAX_DAW_PARAMS; i++) {
+        if (!mParametersClaimed[i]) {
+          // found one
+          break;
         }
       }
-      mParametersLeft--;
-      mParametersClaimed[i] = true;
-      couple->parameter = mParameters[i];
-      switch (couple->type)
-      {
-      case ParameterCoupling::Boolean:
-        couple->parameter->InitBool(couple->name, couple->defaultVal == 1.0);
-        break;
-      case ParameterCoupling::Frequency:
-        couple->parameter->InitFrequency(
-          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
-        );
-        break;
-      case ParameterCoupling::Gain:
-        couple->parameter->InitGain(
-          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
-        );
-        break;
-      case ParameterCoupling::Percentage:
-        couple->parameter->InitPercentage(
-          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
-        );
-        break;
-      case ParameterCoupling::Linear:
-      default:
-        couple->parameter->InitDouble(
-          couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
-        );
-        break;
-      }
-      // TODOG These seem to be leaking and also don't force vsts to update the names
-      // works for AU though
-      //couple->parameter->SetLabel(couple->name);
-      //couple->parameter->SetDisplayText(1, couple->name);
-      couple->parameterIdx = i;
-      couple->parameter->Set(*(couple->value));
-      WDBGMSG("Claimed param %i\n", i);
-      return true;
     }
-    // no free parameters left
-    couple->parameter = nullptr;
-    couple->parameterIdx = iplug::kNoParameter;
-    return false;
+    if (MAX_DAW_PARAMS <= i || mParametersClaimed[i] || i == iplug::kNoParameter) {
+      WDBGMSG("Could not claim a prefered DAW parameter!\n");
+      // This is bad and means a preset will not load correctly
+      couple->parameter = nullptr;
+      couple->parameterIdx = iplug::kNoParameter;
+      // Set the base value to the one from the preset
+      couple->baseValue = *(couple->value);
+      return false;
+    }
+    mParametersLeft--;
+    mParametersClaimed[i] = true;
+    couple->parameter = mParameters[i];
+    switch (couple->type)
+    {
+    case ParameterCoupling::Boolean:
+      couple->parameter->InitBool(couple->name, couple->defaultVal == 1.0);
+      break;
+    case ParameterCoupling::Frequency:
+      couple->parameter->InitFrequency(
+        couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+      );
+      break;
+    case ParameterCoupling::Gain:
+      couple->parameter->InitGain(
+        couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+      );
+      break;
+    case ParameterCoupling::Percentage:
+      couple->parameter->InitPercentage(
+        couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+      );
+      break;
+    case ParameterCoupling::Linear:
+    default:
+      couple->parameter->InitDouble(
+        couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+      );
+      break;
+    }
+    // TODOG These seem to be leaking and also don't force vsts to update the names
+    // works for AU though
+    //couple->parameter->SetLabel(couple->name);
+    //couple->parameter->SetDisplayText(1, couple->name);
+    couple->parameterIdx = i;
+    couple->parameter->Set(*(couple->value));
+    WDBGMSG("Claimed param %i\n", i);
+    return true;
   }
 
   void releaseNode(Node* node) {

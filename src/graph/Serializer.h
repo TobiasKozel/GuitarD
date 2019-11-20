@@ -44,7 +44,7 @@ namespace Serializer {
       for (int p = 0; p < node->mParameters.GetSize(); p++) {
         ParameterCoupling* para = node->mParameters.Get(p);
         const char* name = para->name;
-        double val = para->parameter != nullptr ? para->parameter->Value() : *(para->value);
+        double val = para->parameter != nullptr ? para->parameter->Value() : para->baseValue;
         int idx = para->parameterIdx;
         serialized["nodes"][i]["parameters"][p] = {
           { "name", name },
