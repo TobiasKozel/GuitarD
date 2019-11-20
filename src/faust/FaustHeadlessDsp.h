@@ -32,18 +32,18 @@ struct UI {
     }
     name = key;
   };
-  void openHorizontalBox(const char* key) {};
-  void closeBox() {};
-  void declare(FAUSTFLOAT*, const char*, const char*) {};
+  static void openHorizontalBox(const char* key) {};
+  static void closeBox() {};
+  static void declare(FAUSTFLOAT*, const char*, const char*) {};
 
-  void addHorizontalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT p_default, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
+  void addHorizontalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT pDefault, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
     // For every new there should be a delete eh?
     // Well these will get cleaned up in the node (hopefully)
-    params.Add(new ParameterCoupling(name, prop, p_default, min, max, stepSize));
+    params.Add(new ParameterCoupling(name, prop, pDefault, min, max, stepSize));
   }
 
-  void addVerticalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT p_default, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
-    params.Add(new ParameterCoupling(name, prop, p_default, min, max, stepSize));
+  void addVerticalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT pDefault, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) {
+    params.Add(new ParameterCoupling(name, prop, pDefault, min, max, stepSize));
   }
 
   void addCheckButton(const char* name, FAUSTFLOAT* prop) {
@@ -71,7 +71,7 @@ public:
   virtual void instanceConstants(int samplingFreq) = 0;
   virtual void instanceClear() = 0;
 
-  void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, const int pMaxBuffer = MAX_BUFFER, const int pChannels = 2, int pInputs = 1, int pOutputs = 1) {
+  void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, const int pMaxBuffer = MAX_BUFFER, const int pChannels = 2, int pInputs = 1, int pOutputs = 1) override {
     Node::setup(pBus, pSamplerate, pMaxBuffer, pChannels, getNumInputs() / pChannels, getNumOutputs() / pChannels);
     
     /**
