@@ -116,7 +116,6 @@ public:
     mPreviewSocketEvent.subscribe(mBus, MessageBus::PreviewSocket, [&](NodeSocket* socket) {
       // TODO this is kinda shady and does not use the MessageBus::SocketConnect event
       NodeSocket* outSocket = this->mOutNode->mSocketsIn.Get(0);
-      if (outSocket->mConnectedTo == socket) { return; }
       if (socket == this->mPreviewSocket) {
         // Connect the original socket again
         if (this->mPreviewSocketPrev != nullptr) {
@@ -126,6 +125,8 @@ public:
         this->mPreviewSocket = nullptr;
       }
       else {
+        // Don't do anything if the socket is already connected to the output node
+        if (outSocket->mConnectedTo == socket) { return; }
         // Save the currently connected socket and connect it to the one provided
         this->mPreviewSocketPrev = outSocket->mConnectedTo;
         this->mPreviewSocket = socket;
@@ -157,8 +158,8 @@ public:
   }
 
   inline void DrawSocket(IGraphics& g, NodeSocket* s) {
-    float x = s->mX + Theme::Sockets::RADIUS;
-    float y = s->mY + Theme::Sockets::RADIUS;
+    const float x = s->mX + Theme::Sockets::RADIUS;
+    const float y = s->mY + Theme::Sockets::RADIUS;
     g.FillCircle(
       Theme::Sockets::COLOR, x, y,
       Theme::Sockets::RADIUS * 0.5 * Theme::Sockets::OUTLINE_SIZE, &mBlend
