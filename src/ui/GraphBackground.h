@@ -10,18 +10,24 @@ typedef std::function<void(float x, float y, float scale)> BackgroundMoveCallbac
 
 class GraphBackground : public IControl {
   MessageBus::Bus* mBus;
+  IGraphics* mGraphics;
+  float mX = 0;
+  float mY = 0;
+  float offsetX = 0;
+  float offsetY = 0;
+  float lastWidth;
+  float lastHeight;
+  bool triggeredScale;
+  IColor mColorBackgroundDetail;
+  BackgroundMoveCallback mCallback;
 public:
+  float mScale = 1;
   GraphBackground(MessageBus::Bus* pBus, IGraphics* g, BackgroundMoveCallback pCallback) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
     mBus = pBus;
     mGraphics = g;
-    mY = mX = 0;
     mCallback = pCallback;
-    mScale = 1.0;
-    offsetX = offsetY = 0;
-    mColorBackground = IColor(255, COLORBACKGROUND);
-    mColorBackgroundDetail = IColor(255, COLORBACKGROUNDDETAIL);
     storeSize();
     triggeredScale = false;
   }
@@ -32,18 +38,24 @@ public:
   void Draw(IGraphics& g) override {
     int windowX = g.Width();
     int windowY = g.Height();
-    g.FillRect(mColorBackground, mRECT);
-    for (float y = fmod(offsetY, BACKGROUNDDETAILDIST) - BACKGROUNDDETAILDIST; y < windowY + BACKGROUNDDETAILDIST; y += BACKGROUNDDETAILDIST) {
-      for (float x = fmod(offsetX, BACKGROUNDDETAILDIST) - BACKGROUNDDETAILDIST; x < windowX + BACKGROUNDDETAILDIST; x += BACKGROUNDDETAILDIST) {
-        float x1 = x - (BACKGROUNDDETAILSIZE / 2);
-        float y1 = y - (BACKGROUNDDETAILWIDTH / 2);
-        g.FillRect(mColorBackgroundDetail, IRECT(
-          x1, y1, x1 + BACKGROUNDDETAILSIZE, y1 + BACKGROUNDDETAILWIDTH
+    g.FillRect(Theme::Graph::BACKGROUND, mRECT);
+    const float dist = Theme::Graph::BACKGROUND_DETAIL_DIST;
+    const float yStart = fmod(offsetY, dist) - dist;
+    const float xStart = fmod(offsetX, dist) - dist;
+    const float detailSize = Theme::Graph::BACKGROUND_DETAIL_SIZE;
+    const float detailWidth = Theme::Graph::BACKGROUND_DETAIL_WIDTH;
+
+    for (float y = yStart; y < windowY + dist; y += dist) {
+      for (float x = xStart; x < windowX + dist; x += dist) {
+        float x1 = x - (detailSize / 2.f);
+        float y1 = y - (detailWidth / 2.f);
+        g.FillRect(Theme::Graph::BACKGROUND_DETAIL, IRECT(
+          x1, y1, x1 + detailSize, y1 + detailWidth
         ));
-        x1 = x - (BACKGROUNDDETAILWIDTH / 2);
-        y1 = y - (BACKGROUNDDETAILSIZE / 2);
-        g.FillRect(mColorBackgroundDetail, IRECT(
-          x1, y1, x1 + BACKGROUNDDETAILWIDTH, y1 + BACKGROUNDDETAILSIZE
+        x1 = x - (detailWidth / 2.f);
+        y1 = y - (detailSize / 2.f);
+        g.FillRect(Theme::Graph::BACKGROUND_DETAIL, IRECT(
+          x1, y1, x1 + detailWidth, y1 + detailSize
         ));
       }
     }
@@ -107,8 +119,6 @@ public:
     }
   }
 
-  float mScale;
-
 protected:
   void translate(float dX, float dY) {
     offsetX += (dX);
@@ -120,16 +130,4 @@ protected:
     lastHeight = mGraphics->Height();
     lastWidth = mGraphics->Width();
   }
-
-  IGraphics* mGraphics;
-  float mX;
-  float mY;
-  float offsetX;
-  float offsetY;
-  float lastWidth;
-  float lastHeight;
-  bool triggeredScale;
-  IColor mColorBackground;
-  IColor mColorBackgroundDetail;
-  BackgroundMoveCallback mCallback;
 };

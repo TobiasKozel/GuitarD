@@ -1,9 +1,9 @@
 #pragma once
 #include "ParametricEq.h"
 
-class ParametricEqNodeUi : public NodeUi {
+class ParametricEqNodeUi final : public NodeUi {
 public:
-  ParametricEqNodeUi(NodeUiParam param) : NodeUi(param) {
+  ParametricEqNodeUi(const NodeUiParam param) : NodeUi(param) {
   }
 
   void setUpControls() override {
@@ -16,19 +16,19 @@ public:
     }
   }
 
-#define scaleLog(v, lw) log10(v * (100 / lw)) * lw - lw - 30
-#define drawGuide(cr, cg, cb, v) g.DrawLine(IColor(255, cr, cg, cb), x + v, y - 100, x + v, y + 100)
+#define SCALE_LOG(v, lw) log10(v * (100 / lw)) * lw - lw - 30
+#define DRAW_GUIDE(cr, cg, cb, v) g.DrawLine(IColor(255, cr, cg, cb), x + v, y - 100, x + v, y + 100)
   void DrawDebug(IGraphics& g, float x, float y, float w) {
-    float logW = w / 3.f;
-    float lowPassF = scaleLog(*(mParamsByName.at("lowF")->value), logW);
-    drawGuide(255, 0, 0, lowPassF);
-    float highPassF = scaleLog(*(mParamsByName.at("highF")->value), logW);
-    drawGuide(0, 0, 255, highPassF);
+    const float logW = w / 3.f;
+    const float lowPassF = SCALE_LOG(mParamsByName.at("lowF")->getValue<float>(), logW);
+    DRAW_GUIDE(255, 0, 0, lowPassF);
+    const float highPassF = SCALE_LOG(mParamsByName.at("highF")->getValue<float>(), logW);
+    DRAW_GUIDE(0, 0, 255, highPassF);
 
-    float f1 = scaleLog(*(mParamsByName.at("f1")->value), logW);
-    drawGuide(0, 255, 0, f1);
-    float f2 = scaleLog(*(mParamsByName.at("f2")->value), logW);
-    drawGuide(255, 0, 255, f2);
+    const float f1 = SCALE_LOG(mParamsByName.at("f1")->getValue<float>(), logW);
+    DRAW_GUIDE(0, 255, 0, f1);
+    const float f2 = SCALE_LOG(mParamsByName.at("f2")->getValue<float>(), logW);
+    DRAW_GUIDE(255, 0, 255, f2);
   }
 
 #define STEPSIZE 8
@@ -42,7 +42,7 @@ public:
     float logW = w / 3.f;
 
     while (x < mTargetRECT.R) {
-      float offset = 0;
+      const float offset = 0;
       g.DrawLine(IColor(255, 255, 0, 0), x, y + offset, x + STEPSIZE, y + offset);
       x += STEPSIZE;
       i++;
@@ -56,9 +56,9 @@ public:
   }
 };
 
-class ParametricEqNode : public ParametricEq {
+class ParametricEqNode final : public ParametricEq {
 public:
-  ParametricEqNode(std::string pType) {
+  ParametricEqNode(const std::string pType) {
     mType = pType;
   }
 
@@ -68,7 +68,7 @@ public:
       300, 250,
       &mX, &mY, &mParameters, &mSocketsIn, &mSocketsOut, this
     });
-    mUi->setColor(CATEGORYCOLORFILTER);
+    mUi->setColor(Theme::Categories::FILTER);
     pGrahics->AttachControl(mUi);
     mUi->setUp();
     mUiReady = true;

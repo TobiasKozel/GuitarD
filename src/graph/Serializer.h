@@ -26,7 +26,7 @@ namespace Serializer {
       serialized["nodes"][i]["type"] = node->mType;
       serialized["nodes"][i]["inputs"] = nlohmann::json::array();
       for (int prev = 0; prev < node->mInputCount; prev++) {
-        Node* cNode = node->mSocketsIn.Get(prev)->connectedNode;
+        Node* cNode = node->mSocketsIn.Get(prev)->mConnectedNode;
         if (cNode == nullptr) {
           serialized["nodes"][i]["inputs"][prev] = { NoNode, 0 };
         }
@@ -36,7 +36,7 @@ namespace Serializer {
         else {
           serialized["nodes"][i]["inputs"][prev] = {
             nodes.Find(cNode),
-            node->mSocketsIn.Get(prev)->connectedSocketIndex
+            node->mSocketsIn.Get(prev)->mConnectedSocketIndex
           };
         }
       }
@@ -58,7 +58,7 @@ namespace Serializer {
     serialized["output"]["position"] = {
       output->mX, output->mY
     };
-    Node* lastNode = output->mSocketsIn.Get(0)->connectedNode;
+    Node* lastNode = output->mSocketsIn.Get(0)->mConnectedNode;
     int lastNodeIndex = NoNode;
     if (lastNode == input) {
       lastNodeIndex = InputNode;
@@ -68,7 +68,7 @@ namespace Serializer {
     }
     serialized["output"]["inputs"][0] = {
       lastNodeIndex,
-      output->mSocketsIn.Get(0)->connectedSocketIndex
+      output->mSocketsIn.Get(0)->mConnectedSocketIndex
     };
   }
 

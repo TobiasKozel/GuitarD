@@ -3,9 +3,9 @@
 #include "src/node/Node.h"
 #include "src/node/NodeUi.h"
 
-#define TWO_YROOT_TWELVE 1.05946309435929526456
+#define TWO_YROOT_TWELVE 1.05946309435929526456f
 
-class InputNodeUi : public NodeUi {
+class InputNodeUi final : public NodeUi {
   map<float, string> equalPitches;
   const char* mNotes[12] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
   bool mEnableTuner;
@@ -18,7 +18,7 @@ class InputNodeUi : public NodeUi {
 public:
   InputNodeUi(NodeUiParam param) : NodeUi(param) {
     mInfo = "";
-    mBlocksizeText = DEBUGFONT;
+    mBlocksizeText = DEBUG_FONT;
     mCurrentFrequency = 440.f;
     mCurrentQuantizedPitch = mNotes[0];
     mTunerCentsOff = 0;
@@ -41,7 +41,7 @@ public:
   }
 };
 
-class InputNode : public Node {
+class InputNode final : public Node {
 public:
   InputNode(MessageBus::Bus* pBus) : Node() {
     mLastBlockSize = -1;
@@ -63,7 +63,7 @@ public:
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     if (mX == mY && mX == 0) {
       // Place it at the screen edge if no position is set
-      mY = pGrahics->Height() / 2;
+      mY = pGrahics->Height() / 2.f;
     }
     mUi = new InputNodeUi(NodeUiParam {
       mBus, pGrahics,

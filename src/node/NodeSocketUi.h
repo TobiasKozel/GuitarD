@@ -9,20 +9,29 @@ using namespace iplug;
 using namespace igraphics;
 
 class NodeSocketUi : public IControl {
-  MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
-  MessageBus::Subscription<SocketConnectRequest> onConnectionRedirectEvent;
-  MessageBus::Subscription<Node*> onDisconnectAllEvent;
-  MessageBus::Subscription<NodeSocket*> onDisconnectEvent;
-  int vol;
-  IMouseMod mMousDown;
+  MessageBus::Subscription<SocketConnectRequest> mOnConnectionEvent;
+  MessageBus::Subscription<SocketConnectRequest> mOnConnectionRedirectEvent;
+  MessageBus::Subscription<Node*> mOnDisconnectAllEvent;
+  MessageBus::Subscription<NodeSocket*> mOnDisconnectEvent;
+  IMouseMod mMouseDown;
+protected:
+  ConnectionDragData mDragData;
+  MessageBus::Bus* mBus = nullptr;
+  NodeSocket* mSocket = nullptr;
+  IBlend mBlend;
+  IGraphics* mGraphics = nullptr;
+  float mDiameter = 0;
+  float mRadius = 0;
+  int mIndex = -1;
+  bool mOut = false;
 public:
-  NodeSocketUi(MessageBus::Bus* pBus, IGraphics* g, NodeSocket* socket, float x, float y) :
+  NodeSocketUi(MessageBus::Bus* pBus, IGraphics* g, NodeSocket* socket, const float x, const float y) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
   {
     mBus = pBus;
     mSocket = socket;
-    mDiameter = SOCKETDIAMETER;
-    mRadius = SOCKETDIAMETER * 0.5f;
+    mDiameter = Theme::Sockets::DIAMETER;
+    mRadius = Theme::Sockets::DIAMETER * 0.5f;
     mRECT.L = x;
     mRECT.T = y;
     mRECT.R = mRECT.L + mDiameter;
@@ -31,29 +40,29 @@ public:
     mBlend = EBlend::Clobber;
     mGraphics = g;
 
-    mSocket->X = mTargetRECT.L;
-    mSocket->Y = mTargetRECT.T;
+    mSocket->mX = mTargetRECT.L;
+    mSocket->mY = mTargetRECT.T;
 
-    onConnectionEvent.subscribe(mBus, MessageBus::SocketConnect, [&](SocketConnectRequest req) {
+    mOnConnectionEvent.subscribe(mBus, MessageBus::SocketConnect, [&](const SocketConnectRequest req) {
       if (req.to == this->mSocket) {
         this->mSocket->connect(req.from);
       }
     });
 
-    onConnectionRedirectEvent.subscribe(mBus, MessageBus::SocketRedirectConnection, [&](SocketConnectRequest req) {
-      if (req.from == this->mSocket->connectedTo) {
+    mOnConnectionRedirectEvent.subscribe(mBus, MessageBus::SocketRedirectConnection, [&](const SocketConnectRequest req) {
+      if (req.from == this->mSocket->mConnectedTo) {
         this->mSocket->connect(req.to);
       }
     });
 
-    onDisconnectAllEvent.subscribe(mBus, MessageBus::NodeDisconnectAll, [&](Node* node) {
-      if (this->mSocket->parentNode == node) {
-        mSocket->disconnect();
+    mOnDisconnectAllEvent.subscribe(mBus, MessageBus::NodeDisconnectAll, [&](Node* node) {
+      if (this->mSocket->mParentNode == node) {
+        this->mSocket->disconnect();
       }
     });
 
-    onDisconnectEvent.subscribe(mBus, MessageBus::DisconnectSocket, [&](NodeSocket * socket) {
-      if (this->mSocket->connectedTo == socket && this->mSocket->isInput) {
+    mOnDisconnectEvent.subscribe(mBus, MessageBus::DisconnectSocket, [&](NodeSocket * socket) {
+      if (this->mSocket->mConnectedTo == socket && this->mSocket->mIsInput) {
         this->mSocket->disconnect();
       }
     });
@@ -64,15 +73,15 @@ public:
     // layer stack. It's drawn in the cable layer and only a control to handle input
     if (mDragData.dragging) {
       // This is just a nice highlight around the socket beeing dragged
-      g.FillCircle(SOCKETCOLORACITVE, mDragData.startX,
-        mDragData.startY, SOCKETATIVESIZE, &mBlend
+      g.FillCircle(Theme::Sockets::COLOR_ACTIVE, mDragData.startX,
+        mDragData.startY, Theme::Sockets::ACTIVE_SIZE, &mBlend
       );
     }
   }
 
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
-    mMousDown = mod;
+    mMouseDown = mod;
     if (mod.C) {
       MessageBus::fireEvent<NodeSocket*>(mBus, MessageBus::PreviewSocket, mSocket);
     }
@@ -89,8 +98,8 @@ public:
     MessageBus::fireEvent<ConnectionDragData*>(
       mBus, MessageBus::ConnectionDragged, &mDragData
     );
-    if (mMousDown.C) {
-      mMousDown = IMouseMod();
+    if (mMouseDown.C) {
+      mMouseDown = IMouseMod();
       return;
     }
 
@@ -113,11 +122,11 @@ public:
         );
       }
     }
-    mMousDown = IMouseMod();
+    mMouseDown = IMouseMod();
   }
 
-  void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
-    if (mMousDown.C) { return; }
+  void OnMouseDrag(const float x, const float y, float dX, float dY, const IMouseMod& mod) override {
+    if (mMouseDown.C) { return; }
     if (!mDragData.dragging) {
       SetRECT(mGraphics->GetBounds());
       mDragData.dragging = true;
@@ -136,15 +145,4 @@ public:
     mSocket->disconnect();
     mGraphics->SetAllControlsDirty();
   }
-
-protected:
-  ConnectionDragData mDragData;
-  MessageBus::Bus* mBus;
-  NodeSocket* mSocket;
-  IBlend mBlend;
-  IGraphics* mGraphics;
-  float mDiameter;
-  float mRadius;
-  int mIndex;
-  bool mOut;
 };

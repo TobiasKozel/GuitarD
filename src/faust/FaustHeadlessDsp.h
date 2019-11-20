@@ -125,7 +125,7 @@ public:
     for (int i = 1; i < mParameters.GetSize(); i++) {
       mParameters.Get(i)->update();
     }
-    compute(nFrames, mSocketsIn.Get(0)->connectedTo->parentBuffer, mBuffersOut[0]);
+    compute(nFrames, mSocketsIn.Get(0)->mConnectedTo->mParentBuffer, mBuffersOut[0]);
     mIsProcessed = true;
   }
 };

@@ -8,15 +8,21 @@ using namespace igraphics;
 class GalleryCategory {
   WDL_PtrList<GalleryElement> mElements;
 public:
+  bool mOpen;
+  const char* mName;
+  // keep this one around so the c_str() of it stays valid
+  std::string mNameString;
+  IRECT* mViewport;
+  IRECT mRECT;
+  IRECT mTitleRect;
+  GalleryCategory* mPrev;
+
   GalleryCategory(GalleryCategory* prev, IRECT* viewport) {
-    mTitleBack = IColor(255, GALLERYCATEGORYTITLEBACKROUND);
-    mBack = IColor(255, GALLERYCATEGORYBACKGROUND);
     mPrev = prev;
     mViewport = viewport;
     mOpen = false;
-    mRECT = IRECT(0, 0, 400, GALLERYELEMENTTITLEHEIGHT);
+    mRECT = IRECT(0, 0, 400, Theme::Gallery::ELEMENT_TITLE_HEIGHT);
     mTitleRect = mRECT;
-    mTitle = GALLERYCATEGORYTITLE;
   }
 
   ~GalleryCategory() {
@@ -26,7 +32,7 @@ public:
   void OnResize() {
   }
 
-  void addNode(NodeList::NodeInfo node) {
+  void addNode(const NodeList::NodeInfo node) {
     mNameString = node.categoryName;
     mName = mNameString.c_str();
     mElements.Compact();
@@ -38,20 +44,25 @@ public:
     mRECT.R = mViewport->R;
     // See at which y the category starts
     if (mPrev != nullptr) {
-      mRECT.T = mPrev->mRECT.B + GALLERYCATEGORYPADDING;
+      mRECT.T = mPrev->mRECT.B + Theme::Gallery::CATEGORY_PADDING;
     }
     else {
       mRECT.T = mViewport->T;
     }
     // Title is always visible
-    mRECT.B = mRECT.T + GALLERYELEMENTTITLEHEIGHT;
+    mRECT.B = mRECT.T + Theme::Gallery::ELEMENT_TITLE_HEIGHT;
     if (mOpen) {
       // Calculate own height
       mTitleRect = mRECT;
-      float columns = max(static_cast<int>(floor(mRECT.W() / (GALLERYELEMENTWIDTH + GALLERYELEMENTPADDING * 1.5))), 1);
+      const float columns = max(static_cast<int>(
+        floor(mRECT.W() / (Theme::Gallery::ELEMENT_WIDTH
+        + Theme::Gallery::ELEMENT_PADDING * 1.5))), 1
+      );
       int rows = ceilf(mElements.GetSize() / columns);
-      mRECT.B += rows * GALLERYELEMENTHEIGHT + rows * GALLERYELEMENTPADDING + GALLERYELEMENTPADDING;
-      g.FillRect(mBack, mRECT);
+      mRECT.B +=
+        rows * Theme::Gallery::ELEMENT_HEIGHT + rows
+        * Theme::Gallery::ELEMENT_PADDING + Theme::Gallery::ELEMENT_PADDING;
+      g.FillRect(Theme::Gallery::CATEGORY_BG, mRECT);
       for (int i = 0; i < mElements.GetSize(); i++) {
         mElements.Get(i)->Draw(g, &mRECT, i, columns);
       }
@@ -59,11 +70,11 @@ public:
     else {
       mTitleRect = mRECT;
     }
-    g.FillRect(mTitleBack, mTitleRect);
-    g.DrawText(mTitle, mName, mTitleRect);
+    g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG, mTitleRect);
+    g.DrawText(Theme::Gallery::CATEGORY_TITLE, mName, mTitleRect);
   }
 
-  NodeList::NodeInfo* OnMouseDown(float x, float y, const IMouseMod& mod) {
+  NodeList::NodeInfo* OnMouseDown(const float x, const float y, const IMouseMod& mod) {
     IRECT p(x, y, x, y);
     if (mTitleRect.Contains(p)) {
       mOpen = !mOpen;
@@ -78,15 +89,5 @@ public:
     return nullptr;
   }
 
-  IText mTitle;
-  bool mOpen;
-  const char* mName;
-  // keep this one around so the c_str() of it stays valid
-  std::string mNameString;
-  IColor mTitleBack;
-  IColor mBack;
-  IRECT* mViewport;
-  IRECT mRECT;
-  IRECT mTitleRect;
-  GalleryCategory* mPrev;
+
 };

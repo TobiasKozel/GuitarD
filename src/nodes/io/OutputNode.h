@@ -2,32 +2,32 @@
 
 #include "src/node/Node.h"
 
-class OutputNodeUi : public NodeUi {
+class OutputNodeUi final : public NodeUi {
 public:
   OutputNodeUi(NodeUiParam param) : NodeUi(param) {
   }
 };
 
 
-class OutputNode : public Node {
+class OutputNode final : public Node {
 public:
   OutputNode(MessageBus::Bus* pBus) : Node() {
     setup(pBus, 0, MAX_BUFFER, 2, 1, 0);
   }
 
   void ProcessBlock(int) {
-    NodeSocket* in = mSocketsIn.Get(0)->connectedTo;
+    NodeSocket* in = mSocketsIn.Get(0)->mConnectedTo;
     if (in == nullptr) {
       mIsProcessed = true;
     }
     else {
-      mIsProcessed = in->parentNode->mIsProcessed;
+      mIsProcessed = in->mParentNode->mIsProcessed;
     }
   }
 
   void CopyOut(iplug::sample** out, int nFrames) {
-    NodeSocket* in = mSocketsIn.Get(0)->connectedTo;
-    if (mMaxBuffer < nFrames || in == nullptr || !in->parentNode->mIsProcessed) {
+    NodeSocket* in = mSocketsIn.Get(0)->mConnectedTo;
+    if (mMaxBuffer < nFrames || in == nullptr || !in->mParentNode->mIsProcessed) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
           out[c][i] = 0;
@@ -35,7 +35,7 @@ public:
       }
     }
     else {
-      iplug::sample** buf = in->parentBuffer;
+      iplug::sample** buf = in->mParentBuffer;
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
           out[c][i] = buf[c][i];
@@ -52,7 +52,7 @@ public:
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     if (mX == mY && mX == 0) {
       // Place it at the screen edge if no position is set
-      mY = pGrahics->Height() / 2;
+      mY = pGrahics->Height() / 2.f;
       mX = pGrahics->Width();
     }
     mUi = new OutputNodeUi(NodeUiParam{

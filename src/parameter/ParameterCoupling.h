@@ -16,45 +16,51 @@ struct ParameterCoupling {
     Frequency,
     Gain,
     Seconds,
-    Miliseconds,
+    Milliseconds,
     Percentage
   };
-  Type type;
+
+  Type type = Auto;
+
   // Param object for outside daw automation
-  iplug::IParam* parameter;
+  iplug::IParam* parameter = nullptr;
+
   // Index of the Param
-  int parameterIdx;
+  int parameterIdx = -1;
+
   // pointer to the value used in the dsp code
-  double* value;
+  double* value = nullptr;
 
   // this will be added on top of the actual value to allow internal automation eventually
-  double automation;
-  // This value is only used for params which couldn't claim a DAW parameter to act as the one provided by the IParam
-  double baseValue;
+  double automation = 0;
 
-  double mAdd;
-  double mMul;
+  // This value is only used for params which couldn't claim a DAW parameter to act as the one provided by the IParam
+  double baseValue = 0;
+
+  double mAdd = 0;
+  double mMul = 0;
 
   // Bounds and so on 
-  double min;
-  double max;
-  double defaultVal;
-  double stepSize;
+  double min = 0;
+  double max = 1;
+  double defaultVal = 0;
+  double stepSize = 0.01;
 
   // Control object which will draw the UI knob
-  iplug::igraphics::IControl* control;
+  iplug::igraphics::IControl* control = nullptr;
   // UI position and size
-  float x;
-  float y;
-  float w;
-  float h;
+  float x = 0;
+  float y = 0;
+  float w = 60;
+  float h = 60;
+
   // name which may be used in the UI
   const char* name;
   // custom image or something, prolly doesn't belong here
-  const char* asset;
+  const char* asset = nullptr;
 
-  bool showLabel;
-  bool showValue;
+  bool showLabel = true;
+  bool showValue = true;
 
   explicit ParameterCoupling(const char* pName = nullptr, double* pProperty = nullptr,
                     const double pDefault = 0.5, const double pMin = 0, const double pMax = 1,
@@ -66,17 +72,6 @@ struct ParameterCoupling {
     max = pMax;
     stepSize = pStepSize;
     name = pName;
-    parameterIdx = iplug::kNoParameter;
-    parameter = nullptr;
-    parameter = nullptr;
-    control = nullptr;
-    automation = 0;
-    x = y = 0;
-    asset = nullptr;
-    w = h = 60;
-    showLabel = true;
-    showValue = true;
-
 
     // Do some assumptions for the correct type
     if (pType == Auto) {
@@ -116,11 +111,30 @@ struct ParameterCoupling {
     showValue = pShowValue;
   }
 
+  template <typename T>
+  T getValue() {
+    if (parameter != nullptr) {
+      return static_cast<T>(parameter->Value());
+    }
+    else {
+      return static_cast<T>(baseValue);
+    }
+  }
+
+  template <typename T>
+  T getWithAutomation() {
+    if (parameter != nullptr) {
+      return static_cast<T>(parameter->Value() + automation);
+    }
+    else {
+      return static_cast<T>(baseValue + automation);
+    }
+  }
+
   /**
    * This should only be called from the audio thread since the value might tear on 32bit
    */
-  void update() const
-  {
+  void update() const {
     if (parameter != nullptr) {
       *value = parameter->Value() + automation;
     }

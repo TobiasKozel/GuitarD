@@ -2,33 +2,33 @@
 
 // Some structs used to pass around bundled data with the MessageBus
 
-struct Coord2d {
-  float x;
-  float y;
+struct Coord2D {
+  float x = 0;
+  float y = 0;
 };
 
 
 class Node;
-class NodeSocket;
+struct NodeSocket;
 struct NodeSpliceInPair {
-  Node* node;
-  NodeSocket* socket;
+  Node* node = nullptr;
+  NodeSocket* socket = nullptr;
 };
 
 struct GraphStats {
-  long long executionTime;
-  int nodeCount;
+  long long executionTime = 0;
+  int nodeCount = 0;
 };
 
 struct SocketConnectRequest {
-  NodeSocket* from;
-  NodeSocket* to;
+  NodeSocket* from = nullptr;
+  NodeSocket* to = nullptr;
 };
 
 struct ConnectionDragData {
   bool dragging = false;
-  float startY;
-  float startX;
-  float currentY;
-  float currentX;
+  float startY = 0;
+  float startX = 0;
+  float currentY = 0;
+  float currentX = 0;
 };

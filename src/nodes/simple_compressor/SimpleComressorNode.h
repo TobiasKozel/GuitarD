@@ -1,14 +1,14 @@
 #pragma once
 #include "SimpleComressor.h"
 
-class SimpleComressorNode : public SimpleComressor {
+class SimpleComressorNode final : public SimpleComressor {
 public:
-  SimpleComressorNode(std::string pType) {
+  SimpleComressorNode(const std::string pType) {
     mType = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     Node::setupUi(pGrahics);
-    mUi->setColor(CATEGORYCOLORDYNAMICS);
+    mUi->setColor(Theme::Categories::DYNAMICS);
   }
 };

@@ -1,9 +1,9 @@
 #pragma once
 #include "StereoTool.h"
 
-class StereoToolNode : public StereoTool {
+class StereoToolNode final : public StereoTool {
  public:
-  StereoToolNode(std::string pType) {
+  StereoToolNode(const std::string pType) {
     mType = pType;
   }
 
@@ -22,6 +22,6 @@ class StereoToolNode : public StereoTool {
     //parameters[2]->x = 175;
     //parameters[2]->y = 80;
     Node::setupUi(pGrahics);
-    mUi->setColor(CATEGORYCOLORTOOLS);
+    mUi->setColor(Theme::Categories::TOOLS);
   }
 };

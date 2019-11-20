@@ -1,7 +1,7 @@
 #pragma once
 #include "src/node/Node.h"
 
-class CombineNode : public Node {
+class CombineNode final : public Node {
   double pan1;
   double pan2;
   double mix;
@@ -13,27 +13,27 @@ public:
     mType = pType;
   }
 
-  void ProcessBlock(int nFrames) {
+  void ProcessBlock(const int nFrames) {
     if (mIsProcessed) { return; }
     NodeSocket* s1 = mSocketsIn.Get(0);
     NodeSocket* s2 = mSocketsIn.Get(1);
 
     // see which inputs are connected
-    bool has1 = s1->connectedNode != nullptr;
-    bool has2 = s2->connectedNode != nullptr;
+    const bool has1 = s1->mConnectedNode != nullptr;
+    const bool has2 = s2->mConnectedNode != nullptr;
     if (has1 == has2 && has1 == false) {
       outputSilence();
       return;
     }
 
-    if ((has1 && !s1->connectedNode->mIsProcessed) || has2 && !s2->connectedNode->mIsProcessed) {
+    if ((has1 && !s1->mConnectedNode->mIsProcessed) || has2 && !s2->mConnectedNode->mIsProcessed) {
       // skip until inputs are ready
       return;
     }
 
     // Choose the buffer from the input or use silence
-    sample** buffer1 = has1 ? s1->connectedTo->parentBuffer : emptyBuffer;
-    sample** buffer2 = has2 ? s2->connectedTo->parentBuffer : emptyBuffer;
+    sample** buffer1 = has1 ? s1->mConnectedTo->mParentBuffer : emptyBuffer;
+    sample** buffer2 = has2 ? s2->mConnectedTo->mParentBuffer : emptyBuffer;
 
     // Update the params
     mParameters.Get(0)->update();
@@ -41,14 +41,14 @@ public:
     mParameters.Get(2)->update();
 
     // prepare the values
-    double mix = *(mParameters.Get(2)->value);
-    double invMix = 1 - mix;
-    double pan1 = *(mParameters.Get(0)->value);
-    double pan2 = *(mParameters.Get(1)->value);
-    double pan1l = min(1.0, max(-pan1 + 1.0, 0.0)) * invMix;
-    double pan1r = min(1.0, max(+pan1 + 1.0, 0.0)) * invMix;
-    double pan2l = min(1.0, max(-pan2 + 1.0, 0.0)) * mix;
-    double pan2r = min(1.0, max(+pan2 + 1.0, 0.0)) * mix;
+    const double mix = *(mParameters.Get(2)->value);
+    const double invMix = 1 - mix;
+    const double pan1 = *(mParameters.Get(0)->value);
+    const double pan2 = *(mParameters.Get(1)->value);
+    const double pan1l = min(1.0, max(-pan1 + 1.0, 0.0)) * invMix;
+    const double pan1r = min(1.0, max(+pan1 + 1.0, 0.0)) * invMix;
+    const double pan2l = min(1.0, max(-pan2 + 1.0, 0.0)) * mix;
+    const double pan2r = min(1.0, max(+pan2 + 1.0, 0.0)) * mix;
 
     // do the math
     for (int i = 0; i < nFrames; i++) {
@@ -61,8 +61,8 @@ public:
     mIsProcessed = true;
   }
 
-  void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = 512, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
-    Node::setup(pBus, p_samplerate, p_maxBuffer, 2, 2, 1);
+  void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, const int pMaxBuffer = 512, int pChannles = 2, int pInputs = 1, int pOutputs = 1) {
+    Node::setup(pBus, pSamplerate, pMaxBuffer, 2, 2, 1);
     ParameterCoupling* p = new ParameterCoupling(
       "PAN 1", &pan1, 0.0, -1.0, 1.0, 0.01
     );
@@ -109,6 +109,6 @@ public:
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     Node::setupUi(pGrahics);
-    mUi->setColor(CATEGORYCOLORTOOLS);
+    mUi->setColor(Theme::Categories::TOOLS);
   }
 };

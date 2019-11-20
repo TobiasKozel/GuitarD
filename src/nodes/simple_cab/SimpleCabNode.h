@@ -1,7 +1,6 @@
 #pragma once
 #include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
 #include "resample.h"
-#include "config.h"
 #include "src/node/Node.h"
 #include "clean.h"
 #include "thirdparty/threadpool.h"
@@ -69,7 +68,7 @@ class SimpleCabNodeUi : public NodeUi {
 public:
   SimpleCabNodeUi(NodeUiParam param) : NodeUi(param) {
     mInfo = "None";
-    mBlocksizeText = DEBUGFONT;
+    mBlocksizeText = DEBUG_FONT;
   }
 
   void OnDrop(const char* str) override {
@@ -85,13 +84,12 @@ public:
 
 };
 
-class SimpleCabNode : public Node {
-  fftconvolver::TwoStageFFTConvolver* convolvers[8];
+class SimpleCabNode final : public Node {
+  fftconvolver::TwoStageFFTConvolver* mConvolvers[8];
   WDL_Resampler mResampler;
-  WDL_RESAMPLE_TYPE* resampledIR;
-  WDL_RESAMPLE_TYPE selectedIr;
-  WDL_RESAMPLE_TYPE** conversionBufferIn;
-  WDL_RESAMPLE_TYPE** conversionBufferOut;
+  WDL_RESAMPLE_TYPE* mResampledIR;
+  WDL_RESAMPLE_TYPE** mConversionBufferIn;
+  WDL_RESAMPLE_TYPE** mConversionBufferOut;
 
 #ifdef useThreadPool
   ctpl::thread_pool tPool;
@@ -100,15 +98,14 @@ class SimpleCabNode : public Node {
 public:
   SimpleCabNode(std::string pType) : Node() {
     mType = pType;
-    resampledIR = nullptr;
-    conversionBufferIn = nullptr;
-    conversionBufferOut = nullptr;
-    selectedIr = 1;
+    mResampledIR = nullptr;
+    mConversionBufferIn = nullptr;
+    mConversionBufferOut = nullptr;
   }
 
   // TODOG FIX THIS MESS
-  void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAX_BUFFER, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
-    Node::setup(pBus, p_samplerate, p_maxBuffer, 2, 1, 1);
+  void setup(MessageBus::Bus* pBus, int pSamplerate = 48000, int pMaxBuffer = MAX_BUFFER, int pChannles = 2, int pInputs = 1, int pOutputs = 1) override {
+    Node::setup(pBus, pSamplerate, pMaxBuffer, 2, 1, 1);
 
     mStereo = 0;
     addByPassParam();
@@ -122,14 +119,14 @@ public:
   void createBuffers() override {
     Node::createBuffers();
     for (int c = 0; c < mChannelCount; c++) {
-      convolvers[c] = new fftconvolver::TwoStageFFTConvolver();
+      mConvolvers[c] = new fftconvolver::TwoStageFFTConvolver();
     }
 #ifdef FLOATCONV
-    conversionBufferIn = new WDL_RESAMPLE_TYPE * [mChannelCount];
-    conversionBufferOut = new WDL_RESAMPLE_TYPE * [mChannelCount];
+    mConversionBufferIn = new WDL_RESAMPLE_TYPE * [mChannelCount];
+    mConversionBufferOut = new WDL_RESAMPLE_TYPE * [mChannelCount];
     for (int c = 0; c < mChannelCount; c++) {
-      conversionBufferIn[c] = new WDL_RESAMPLE_TYPE[mMaxBuffer];
-      conversionBufferOut[c] = new WDL_RESAMPLE_TYPE[mMaxBuffer];
+      mConversionBufferIn[c] = new WDL_RESAMPLE_TYPE[mMaxBuffer];
+      mConversionBufferOut[c] = new WDL_RESAMPLE_TYPE[mMaxBuffer];
     }
 #endif
     mResampler.SetMode(true, 0, true);
@@ -137,33 +134,35 @@ public:
     mResampler.SetFeedMode(true);
     mResampler.SetRates(48000, mSampleRate);
     WDL_RESAMPLE_TYPE* test;
-    int inSamples = mResampler.ResamplePrepare(cleanIRLength, 1, &test);
+    const int inSamples = mResampler.ResamplePrepare(cleanIRLength, 1, &test);
     for (int i = 0; i < cleanIRLength; i++) {
-      test[i] = cleanIR[i] * (48000.f / (float) mSampleRate ) * 0.2;
+      test[i] = cleanIR[i] * (48000.f / static_cast<float>(mSampleRate) ) * 0.2;
     }
-    resampledIR = new WDL_RESAMPLE_TYPE[ceil(cleanIRLength * ((mSampleRate / 48000.f)))];
-    int outSamples = mResampler.ResampleOut(resampledIR, inSamples, cleanIRLength, 1);
+    mResampledIR = new WDL_RESAMPLE_TYPE[
+      static_cast<size_t>(ceil(cleanIRLength * ((mSampleRate / 48000.f))))
+    ];
+    const int outSamples = mResampler.ResampleOut(mResampledIR, inSamples, cleanIRLength, 1);
     for (int c = 0; c < mChannelCount; c++) {
-      convolvers[c]->init(128, 1024 * 4, resampledIR, outSamples);
+      mConvolvers[c]->init(128, 1024 * 4, mResampledIR, outSamples);
     }
   }
 
   void deleteBuffers() override {
     Node::deleteBuffers();
-    delete resampledIR;
-    resampledIR = nullptr;
+    delete mResampledIR;
+    mResampledIR = nullptr;
     for (int c = 0; c < mChannelCount; c++) {
-      delete convolvers[c];
+      delete mConvolvers[c];
     }
 #ifdef FLOATCONV
     for (int c = 0; c < mChannelCount; c++) {
-      delete conversionBufferIn[c];
-      delete conversionBufferOut[c];
+      delete mConversionBufferIn[c];
+      delete mConversionBufferOut[c];
     }
-    delete conversionBufferIn;
-    delete conversionBufferOut;
-    conversionBufferIn = nullptr;
-    conversionBufferOut = nullptr;
+    delete mConversionBufferIn;
+    delete mConversionBufferOut;
+    mConversionBufferIn = nullptr;
+    mConversionBufferOut = nullptr;
 #endif
   }
 
@@ -171,7 +170,7 @@ public:
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
     mParameters.Get(1)->update();
 
-    sample** buffer = mSocketsIn.Get(0)->connectedTo->parentBuffer;
+    sample** buffer = mSocketsIn.Get(0)->mConnectedTo->mParentBuffer;
 
 #ifdef FLOATCONV
     /**                           THREADPOOLING ATTEMPT                           */
@@ -225,11 +224,11 @@ public:
 #else
     /**                           REFERENCE                           */
     for (int i = 0; i < nFrames; i++) {
-      conversionBufferIn[0][i] = buffer[0][i];
+      mConversionBufferIn[0][i] = static_cast<float>(buffer[0][i]);
     }
-    convolvers[0]->process(conversionBufferIn[0], conversionBufferOut[0], nFrames);
+    mConvolvers[0]->process(mConversionBufferIn[0], mConversionBufferOut[0], nFrames);
     for (int i = 0; i < nFrames; i++) {
-      mBuffersOut[0][0][i] = conversionBufferOut[0][i];
+      mBuffersOut[0][0][i] = mConversionBufferOut[0][i];
     }
 
     if (!mStereo) {
@@ -239,11 +238,11 @@ public:
     }
     else {
       for (int i = 0; i < nFrames; i++) {
-        conversionBufferIn[1][i] = buffer[1][i];
+        mConversionBufferIn[1][i] = static_cast<float>(buffer[1][i]);
       }
-      convolvers[1]->process(conversionBufferIn[1], conversionBufferOut[1], nFrames);
+      mConvolvers[1]->process(mConversionBufferIn[1], mConversionBufferOut[1], nFrames);
       for (int i = 0; i < nFrames; i++) {
-        mBuffersOut[0][1][i] = conversionBufferOut[1][i];
+        mBuffersOut[0][1][i] = mConversionBufferOut[1][i];
       }
     }
 #endif

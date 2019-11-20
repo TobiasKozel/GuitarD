@@ -4,23 +4,29 @@
 
 class Node;
 
-class NodeSocket {
-public:
+struct NodeSocket {
+  bool mIsInput = false;
+  NodeSocket* mConnectedTo = nullptr;
+  Node* mParentNode = nullptr;
+  int mIndex = -1;
+  iplug::sample** mParentBuffer = nullptr;
+  float mX = 0;
+  float mY = 0;
+
+  Node* mConnectedNode = nullptr;
+  int mConnectedSocketIndex = -1;
+  // TODOG Get the message bus ouf here, since it shouldn't be needed without the GUI running
+  MessageBus::Bus* mBus = nullptr;
+
   /**
    * Constructor if it's a input socket, meaning it has no buffer
    * (Nodes only have an output buffer)
    */
-
-  NodeSocket(MessageBus::Bus* pBus, int pIndex, Node* pNode) {
+  NodeSocket(MessageBus::Bus* pBus, const int pIndex, Node* pNode) {
     mBus = pBus;
-    isInput = true;
-    connectedTo = nullptr;
-    parentNode = pNode;
-    index = pIndex;
-    parentBuffer = nullptr;
-    X = Y = 0;
-    connectedSocketIndex = -1;
-    connectedNode = nullptr;
+    mIsInput = true;
+    mParentNode = pNode;
+    mIndex = pIndex;
   }
 
   /**
@@ -29,14 +35,10 @@ public:
    */
   NodeSocket(MessageBus::Bus* pBus, int pIndex, Node* pNode, iplug::sample** pBuffer) {
     mBus = pBus;
-    isInput = false;
-    connectedTo = nullptr;
-    parentNode = pNode;
-    index = pIndex;
-    parentBuffer = pBuffer;
-    X = Y = 0;
-    connectedSocketIndex = -1;
-    connectedNode = nullptr;
+    mIsInput = false;
+    mParentNode = pNode;
+    mIndex = pIndex;
+    mParentBuffer = pBuffer;
   }
 
   ~NodeSocket() {
@@ -45,10 +47,10 @@ public:
 
   void disconnect() {
     MessageBus::fireEvent<bool>(mBus, MessageBus::AwaitAudioMutex, false);
-    if (isInput) {
-      connectedNode = nullptr;
-      connectedSocketIndex = -1;
-      connectedTo = nullptr;
+    if (mIsInput) {
+      mConnectedNode = nullptr;
+      mConnectedSocketIndex = -1;
+      mConnectedTo = nullptr;
     }
     else {
       MessageBus::fireEvent<NodeSocket*>(mBus, MessageBus::DisconnectSocket, this);
@@ -57,32 +59,20 @@ public:
 
   void connect(NodeSocket* to) {
     MessageBus::fireEvent<bool>(mBus, MessageBus::AwaitAudioMutex, false);
-    if (to->isInput == isInput) {
+    if (to->mIsInput == mIsInput) {
       WDBGMSG("Trying to connect an input to input / output to output!");
       return;
     }
-    if (isInput) {
-      connectedTo = to;
-      connectedNode = to->parentNode;
-      connectedSocketIndex = to->index;
+    if (mIsInput) {
+      mConnectedTo = to;
+      mConnectedNode = to->mParentNode;
+      mConnectedSocketIndex = to->mIndex;
     }
     else {
-      to->connectedTo = this;
-      to->connectedNode = parentNode;
-      to->connectedSocketIndex = index;
+      to->mConnectedTo = this;
+      to->mConnectedNode = mParentNode;
+      to->mConnectedSocketIndex = mIndex;
     }
 
   }
-
-  bool isInput;
-  NodeSocket* connectedTo;
-  Node* parentNode;
-  int index;
-  iplug::sample** parentBuffer;
-  float X;
-  float Y;
-
-  Node* connectedNode;
-  int connectedSocketIndex;
-  MessageBus::Bus* mBus;
 };

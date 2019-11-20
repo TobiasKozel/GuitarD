@@ -1,14 +1,14 @@
 #pragma once
 #include "SimpleGate.h"
 
-class SimpleGateNode : public SimpleGate {
+class SimpleGateNode final : public SimpleGate {
 public:
-  SimpleGateNode(std::string pType) {
+  SimpleGateNode(const std::string pType) {
     mType = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     Node::setupUi(pGrahics);
-    mUi->setColor(CATEGORYCOLORDYNAMICS);
+    mUi->setColor(Theme::Categories::DYNAMICS);
   }
 };

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "IPlugParameter.h"
-#include "IControl.h"
 #include "src/misc/constants.h"
 #include "src/node/Node.h"
 #include "src/parameter/ParameterCoupling.h"
@@ -9,18 +8,13 @@
 
 class ParameterManager {
   MessageBus::Bus* mBus;
-  iplug::IParam* parameters[MAX_DAW_PARAMS];
-  bool parametersClaimed[MAX_DAW_PARAMS];
-  int parametersLeft;
+  iplug::IParam* mParameters[MAX_DAW_PARAMS] = { nullptr };
+  bool mParametersClaimed[MAX_DAW_PARAMS] = { true };
+  int mParametersLeft = 0;
 
 public:
-  ParameterManager(MessageBus::Bus* pBus) {
+  explicit ParameterManager(MessageBus::Bus* pBus) {
     mBus = pBus;
-    parametersLeft = 0;
-    for (int i = 0; i < MAX_DAW_PARAMS; i++) {
-      parameters[i] = nullptr;
-      parametersClaimed[i] = true;
-    }
   }
 
   /**
@@ -29,10 +23,10 @@ public:
    */
   void addParameter(iplug::IParam* param) {
     std::string paramprefix = "Uninitialized ";
-    parametersClaimed[parametersLeft] = false;
-    parameters[parametersLeft++] = param;
+    mParametersClaimed[mParametersLeft] = false;
+    mParameters[mParametersLeft++] = param;
     // all these values have a range from 0-1 since this can't be changed later on
-    param->InitDouble((paramprefix + std::to_string(parametersLeft)).c_str(), 1, 0, 1.0, 0.01);
+    param->InitDouble((paramprefix + std::to_string(mParametersLeft)).c_str(), 1, 0, 1.0, 0.01);
   }
 
   /**
@@ -40,36 +34,36 @@ public:
    * Will return true if all parameters could be claimed, false if at least one failed
    */
   bool claimNode(Node* node) {
-    bool gotAllPamams = true;
+    bool gotAllParams = true;
     for (int i = 0; i < node->mParameters.GetSize(); i++) {
       if (!claimParameter(node->mParameters.Get(i))) {
         /**
          * this means the manager has no free parameters left and the control cannot be automated from the daw
          */
         WDBGMSG("Ran out of daw parameters!\n");
-        gotAllPamams = false;
+        gotAllParams = false;
       }
     }
     MessageBus::fireEvent<bool>(mBus, MessageBus::ParametersChanged, false);
-    return gotAllPamams;
+    return gotAllParams;
   }
 
   /**
    * This will provide one of the reserved daw parameters. If one is free, it will return true
    */
   bool claimParameter(ParameterCoupling* couple) {
-    if (parametersLeft > 0) {
+    if (mParametersLeft > 0) {
       int i = couple->parameterIdx;
       if (i == iplug::kNoParameter) {
         // if there's no parameter index set, go look for one
         for (i = 0; i < MAX_DAW_PARAMS; i++) {
-          if (!parametersClaimed[i]) {
+          if (!mParametersClaimed[i]) {
             // found one
             break;
           }
         }
       } else {
-        if (parametersClaimed[i]) {
+        if (mParametersClaimed[i]) {
           WDBGMSG("Could not claim a prefered DAW parameter!\n");
           // This is bad
           couple->parameter = nullptr;
@@ -77,9 +71,9 @@ public:
           return false;
         }
       }
-      parametersLeft--;
-      parametersClaimed[i] = true;
-      couple->parameter = parameters[i];
+      mParametersLeft--;
+      mParametersClaimed[i] = true;
+      couple->parameter = mParameters[i];
       switch (couple->type)
       {
       case ParameterCoupling::Boolean:
@@ -107,7 +101,7 @@ public:
         );
         break;
       }
-      // TODO These seem to be leaking and also don't force vsts to update the names
+      // TODOG These seem to be leaking and also don't force vsts to update the names
       // works for AU though
       //couple->parameter->SetLabel(couple->name);
       //couple->parameter->SetDisplayText(1, couple->name);
@@ -131,13 +125,13 @@ public:
 
   void releaseParameter(ParameterCoupling* couple) {
     for (int i = 0; i < MAX_DAW_PARAMS; i++) {
-      if (parameters[i] == couple->parameter) {
-        parametersClaimed[i] = false;
-        parameters[i]->SetLabel("Released");
-        parameters[i]->SetDisplayText(1, "Released");
+      if (mParameters[i] == couple->parameter) {
+        mParametersClaimed[i] = false;
+        mParameters[i]->SetLabel("Released");
+        mParameters[i]->SetDisplayText(1, "Released");
         // memleak TODO check if the const char cause leaks
         couple->parameter = nullptr;
-        parametersLeft++;
+        mParametersLeft++;
         WDBGMSG("Released param %i\n", i);
         return;
       }

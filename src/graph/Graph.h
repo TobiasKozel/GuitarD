@@ -79,7 +79,7 @@ public:
       this->serialize(*(mHistoryStack.pushState()));
     });
 
-    mPopUndoState.subscribe(mBus, MessageBus::PopUndoState, [&](bool redo) {
+    mPopUndoState.subscribe(mBus, MessageBus::PopUndoState, [&](const bool redo) {
       nlohmann::json* state = mHistoryStack.popState(redo);
       if (state != nullptr) {
         WDBGMSG("PopState");
@@ -270,13 +270,13 @@ public:
     if (reconnect) {
       NodeSocket* prevSock = node->mSocketsIn.Get(0);
       NodeSocket* nextSock = node->mSocketsOut.Get(0);
-      if (prevSock != nullptr && prevSock->connectedTo && nextSock != nullptr) {
+      if (prevSock != nullptr && prevSock->mConnectedTo && nextSock != nullptr) {
         MessageBus::fireEvent<SocketConnectRequest>(
           mBus,
           MessageBus::SocketRedirectConnection,
           SocketConnectRequest {
             nextSock,
-            prevSock->connectedTo
+            prevSock->mConnectedTo
           }
         );
       }

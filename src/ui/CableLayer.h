@@ -14,9 +14,16 @@ using namespace igraphics;
  * It also handles the splice in logic
  */
 class CableLayer : public IControl {
+  IGraphics* mGraphics;
+  WDL_PtrList<Node>* mNodes;
+  Node* mOutNode;
+  Node* mInNode;
+  NodeSocket* mHighlightSocket;
+  IBlend mBlend;
+
   MessageBus::Bus* mBus;
   MessageBus::Subscription<Node*> mDisconnectAllEvent;
-  MessageBus::Subscription<Coord2d> mNodeDraggedEvent;
+  MessageBus::Subscription<Coord2D> mNodeDraggedEvent;
   MessageBus::Subscription<Node*> mNodeDraggedEndEvent;
   MessageBus::Subscription<NodeSocket*> mPreviewSocketEvent;
   MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
@@ -47,8 +54,8 @@ public:
       this->mDirty = true;
     });
 
-    mNodeDraggedEvent.subscribe(mBus, MessageBus::NodeDragged, [&](Coord2d pos) {
-      float socketRadius = SOCKETDIAMETER / 2;
+    mNodeDraggedEvent.subscribe(mBus, MessageBus::NodeDragged, [&](Coord2D pos) {
+      const float socketRadius = Theme::Sockets::DIAMETER / 2;
       mHighlightSocket = nullptr;
       Node* curNode;
       NodeSocket* curSock;
@@ -61,22 +68,22 @@ public:
         }
         for (int i = 0; i < curNode->mInputCount; i++) {
           curSock = curNode->mSocketsIn.Get(i);
-          tarSock = curSock->connectedTo;
+          tarSock = curSock->mConnectedTo;
           if (tarSock != nullptr) {
-            float x1 = tarSock->X + socketRadius;
-            float x2 = curSock->X + socketRadius;
-            float y1 = tarSock->Y + socketRadius;
-            float y2 = curSock->Y + socketRadius;
+            float x1 = tarSock->mX + socketRadius;
+            float x2 = curSock->mX + socketRadius;
+            float y1 = tarSock->mY + socketRadius;
+            float y2 = curSock->mY + socketRadius;
             IRECT box;
             box.L = min(x1, x2) - SPLICEIN_DISTANCE;
             box.R = max(x1, x2) + SPLICEIN_DISTANCE;
             box.T = min(y1, y2) - SPLICEIN_DISTANCE;
             box.B = max(y1, y2) + SPLICEIN_DISTANCE;
             if (box.Contains(IRECT{ pos.x, pos.y, pos.x, pos.y })) {
-              float a = y1 - y2;
-              float b = x2 - x1;
-              float c = x1 * y2 - x2 * y1;
-              float d = abs(a * pos.x + b * pos.y + c) / sqrt(a * a + b * b);
+              const float a = y1 - y2;
+              const float b = x2 - x1;
+              const float c = x1 * y2 - x2 * y1;
+              const float d = abs(a * pos.x + b * pos.y + c) / sqrt(a * a + b * b);
               if (d < SPLICEIN_DISTANCE) {
                 mHighlightSocket = curSock;
                 break;
@@ -92,13 +99,13 @@ public:
       mHighlightSocket = nullptr;
       mDirty = true;
       if (target != nullptr) {
-        if (target->parentNode == node) {
+        if (target->mParentNode == node) {
           return;
         }
-        Node* targetNode = target->parentNode;
+        Node* targetNode = target->mParentNode;
         for (int i = 0; i < targetNode->mInputCount; i++) {
-          if (targetNode->mSocketsIn.Get(i)->connectedTo != nullptr &&
-              targetNode->mSocketsIn.Get(i)->connectedTo->parentNode == node) {
+          if (targetNode->mSocketsIn.Get(i)->mConnectedTo != nullptr &&
+              targetNode->mSocketsIn.Get(i)->mConnectedTo->mParentNode == node) {
             return;
           }
         }
@@ -109,7 +116,7 @@ public:
     mPreviewSocketEvent.subscribe(mBus, MessageBus::PreviewSocket, [&](NodeSocket* socket) {
       // TODO this is kinda shady and does not use the MessageBus::SocketConnect event
       NodeSocket* outSocket = this->mOutNode->mSocketsIn.Get(0);
-      if (outSocket->connectedTo == socket) { return; }
+      if (outSocket->mConnectedTo == socket) { return; }
       if (socket == this->mPreviewSocket) {
         // Connect the original socket again
         if (this->mPreviewSocketPrev != nullptr) {
@@ -120,7 +127,7 @@ public:
       }
       else {
         // Save the currently connected socket and connect it to the one provided
-        this->mPreviewSocketPrev = outSocket->connectedTo;
+        this->mPreviewSocketPrev = outSocket->mConnectedTo;
         this->mPreviewSocket = socket;
         outSocket->connect(socket);
       }
@@ -150,17 +157,23 @@ public:
   }
 
   inline void DrawSocket(IGraphics& g, NodeSocket* s) {
-    float x = s->X + SOCKETRADIUS;
-    float y = s->Y + SOCKETRADIUS;
-    g.FillCircle(SOCKETCOLOR, x, y, SOCKETRADIUS * 0.5 * SOCKETOUTLINESIZE, &mBlend);
-    g.FillCircle(SOCKETCOLORINNER, x, y, SOCKETRADIUS * 0.4, &mBlend);
+    float x = s->mX + Theme::Sockets::RADIUS;
+    float y = s->mY + Theme::Sockets::RADIUS;
+    g.FillCircle(
+      Theme::Sockets::COLOR, x, y,
+      Theme::Sockets::RADIUS * 0.5 * Theme::Sockets::OUTLINE_SIZE, &mBlend
+    );
+    g.FillCircle(
+      Theme::Sockets::COLOR_INNER, x, y,
+      Theme::Sockets::RADIUS * 0.4, &mBlend
+    );
   }
 
   void Draw(IGraphics& g) override {
     Node* curNode;
     NodeSocket* curSock;
     NodeSocket* tarSock;
-    float socketRadius = SOCKETDIAMETER / 2;
+    const float socketRadius = Theme::Sockets::DIAMETER / 2;
     // Draw all the connections between nodes
     for (int n = 0; n < mNodes->GetSize() + 1; n++) {
       curNode = mNodes->Get(n);
@@ -170,32 +183,32 @@ public:
       }
       for (int i = 0; i < curNode->mInputCount; i++) {
         curSock = curNode->mSocketsIn.Get(i);
-        if (curSock->connectedTo != nullptr) {
-          tarSock = curSock->connectedTo;
+        if (curSock->mConnectedTo != nullptr) {
+          tarSock = curSock->mConnectedTo;
           if (tarSock == mPreviewSocket && curSock == mOutNode->mSocketsIn.Get(0)) {
             // Draw the temporary bypass
             g.DrawDottedLine(
-              curSock == mHighlightSocket ? CABLECOLORSPLICE : CABLECOLOR,
-              curSock->X + socketRadius, curSock->Y + socketRadius,
-              tarSock->X + socketRadius, tarSock->Y + socketRadius,
-              &mBlend, CABLETHICKNESS, CABLEPREVIEWDASHDIST
+              curSock == mHighlightSocket ? Theme::Cables::COLOR_SPLICE_IN : Theme::Cables::COLOR,
+              curSock->mX + socketRadius, curSock->mY + socketRadius,
+              tarSock->mX + socketRadius, tarSock->mY + socketRadius,
+              &mBlend, Theme::Cables::THICKNESS, Theme::Cables::PREVIEW_DASH_DIST
             );
             if (mPreviewSocketPrev != nullptr) {
               // draw the original connection slightly transparent
               g.DrawLine(
-                curSock == mHighlightSocket ? CABLECOLORSPLICE : CABLECOLORPREVIEW,
-                curSock->X + socketRadius, curSock->Y + socketRadius,
-                mPreviewSocketPrev->X + socketRadius, mPreviewSocketPrev->Y + socketRadius,
-                &mBlend, CABLETHICKNESS
+                curSock == mHighlightSocket ? Theme::Cables::COLOR_SPLICE_IN : Theme::Cables::COLOR_PREVIEW,
+                curSock->mX + socketRadius, curSock->mY + socketRadius,
+                mPreviewSocketPrev->mX + socketRadius, mPreviewSocketPrev->mY + socketRadius,
+                &mBlend, Theme::Cables::THICKNESS
               );
             }
           }
           else {
             g.DrawLine(
-              curSock == mHighlightSocket ? CABLECOLORSPLICE : CABLECOLOR,
-              curSock->X + socketRadius, curSock->Y + socketRadius,
-              tarSock->X + socketRadius, tarSock->Y + socketRadius,
-              &mBlend, CABLETHICKNESS
+              curSock == mHighlightSocket ? Theme::Cables::COLOR_SPLICE_IN : Theme::Cables::COLOR,
+              curSock->mX + socketRadius, curSock->mY + socketRadius,
+              tarSock->mX + socketRadius, tarSock->mY + socketRadius,
+              &mBlend, Theme::Cables::THICKNESS
             );
           }
         }
@@ -205,8 +218,8 @@ public:
     // Draw a new connection from the user to start socket;
     if (mConnectionDragData != nullptr) {
       g.DrawLine(
-        CABLECOLOR, mConnectionDragData->startX, mConnectionDragData->startY,
-        mConnectionDragData->currentX, mConnectionDragData->currentY, &mBlend, CABLETHICKNESS
+        Theme::Cables::COLOR, mConnectionDragData->startX, mConnectionDragData->startY,
+        mConnectionDragData->currentX, mConnectionDragData->currentY, &mBlend, Theme::Cables::THICKNESS
       );
     }
 
@@ -239,11 +252,4 @@ public:
     mRECT.B = mGraphics->Height();
   }
 
-private:
-  IGraphics* mGraphics;
-  WDL_PtrList<Node>* mNodes;
-  Node* mOutNode;
-  Node* mInNode;
-  NodeSocket* mHighlightSocket;
-  IBlend mBlend;
 };

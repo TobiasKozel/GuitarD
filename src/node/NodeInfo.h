@@ -10,7 +10,7 @@ namespace NodeList {
   struct NodeInfo {
     NodeConstructor constructor;
     std::string name;
-    std::string dislayName;
+    std::string displayName;
     std::string image;
     std::string categoryName;
   };

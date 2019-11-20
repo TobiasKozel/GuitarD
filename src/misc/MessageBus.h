@@ -26,12 +26,10 @@ namespace MessageBus {
   typedef WDL_PtrList<BaseSubscription> SubsVector;
 
   // The bus object knows about all the subscribers and relays the events
-  class Bus {
-  public:
+  struct Bus {
     SubsVector mSubscriptions[TOTAL_MESSAGE_IDS];
     WDL_Mutex mMutex;
     int mSubCount = 0;
-    Bus() {}
     ~Bus() {
       /**
        * If the destructor is called, the plugin was probably destroyed
@@ -74,13 +72,10 @@ namespace MessageBus {
   public:
     function<void(T param)> mCallback;
 
-    Subscription(Bus* pBus, const MESSAGE_ID pEventId, function<void(T param)> callback) {
-      subscribed = false;
-      subscribe(pBus, pEventId, callback);
-    }
+    Subscription() {}
 
-    Subscription() {
-      subscribed = false;
+    Subscription(Bus* pBus, const MESSAGE_ID pEventId, function<void(T param)> callback) {
+      subscribe(pBus, pEventId, callback);
     }
 
     ~Subscription() {

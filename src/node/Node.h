@@ -23,35 +23,23 @@ public:
   WDL_PtrList<NodeSocket> mSocketsOut;
 
   // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
-  iplug::sample*** mBuffersOut;
-  int mInputCount;
-  int mOutputCount;
-  NodeUi* mUi;
-  bool mIsProcessed;
+  iplug::sample*** mBuffersOut = nullptr;
+  int mInputCount = 0;
+  int mOutputCount = 0;
+  NodeUi* mUi = nullptr;
+  bool mIsProcessed = false;
   
-  float mX;
-  float mY;
-  float rotation;
+  float mX = 0;
+  float mY = 0;
+  float rotation = 0;
 
-  int mSampleRate;
-  int mChannelCount;
-  int mMaxBuffer;
-  int mLastBlockSize;
+  int mSampleRate = 0;
+  int mChannelCount = 0;
+  int mMaxBuffer = 0;
+  int mLastBlockSize = 0;
 
-  double mByPassed;
-  double mStereo;
-
-  /**
-   * The constructor doesn't take any parameters since it can be instanciated from the NodeList
-   */
-  Node() {
-    mUi = nullptr;
-    mBuffersOut = nullptr;
-    mByPassed = 0;
-    mStereo = 1;
-    mX = mY = 0;
-    rotation = 0;
-  };
+  double mByPassed = 0;
+  double mStereo = 1;
 
   /**
    * This is basically a delayed constructor with the only disadvatage: derived methods have to have the same parameters
@@ -67,8 +55,6 @@ public:
     mIsProcessed = false;
     mUiReady = false;
     OnReset(p_samplerate, p_channles);
-
-
 
     // Setup the sockets for the node connections
     for (int i = 0; i < mInputCount; i++) {
@@ -97,7 +83,7 @@ public:
     }
   }
 
-  /** Delets all the allocated buffers */
+  /** Deletes all the allocated buffers */
   virtual void deleteBuffers() {
     if (mBuffersOut != nullptr) {
       for (int i = 0; i < mOutputCount; i++) {
@@ -141,7 +127,7 @@ public:
     // The first param will always be bypass
     mParameters.Get(0)->update();
     if (mByPassed < 0.5) { return false; }
-    iplug::sample** in = mSocketsIn.Get(0)->connectedTo->parentBuffer;
+    iplug::sample** in = mSocketsIn.Get(0)->mConnectedTo->mParentBuffer;
     for (int o = 0; o < mOutputCount; o++) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < mMaxBuffer; i++) {
@@ -160,14 +146,14 @@ public:
      * If that's not desired, this function has to be overidden
      */
     for (int i = 0; i < mSocketsIn.GetSize(); i++) {
-      if (mSocketsIn.Get(i)->connectedTo == nullptr) {
+      if (mSocketsIn.Get(i)->mConnectedTo == nullptr) {
         outputSilence();
         return false;
       }
     }
 
     for (int i = 0; i < mInputCount; i++) {
-      if (!mSocketsIn.Get(i)->connectedTo->parentNode->mIsProcessed) {
+      if (!mSocketsIn.Get(i)->mConnectedTo->mParentNode->mIsProcessed) {
         // A node isn't ready so return false
         return false;
       }
@@ -177,8 +163,6 @@ public:
 
   /** Main Processing, only takes a blocksize since it knows its inputs */
   virtual void ProcessBlock(int nFrames) = 0;
-
-
 
 
 

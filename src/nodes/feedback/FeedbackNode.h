@@ -1,12 +1,12 @@
 #pragma once
 #include "src/node/Node.h"
 
-class FeedbackNode : public Node {
+class FeedbackNode final : public Node {
   bool hasLastBuffer;
   double gain;
   sample** prevBlock;
 public:
-  FeedbackNode(std::string pType) : Node() {
+  FeedbackNode(const std::string pType) : Node() {
     mType = pType;
   }
 
@@ -23,8 +23,8 @@ public:
       }
     }
 
-    mSocketsIn.Get(0)->X = mX + 100;
-    mSocketsOut.Get(0)->X = mX - 100;
+    mSocketsIn.Get(0)->mX = mX + 100;
+    mSocketsOut.Get(0)->mX = mX - 100;
     hasLastBuffer = false;
   }
 
@@ -44,7 +44,7 @@ public:
     mIsProcessed = true;
     if (inputsReady() && !hasLastBuffer) {
       mParameters.Get(0)->update();
-      sample** buffer = mSocketsIn.Get(0)->connectedTo->parentBuffer;
+      sample** buffer = mSocketsIn.Get(0)->mConnectedTo->mParentBuffer;
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
           mBuffersOut[0][c][i] = prevBlock[c][i] * gain;
@@ -57,6 +57,6 @@ public:
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     Node::setupUi(pGrahics);
-    mUi->setColor(CATEGORYCOLORTOOLS);
+    mUi->setColor(Theme::Categories::TOOLS);
   }
 };

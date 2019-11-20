@@ -1,14 +1,14 @@
 #pragma once
 #include "OverDrive.h"
 
-class OverDriveNode : public OverDrive {
+class OverDriveNode final : public OverDrive {
 public:
-  OverDriveNode(std::string pType) {
+  OverDriveNode(const std::string pType) {
     mType = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     Node::setupUi(pGrahics);
-    mUi->setColor(CATEGORYCOLORDISTORTION);
+    mUi->setColor(Theme::Categories::DISTORTION);
   }
 };

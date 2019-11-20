@@ -1,14 +1,14 @@
 #pragma once
 #include "SimpleReverb.h"
 
-class SimpleReverbNode : public SimpleReverb {
+class SimpleReverbNode final : public SimpleReverb {
 public:
-  SimpleReverbNode(std::string pType) {
+  SimpleReverbNode(const std::string pType) {
     mType = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     Node::setupUi(pGrahics);
-    mUi->setColor(CATEGORYCOLORSPATIAL);
+    mUi->setColor(Theme::Categories::SPATIAL);
   }
 };

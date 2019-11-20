@@ -2,80 +2,88 @@
 #include "config.h"
 #include "IPlugStructs.h"
 
-#define DEBUGFONT iplug::igraphics::IText { 16, COLOR_BLACK, "Roboto-Regular", iplug::igraphics::EAlign::Center, iplug::igraphics::EVAlign::Middle, 0 }
-#define ICONFONT iplug::igraphics::IText {16.f, COLOR_WHITE, "ForkAwesome"}
+using namespace iplug;
+using namespace igraphics;
 
-#define COLORACCENT 233, 140, 36
+namespace Theme {
+  namespace Colors {
+    const IColor ACCENT(255, 233, 140, 36);
+  }
+  namespace Graph {
+    const IColor BACKGROUND(255, 230, 230, 230);
+    const IColor BACKGROUND_DETAIL(255, 200, 200, 200);
+    const float BACKGROUND_DETAIL_DIST = 140.f;
+    const float BACKGROUND_DETAIL_SIZE = 12;
+    const float BACKGROUND_DETAIL_WIDTH = 1.5;
+  }
 
-/** Graph background */
-#define COLORBACKGROUND 230, 230, 230
-#define COLORBACKGROUNDDETAIL 200, 200, 200
-#define BACKGROUNDDETAILDIST  140
-#define BACKGROUNDDETAILSIZE  12
-#define BACKGROUNDDETAILWIDTH  1.5
+  namespace Gallery {
+    const float GALLERY_ADD_CIRCLE_DIAMETER = 48.f;
+    const float GALLERY_ADD_CIRCLE_RADIUS = GALLERY_ADD_CIRCLE_DIAMETER * 0.5f;
+    const IColor COLOR_GALLERY_BACKGROUND(255, 180, 180, 180);
+    const float BUTTON_SIZE = 18;
+    const float BUTTON_ICON_SIZE = 3;
+    const float PADDING = 10;
 
-/** Node gallery */
-#define GALLERYADDCIRCLEDIAMETER 48
-#define GALLERYADDCIRCLERADIUS GALLERYADDCIRCLEDIAMETER * 0.5
-#define GALLERYADDSIGNSIZE  18
-#define GALLERYADDSIGNWIDTH  3
-#define GALLERYPADDING 10
-#define GALLERYBACKGROUND 180, 180, 180
+    const IText ELEMENT_TITLE{ 18, COLOR_WHITE, "Roboto-Regular", EAlign::Center, EVAlign::Bottom, 0 };
+    const float ELEMENT_TITLE_HEIGHT = 28;
+    const float ELEMENT_HEIGHT = 110;
+    const float ELEMENT_WIDTH = 200;
+    const float ELEMENT_PADDING = 8;
 
-#define GALLERYELEMENTTITLE iplug::igraphics::IText{ 18, COLOR_WHITE, "Roboto-Regular", EAlign::Center, EVAlign::Bottom, 0 }
-#define GALLERYELEMENTTITLEHEIGHT 28
-#define GALLERYELEMENTHEIGHT 110
-#define GALLERYELEMENTWIDTH 200
-#define GALLERYELEMENTPADDING 8
+    const IColor CATEGORY_TITLE_BG(255, 100, 100, 100);
+    const IText CATEGORY_TITLE{ 24, COLOR_WHITE, "Roboto-Regular", EAlign::Center, EVAlign::Middle, 0 };
+    const float CATEGORY_PADDING = 8;
+    const IColor CATEGORY_BG(255, 30, 30, 30);
+  }
 
-#define GALLERYCATEGORYTITLEBACKROUND 100, 100, 100
-#define GALLERYCATEGORYTITLE IText { 24, COLOR_WHITE, "Roboto-Regular", EAlign::Center, EVAlign::Middle, 0 }
-#define GALLERYCATEGORYPADDING 8
-#define GALLERYCATEGORYBACKGROUND 30, 30, 30
+  namespace Categories {
+    const IColor TOOLS(255, 100, 100, 220);
+    const IColor FILTER(255, 50, 150, 70);
+    const IColor DISTORTION(255, 200, 80, 60);
+    const IColor DYNAMICS(255, 120, 50, 130);
+    const IColor SPATIAL(255, 60, 50, 160);
+  }
 
+  namespace Cables {
+    const float THICKNESS = 5;
+    const float PREVIEW_DASH_DIST = 20;
+    const IColor COLOR(255, 40, 40, 40);
+    const IColor COLOR_SPLICE_IN(255, 250, 150, 0);
+    const IColor COLOR_PREVIEW(150, 40, 40, 40);
+  }
 
+  namespace Sockets {
+    const float DIAMETER = 30.f;
+    const float RADIUS = DIAMETER * 0.5f;
+    const float ACTIVE_SIZE = RADIUS * 0.7f;
+    const float OUTLINE_SIZE = 1.1f;
+    const IColor COLOR(255, 40, 40, 40);
+    const IColor COLOR_INNER(255, 250, 250, 250);
+    const IColor COLOR_ACTIVE(255, 250, 150, 0);
+  }
 
-/** Nodes */
-#define NODEHEADERSIZE 20
-#define NODEHEADERCOLOR 30, 30, 30
-#define NODEHEADERBYPASSLEFT 6
-#define NODEHEADERBYPASSTOP 2
-#define NODEHEADERBYPASSSIZE 16
+  namespace  Node {
+#define NODE_CACHE_BG
+#define NODE_ROUNDED_CORNER
+#define NODE_SHADOW
+    const IColor HEADER{ 255, 30, 30, 30 };
+    const float HEADER_SIZE = 20;
+    const float HEADER_BYPASS_LEFT = 6;
+    const float HEADER_BYPASS_TOP = 2;
+    const float HEADER_BYPASS_SIZE = 16;
+    const float HEADER_DISCONNECT_RIGHT = 26;
+    const float HEADER_DISCONNECT_TOP = 2;
+    const float HEADER_DISCONNECT_SIZE = 20;
+    const float HEADER_REMOVE_RIGHT = 6;
+    const float SHADOW_DIST_X = 2.f;
+    const float SHADOW_DIST_Y = 2.f;
+    const float SHADOW_BOUNDS = 15.f;
+    const float SHADOW_BLUR = 15.f;
+    const float ROUNDED_CORNER = 15.f;
+    const IColor SHADOW_COLOR(255, 0, 0, 0);
+  }
+}
 
-#define NODEHEADERDISCONNECTRIGHT 26
-#define NODEHEADERDISCONNECTTOP 2
-#define NODEHEADERDISCONNECTSIZE 20
-
-#define NODEHEADERREMOVERIGHT 6
-
-#define NODESCACHEBG
-#define NODESROUNDEDCORNER
-#define NODESSHADOW
-#define NODESHADOWDIST 2.f
-#define NODESHADOWBOUNDS 15.f
-#define NODESHADOWBLUR 15.f
-#define NODESHADOWROUND 15.f
-const iplug::igraphics::IColor NODESHADOWCOLOR(255, 0, 0, 0);
-
-/** NODE SOCKETS */
-#define SOCKETDIAMETER 30
-#define SOCKETRADIUS SOCKETDIAMETER * 0.5
-#define SOCKETATIVESIZE SOCKETRADIUS * 0.7
-#define SOCKETOUTLINESIZE 1.1
-const iplug::igraphics::IColor SOCKETCOLOR(255, 40, 40, 40);
-const iplug::igraphics::IColor SOCKETCOLORINNER(255, 250, 250, 250);
-const iplug::igraphics::IColor SOCKETCOLORACITVE(255, 250, 150, 0);
-
-/**   CABLE LAYER */
-#define CABLETHICKNESS 5
-#define CABLEPREVIEWDASHDIST 20
-const iplug::igraphics::IColor CABLECOLOR(255, 40, 40, 40);
-const iplug::igraphics::IColor CABLECOLORSPLICE(255, 250, 150, 0);
-const iplug::igraphics::IColor CABLECOLORPREVIEW(150, 40, 40, 40);
-
-/** Color scheme */
-const iplug::igraphics::IColor CATEGORYCOLORTOOLS(255, 100, 100, 220);
-const iplug::igraphics::IColor CATEGORYCOLORFILTER(255, 50, 150, 70);
-const iplug::igraphics::IColor CATEGORYCOLORDISTORTION(255, 200, 80, 60);
-const iplug::igraphics::IColor CATEGORYCOLORDYNAMICS(255, 120, 50, 130);
-const iplug::igraphics::IColor CATEGORYCOLORSPATIAL(255, 60, 50, 160);
+#define DEBUG_FONT IText { 16, COLOR_BLACK, "Roboto-Regular", iplug::igraphics::EAlign::Center, iplug::igraphics::EVAlign::Middle, 0 }
+#define ICON_FONT IText {16.f, COLOR_WHITE, "ForkAwesome"}
