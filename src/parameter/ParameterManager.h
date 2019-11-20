@@ -63,11 +63,12 @@ public:
           }
         }
       } else {
-        if (mParametersClaimed[i]) {
+        if (MAX_DAW_PARAMS <= i || mParametersClaimed[i]) {
           WDBGMSG("Could not claim a prefered DAW parameter!\n");
           // This is bad and means a preset will not load correctly
           couple->parameter = nullptr;
           couple->parameterIdx = iplug::kNoParameter;
+          couple->baseValue = *(couple->value);
           return false;
         }
       }
