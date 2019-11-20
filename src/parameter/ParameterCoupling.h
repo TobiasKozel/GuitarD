@@ -101,6 +101,70 @@ struct ParameterCoupling {
     }
   }
 
+  /**
+   * This should only be called from the audio thread since the value might tear on 32bit
+   */
+  void update() const {
+    *value = getValue() + automation;
+  }
+
+  /**
+   * Simply returns the value used in the DSP
+   */
+  inline double getValue() const {
+    if (parameter != nullptr) {
+      return parameter->Value();
+    }
+    return baseValue;
+  }
+
+
+  inline double scaledToNormalized(const double v) const {
+    return ((v - min) / (max - min));
+  }
+
+  inline double normalizedToScaled(const double v) const {
+    return min + v * (max - min);
+  }
+
+
+  inline double normalizedToExp(const double v) const {
+    return std::exp(mAdd + v * mMul);
+  }
+
+  inline double expToNormalized(const double v) const {
+    return (std::log(v) - mAdd) / mMul;
+  }
+
+  /**
+   * Usually called from the IControl callback with a linear
+   * normalized value, this will scale it to the internal DSP value
+   */
+  void setFromNormalized(const double v) {
+    if (parameter != nullptr) {
+      parameter->SetNormalized(v);
+      return;
+    }
+    if (type == Frequency) {
+      baseValue = normalizedToExp(v);
+      return;
+    }
+    baseValue = normalizedToScaled(v);
+  }
+
+  /**
+   * Return the normalized and shaped value to use for controls
+   */
+  double getNormalized() const {
+    if (parameter != nullptr) {
+      return parameter->GetNormalized();
+    }
+    if (type == Frequency) {
+      return expToNormalized(baseValue);
+    }
+    return scaledToNormalized(baseValue);
+  }
+
   void setPos(const float pX, const float pY, const float size = -1, const bool pShowLabel = true, const bool pShowValue = true) {
     x = pX;
     y = pY;
@@ -113,39 +177,11 @@ struct ParameterCoupling {
 
   template <typename T>
   T getValue() {
-    if (parameter != nullptr) {
-      return static_cast<T>(parameter->Value());
-    }
-    else {
-      return static_cast<T>(baseValue);
-    }
+    return static_cast<T>(getValue());
   }
 
   template <typename T>
   T getWithAutomation() {
-    if (parameter != nullptr) {
-      return static_cast<T>(parameter->Value() + automation);
-    }
-    else {
-      return static_cast<T>(baseValue + automation);
-    }
-  }
-
-  /**
-   * This should only be called from the audio thread since the value might tear on 32bit
-   */
-  void update() const {
-    if (parameter != nullptr) {
-      *value = parameter->Value() + automation;
-    }
-    else {
-      // TODOG handle the other types here as well
-      if (type == Frequency) {
-        *value = std::exp(mAdd + ((baseValue - min) / max) * mMul) + automation;
-      }
-      else {
-        *value = baseValue + automation;
-      }
-    }
+    return static_cast<T>(getValue() + automation);
   }
 };

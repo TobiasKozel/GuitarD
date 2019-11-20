@@ -71,8 +71,8 @@ public:
   virtual void instanceConstants(int samplingFreq) = 0;
   virtual void instanceClear() = 0;
 
-  void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAX_BUFFER, int p_channels = 2, int p_inputs = 1, int p_outputs = 1) {
-    Node::setup(pBus, p_samplerate, p_maxBuffer, p_channels, getNumInputs() / p_channels, getNumOutputs() / p_channels);
+  void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, const int pMaxBuffer = MAX_BUFFER, const int pChannels = 2, int pInputs = 1, int pOutputs = 1) {
+    Node::setup(pBus, pSamplerate, pMaxBuffer, pChannels, getNumInputs() / pChannels, getNumOutputs() / pChannels);
     
     /**
      * This will use the UI shim to create ParameterCouplings between the faust dsp and iplug iControls
@@ -80,7 +80,7 @@ public:
      * the right ones so the automation will affect the correct parameters
      */
     buildUserInterface(&faustUi);
-    init(p_samplerate);
+    init(pSamplerate);
     if (mType == DEFAULT_NODE_NAME) {
       mType = faustUi.name;
     }

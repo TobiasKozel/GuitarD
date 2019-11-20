@@ -218,15 +218,13 @@ public:
         // use the callback to get the value to the dsp, won't allow automation though
         couple->control = new IVKnobControl(
           controlPos, [couple](IControl* pCaller) {
-          // TODOG Add a label and handle nonlinear scalings according to the type
-          couple->baseValue =
-            (pCaller->GetValue() * (couple->max - couple->min)) + couple->min;
+          // TODOG Add a label with the current value
+          couple->setFromNormalized(pCaller->GetValue());
         }, couple->name, DEFAULT_STYLE, true, true
         );
       }
-      couple->control->SetValue(
-        (value - couple->min) / (couple->max - couple->min)
-      );
+      
+      couple->control->SetValue(couple->getNormalized());
       mGraphics->AttachControl(couple->control);
       mElements.Add(couple->control);
       if (i == 0 && mHeader.hasByPass) { couple->control->Hide(true); }
