@@ -114,10 +114,11 @@ public:
     });
 
     mPreviewSocketEvent.subscribe(mBus, MessageBus::PreviewSocket, [&](NodeSocket* socket) {
-      // TODO this is kinda shady and does not use the MessageBus::SocketConnect event
+      // WDBGMSG(socket->mParentNode->mType.c_str());
+      // TODOG this is kinda shady and does not use the MessageBus::SocketConnect event
       NodeSocket* outSocket = this->mOutNode->mSocketsIn.Get(0);
-      if (socket == this->mPreviewSocket) {
-        // Connect the original socket again
+      if (socket == this->mPreviewSocketPrev || socket == this->mPreviewSocket) {
+        // If the socket clicked is the current preview socket, connect the original socket again
         if (this->mPreviewSocketPrev != nullptr) {
           outSocket->connect(this->mPreviewSocketPrev);
           this->mPreviewSocketPrev = nullptr;
@@ -128,7 +129,9 @@ public:
         // Don't do anything if the socket is already connected to the output node
         if (outSocket->mConnectedTo == socket) { return; }
         // Save the currently connected socket and connect it to the one provided
-        this->mPreviewSocketPrev = outSocket->mConnectedTo;
+        if (this->mPreviewSocket == nullptr) {
+          this->mPreviewSocketPrev = outSocket->mConnectedTo;
+        }
         this->mPreviewSocket = socket;
         outSocket->connect(socket);
       }
@@ -136,6 +139,7 @@ public:
     });
 
     onConnectionEvent.subscribe(mBus, MessageBus::SocketConnect, [&](SocketConnectRequest req) {
+      // TODOG maybe connect back to the original instead of making the temp preview the active one
       mPreviewSocket = nullptr;
       mPreviewSocketPrev = nullptr;
     });
