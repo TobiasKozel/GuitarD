@@ -100,8 +100,10 @@ public:
         if (node == nullptr) { continue; }
         for (int p = 0; p < node->mParameters.GetSize(); p++) {
           if (node->mParameters.Get(p)->control == r.targetControl) {
-            ParameterCoupling* couple = node->attachAutomation(r.automationNode, p);
-            r.automationNode->addAutomationTarget(couple);
+            if (node != r.automationNode) {
+              // Don't allow automation on self
+              node->attachAutomation(r.automationNode, p);
+            }
           }
         }
       }

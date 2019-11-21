@@ -57,6 +57,9 @@ public:
 
 };
 
+/**
+ * This will take a signal and allow internal modulation for any other parameters
+ */
 class EnvelopeNode final : public Node {
   WDL_PtrList<ParameterCoupling> mAutomationTargets;
   int mAutomationTargetCount = 0;
@@ -64,8 +67,14 @@ class EnvelopeNode final : public Node {
   double filter = 0;
   double avg = 0;
 public:
-  explicit EnvelopeNode(const std::string pType) : Node() {
+  explicit EnvelopeNode(const std::string pType) {
     mType = pType;
+  }
+
+  ~EnvelopeNode() {
+    for(int i = 0; i < mAutomationTargets.GetSize(); i++) {
+      removeAutomationTarget(mAutomationTargets.Get(i));
+    }
   }
 
   void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, int pMaxBuffer = MAX_BUFFER, int pChannles = 2, int pInputs = 1, int pOutputs = 1) override {
@@ -80,8 +89,9 @@ public:
     mParameters.Add(p);
 
     p = new ParameterCoupling(
-      "Filter", &filter, 0, 0, 1.0, 0.001
+      "Filter", &filter, 0, 0, 1, 0.01
     );
+    p->type = ParameterCoupling::Frequency;
     p->x = 0;
     p->y = -100;
     mParameters.Add(p);
@@ -89,21 +99,37 @@ public:
   }
 
   void addAutomationTarget(ParameterCoupling* c) override {
+    // Check if it's our own target
     if (mAutomationTargets.Find(c) == -1) {
+      if (c->automationDependency != nullptr) {
+        // If not, but there's still a target, get rid of it
+        c->automationDependency->removeAutomationTarget(c);
+      }
       mAutomationTargets.Add(c);
       mAutomationTargetCount++;
+      if (c->automationDependency != nullptr) {
+        WDBGMSG("Trying to attach automation to a Param with an automation!\n");
+        assert(true);
+      }
+      c->automationDependency = this;
+    }
+    else {
+      // It's ours so get rid of it
+      removeAutomationTarget(c);
     }
   }
 
   void removeAutomationTarget(ParameterCoupling* c) override {
-    int i = mAutomationTargets.Find(c);
+    const int i = mAutomationTargets.Find(c);
     if (i != -1) {
       mAutomationTargets.Delete(i);
       mAutomationTargetCount--;
+      c->automationDependency = nullptr;
+      c->automation = 0;
     }
   }
 
-  void ProcessBlock(int nFrames) override {
+  void ProcessBlock(const int nFrames) override {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
     sample** buffer = mSocketsIn.Get(0)->mConnectedTo->mParentBuffer;
     mParameters.Get(1)->update();
@@ -113,7 +139,8 @@ public:
       value += abs(buffer[0][i]);
     }
     value /= nFrames;
-    avg = (filter * avg + (1 - filter) * value);
+    avg = (filter * value + (1 - filter) * avg);
+
     for (int i = 0; i < mAutomationTargetCount; i++) {
       ParameterCoupling* c = mAutomationTargets.Get(i);
       c->automation = avg * gain * c->max;

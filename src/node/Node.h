@@ -23,11 +23,11 @@ public:
   WDL_PtrList<NodeSocket> mSocketsIn;
   int mOutputCount = 0;
   WDL_PtrList<NodeSocket> mSocketsOut;
-  int mAutomationCount = 0;
-  WDL_PtrList<Node> mAutomations;
-
+  // Flag to skip automation if there's none
+  bool mIsAutomated = false;
   // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
   iplug::sample*** mBuffersOut = nullptr;
+  // The UI element representing this node instance visually
   NodeUi* mUi = nullptr;
   bool mIsProcessed = false;
   
@@ -44,8 +44,8 @@ public:
   double mStereo = 1;
 
   /**
-   * This is basically a delayed constructor with the only disadvatage: derived methods have to have the same parameters
-   * The derived class will call this with the desired paramters, except for the samplerate
+   * This is basically a delayed constructor with the only disadvantage: derived methods have to have the same parameters
+   * The derived class will call this with the desired parameters, except for the samplerate
    */
   virtual void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAX_BUFFER, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
     mBus = pBus;
@@ -70,7 +70,9 @@ public:
     }
   }
 
-  /** create all the needed buffers for the dsp */
+  /**
+   * Create all the needed buffers for the dsp
+   */
   virtual void createBuffers() {
     if (mBuffersOut != nullptr) {
       WDBGMSG("Trying to create a new dsp buffer without cleanung up the old one");
@@ -85,7 +87,9 @@ public:
     }
   }
 
-  /** Deletes all the allocated buffers */
+  /**
+   * Deletes all the allocated buffers
+   */
   virtual void deleteBuffers() {
     if (mBuffersOut != nullptr) {
       for (int i = 0; i < mOutputCount; i++) {
@@ -99,7 +103,9 @@ public:
     }
   }
 
-  /** Should do all the required cleanup */
+  /**
+   * Should do all the required cleanup
+   */
   virtual ~Node() {
     deleteBuffers();
 
@@ -107,19 +113,17 @@ public:
       WDBGMSG("Warning, UI of node was not cleaned up!\n");
     }
 
-    for (int i = 0; i < mAutomationCount; i++) {
-      for (int p = 0; p < mParameters.GetSize(); p++) {
-        mAutomations.Get(i)->removeAutomationTarget(
-          mParameters.Get(p)
-        );
-      }
+    for (int i = 0; i < mParameters.GetSize(); i++) {
+      detachAutomation(mParameters.Get(i));
     }
     mParameters.Empty(true);
     mSocketsIn.Empty(true);
     mSocketsOut.Empty(true);
   }
 
-  /** Will fill all the output buffers with silence */
+  /**
+   * Will fill all the output buffers with silence
+   */
   void outputSilence() {
     for (int o = 0; o < mOutputCount; o++) {
       for (int c = 0; c < mChannelCount; c++) {
@@ -131,7 +135,9 @@ public:
     mIsProcessed = true;
   }
 
-  /** Will return true if the node is bypassed and also do the bypassing of buffers */
+  /**
+   * Will return true if the node is bypassed and also do the bypassing of buffers
+   */
   bool byPass() {
     // The first param will always be bypass
     mParameters.Get(0)->update();
@@ -148,9 +154,13 @@ public:
     return true;
   }
 
-  /** Check where the node is able to process a block */
+  /**
+   * Check whether the node is able to process a block
+   * Will also output silence if not connected
+   */
   virtual bool inputsReady() {
     /**
+     * Check for disconnected inputs
      * If one input isn't connected, skip the processing and output silence
      * If that's not desired, this function has to be overriden
      */
@@ -161,19 +171,39 @@ public:
       }
     }
 
-    for (int i = 0; i < mAutomationCount; i++) {
-      if (!mAutomations.Get(i)->mIsProcessed) {
-        return false;
-      }
-    }
-
+    /**
+     * Check for inputs which are connected to unprocessed nodes
+     */
     for (int i = 0; i < mInputCount; i++) {
       if (!mSocketsIn.Get(i)->mConnectedTo->mParentNode->mIsProcessed) {
         // A node isn't ready so return false
         return false;
       }
     }
+
+    /**
+     * Check for automation
+     */
+    if (mIsAutomated) {
+      for (int i = 0; i < mParameters.GetSize(); i++) {
+        Node* n = mParameters.Get(i)->automationDependency;
+        if (n != nullptr && !n->mIsProcessed) {
+          return false;
+        }
+      }
+    }
+
     return true;
+  }
+
+  void checkIsAutomated() {
+    for (int i = 0; i < mParameters.GetSize(); i++) {
+      if (mParameters.Get(i)->automationDependency != nullptr) {
+        mIsAutomated = true;
+        return;
+      }
+    }
+    mIsAutomated = false;
   }
 
   /** Main Processing, only takes a blocksize since it knows its inputs */
@@ -218,7 +248,9 @@ public:
     }
   }
 
-  /** Connects a given socket to a input at a given index of this node */
+  /**
+   * Connects a given socket to a input at a given index of this node
+   */
   virtual void connectInput(NodeSocket* out, int inputNumber = 0) {
     NodeSocket* inSocket = mSocketsIn.Get(inputNumber);
     if (inSocket != nullptr) {
@@ -231,23 +263,48 @@ public:
     }
   }
 
-  virtual ParameterCoupling* attachAutomation(Node* n, const int index) {
-    if (mAutomations.Find(n) == -1) {
-      mAutomations.Add(n);
-      mAutomationCount++;
+  /**
+   * In order for automations to keep in sync inside a audio block
+   * the automation node responsible for the automation has to be added to a
+   * dependency list.
+   * The requested ParameterCoupling is returned to be used in the automation node
+   */
+  virtual void attachAutomation(Node* n, const int index) {
+    ParameterCoupling* p = mParameters.Get(index);
+    if (p != nullptr) {
+      //if (p->automationDependency != nullptr) {
+      //  // Get rid of the old automation if there was one
+      //  p->automationDependency->removeAutomationTarget(p);
+      //}
+      n->addAutomationTarget(p);
     }
-    return mParameters.Get(index);
+    checkIsAutomated();
   }
 
-  virtual void detachAutomation(Node* n) {
-    if (mAutomations.Find(n) != -1) {
-      mAutomations.DeletePtr(n);
-      mAutomationCount--;
+  /**
+   * Removes the node from the dependency list and removes all the automation targets
+   * from the automation node
+   */
+  virtual void detachAutomation(ParameterCoupling* p) {
+    // ParameterCoupling* p = mParameters.Get(index);
+    if (p != nullptr) {
+      if (p->automationDependency != nullptr) {
+        p->automationDependency->removeAutomationTarget(p);
+      }
     }
+    checkIsAutomated();
   }
 
+  /**
+   * This is for nodes that provide can provide automation for other nodes
+   * They will keep track of all the ParameterCouplings and update them accordingly
+   * These should only be called from the attach/detachAutomation functions
+   */
   virtual void addAutomationTarget(ParameterCoupling* c) { }
 
+  /**
+   * Also for nodes which provide automation, see above
+   */
   virtual void removeAutomationTarget(ParameterCoupling* c) { }
 
 

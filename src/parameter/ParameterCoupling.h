@@ -55,6 +55,8 @@ struct ParameterCoupling {
   float w = 60;
   float h = 60;
 
+  Node* automationDependency = nullptr;
+
   // name which may be used in the UI
   const char* name;
   // custom image or something, prolly doesn't belong here
@@ -106,7 +108,12 @@ struct ParameterCoupling {
    * This should only be called from the audio thread since the value might tear on 32bit
    */
   void update() const {
-    *value = std::min(std::max(getValue() + automation, min), max);
+    if (automationDependency == nullptr) {
+      *value = getValue();
+    }
+    else {
+      *value = std::min(std::max(getValue() + automation, min), max);
+    }
   }
 
   /**
