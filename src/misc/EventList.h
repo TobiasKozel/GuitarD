@@ -19,6 +19,7 @@ namespace MessageBus {
     PopUndoState,
     GetGraphStats,
     ConnectionDragged,
+    AttachAutomation,
     TOTAL_MESSAGE_IDS
   };
 }

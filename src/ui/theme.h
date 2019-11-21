@@ -39,6 +39,7 @@ namespace Theme {
 
   namespace Categories {
     const IColor TOOLS(255, 100, 100, 220);
+    const IColor AUTOMATION(255, 140, 140, 250);
     const IColor FILTER(255, 50, 150, 70);
     const IColor DISTORTION(255, 200, 80, 60);
     const IColor DYNAMICS(255, 120, 50, 130);

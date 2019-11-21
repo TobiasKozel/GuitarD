@@ -1,5 +1,6 @@
 #pragma once
 #include "IPlugParameter.h"
+#include <algorithm>
 
 
 /**
@@ -105,7 +106,7 @@ struct ParameterCoupling {
    * This should only be called from the audio thread since the value might tear on 32bit
    */
   void update() const {
-    *value = getValue() + automation;
+    *value = std::min(std::max(getValue() + automation, min), max);
   }
 
   /**

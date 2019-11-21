@@ -12,6 +12,7 @@
 #include "src/ui/CableLayer.h"
 #include "src/ui/gallery/NodeGallery.h"
 #include "src/misc/HistoryStack.h"
+#include "src/nodes/envelope/EnvelopeNode.h"
 
 class Graph {
   MessageBus::Bus* mBus = nullptr;
@@ -21,6 +22,7 @@ class Graph {
   MessageBus::Subscription<bool> mPushUndoState;
   MessageBus::Subscription<bool> mPopUndoState;
   MessageBus::Subscription<GraphStats**> mReturnStats;
+  MessageBus::Subscription<AutomationAttachRequest> mAutomationRequest;
 
   iplug::igraphics::IGraphics* mGraphics = nullptr;
   /** Holds all the nodes in the processing graph */
@@ -89,6 +91,20 @@ public:
 
     mReturnStats.subscribe(mBus, MessageBus::GetGraphStats, [&](GraphStats** stats) {
       *stats = &mStats;
+    });
+
+    mAutomationRequest.subscribe(mBus, MessageBus::AttachAutomation, [&](AutomationAttachRequest r) {
+      WDL_PtrList<Node>& n = this->nodes;
+      for (int i = 0; i < n.GetSize(); i++) {
+        Node* node = n.Get(i);
+        if (node == nullptr) { continue; }
+        for (int p = 0; p < node->mParameters.GetSize(); p++) {
+          if (node->mParameters.Get(p)->control == r.targetControl) {
+            ParameterCoupling* couple = node->attachAutomation(r.automationNode, p);
+            r.automationNode->addAutomationTarget(couple);
+          }
+        }
+      }
     });
   }
 

@@ -19,13 +19,15 @@ public:
 
   WDL_PtrList<ParameterCoupling> mParameters;
   // The dsp will get the data from the buffer inside the socket
+  int mInputCount = 0;
   WDL_PtrList<NodeSocket> mSocketsIn;
+  int mOutputCount = 0;
   WDL_PtrList<NodeSocket> mSocketsOut;
+  int mAutomationCount = 0;
+  WDL_PtrList<Node> mAutomations;
 
   // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
   iplug::sample*** mBuffersOut = nullptr;
-  int mInputCount = 0;
-  int mOutputCount = 0;
   NodeUi* mUi = nullptr;
   bool mIsProcessed = false;
   
@@ -100,11 +102,18 @@ public:
   /** Should do all the required cleanup */
   virtual ~Node() {
     deleteBuffers();
-    
+
     if (mUiReady || mUi != nullptr) {
       WDBGMSG("Warning, UI of node was not cleaned up!\n");
     }
 
+    for (int i = 0; i < mAutomationCount; i++) {
+      for (int p = 0; p < mParameters.GetSize(); p++) {
+        mAutomations.Get(i)->removeAutomationTarget(
+          mParameters.Get(p)
+        );
+      }
+    }
     mParameters.Empty(true);
     mSocketsIn.Empty(true);
     mSocketsOut.Empty(true);
@@ -143,11 +152,17 @@ public:
   virtual bool inputsReady() {
     /**
      * If one input isn't connected, skip the processing and output silence
-     * If that's not desired, this function has to be overidden
+     * If that's not desired, this function has to be overriden
      */
     for (int i = 0; i < mSocketsIn.GetSize(); i++) {
       if (mSocketsIn.Get(i)->mConnectedTo == nullptr) {
         outputSilence();
+        return false;
+      }
+    }
+
+    for (int i = 0; i < mAutomationCount; i++) {
+      if (!mAutomations.Get(i)->mIsProcessed) {
         return false;
       }
     }
@@ -216,7 +231,30 @@ public:
     }
   }
 
-  /** Generic function to call when the node can be bypassed*/
+  virtual ParameterCoupling* attachAutomation(Node* n, const int index) {
+    if (mAutomations.Find(n) == -1) {
+      mAutomations.Add(n);
+      mAutomationCount++;
+    }
+    return mParameters.Get(index);
+  }
+
+  virtual void detachAutomation(Node* n) {
+    if (mAutomations.Find(n) != -1) {
+      mAutomations.DeletePtr(n);
+      mAutomationCount--;
+    }
+  }
+
+  virtual void addAutomationTarget(ParameterCoupling* c) { }
+
+  virtual void removeAutomationTarget(ParameterCoupling* c) { }
+
+
+  /**
+   * ALWAYS NEEDS TO BE THE FIRST PARAM IF USED
+   * Generic function to call when the node can be bypassed
+   */
   void addByPassParam() {
     mParameters.Add(new ParameterCoupling(
       "Bypass", &mByPassed, 0.0, 0.0, 1.0, 1

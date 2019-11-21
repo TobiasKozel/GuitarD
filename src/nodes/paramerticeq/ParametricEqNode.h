@@ -20,14 +20,14 @@ public:
 #define DRAW_GUIDE(cr, cg, cb, v) g.DrawLine(IColor(255, cr, cg, cb), x + v, y - 100, x + v, y + 100)
   void DrawDebug(IGraphics& g, float x, float y, float w) {
     const float logW = w / 3.f;
-    const float lowPassF = SCALE_LOG(mParamsByName.at("lowF")->getValue<float>(), logW);
+    const float lowPassF = SCALE_LOG(mParamsByName.at("lowF")->getWithAutomation<float>(), logW);
     DRAW_GUIDE(255, 0, 0, lowPassF);
-    const float highPassF = SCALE_LOG(mParamsByName.at("highF")->getValue<float>(), logW);
+    const float highPassF = SCALE_LOG(mParamsByName.at("highF")->getWithAutomation<float>(), logW);
     DRAW_GUIDE(0, 0, 255, highPassF);
 
-    const float f1 = SCALE_LOG(mParamsByName.at("f1")->getValue<float>(), logW);
+    const float f1 = SCALE_LOG(mParamsByName.at("f1")->getWithAutomation<float>(), logW);
     DRAW_GUIDE(0, 255, 0, f1);
-    const float f2 = SCALE_LOG(mParamsByName.at("f2")->getValue<float>(), logW);
+    const float f2 = SCALE_LOG(mParamsByName.at("f2")->getWithAutomation<float>(), logW);
     DRAW_GUIDE(255, 0, 255, f2);
   }
 

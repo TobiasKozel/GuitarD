@@ -343,6 +343,7 @@
     <ClInclude Include="..\src\nodes\bitcrusher\BitCrusherNode.h" />
     <ClInclude Include="..\src\nodes\combine\CombineNode.h" />
     <ClInclude Include="..\src\nodes\crybaby\CryBabyNode.h" />
+    <ClInclude Include="..\src\nodes\envelope\EnvelopeNode.h" />
     <ClInclude Include="..\src\nodes\feedback\FeedbackNode.h" />
     <ClInclude Include="..\src\nodes\fuzz\FuzzNode.h" />
     <ClInclude Include="..\src\nodes\io\InputNode.h" />

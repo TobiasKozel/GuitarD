@@ -99,17 +99,17 @@ public:
     }
   }
 
-  void OnChannelsChanged(int p_channels) override {
+  void OnChannelsChanged(const int pChannels) override {
     if (mBuffersOut != nullptr) {
       WDBGMSG("Warning trying to change the channelcount on a faust node!\n");
     }
     else {
-      Node::OnChannelsChanged(p_channels);
+      Node::OnChannelsChanged(pChannels);
     }
   }
 
-  void OnSamplerateChanged(int p_samplerate) override {
-    instanceConstants(p_samplerate);
+  void OnSamplerateChanged(const int pSamplerate) override {
+    instanceConstants(pSamplerate);
   }
 
   void OnTransport() override {
@@ -120,7 +120,7 @@ public:
    * The faust uses a fairly similar way of processing blocks, however
    * A node might have multiple inputs so the right ones have to be forwarded
    */
-  virtual void ProcessBlock(int nFrames) {
+  virtual void ProcessBlock(const int nFrames) {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
     for (int i = 1; i < mParameters.GetSize(); i++) {
       mParameters.Get(i)->update();

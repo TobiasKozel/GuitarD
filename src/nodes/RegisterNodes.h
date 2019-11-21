@@ -15,6 +15,7 @@
 #include "src/nodes/overdrive/OverDriveNode.h"
 #include "src/nodes/paramerticeq/ParametricEqNode.h"
 #include "src/nodes/phasetool/PhaseToolNode.h"
+#include "src/nodes/envelope/EnvelopeNode.h"
 
 
 namespace NodeList {
@@ -49,6 +50,14 @@ namespace NodeList {
       "Phase Tool",
       "asd",
       "Tools"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new EnvelopeNode("EnvelopeNode"); },
+      "EnvelopeNode",
+      "Envelope Automation Tool",
+      "asd",
+      "Automation"
     });
 
     NodeList::registerNode(NodeList::NodeInfo{

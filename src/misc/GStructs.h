@@ -10,6 +10,7 @@ struct Coord2D {
 
 class Node;
 struct NodeSocket;
+
 struct NodeSpliceInPair {
   Node* node = nullptr;
   NodeSocket* socket = nullptr;
@@ -31,4 +32,9 @@ struct ConnectionDragData {
   float startX = 0;
   float currentY = 0;
   float currentX = 0;
+};
+
+struct AutomationAttachRequest {
+  Node* automationNode = nullptr;
+  iplug::igraphics::IControl* targetControl = nullptr;
 };

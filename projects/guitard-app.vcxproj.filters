@@ -432,6 +432,9 @@
     <ClInclude Include="..\src\nodes\phasetool\PhaseToolNode.h">
       <Filter>src\nodes\tools</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\envelope\EnvelopeNode.h">
+      <Filter>src\nodes\automation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -520,6 +523,9 @@
     </Filter>
     <Filter Include="src\ui\gallery">
       <UniqueIdentifier>{f835fb60-d345-459e-a62b-a90eebca75c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\nodes\automation">
+      <UniqueIdentifier>{c02e5d84-eb19-47f8-904e-6c84655bf14f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
