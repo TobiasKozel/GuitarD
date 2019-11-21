@@ -80,7 +80,7 @@ public:
     mParameters.Add(p);
 
     p = new ParameterCoupling(
-      "Filter", &filter, 0, 0, 1.0, 0.01
+      "Filter", &filter, 0, 0, 1.0, 0.001
     );
     p->x = 0;
     p->y = -100;
@@ -110,7 +110,7 @@ public:
     mParameters.Get(2)->update();
     double value = 0;
     for (int i = 0; i < nFrames; i++) {
-      value += buffer[0][i];
+      value += abs(buffer[0][i]);
     }
     value /= nFrames;
     avg = (filter * avg + (1 - filter) * value);
