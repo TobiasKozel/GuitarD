@@ -46,10 +46,12 @@ namespace Serializer {
         const char* name = para->name;
         double val = para->parameter != nullptr ? para->parameter->Value() : para->baseValue;
         int idx = para->parameterIdx;
+        int automation = nodes.Find(para->automationDependency);
         serialized["nodes"][i]["parameters"][p] = {
           { "name", name },
           { "idx", idx},
-          { "value", val }
+          { "value", val },
+          { "automation", automation }
         };
       }
     }
@@ -121,24 +123,43 @@ namespace Serializer {
     // link them all up accordingly in the second pass
     int currentNodeIdx = 0;
     for (auto sNode : serialized["nodes"]) {
+      Node* node = nodes.Get(currentNodeIdx);
       int currentInputIdx = 0;
       for (auto connection : sNode["inputs"]) {
         const int inNodeIdx = connection[0];
         const int inBufferIdx = connection[1];
         if (inNodeIdx >= 0 && nodes.Get(inNodeIdx) != nullptr) {
-          nodes.Get(currentNodeIdx)->connectInput(
+          node->connectInput(
             nodes.Get(inNodeIdx)->mSocketsOut.Get(inBufferIdx),
             currentInputIdx
           );
         }
         else if (inNodeIdx == InputNode) {
           // if it's NoNode it's not connected at all and we'll just leave it at a nullptr
-          nodes.Get(currentNodeIdx)->connectInput(
+          node->connectInput(
             input->mSocketsOut.Get(0),
             currentInputIdx
           );
         }
         currentInputIdx++;
+      }
+
+      // Link up the automation
+      for (auto param : sNode["parameters"]) {
+        string name = param["name"];
+        for (int i = 0; i < node->mParameters.GetSize(); i++) {
+          ParameterCoupling* para = node->mParameters.Get(i);
+          if (para->name == name) {
+            int automationIndex = -1;
+            try {
+              automationIndex = param.at("automation");
+            }
+            catch (...) {}
+            if (automationIndex != -1) {
+              node->attachAutomation(nodes.Get(automationIndex), i);
+            }
+          }
+        }
       }
       currentNodeIdx++;
     }

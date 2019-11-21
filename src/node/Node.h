@@ -272,10 +272,6 @@ public:
   virtual void attachAutomation(Node* n, const int index) {
     ParameterCoupling* p = mParameters.Get(index);
     if (p != nullptr) {
-      //if (p->automationDependency != nullptr) {
-      //  // Get rid of the old automation if there was one
-      //  p->automationDependency->removeAutomationTarget(p);
-      //}
       n->addAutomationTarget(p);
     }
     checkIsAutomated();
