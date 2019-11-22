@@ -50,6 +50,7 @@ namespace Theme {
     const float THICKNESS = 5;
     const float PREVIEW_DASH_DIST = 20;
     const IColor COLOR(255, 40, 40, 40);
+    const IColor AUTOMATION(255, 40, 40, 230);
     const IColor COLOR_SPLICE_IN(255, 250, 150, 0);
     const IColor COLOR_PREVIEW(150, 40, 40, 40);
   }

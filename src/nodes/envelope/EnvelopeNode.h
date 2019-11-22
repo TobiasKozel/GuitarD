@@ -48,6 +48,16 @@ public:
     mDirty = true;
   }
 
+  void OnMouseOver(float x, float y, const IMouseMod& mod) override {
+    mMouseIsOver = true;
+    MessageBus::fireEvent<Node*>(mBus, MessageBus::VisualizeAutomationTargets, mParentNode);
+  }
+
+  void OnMouseOut() override {
+    mMouseIsOver = false;
+    MessageBus::fireEvent<Node*>(mBus, MessageBus::VisualizeAutomationTargets, nullptr);
+  }
+
   void Draw(IGraphics& g) override {
     NodeUi::Draw(g);
     if (mPickerMode) {

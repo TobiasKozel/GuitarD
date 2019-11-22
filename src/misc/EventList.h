@@ -20,6 +20,7 @@ namespace MessageBus {
     GetGraphStats,
     ConnectionDragged,
     AttachAutomation,
+    VisualizeAutomationTargets,
     TOTAL_MESSAGE_IDS
   };
 }

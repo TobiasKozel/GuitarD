@@ -12,8 +12,8 @@
  */
 class Node {
 protected:
-  MessageBus::Bus* mBus;
-  bool mUiReady;
+  MessageBus::Bus* mBus = nullptr;
+  bool mUiReady = false;
 public:
   std::string mType;
 
@@ -26,7 +26,7 @@ public:
   // Flag to skip automation if there's none
   bool mIsAutomated = false;
   // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
-  iplug::sample*** mBuffersOut = nullptr;
+  sample*** mBuffersOut = nullptr;
   // The UI element representing this node instance visually
   NodeUi* mUi = nullptr;
   bool mIsProcessed = false;
@@ -47,26 +47,27 @@ public:
    * This is basically a delayed constructor with the only disadvantage: derived methods have to have the same parameters
    * The derived class will call this with the desired parameters, except for the samplerate
    */
-  virtual void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAX_BUFFER, int p_channles = 2, int p_inputs = 1, int p_outputs = 1) {
+  virtual void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000,
+                     const int pMaxBuffer = MAX_BUFFER, const int pChannles = 2,
+                     const int pInputs = 1, const int pOutputs = 1)
+  {
     mBus = pBus;
     mSampleRate = 0;
     mChannelCount = 0;
-    mMaxBuffer = p_maxBuffer;
-    mInputCount = p_inputs;
-    mOutputCount = p_outputs;
+    mMaxBuffer = pMaxBuffer;
+    mInputCount = pInputs;
+    mOutputCount = pOutputs;
     mIsProcessed = false;
     mUiReady = false;
-    OnReset(p_samplerate, p_channles);
+    OnReset(pSamplerate, pChannles);
 
     // Setup the sockets for the node connections
     for (int i = 0; i < mInputCount; i++) {
-      NodeSocket* in = new NodeSocket(mBus, i, this);
-      mSocketsIn.Add(in);
+      mSocketsIn.Add(new NodeSocket(mBus, i, this));
     }
 
     for (int i = 0; i < mOutputCount; i++) {
-      NodeSocket* out = new NodeSocket(mBus, i, this, mBuffersOut[i]);
-      mSocketsOut.Add(out);
+      mSocketsOut.Add(new NodeSocket(mBus, i, this, mBuffersOut[i]));
     }
   }
 
@@ -78,11 +79,11 @@ public:
       WDBGMSG("Trying to create a new dsp buffer without cleanung up the old one");
       assert(true);
     }
-    mBuffersOut = new iplug::sample **[mOutputCount];
+    mBuffersOut = new sample **[mOutputCount];
     for (int i = 0; i < mOutputCount; i++) {
-      mBuffersOut[i] = new iplug::sample * [mChannelCount];
+      mBuffersOut[i] = new sample * [mChannelCount];
       for (int c = 0; c < mChannelCount; c++) {
-        mBuffersOut[i][c] = new iplug::sample[mMaxBuffer];
+        mBuffersOut[i][c] = new sample[mMaxBuffer];
       }
     }
   }
@@ -107,6 +108,8 @@ public:
    * Should do all the required cleanup
    */
   virtual ~Node() {
+    // TODOG it's probably not a good idea to call a virtual function here
+    // Seems to work for now though
     deleteBuffers();
 
     if (mUiReady || mUi != nullptr) {
@@ -142,7 +145,7 @@ public:
     // The first param will always be bypass
     mParameters.Get(0)->update();
     if (mByPassed < 0.5) { return false; }
-    iplug::sample** in = mSocketsIn.Get(0)->mConnectedTo->mParentBuffer;
+    sample** in = mSocketsIn.Get(0)->mConnectedTo->mParentBuffer;
     for (int o = 0; o < mOutputCount; o++) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < mMaxBuffer; i++) {
@@ -341,7 +344,7 @@ public:
   /**
    * Generic setup of the parameters to get something on the screen
    */
-  virtual void setupUi(iplug::igraphics::IGraphics* pGrahics) {
+  virtual void setupUi(IGraphics* pGrahics) {
 
     mUi = new NodeUi(NodeUiParam {
       mBus, pGrahics, 300, 300, &mX, &mY,
@@ -356,7 +359,7 @@ public:
   /**
    * Cleans up the IControls for all the parameters
    */
-  virtual void cleanupUi(iplug::igraphics::IGraphics* pGrahics) {
+  virtual void cleanupUi(IGraphics* pGrahics) {
     /**
      * The param value gets only synced to the dsp value when the node is processed
      * If the node is not connected this won't happen, so always do the update when the

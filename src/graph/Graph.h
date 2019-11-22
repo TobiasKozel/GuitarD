@@ -209,6 +209,7 @@ public:
       mGraphics = pGraphics;
     }
 
+    pGraphics->HandleMouseOver(true);
     
     mGraphics->SetKeyHandlerFunc([&](const IKeyPress & key, const bool isUp) {
       if (key.C && key.VK == kVK_Z && !isUp) {

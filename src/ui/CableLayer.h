@@ -14,14 +14,16 @@ using namespace igraphics;
  * It also handles the splice in logic
  */
 class CableLayer : public IControl {
-  IGraphics* mGraphics;
+  IGraphics* mGraphics = nullptr;
   WDL_PtrList<Node>* mNodes;
-  Node* mOutNode;
-  Node* mInNode;
-  NodeSocket* mHighlightSocket;
+  Node* mOutNode = nullptr;
+  Node* mInNode = nullptr;
+
+  Node* mVisualizeAutomation = nullptr;
+  
   IBlend mBlend;
 
-  MessageBus::Bus* mBus;
+  MessageBus::Bus* mBus = nullptr;
   MessageBus::Subscription<Node*> mDisconnectAllEvent;
   MessageBus::Subscription<Coord2D> mNodeDraggedEvent;
   MessageBus::Subscription<Node*> mNodeDraggedEndEvent;
@@ -29,20 +31,21 @@ class CableLayer : public IControl {
   MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
   MessageBus::Subscription<Node*> mNodeDeleteEvent;
   MessageBus::Subscription<ConnectionDragData*> mConnectionDragEvent;
+  MessageBus::Subscription<Node*> mVisualizeAutomationTargetsEvent;
 
-  NodeSocket* mPreviewSocketPrev;
-  NodeSocket* mPreviewSocket;
+  // Used to highlight the connection just before a splice in
+  NodeSocket* mHighlightSocket = nullptr;
+  // Used to indicate the previous connection when doing quick previews
+  NodeSocket* mPreviewSocketPrev = nullptr;
+  // The temporary preview connection
+  NodeSocket* mPreviewSocket = nullptr;
 
-  ConnectionDragData* mConnectionDragData;
+  ConnectionDragData* mConnectionDragData = nullptr;
 public:
   CableLayer(MessageBus::Bus* pBus, IGraphics* g, WDL_PtrList<Node>* pNodes, Node* pOutNode, Node* pInNode) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
   {
     mBus = pBus;
-    mPreviewSocket = nullptr;
-    mPreviewSocketPrev = nullptr;
-    mHighlightSocket = nullptr;
-    mConnectionDragData = nullptr;
     SetTargetRECT(IRECT(0, 0, 0, 0));
     mNodes = pNodes;
     mOutNode = pOutNode;
@@ -57,18 +60,15 @@ public:
     mNodeDraggedEvent.subscribe(mBus, MessageBus::NodeDragged, [&](Coord2D pos) {
       const float socketRadius = Theme::Sockets::DIAMETER / 2;
       mHighlightSocket = nullptr;
-      Node* curNode;
-      NodeSocket* curSock;
-      NodeSocket* tarSock;
       for (int n = 0; n < mNodes->GetSize() + 1; n++) {
-        curNode = mNodes->Get(n);
+        Node* curNode = mNodes->Get(n);
         if (curNode == nullptr) {
           // only happens for the last node
           curNode = mOutNode;
         }
         for (int i = 0; i < curNode->mInputCount; i++) {
-          curSock = curNode->mSocketsIn.Get(i);
-          tarSock = curSock->mConnectedTo;
+          NodeSocket* curSock = curNode->mSocketsIn.Get(i);
+          NodeSocket* tarSock = curSock->mConnectedTo;
           if (tarSock != nullptr) {
             float x1 = tarSock->mX + socketRadius;
             float x2 = curSock->mX + socketRadius;
@@ -159,9 +159,14 @@ public:
         this->mConnectionDragData = nullptr;
       }
     });
+
+    mVisualizeAutomationTargetsEvent.subscribe(mBus, MessageBus::VisualizeAutomationTargets, [&](Node* n) {
+      this->mVisualizeAutomation = n;
+      this->mDirty = true;
+    });
   }
 
-  inline void DrawSocket(IGraphics& g, NodeSocket* s) {
+  inline void DrawSocket(IGraphics& g, NodeSocket* s) const {
     const float x = s->mX + Theme::Sockets::RADIUS;
     const float y = s->mY + Theme::Sockets::RADIUS;
     g.FillCircle(
@@ -175,21 +180,18 @@ public:
   }
 
   void Draw(IGraphics& g) override {
-    Node* curNode;
-    NodeSocket* curSock;
-    NodeSocket* tarSock;
     const float socketRadius = Theme::Sockets::DIAMETER / 2;
     // Draw all the connections between nodes
     for (int n = 0; n < mNodes->GetSize() + 1; n++) {
-      curNode = mNodes->Get(n);
+      Node* curNode = mNodes->Get(n);
       if (curNode == nullptr) {
         // only happens for the last node
         curNode = mOutNode;
       }
       for (int i = 0; i < curNode->mInputCount; i++) {
-        curSock = curNode->mSocketsIn.Get(i);
+        NodeSocket* curSock = curNode->mSocketsIn.Get(i);
         if (curSock->mConnectedTo != nullptr) {
-          tarSock = curSock->mConnectedTo;
+          NodeSocket* tarSock = curSock->mConnectedTo;
           if (tarSock == mPreviewSocket && curSock == mOutNode->mSocketsIn.Get(0)) {
             // Draw the temporary bypass
             g.DrawDottedLine(
@@ -220,7 +222,7 @@ public:
       }
     }
 
-    // Draw a new connection from the user to start socket;
+    // Draw a new connection from the cursor to start socket
     if (mConnectionDragData != nullptr) {
       g.DrawLine(
         Theme::Cables::COLOR, mConnectionDragData->startX, mConnectionDragData->startY,
@@ -230,15 +232,15 @@ public:
 
     // Draw all the sockets
     for (int n = 0; n < mNodes->GetSize(); n++) {
-      curNode = mNodes->Get(n);
+      Node* curNode = mNodes->Get(n);
       for (int i = 0; i < curNode->mOutputCount; i++) {
-        curSock = curNode->mSocketsOut.Get(i);
+        NodeSocket* curSock = curNode->mSocketsOut.Get(i);
         if (curSock != nullptr) {
           DrawSocket(g, curSock);
         }
       }
       for (int i = 0; i < curNode->mInputCount; i++) {
-        curSock = curNode->mSocketsIn.Get(i);
+        NodeSocket* curSock = curNode->mSocketsIn.Get(i);
         if (curSock != nullptr) {
           DrawSocket(g, curSock);
         }
@@ -247,8 +249,24 @@ public:
     DrawSocket(g, mOutNode->mSocketsIn.Get(0));
     DrawSocket(g, mInNode->mSocketsOut.Get(0));
 
+    // Visualizes the automation target node of each control attached to it
+    if (mVisualizeAutomation != nullptr) {
+      for (int n = 0; n < mNodes->GetSize(); n++) {
+        Node* curNode = mNodes->Get(n);
+        for (int p = 0; p < curNode->mParameters.GetSize(); p++) {
+          ParameterCoupling* pc = curNode->mParameters.Get(p);
+          if (pc->automationDependency == mVisualizeAutomation) {
+            const IRECT pos = pc->control->GetRECT();
+            g.DrawLine(
+              Theme::Cables::AUTOMATION, pos.MW(), pos.MH(),
+              pc->automationDependency->mX, pc->automationDependency->mY,
+              &mBlend, Theme::Cables::THICKNESS
+            );
+          }
+        }
+      }
+    }
 
-    
     // g.FillRect(COLOR_GRAY, mRECT);
   }
 
