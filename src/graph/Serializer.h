@@ -54,6 +54,8 @@ namespace Serializer {
           { "automation", automation }
         };
       }
+
+      node->serializeAdditional(serialized);
     }
     // Handle the output node
     serialized["output"]["gain"] = 1.0;
@@ -161,6 +163,7 @@ namespace Serializer {
           }
         }
       }
+      node->deserializeAdditional(serialized);
       currentNodeIdx++;
     }
 

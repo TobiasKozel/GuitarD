@@ -324,7 +324,15 @@ public:
     mParameters.Add(p);
   }
 
+  /**
+   * Allows attaching additional data at the end of the serialization
+   */
+  virtual void serializeAdditional(nlohmann::json& serialized) { }
 
+  /**
+   * Allows loading additional settings after deserialization
+   */
+  virtual void deserializeAdditional(nlohmann::json& serialized) { }
 
 
   /**                 UI STUFF                */
