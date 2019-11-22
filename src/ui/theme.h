@@ -53,6 +53,7 @@ namespace Theme {
     const IColor AUTOMATION(255, 40, 40, 230);
     const IColor COLOR_SPLICE_IN(255, 250, 150, 0);
     const IColor COLOR_PREVIEW(150, 40, 40, 40);
+    const IColor PICK_AUTOMATION(50, 40, 40, 200);
   }
 
   namespace Sockets {

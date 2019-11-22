@@ -21,6 +21,7 @@ namespace MessageBus {
     ConnectionDragged,
     AttachAutomation,
     VisualizeAutomationTargets,
+    PickAutomationTarget,
     TOTAL_MESSAGE_IDS
   };
 }

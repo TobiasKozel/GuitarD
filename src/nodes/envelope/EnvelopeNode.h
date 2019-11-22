@@ -11,7 +11,10 @@ public:
   void setUpControls() override {
     NodeUi::setUpControls();
     mPicker = new IVButtonControl(mRECT.GetPadded(-100), [&](IControl* pCaller) {
-      this->enterPickerMode();
+      this->mPickerMode = true;
+      MessageBus::fireEvent<Node*>(
+        mBus, MessageBus::PickAutomationTarget, mParentNode
+      );
     });
     mElements.Add(mPicker);
     mGraphics->AttachControl(mPicker);
@@ -22,47 +25,35 @@ public:
     mGraphics->RemoveControl(mPicker, true);
   }
 
-  void enterPickerMode() {
-    mNoScale = true;
-    SetTargetRECT(mGraphics->GetBounds());
-    mDirty = true;
-    mPickerMode = true;
-  }
 
-  void OnMouseDown(float x, float y, const IMouseMod& mod) override {
+  void OnMouseDown(const float x, const float y, const IMouseMod& mod) override {
     if (mPickerMode) {
-      SetTargetRECT(mRECT);
       mPickerMode = false;
-      IControl* target = mGraphics->GetControl(
-        mGraphics->GetMouseControlIdx(x, y, false)
-      );
-      if (target != nullptr) {
-        MessageBus::fireEvent<AutomationAttachRequest>(
-          mBus, MessageBus::AttachAutomation,
-          AutomationAttachRequest{
-            mParentNode, target
-          }
-        );
-      }
+
     }
     mDirty = true;
   }
 
   void OnMouseOver(float x, float y, const IMouseMod& mod) override {
     mMouseIsOver = true;
-    MessageBus::fireEvent<Node*>(mBus, MessageBus::VisualizeAutomationTargets, mParentNode);
+    MessageBus::fireEvent<Node*>(
+      mBus, MessageBus::VisualizeAutomationTargets, mParentNode
+    );
   }
 
   void OnMouseOut() override {
     mMouseIsOver = false;
-    MessageBus::fireEvent<Node*>(mBus, MessageBus::VisualizeAutomationTargets, nullptr);
+    MessageBus::fireEvent<Node*>(
+      mBus, MessageBus::VisualizeAutomationTargets, nullptr
+    );
   }
 
   void Draw(IGraphics& g) override {
     NodeUi::Draw(g);
-    if (mPickerMode) {
-      g.FillRect(IColor(80, 255, 0, 0), mTargetRECT);
-    }
+    // Maybe do some nice indication that this is the source automation
+    //if (mPickerMode) {
+    //  g.FillRect(IColor(80, 255, 0, 0), mTargetRECT);
+    //}
   }
 
 };

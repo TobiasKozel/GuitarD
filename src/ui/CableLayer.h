@@ -20,6 +20,8 @@ class CableLayer : public IControl {
   Node* mInNode = nullptr;
 
   Node* mVisualizeAutomation = nullptr;
+
+  Node* mPickAutomationTarget = nullptr;
   
   IBlend mBlend;
 
@@ -32,6 +34,7 @@ class CableLayer : public IControl {
   MessageBus::Subscription<Node*> mNodeDeleteEvent;
   MessageBus::Subscription<ConnectionDragData*> mConnectionDragEvent;
   MessageBus::Subscription<Node*> mVisualizeAutomationTargetsEvent;
+  MessageBus::Subscription<Node*> mPickAutomationTargetEvent;
 
   // Used to highlight the connection just before a splice in
   NodeSocket* mHighlightSocket = nullptr;
@@ -164,6 +167,13 @@ public:
       this->mVisualizeAutomation = n;
       this->mDirty = true;
     });
+
+    mPickAutomationTargetEvent.subscribe(mBus, MessageBus::PickAutomationTarget, [&](Node* n) {
+      this->mPickAutomationTarget = n;
+      // SetTargetRECT(IRECT(0, 0, 0, 0));
+      SetTargetRECT(mGraphics->GetBounds());
+      this->mDirty = true;
+    });
   }
 
   inline void DrawSocket(IGraphics& g, NodeSocket* s) const {
@@ -250,12 +260,16 @@ public:
     DrawSocket(g, mInNode->mSocketsOut.Get(0));
 
     // Visualizes the automation target node of each control attached to it
-    if (mVisualizeAutomation != nullptr) {
+    Node* automation = mVisualizeAutomation;
+    if (mPickAutomationTarget != nullptr) {
+      automation = mPickAutomationTarget;
+    }
+    if (automation != nullptr) {
       for (int n = 0; n < mNodes->GetSize(); n++) {
         Node* curNode = mNodes->Get(n);
         for (int p = 0; p < curNode->mParameters.GetSize(); p++) {
           ParameterCoupling* pc = curNode->mParameters.Get(p);
-          if (pc->automationDependency == mVisualizeAutomation) {
+          if (pc->automationDependency == automation) {
             const IRECT pos = pc->control->GetRECT();
             g.DrawLine(
               Theme::Cables::AUTOMATION, pos.MW(), pos.MH(),
@@ -267,8 +281,33 @@ public:
       }
     }
 
-    // g.FillRect(COLOR_GRAY, mRECT);
+    if (mPickAutomationTarget != nullptr) {
+      g.FillRect(Theme::Cables::PICK_AUTOMATION, mRECT);
+    }
   }
+
+  void OnMouseDown(const float x, const float y, const IMouseMod& mod) override {
+    if (mPickAutomationTarget != nullptr) {
+      SetTargetRECT(IRECT(0, 0, 0, 0));
+      IControl* target = mGraphics->GetControl(
+        mGraphics->GetMouseControlIdx(x, y, false)
+      );
+      if (target != nullptr) {
+        MessageBus::fireEvent<AutomationAttachRequest>(
+          mBus, MessageBus::AttachAutomation,
+          AutomationAttachRequest{
+            mPickAutomationTarget, target
+          }
+        );
+      }
+      mPickAutomationTarget = nullptr;
+      mDirty = true;
+    }
+    else {
+      SetTargetRECT(IRECT(0, 0, 0, 0));
+    }
+  }
+
 
   void OnResize() override {
     mRECT.R = mGraphics->Width();
