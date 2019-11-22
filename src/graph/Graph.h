@@ -26,14 +26,14 @@ class Graph {
 
   iplug::igraphics::IGraphics* mGraphics = nullptr;
   /** Holds all the nodes in the processing graph */
-  WDL_PtrList<Node> nodes;
-  WDL_Mutex isProcessing;
+  WDL_PtrList<Node> mNodes;
+  WDL_Mutex mIsProcessing;
   /** Dummy nodes to get the audio blocks in and out of the graph */
-  InputNode* inputNode;
-  OutputNode* outputNode;
+  InputNode* mInputNode;
+  OutputNode* mOutputNode;
 
-  int channelCount = 2;
-  int sampleRate = 44101;
+  int mChannelCount = 2;
+  int mSampleRate = 44101;
 
   /** Control elements */
   GraphBackground* mBackground = nullptr;
@@ -49,16 +49,19 @@ class Graph {
   int mWindowHeight = 0;
   float mWindowScale = 0;
 
+  /** Used to slice the dsp block in smaller slices */
+  sample** mSliceBuffer[2] = { nullptr };
+
 public:
-  ParameterManager paramManager;
+  ParameterManager mParamManager;
 
 
-  explicit Graph(MessageBus::Bus* pBus) : paramManager(pBus) {
+  explicit Graph(MessageBus::Bus* pBus) : mParamManager(pBus) {
     mBus = pBus;
     
-    inputNode = new InputNode(mBus);
-    outputNode = new OutputNode(mBus);
-    outputNode->connectInput(inputNode->mSocketsOut.Get(0));
+    mInputNode = new InputNode(mBus);
+    mOutputNode = new OutputNode(mBus);
+    mOutputNode->connectInput(mInputNode->mSocketsOut.Get(0));
 
     // output->connectInput(input->outSockets.Get(0));
     mNodeDelSub.subscribe(mBus, MessageBus::NodeDeleted, [&](Node* param) {
@@ -94,7 +97,7 @@ public:
     });
 
     mAutomationRequest.subscribe(mBus, MessageBus::AttachAutomation, [&](AutomationAttachRequest r) {
-      WDL_PtrList<Node>& n = this->nodes;
+      WDL_PtrList<Node>& n = this->mNodes;
       for (int i = 0; i < n.GetSize(); i++) {
         Node* node = n.Get(i);
         if (node == nullptr) { continue; }
@@ -113,8 +116,8 @@ public:
   void testadd() {
     return;
     Node* test = NodeList::createNode("BitCrusherNode");
-    addNode(test, inputNode, 0, 500, 300);
-    outputNode->connectInput(test->mSocketsOut.Get(0));
+    addNode(test, mInputNode, 0, 500, 300);
+    mOutputNode->connectInput(test->mSocketsOut.Get(0));
   }
 
   ~Graph() {
@@ -123,45 +126,76 @@ public:
 
   void OnReset(const int pSampleRate, const int pChannels = 2) {
     if (pSampleRate > 0 && pChannels > 0) {
-      WDL_MutexLock lock(&isProcessing);
-      sampleRate = pSampleRate;
-      channelCount = pChannels;
-      inputNode->OnReset(pSampleRate, pChannels);
-      outputNode->OnReset(pSampleRate, pChannels);
-      for (int i = 0; i < nodes.GetSize(); i++) {
-        nodes.Get(i)->OnReset(pSampleRate, pChannels);
+      WDL_MutexLock lock(&mIsProcessing);
+      mSampleRate = pSampleRate;
+      resizeSliceBuffer(pChannels);
+      mChannelCount = pChannels;
+      mInputNode->OnReset(pSampleRate, pChannels);
+      mOutputNode->OnReset(pSampleRate, pChannels);
+      for (int i = 0; i < mNodes.GetSize(); i++) {
+        mNodes.Get(i)->OnReset(pSampleRate, pChannels);
       }
     }
   }
 
+  void resizeSliceBuffer(const int channelCount) {
+    if (mSliceBuffer[0] != nullptr) {
+      for (int c = 0; c < channelCount; c++) {
+        delete mSliceBuffer[0];
+        mSliceBuffer[0] = nullptr;
+        delete mSliceBuffer[1];
+        mSliceBuffer[1] = nullptr;
+      }
+    }
+    mSliceBuffer[0] = new sample*[channelCount];
+    mSliceBuffer[1] = new sample*[channelCount];
+  }
+
   void ProcessBlock(iplug::sample** in, iplug::sample** out, const int nFrames) {
-    const auto start = std::chrono::high_resolution_clock::now();
-    WDL_MutexLock lock(&isProcessing);
     if (nFrames > MAX_BUFFER) {
-      // TODOG process this in smaller chunks, should be a simple for loop
-      outputNode->CopyOut(out, nFrames);
-      return;
+      /** Process the block in smaller bits since it's too large */
+      const int overhang = nFrames % MAX_BUFFER;
+      int s = 0;
+      while (true) {
+        for (int c = 0; c < mChannelCount; c++) {
+          mSliceBuffer[0][c] = &in[c][s];
+          mSliceBuffer[1][c] = &out[c][s];
+        }
+        s += MAX_BUFFER;
+        if (s <= nFrames) {
+          ProcessBlock(mSliceBuffer[0], mSliceBuffer[1], MAX_BUFFER);
+        }
+        else {
+          if (overhang > 0) {
+            ProcessBlock(mSliceBuffer[0], mSliceBuffer[1], overhang);
+          }
+          return;
+        }
+      }
     }
-    inputNode->CopyIn(in, nFrames);
 
-    const int nodeCount = nodes.GetSize();
+    const auto start = std::chrono::high_resolution_clock::now();
+    WDL_MutexLock lock(&mIsProcessing);
+    mInputNode->CopyIn(in, nFrames);
+
+    const int nodeCount = mNodes.GetSize();
     for (int n = 0; n < nodeCount; n++) {
-      nodes.Get(n)->BlockStart();
+      mNodes.Get(n)->BlockStart();
     }
 
-    outputNode->BlockStart();
+    mOutputNode->BlockStart();
 
     // TODOG multiple passes to ensure all the nodes are computed is super dumb
     int attempts = 0;
-    while (!outputNode->mIsProcessed && attempts < 10) {
+    while (!mOutputNode->mIsProcessed && attempts < 10) {
       for (int n = 0; n < nodeCount; n++) {
-        nodes.Get(n)->ProcessBlock(nFrames);
+        mNodes.Get(n)->ProcessBlock(nFrames);
       }
-      outputNode->ProcessBlock(nFrames);
+      mOutputNode->ProcessBlock(nFrames);
       attempts++;
     }
 
-    outputNode->CopyOut(out, nFrames);
+    mOutputNode->CopyOut(out, nFrames);
     const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
       std::chrono::high_resolution_clock::now() - start
     );
@@ -189,13 +223,13 @@ public:
     });
     mGraphics->AttachControl(mBackground);
 
-    for (int n = 0; n < nodes.GetSize(); n++) {
-        nodes.Get(n)->setupUi(mGraphics);
+    for (int n = 0; n < mNodes.GetSize(); n++) {
+        mNodes.Get(n)->setupUi(mGraphics);
     }
-    inputNode->setupUi(mGraphics);
-    outputNode->setupUi(mGraphics);
+    mInputNode->setupUi(mGraphics);
+    mOutputNode->setupUi(mGraphics);
 
-    mCableLayer = new CableLayer(mBus, mGraphics, &nodes, outputNode, inputNode);
+    mCableLayer = new CableLayer(mBus, mGraphics, &mNodes, mOutputNode, mInputNode);
     mGraphics->AttachControl(mCableLayer);
 
     mNodeGallery = new NodeGallery(mBus, mGraphics);
@@ -217,8 +251,8 @@ public:
     mWindowWidth = mGraphics->Width();
     mWindowHeight = mGraphics->Height();
     mWindowScale = mGraphics->GetDrawScale();
-    for (int n = 0; n < nodes.GetSize(); n++) {
-      nodes.Get(n)->cleanupUi(mGraphics);
+    for (int n = 0; n < mNodes.GetSize(); n++) {
+      mNodes.Get(n)->cleanupUi(mGraphics);
     }
 
     mGraphics->RemoveControl(mNodeGallery, true);
@@ -230,8 +264,8 @@ public:
     mGraphics->RemoveControl(mCableLayer, true);
     mCableLayer = nullptr;
 
-    inputNode->cleanupUi(mGraphics);
-    outputNode->cleanupUi(mGraphics);
+    mInputNode->cleanupUi(mGraphics);
+    mOutputNode->cleanupUi(mGraphics);
 
     mGraphics = nullptr;
   }
@@ -241,11 +275,11 @@ public:
    * creating the illusion of a viewport
    */
   void onViewPortChange(const float dX = 0, const float dY = 0, float scale = 1) const {
-    for (int i = 0; i < nodes.GetSize(); i++) {
-      nodes.Get(i)->mUi->translate(dX, dY);
+    for (int i = 0; i < mNodes.GetSize(); i++) {
+      mNodes.Get(i)->mUi->translate(dX, dY);
     }
-    outputNode->mUi->translate(dX, dY);
-    inputNode->mUi->translate(dX, dY);
+    mOutputNode->mUi->translate(dX, dY);
+    mInputNode->mUi->translate(dX, dY);
     // WDBGMSG("x %f y %f s %f\n", x, y, scale);
   }
 
@@ -255,8 +289,8 @@ public:
       mGraphics = pGraphics;
       // TODOG find out whether the context ever changes
     }
-    for (int n = 0; n < nodes.GetSize(); n++) {
-      nodes.Get(n)->layoutChanged();
+    for (int n = 0; n < mNodes.GetSize(); n++) {
+      mNodes.Get(n)->layoutChanged();
     }
   }
 
@@ -264,28 +298,28 @@ public:
    * Used to add nodes and push a state to the history stack
    */
   void addNode(Node* node, Node* pInput = nullptr, const int index = 0, const float x = 0, const float y = 0) {
-    WDL_MutexLock lock(&isProcessing);
+    WDL_MutexLock lock(&mIsProcessing);
     node->mX = x;
     node->mY = y;
-    node->setup(mBus, sampleRate);
-    paramManager.claimNode(node);
+    node->setup(mBus, mSampleRate);
+    mParamManager.claimNode(node);
     node->setupUi(mGraphics);
     if (pInput != nullptr) {
       node->connectInput(pInput->mSocketsOut.Get(index));
     }
-    nodes.Add(node);
+    mNodes.Add(node);
     sortRenderStack();
   }
 
   void removeAllNodes() {
-    while (nodes.GetSize()) {
+    while (mNodes.GetSize()) {
       removeNode(0);
     }
   }
 
   void removeNode(Node* node, const bool reconnect = false) {
-    if (node == inputNode || node == outputNode) { return; }
-    WDL_MutexLock lock(&isProcessing);
+    if (node == mInputNode || node == mOutputNode) { return; }
+    WDL_MutexLock lock(&mIsProcessing);
     if (reconnect) {
       NodeSocket* prevSock = node->mSocketsIn.Get(0);
       NodeSocket* nextSock = node->mSocketsOut.Get(0);
@@ -301,13 +335,13 @@ public:
       }
     }
     node->cleanupUi(mGraphics);
-    paramManager.releaseNode(node);
-    nodes.DeletePtr(node, true);
-    nodes.Compact();
+    mParamManager.releaseNode(node);
+    mNodes.DeletePtr(node, true);
+    mNodes.Compact();
   }
 
   void removeNode(const int index) {
-    removeNode(nodes.Get(index));
+    removeNode(mNodes.Get(index));
   }
 
   void serialize(nlohmann::json& json) {
@@ -319,7 +353,7 @@ public:
     json["scale"] = mWindowScale;
     json["width"] = mWindowWidth;
     json["height"] = mWindowHeight;
-    Serializer::serialize(json, nodes, inputNode, outputNode);
+    Serializer::serialize(json, mNodes, mInputNode, mOutputNode);
   }
 
   void deserialize(nlohmann::json& json) {
@@ -329,11 +363,11 @@ public:
       mWindowWidth = json["width"];
       mWindowHeight = json["height"];
     }
-    WDL_MutexLock lock(&isProcessing);
-    Serializer::deserialize(json, nodes, outputNode, inputNode, sampleRate, &paramManager, mBus);
+    WDL_MutexLock lock(&mIsProcessing);
+    Serializer::deserialize(json, mNodes, mOutputNode, mInputNode, mSampleRate, &mParamManager, mBus);
     if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
-      for (int i = 0; i < nodes.GetSize(); i++) {
-        nodes.Get(i)->setupUi(mGraphics);
+      for (int i = 0; i < mNodes.GetSize(); i++) {
+        mNodes.Get(i)->setupUi(mGraphics);
       }
       sortRenderStack();
       scaleUi();

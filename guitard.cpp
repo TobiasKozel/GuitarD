@@ -10,7 +10,7 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAX_DAW_PAR
 
   // Gather a good amount of parameters to expose to the daw based on what nodes are on the canvas
   for (int i = 0; i < MAX_DAW_PARAMS; i++) {
-    graph->paramManager.addParameter(GetParam(i));
+    graph->mParamManager.addParameter(GetParam(i));
   }
 
   mParamChanged.subscribe(&mBus, MessageBus::ParametersChanged, [&](bool) {
