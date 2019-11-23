@@ -10,7 +10,8 @@ public:
 
   void setUpControls() override {
     NodeUi::setUpControls();
-    mPicker = new IVButtonControl(mRECT.GetPadded(-100), [&](IControl* pCaller) {
+    IRECT button{ mTargetRECT.L + 50, mTargetRECT.T + 100, mTargetRECT.R - 50, mTargetRECT.B -20};
+    mPicker = new IVButtonControl(button, [&](IControl* pCaller) {
       this->mPickerMode = true;
       MessageBus::fireEvent<Node*>(
         shared->bus, MessageBus::PickAutomationTarget, shared->node
@@ -86,7 +87,7 @@ public:
       "Gain", &gain, 0.0, 0.0, 50.0, 0.01
     );
     p->x = -100;
-    p->y = -100;
+    p->y = -30;
     shared.parameters.Add(p);
 
     p = new ParameterCoupling(
@@ -94,7 +95,7 @@ public:
     );
     p->type = ParameterCoupling::Frequency;
     p->x = 0;
-    p->y = -100;
+    p->y = -30;
     shared.parameters.Add(p);
 
   }
@@ -150,7 +151,7 @@ public:
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    mUi = new OutputNodeUi(&shared);
+    shared.graphics = pGrahics;
     mUi = new EnvelopeNodeUi(&shared);
     pGrahics->AttachControl(mUi);
     mUi->setColor(Theme::Categories::AUTOMATION);
