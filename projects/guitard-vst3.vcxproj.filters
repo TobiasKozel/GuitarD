@@ -158,6 +158,12 @@
     <ClCompile Include="..\..\..\WDL\resample.cpp">
       <Filter>WDL</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\WDL\win32_utf8.c">
+      <Filter>WDL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\WDL\filebrowse.cpp">
+      <Filter>WDL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../config.h" />

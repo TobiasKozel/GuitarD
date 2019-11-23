@@ -4,6 +4,7 @@
 #include "src/node/Node.h"
 #include "clean.h"
 #include "thirdparty/threadpool.h"
+#include "filebrowse.h"
 
 // #define useThreadPool
 // #define useOpenMP
@@ -64,6 +65,7 @@ public:
 
 class SimpleCabNodeUi : public NodeUi {
   iplug::igraphics::IText mBlocksizeText;
+  IVButtonControl* mBrowseButton = nullptr;
   string mInfo;
 public:
   SimpleCabNodeUi(NodeShared* param) : NodeUi(param) {
@@ -71,6 +73,33 @@ public:
     mBlocksizeText = DEBUG_FONT;
   }
 
+  void setUpControls() override {
+    NodeUi::setUpControls();
+    const IRECT button{ mTargetRECT.L + 50, mTargetRECT.T + 100, mTargetRECT.R - 50, mTargetRECT.B - 20 };
+    mBrowseButton = new IVButtonControl(button, [&](IControl* pCaller) {
+      this->openFileDialog();
+    });
+    mElements.Add(mBrowseButton);
+    shared->graphics->AttachControl(mBrowseButton);
+  }
+
+  void openFileDialog() {
+    HWND handle = reinterpret_cast<HWND>(shared->graphics->GetWindow());
+    const char* result = WDL_ChooseFileForOpen(
+      handle, "Open IR", nullptr, nullptr, "Wave Files\0*.wav;*.WAV\0AIFF Files\0*.aiff;*.AIFF\0", "*.wav",
+      true, false
+    );
+    if (result != nullptr) {
+      WDBGMSG(result);
+    }
+    else {
+      WDBGMSG("No file selected.\n");
+    }
+  }
+
+  /**
+   * File drop is only supported in the standalone app
+   */
   void OnDrop(const char* str) override {
     mInfo = "Path: " + string(str);
     mDirty = true;
@@ -79,6 +108,11 @@ public:
   void Draw(IGraphics& g) override {
     NodeUi::Draw(g);
     g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
+  }
+
+  void cleanUp() const override {
+    NodeUi::cleanUp();
+    shared->graphics->RemoveControl(mBrowseButton, true);
   }
 
 
@@ -166,7 +200,7 @@ public:
 #endif
   }
 
-  void ProcessBlock(int nFrames) {
+  void ProcessBlock(const int nFrames) {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
     shared.parameters.Get(1)->update();
 
@@ -264,7 +298,12 @@ public:
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    Node::setupUi(pGrahics);
+    shared.graphics = pGrahics;
+    mUi = new SimpleCabNodeUi(&shared);
+    pGrahics->AttachControl(mUi);
     mUi->setColor(IColor(255, 150, 100, 100));
+    mUi->setUp();
+    mUiReady = true;
+    
   }
 };
