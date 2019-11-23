@@ -435,6 +435,12 @@
     <ClInclude Include="..\src\nodes\envelope\EnvelopeNode.h">
       <Filter>src\nodes\automation</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\parameter\MeterCoupling.h">
+      <Filter>src\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\node\NodeShared.h">
+      <Filter>src\node</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

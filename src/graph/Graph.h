@@ -61,7 +61,7 @@ public:
     
     mInputNode = new InputNode(mBus);
     mOutputNode = new OutputNode(mBus);
-    mOutputNode->connectInput(mInputNode->mSocketsOut.Get(0));
+    mOutputNode->connectInput(mInputNode->shared.socketsOut.Get(0));
 
     // output->connectInput(input->outSockets.Get(0));
     mNodeDelSub.subscribe(mBus, MessageBus::NodeDeleted, [&](Node* param) {
@@ -101,8 +101,8 @@ public:
       for (int i = 0; i < n.GetSize(); i++) {
         Node* node = n.Get(i);
         if (node == nullptr) { continue; }
-        for (int p = 0; p < node->mParameters.GetSize(); p++) {
-          if (node->mParameters.Get(p)->control == r.targetControl) {
+        for (int p = 0; p < node->shared.parameters.GetSize(); p++) {
+          if (node->shared.parameters.Get(p)->control == r.targetControl) {
             if (node != r.automationNode) {
               // Don't allow automation on self
               node->attachAutomation(r.automationNode, p);
@@ -117,7 +117,7 @@ public:
     return;
     Node* test = NodeList::createNode("BitCrusherNode");
     addNode(test, mInputNode, 0, 500, 300);
-    mOutputNode->connectInput(test->mSocketsOut.Get(0));
+    mOutputNode->connectInput(test->shared.socketsOut.Get(0));
   }
 
   ~Graph() {
@@ -300,13 +300,13 @@ public:
    */
   void addNode(Node* node, Node* pInput = nullptr, const int index = 0, const float x = 0, const float y = 0) {
     WDL_MutexLock lock(&mIsProcessing);
-    node->mX = x;
-    node->mY = y;
+    node->shared.X = x;
+    node->shared.Y = y;
     node->setup(mBus, mSampleRate);
     mParamManager.claimNode(node);
     node->setupUi(mGraphics);
     if (pInput != nullptr) {
-      node->connectInput(pInput->mSocketsOut.Get(index));
+      node->connectInput(pInput->shared.socketsOut.Get(index));
     }
     mNodes.Add(node);
     sortRenderStack();
@@ -322,8 +322,8 @@ public:
     if (node == mInputNode || node == mOutputNode) { return; }
     WDL_MutexLock lock(&mIsProcessing);
     if (reconnect) {
-      NodeSocket* prevSock = node->mSocketsIn.Get(0);
-      NodeSocket* nextSock = node->mSocketsOut.Get(0);
+      NodeSocket* prevSock = node->shared.socketsIn.Get(0);
+      NodeSocket* nextSock = node->shared.socketsOut.Get(0);
       if (prevSock != nullptr && prevSock->mConnectedTo && nextSock != nullptr) {
         MessageBus::fireEvent<SocketConnectRequest>(
           mBus,

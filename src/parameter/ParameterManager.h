@@ -35,8 +35,8 @@ public:
    */
   bool claimNode(Node* node) {
     bool gotAllParams = true;
-    for (int i = 0; i < node->mParameters.GetSize(); i++) {
-      if (!claimParameter(node->mParameters.Get(i))) {
+    for (int i = 0; i < node->shared.parameters.GetSize(); i++) {
+      if (!claimParameter(node->shared.parameters.Get(i))) {
         /**
          * this means the manager has no free parameters left and the control cannot be automated from the daw
          */
@@ -112,8 +112,8 @@ public:
   }
 
   void releaseNode(Node* node) {
-    for (int i = 0; i < node->mParameters.GetSize(); i++) {
-      releaseParameter(node->mParameters.Get(i));
+    for (int i = 0; i < node->shared.parameters.GetSize(); i++) {
+      releaseParameter(node->shared.parameters.Get(i));
     }
     MessageBus::fireEvent<bool>(mBus, MessageBus::ParametersChanged, false);
   }

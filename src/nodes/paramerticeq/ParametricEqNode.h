@@ -3,13 +3,13 @@
 
 class ParametricEqNodeUi final : public NodeUi {
 public:
-  ParametricEqNodeUi(const NodeUiParam param) : NodeUi(param) {
+  ParametricEqNodeUi(NodeShared* param) : NodeUi(param) {
   }
 
   void setUpControls() override {
     NodeUi::setUpControls();
-    for (int i = 0; i < mParameters->GetSize(); i++) {
-      IControl* c = mParameters->Get(i)->control;
+    for (int i = 0; i < shared->parameters.GetSize(); i++) {
+      IControl* c = shared->parameters.Get(i)->control;
       if (c != nullptr) {
         ////c->Hide(true);
       }
@@ -60,14 +60,13 @@ class ParametricEqNode final : public ParametricEq {
 public:
   ParametricEqNode(const std::string pType) {
     mType = pType;
+    shared.width = 400;
+    shared.height = 200;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    mUi = new ParametricEqNodeUi(NodeUiParam{
-      mBus, pGrahics,
-      300, 250,
-      &mX, &mY, &mParameters, &mSocketsIn, &mSocketsOut, this
-    });
+    shared.graphics = pGrahics;
+    mUi = new ParametricEqNodeUi(&shared);
     mUi->setColor(Theme::Categories::FILTER);
     pGrahics->AttachControl(mUi);
     mUi->setUp();

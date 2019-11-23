@@ -361,9 +361,11 @@
     <ClInclude Include="..\src\nodes\stereo_tool\StereoToolNode.h" />
     <ClInclude Include="..\src\node\Node.h" />
     <ClInclude Include="..\src\node\NodeInfo.h" />
+    <ClInclude Include="..\src\node\NodeShared.h" />
     <ClInclude Include="..\src\node\NodeSocket.h" />
     <ClInclude Include="..\src\node\NodeSocketUi.h" />
     <ClInclude Include="..\src\node\NodeUi.h" />
+    <ClInclude Include="..\src\parameter\MeterCoupling.h" />
     <ClInclude Include="..\src\parameter\ParameterCoupling.h" />
     <ClInclude Include="..\src\parameter\ParameterManager.h" />
     <ClInclude Include="..\src\ui\CableLayer.h" />

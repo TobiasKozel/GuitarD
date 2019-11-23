@@ -1,26 +1,12 @@
 #pragma once
 #include "IControl.h"
-#include "src/parameter/ParameterCoupling.h"
 #include "src/node/NodeSocket.h"
 #include "src/node/NodeSocketUi.h"
 #include "src/misc/MessageBus.h"
 #include "src/misc/GStructs.h"
+#include "NodeShared.h"
 
 class Node;
-
-struct NodeUiParam {
-  MessageBus::Bus* pBus;
-  iplug::igraphics::IGraphics* pGraphics;
-  float width;
-  float height;
-  float* X;
-  float* Y;
-  WDL_PtrList<ParameterCoupling>* pParameters;
-
-  WDL_PtrList<NodeSocket>* inSockets;
-  WDL_PtrList<NodeSocket>* outSockets;
-  Node* node;
-};
 
 using namespace iplug;
 using namespace igraphics;
@@ -40,17 +26,15 @@ struct NodeUiHeader {
  */
 class NodeUi : public IControl {
 protected:
-  MessageBus::Bus* mBus;
+  NodeShared* shared;
+
   MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
-  WDL_PtrList<ParameterCoupling>* mParameters;
-  WDL_PtrList<NodeSocket>* mInSockets;
-  WDL_PtrList<NodeSocket>* mOutSockets;
+
   WDL_PtrList<NodeSocketUi> mInSocketsUi;
   WDL_PtrList<NodeSocketUi> mOutSocketsUi;
 
   NodeUiHeader mHeader;
   WDL_PtrList<IControl> mElements;
-  Node* mParentNode;
 
   ILayerPtr mCachedBgLayer;
   bool mBgIsCached = false;
@@ -59,47 +43,37 @@ protected:
   bool mNoScale = false;
 
   bool mDragging;
-  float* X;
-  float* Y;
   IColor mColor;
   ISVG mSvgBg = ISVG(nullptr);
-  IGraphics* mGraphics;
   IText mIconFont;
 
 public:
-  explicit NodeUi(const NodeUiParam pParam) :
+  explicit NodeUi(NodeShared* pShared) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
   {
     mDragging = false;
-    X = pParam.X;
-    Y = pParam.Y;
-    mBus = pParam.pBus;
-    mGraphics = pParam.pGraphics;
-    mParameters = pParam.pParameters;
-    mInSockets = pParam.inSockets;
-    mOutSockets = pParam.outSockets;
-    mParentNode = pParam.node;
+    shared = pShared;
 
-    NodeUi::setUpDimensions(pParam.width, pParam.height);
+    NodeUi::setUpDimensions(shared->width, shared->height);
 
-    for (int i = 0; i < mParameters->GetSize(); i++) {
+    for (int i = 0; i < shared->parameters.GetSize(); i++) {
       /**
        * Keep them around in a map for convenient use
        * Only do this in the UI though
        */
-      ParameterCoupling* p = mParameters->Get(i);
+      ParameterCoupling* p = shared->parameters.Get(i);
       mParamsByName.insert(pair<const char*, ParameterCoupling*>(p->name, p));
     }
 
-    mNodeSpliceInEvent.subscribe(mBus, MessageBus::NodeSpliceIn, [&](NodeSpliceInPair pair) {
-      if (mParentNode != pair.node) { return; }
+    mNodeSpliceInEvent.subscribe(shared->bus, MessageBus::NodeSpliceIn, [&](NodeSpliceInPair pair) {
+      if (shared->node != pair.node) { return; }
       /**
        * Splice in only works on nodes with at least one in and output
        * Since there's no way to choose from multiple ones, the first ones will
        * always be used
        */
-      NodeSocket* in = mInSockets->Get(0);
-      NodeSocket* out = mOutSockets->Get(0);
+      NodeSocket* in = shared->socketsIn.Get(0);
+      NodeSocket* out = shared->socketsOut.Get(0);
       NodeSocket* prev = pair.socket->mConnectedTo;
       if (in != nullptr && out != nullptr) {
         pair.socket->disconnect();
@@ -116,10 +90,10 @@ public:
 
   virtual void setUpDimensions(float w, float h) {
     IRECT rect;
-    rect.L = *X - w / 2;
-    rect.R = *X + w / 2;
-    rect.T = *Y - h / 2;
-    rect.B = *Y + h / 2;
+    rect.L = shared->X - w / 2;
+    rect.R = shared->X + w / 2;
+    rect.T = shared->Y - h / 2;
+    rect.B = shared->Y + h / 2;
     SetTargetAndDrawRECTs(rect);
 #ifdef NODE_SHADOW
     // The RECT needs to be bigger to allow the shadow
@@ -134,7 +108,7 @@ public:
   }
 
   virtual void setSvg(const char* path) {
-    mSvgBg = mGraphics->LoadSVG(path);
+    mSvgBg = shared->graphics->LoadSVG(path);
     if (mSvgBg.IsValid()) {
       mUseSvgBg = true;
     }
@@ -150,12 +124,12 @@ public:
         m.L + Theme::Node::HEADER_BYPASS_LEFT + Theme::Node::HEADER_BYPASS_SIZE,
         m.T + Theme::Node::HEADER_BYPASS_TOP + Theme::Node::HEADER_BYPASS_SIZE
       ), [&](IControl* pCaller) {
-        auto p = this->mParameters->Get(0);
+        auto p = this->shared->parameters.Get(0);
         const bool bypassed = static_cast<bool>(p->control->GetValue());
         p->control->SetValueFromUserInput(bypassed ? 0.0 : 1.0);
       }, u8"\uf056", u8"\uf011", mIconFont);
       mElements.Add(mHeader.bypass);
-      mGraphics->AttachControl(mHeader.bypass);
+      shared->graphics->AttachControl(mHeader.bypass);
     }
 
 
@@ -164,48 +138,48 @@ public:
       m.T + Theme::Node::HEADER_DISCONNECT_TOP, m.R - Theme::Node::HEADER_DISCONNECT_RIGHT,
       m.T + Theme::Node::HEADER_DISCONNECT_TOP + Theme::Node::HEADER_DISCONNECT_SIZE
     ), [&](IControl* pCaller) {
-      MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDisconnectAll, this->mParentNode);
+      MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDisconnectAll, this->shared->node);
     });
     mElements.Add(mHeader.disconnect);
-    mGraphics->AttachControl(mHeader.disconnect);
+    shared->graphics->AttachControl(mHeader.disconnect);
 
     mHeader.remove = new IVButtonControl(IRECT(
       m.R - Theme::Node::HEADER_REMOVE_RIGHT - Theme::Node::HEADER_DISCONNECT_SIZE,
       m.T + Theme::Node::HEADER_DISCONNECT_TOP, m.R - Theme::Node::HEADER_REMOVE_RIGHT,
       m.T + Theme::Node::HEADER_DISCONNECT_TOP + Theme::Node::HEADER_DISCONNECT_SIZE
     ), [&](IControl* pCaller) {
-      MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDeleted, this->mParentNode);
+      MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDeleted, this->shared->node);
     });
     mElements.Add(mHeader.remove);
-    mGraphics->AttachControl(mHeader.remove);
+    shared->graphics->AttachControl(mHeader.remove);
   }
 
   virtual void setUpSockets() {
-    for (int i = 0; i < mInSockets->GetSize(); i++) {
+    for (int i = 0; i < shared->socketsIn.GetSize(); i++) {
       NodeSocketUi* socket = new NodeSocketUi(
-        mBus, mGraphics, mInSockets->Get(i), mTargetRECT.L, mTargetRECT.T + i * 50.f + mTargetRECT.H() * 0.5f
+        shared->bus, shared->graphics, shared->socketsIn.Get(i), mTargetRECT.L, mTargetRECT.T + i * 50.f + mTargetRECT.H() * 0.5f
       );
-      mGraphics->AttachControl(socket);
+      shared->graphics->AttachControl(socket);
       mInSocketsUi.Add(socket);
       mElements.Add(socket);
     }
 
-    for (int i = 0; i < mOutSockets->GetSize(); i++) {
+    for (int i = 0; i < shared->socketsOut.GetSize(); i++) {
       NodeSocketUi* socket = new NodeSocketUi(
-        mBus, mGraphics, mOutSockets->Get(i), mTargetRECT.R - 30, mTargetRECT.T + i * 50.f + mTargetRECT.H() * 0.5f
+        shared->bus, shared->graphics, shared->socketsOut.Get(i), mTargetRECT.R - 30, mTargetRECT.T + i * 50.f + mTargetRECT.H() * 0.5f
       );
-      mGraphics->AttachControl(socket);
+      shared->graphics->AttachControl(socket);
       mOutSocketsUi.Add(socket);
       mElements.Add(socket);
     }
   }
 
   virtual void setUpControls() {
-    for (int i = 0; i < mParameters->GetSize(); i++) {
-      ParameterCoupling* couple = mParameters->Get(i);
+    for (int i = 0; i < shared->parameters.GetSize(); i++) {
+      ParameterCoupling* couple = shared->parameters.Get(i);
       const double value = *(couple->value);
-      const float px = *X + couple->x - (couple->w * 0.5f);
-      const float py = *Y + couple->y - (couple->h * 0.5f);
+      const float px = shared->X + couple->x - (couple->w * 0.5f);
+      const float py = shared->Y + couple->y - (couple->h * 0.5f);
       IRECT controlPos(px, py, px + couple->w, py + couple->h);
       // use the daw parameter to sync the values if possible
       if (couple->parameterIdx != kNoParameter) {
@@ -225,7 +199,7 @@ public:
       }
       
       couple->control->SetValue(couple->getNormalized());
-      mGraphics->AttachControl(couple->control);
+      shared->graphics->AttachControl(couple->control);
       mElements.Add(couple->control);
       if (i == 0 && mHeader.hasByPass) { couple->control->Hide(true); }
 
@@ -242,8 +216,8 @@ public:
   }
 
   virtual void setUp() {
-    for (int i = 0; i < mParameters->GetSize(); i++) {
-      ParameterCoupling* p = mParameters->Get(i);
+    for (int i = 0; i < shared->parameters.GetSize(); i++) {
+      ParameterCoupling* p = shared->parameters.Get(i);
       if (p->name == "Bypass") {
         mHeader.hasByPass = true;
         break;
@@ -257,28 +231,28 @@ public:
   }
 
   virtual void cleanUp() const {
-    for (int i = 0; i < mParameters->GetSize(); i++) {
-      ParameterCoupling* param = mParameters->Get(i);
+    for (int i = 0; i < shared->parameters.GetSize(); i++) {
+      ParameterCoupling* param = shared->parameters.Get(i);
       if (param->control != nullptr) {
         // this also destroys the object
-        mGraphics->RemoveControl(param->control, true);
+        shared->graphics->RemoveControl(param->control, true);
         param->control = nullptr;
       }
     }
 
     for (int i = 0; i < mInSocketsUi.GetSize(); i++) {
-      mGraphics->RemoveControl(mInSocketsUi.Get(i), true);
+      shared->graphics->RemoveControl(mInSocketsUi.Get(i), true);
     }
 
     for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
-      mGraphics->RemoveControl(mOutSocketsUi.Get(i), true);
+      shared->graphics->RemoveControl(mOutSocketsUi.Get(i), true);
     }
 
     if (mHeader.hasByPass) {
-      mGraphics->RemoveControl(mHeader.bypass, true);
+      shared->graphics->RemoveControl(mHeader.bypass, true);
     }
-    mGraphics->RemoveControl(mHeader.disconnect, true);
-    mGraphics->RemoveControl(mHeader.remove, true);
+    shared->graphics->RemoveControl(mHeader.disconnect, true);
+    shared->graphics->RemoveControl(mHeader.remove, true);
   }
 
   virtual void DrawHeader(IGraphics& g) {
@@ -328,14 +302,14 @@ public:
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
     if (mDragging) {
       mDragging = false;
-      MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDraggedEnd, mParentNode);
+      MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDraggedEnd, shared->node);
       return;
     }
   }
 
   virtual void OnMouseDrag(const float x, const float y, const float dX, const float dY, const IMouseMod& mod) override {
     mDragging = true;
-    MessageBus::fireEvent<Coord2D>(mBus, MessageBus::NodeDragged, Coord2D {x, y});
+    MessageBus::fireEvent<Coord2D>(shared->bus, MessageBus::NodeDragged, Coord2D {x, y});
     translate(dX, dY);
   }
 
@@ -345,20 +319,20 @@ public:
       moveControl(mElements.Get(i), dX, dY);
     }
 
-    for (int i = 0; i < mInSockets->GetSize(); i++) {
-      mInSockets->Get(i)->mX += dX;
-      mInSockets->Get(i)->mY += dY;
+    for (int i = 0; i < shared->socketsIn.GetSize(); i++) {
+      shared->socketsIn.Get(i)->mX += dX;
+      shared->socketsIn.Get(i)->mY += dY;
     }
 
-    for (int i = 0; i < mOutSockets->GetSize(); i++) {
-      mOutSockets->Get(i)->mX += dX;
-      mOutSockets->Get(i)->mY += dY;
+    for (int i = 0; i < shared->socketsOut.GetSize(); i++) {
+      shared->socketsOut.Get(i)->mX += dX;
+      shared->socketsOut.Get(i)->mY += dY;
     }
 
-    *X += dX;
-    *Y += dY;
+    shared->X += dX;
+    shared->Y += dY;
 
-    mGraphics->SetAllControlsDirty();
+    shared->graphics->SetAllControlsDirty();
   }
 
   virtual void OnResize() override {
@@ -369,8 +343,8 @@ public:
   }
 
   void setTranslation(float x, float y) {
-    const float dX = x - *X;
-    const float dY = y - *Y;
+    const float dX = x - shared->X;
+    const float dY = y - shared->Y;
     translate(dX, dY);
   }
 

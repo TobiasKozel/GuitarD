@@ -70,7 +70,7 @@ public:
           curNode = mOutNode;
         }
         for (int i = 0; i < curNode->mInputCount; i++) {
-          NodeSocket* curSock = curNode->mSocketsIn.Get(i);
+          NodeSocket* curSock = curNode->shared.socketsIn.Get(i);
           NodeSocket* tarSock = curSock->mConnectedTo;
           if (tarSock != nullptr) {
             float x1 = tarSock->mX + socketRadius;
@@ -107,8 +107,8 @@ public:
         }
         Node* targetNode = target->mParentNode;
         for (int i = 0; i < targetNode->mInputCount; i++) {
-          if (targetNode->mSocketsIn.Get(i)->mConnectedTo != nullptr &&
-              targetNode->mSocketsIn.Get(i)->mConnectedTo->mParentNode == node) {
+          if (targetNode->shared.socketsIn.Get(i)->mConnectedTo != nullptr &&
+              targetNode->shared.socketsIn.Get(i)->mConnectedTo->mParentNode == node) {
             return;
           }
         }
@@ -119,7 +119,7 @@ public:
     mPreviewSocketEvent.subscribe(mBus, MessageBus::PreviewSocket, [&](NodeSocket* socket) {
       // WDBGMSG(socket->mParentNode->mType.c_str());
       // TODOG this is kinda shady and does not use the MessageBus::SocketConnect event
-      NodeSocket* outSocket = this->mOutNode->mSocketsIn.Get(0);
+      NodeSocket* outSocket = this->mOutNode->shared.socketsIn.Get(0);
       if (socket == this->mPreviewSocketPrev || socket == this->mPreviewSocket) {
         // If the socket clicked is the current preview socket, connect the original socket again
         if (this->mPreviewSocketPrev != nullptr) {
@@ -199,10 +199,10 @@ public:
         curNode = mOutNode;
       }
       for (int i = 0; i < curNode->mInputCount; i++) {
-        NodeSocket* curSock = curNode->mSocketsIn.Get(i);
+        NodeSocket* curSock = curNode->shared.socketsIn.Get(i);
         if (curSock->mConnectedTo != nullptr) {
           NodeSocket* tarSock = curSock->mConnectedTo;
-          if (tarSock == mPreviewSocket && curSock == mOutNode->mSocketsIn.Get(0)) {
+          if (tarSock == mPreviewSocket && curSock == mOutNode->shared.socketsIn.Get(0)) {
             // Draw the temporary bypass
             g.DrawDottedLine(
               curSock == mHighlightSocket ? Theme::Cables::COLOR_SPLICE_IN : Theme::Cables::COLOR,
@@ -244,20 +244,20 @@ public:
     for (int n = 0; n < mNodes->GetSize(); n++) {
       Node* curNode = mNodes->Get(n);
       for (int i = 0; i < curNode->mOutputCount; i++) {
-        NodeSocket* curSock = curNode->mSocketsOut.Get(i);
+        NodeSocket* curSock = curNode->shared.socketsOut.Get(i);
         if (curSock != nullptr) {
           DrawSocket(g, curSock);
         }
       }
       for (int i = 0; i < curNode->mInputCount; i++) {
-        NodeSocket* curSock = curNode->mSocketsIn.Get(i);
+        NodeSocket* curSock = curNode->shared.socketsIn.Get(i);
         if (curSock != nullptr) {
           DrawSocket(g, curSock);
         }
       }
     }
-    DrawSocket(g, mOutNode->mSocketsIn.Get(0));
-    DrawSocket(g, mInNode->mSocketsOut.Get(0));
+    DrawSocket(g, mOutNode->shared.socketsIn.Get(0));
+    DrawSocket(g, mInNode->shared.socketsOut.Get(0));
 
     // Visualizes the automation target node of each control attached to it
     Node* automation = mVisualizeAutomation;
@@ -267,13 +267,13 @@ public:
     if (automation != nullptr) {
       for (int n = 0; n < mNodes->GetSize(); n++) {
         Node* curNode = mNodes->Get(n);
-        for (int p = 0; p < curNode->mParameters.GetSize(); p++) {
-          ParameterCoupling* pc = curNode->mParameters.Get(p);
+        for (int p = 0; p < curNode->shared.parameters.GetSize(); p++) {
+          ParameterCoupling* pc = curNode->shared.parameters.Get(p);
           if (pc->automationDependency == automation) {
             const IRECT pos = pc->control->GetRECT();
             g.DrawLine(
               Theme::Cables::AUTOMATION, pos.MW(), pos.MH(),
-              pc->automationDependency->mX, pc->automationDependency->mY,
+              pc->automationDependency->shared.X, pc->automationDependency->shared.Y,
               &mBlend, Theme::Cables::THICKNESS
             );
           }

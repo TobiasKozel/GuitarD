@@ -16,7 +16,7 @@ class InputNodeUi final : public NodeUi {
   iplug::igraphics::IText mBlocksizeText;
   string mInfo;
 public:
-  InputNodeUi(NodeUiParam param) : NodeUi(param) {
+  InputNodeUi(NodeShared* param) : NodeUi(param) {
     mInfo = "";
     mBlocksizeText = DEBUG_FONT;
     mCurrentFrequency = 440.f;
@@ -32,7 +32,7 @@ public:
 
   void Draw(IGraphics& g) override {
     NodeUi::Draw(g);
-    mInfo = "Blocksize: " + to_string(mParentNode->mLastBlockSize) + " Sample-Rate: " + to_string(mParentNode->mSampleRate);
+    mInfo = "Blocksize: " + to_string(shared->node->mLastBlockSize) + " Sample-Rate: " + to_string(shared->node->mSampleRate);
     g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
     if (mEnableTuner) {
       // g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
@@ -61,15 +61,12 @@ public:
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    if (mX == mY && mX == 0) {
+    shared.graphics = pGrahics;
+    if (shared.X == shared.Y && shared.X == 0) {
       // Place it at the screen edge if no position is set
-      mY = pGrahics->Height() / 2.f;
+      shared.Y = pGrahics->Height() / 2.f;
     }
-    mUi = new InputNodeUi(NodeUiParam {
-      mBus, pGrahics,
-      250, 150,
-      &mX, &mY, &mParameters, &mSocketsIn, &mSocketsOut, this
-    });
+    mUi = new InputNodeUi(&shared);
     mUi->setColor(IColor(255, 100, 150, 100));
     pGrahics->AttachControl(mUi);
     mUi->setUp();

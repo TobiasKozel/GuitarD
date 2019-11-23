@@ -15,18 +15,18 @@ namespace Serializer {
   inline void serialize(nlohmann::json& serialized, WDL_PtrList<Node>& nodes, Node* input, Node* output) {
     serialized["input"]["gain"] = 1.0;
     serialized["input"]["position"] = {
-      input->mX, input->mY
+      input->shared.X, input->shared.Y
     };
     serialized["nodes"] = nlohmann::json::array();
     for (int i = 0; i < nodes.GetSize(); i++) {
       Node* node = nodes.Get(i);
-      serialized["nodes"][i]["position"] = { node->mX, node->mY };
+      serialized["nodes"][i]["position"] = { node->shared.X, node->shared.Y };
       // The index shouldn't really matter since they're all in order
       serialized["nodes"][i]["idx"] = i;
       serialized["nodes"][i]["type"] = node->mType;
       serialized["nodes"][i]["inputs"] = nlohmann::json::array();
       for (int prev = 0; prev < node->mInputCount; prev++) {
-        Node* cNode = node->mSocketsIn.Get(prev)->mConnectedNode;
+        Node* cNode = node->shared.socketsIn.Get(prev)->mConnectedNode;
         if (cNode == nullptr) {
           serialized["nodes"][i]["inputs"][prev] = { NoNode, 0 };
         }
@@ -36,13 +36,13 @@ namespace Serializer {
         else {
           serialized["nodes"][i]["inputs"][prev] = {
             nodes.Find(cNode),
-            node->mSocketsIn.Get(prev)->mConnectedSocketIndex
+            node->shared.socketsIn.Get(prev)->mConnectedSocketIndex
           };
         }
       }
       serialized["nodes"][i]["parameters"] = nlohmann::json::array();
-      for (int p = 0; p < node->mParameters.GetSize(); p++) {
-        ParameterCoupling* para = node->mParameters.Get(p);
+      for (int p = 0; p < node->shared.parameters.GetSize(); p++) {
+        ParameterCoupling* para = node->shared.parameters.Get(p);
         const char* name = para->name;
         double val = para->parameter != nullptr ? para->parameter->Value() : para->baseValue;
         int idx = para->parameterIdx;
@@ -60,9 +60,9 @@ namespace Serializer {
     // Handle the output node
     serialized["output"]["gain"] = 1.0;
     serialized["output"]["position"] = {
-      output->mX, output->mY
+      output->shared.X, output->shared.Y
     };
-    Node* lastNode = output->mSocketsIn.Get(0)->mConnectedNode;
+    Node* lastNode = output->shared.socketsIn.Get(0)->mConnectedNode;
     int lastNodeIndex = NoNode;
     if (lastNode == input) {
       lastNodeIndex = InputNode;
@@ -72,7 +72,7 @@ namespace Serializer {
     }
     serialized["output"]["inputs"][0] = {
       lastNodeIndex,
-      output->mSocketsIn.Get(0)->mConnectedSocketIndex
+      output->shared.socketsIn.Get(0)->mConnectedSocketIndex
     };
   }
 
@@ -85,13 +85,13 @@ namespace Serializer {
 
     if (input->mUi != nullptr) {
       input->mUi->setTranslation(
-        input->mX = serialized["input"]["position"][0],
-        input->mY = serialized["input"]["position"][1]
+        input->shared.X = serialized["input"]["position"][0],
+        input->shared.Y = serialized["input"]["position"][1]
       );
     }
     else {
-      input->mX = serialized["input"]["position"][0];
-      input->mY = serialized["input"]["position"][1];
+      input->shared.X = serialized["input"]["position"][0];
+      input->shared.Y = serialized["input"]["position"][1];
     }
 
     int expectedIndex = 0;
@@ -101,8 +101,8 @@ namespace Serializer {
       const std::string className = sNode["type"];
       Node* node = NodeList::createNode(className);
       if (node == nullptr) { continue; }
-      node->mX = sNode["position"][0];
-      node->mY = sNode["position"][1];
+      node->shared.X = sNode["position"][0];
+      node->shared.Y = sNode["position"][1];
       node->setup(pBus, sampleRate);
       if (expectedIndex != sNode["idx"]) {
         WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
@@ -110,8 +110,8 @@ namespace Serializer {
       nodes.Add(node);
       for (auto param : sNode["parameters"]) {
         string name = param["name"];
-        for (int i = 0; i < node->mParameters.GetSize(); i++) {
-          ParameterCoupling* para = node->mParameters.Get(i);
+        for (int i = 0; i < node->shared.parameters.GetSize(); i++) {
+          ParameterCoupling* para = node->shared.parameters.Get(i);
           if (para->name == name) {
             para->parameterIdx = param["idx"];
             *(para->value) = param["value"];
@@ -132,14 +132,14 @@ namespace Serializer {
         const int inBufferIdx = connection[1];
         if (inNodeIdx >= 0 && nodes.Get(inNodeIdx) != nullptr) {
           node->connectInput(
-            nodes.Get(inNodeIdx)->mSocketsOut.Get(inBufferIdx),
+            nodes.Get(inNodeIdx)->shared.socketsOut.Get(inBufferIdx),
             currentInputIdx
           );
         }
         else if (inNodeIdx == InputNode) {
           // if it's NoNode it's not connected at all and we'll just leave it at a nullptr
           node->connectInput(
-            input->mSocketsOut.Get(0),
+            input->shared.socketsOut.Get(0),
             currentInputIdx
           );
         }
@@ -149,8 +149,8 @@ namespace Serializer {
       // Link up the automation
       for (auto param : sNode["parameters"]) {
         string name = param["name"];
-        for (int i = 0; i < node->mParameters.GetSize(); i++) {
-          ParameterCoupling* para = node->mParameters.Get(i);
+        for (int i = 0; i < node->shared.parameters.GetSize(); i++) {
+          ParameterCoupling* para = node->shared.parameters.Get(i);
           if (para->name == name) {
             int automationIndex = -1;
             try {
@@ -172,11 +172,11 @@ namespace Serializer {
     const int outConnectionIndex = serialized["output"]["inputs"][0][1];
     if (nodes.Get(outNodeIndex) != nullptr) {
       output->connectInput(
-        nodes.Get(outNodeIndex)->mSocketsOut.Get(outConnectionIndex)
+        nodes.Get(outNodeIndex)->shared.socketsOut.Get(outConnectionIndex)
       );
     }
     else if (outNodeIndex == InputNode) {
-      output->connectInput(input->mSocketsOut.Get(0));
+      output->connectInput(input->shared.socketsOut.Get(0));
     }
 
     //output->X = serialized["output"]["position"][0];
@@ -188,8 +188,8 @@ namespace Serializer {
       );
     }
     else {
-      output->mX = serialized["output"]["position"][0];
-      output->mY = serialized["output"]["position"][1];
+      output->shared.X = serialized["output"]["position"][0];
+      output->shared.Y = serialized["output"]["position"][1];
     }
   }
 }

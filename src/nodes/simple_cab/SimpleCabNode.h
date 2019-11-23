@@ -66,7 +66,7 @@ class SimpleCabNodeUi : public NodeUi {
   iplug::igraphics::IText mBlocksizeText;
   string mInfo;
 public:
-  SimpleCabNodeUi(NodeUiParam param) : NodeUi(param) {
+  SimpleCabNodeUi(NodeShared* param) : NodeUi(param) {
     mInfo = "None";
     mBlocksizeText = DEBUG_FONT;
   }
@@ -168,9 +168,9 @@ public:
 
   void ProcessBlock(int nFrames) {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
-    mParameters.Get(1)->update();
+    shared.parameters.Get(1)->update();
 
-    sample** buffer = mSocketsIn.Get(0)->mConnectedTo->mParentBuffer;
+    sample** buffer = shared.socketsIn.Get(0)->mConnectedTo->mParentBuffer;
 
 #ifdef FLOATCONV
     /**                           THREADPOOLING ATTEMPT                           */
@@ -264,14 +264,7 @@ public:
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    mUi = new SimpleCabNodeUi(NodeUiParam{
-      mBus, pGrahics,
-      300, 300,
-      &mX, &mY, &mParameters, &mSocketsIn, &mSocketsOut, this
-    });
+    Node::setupUi(pGrahics);
     mUi->setColor(IColor(255, 150, 100, 100));
-    pGrahics->AttachControl(mUi);
-    mUi->setUp();
-    mUiReady = true;
   }
 };

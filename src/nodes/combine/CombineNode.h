@@ -11,12 +11,14 @@ public:
     pan1 = pan2 = 0;
     mix = 0.5;
     mType = pType;
+    shared.width = 300;
+    shared.height = 300;
   }
 
   void ProcessBlock(const int nFrames) {
     if (mIsProcessed) { return; }
-    NodeSocket* s1 = mSocketsIn.Get(0);
-    NodeSocket* s2 = mSocketsIn.Get(1);
+    NodeSocket* s1 = shared.socketsIn.Get(0);
+    NodeSocket* s2 = shared.socketsIn.Get(1);
 
     // see which inputs are connected
     const bool has1 = s1->mConnectedNode != nullptr;
@@ -36,15 +38,15 @@ public:
     sample** buffer2 = has2 ? s2->mConnectedTo->mParentBuffer : emptyBuffer;
 
     // Update the params
-    mParameters.Get(0)->update();
-    mParameters.Get(1)->update();
-    mParameters.Get(2)->update();
+    shared.parameters.Get(0)->update();
+    shared.parameters.Get(1)->update();
+    shared.parameters.Get(2)->update();
 
     // prepare the values
-    const double mix = *(mParameters.Get(2)->value);
+    const double mix = *(shared.parameters.Get(2)->value);
     const double invMix = 1 - mix;
-    const double pan1 = *(mParameters.Get(0)->value);
-    const double pan2 = *(mParameters.Get(1)->value);
+    const double pan1 = *(shared.parameters.Get(0)->value);
+    const double pan2 = *(shared.parameters.Get(1)->value);
     const double pan1l = min(1.0, max(-pan1 + 1.0, 0.0)) * invMix;
     const double pan1r = min(1.0, max(+pan1 + 1.0, 0.0)) * invMix;
     const double pan2l = min(1.0, max(-pan2 + 1.0, 0.0)) * mix;
@@ -68,21 +70,21 @@ public:
     );
     p->x = -100;
     p->y = -100;
-    mParameters.Add(p);
+    shared.parameters.Add(p);
 
     p = new ParameterCoupling(
       "PAN 2", &pan2, 0.0, -1.0, 1.0, 0.01
     );
     p->x = -100;
     p->y = 100;
-    mParameters.Add(p);
+    shared.parameters.Add(p);
 
     p = new ParameterCoupling(
       "MIX", &mix, 0.5, 0.0, 1.0, 0.01
     );
     p->x = 0;
     p->y = 0;
-    mParameters.Add(p);
+    shared.parameters.Add(p);
   }
 
   void deleteBuffers() override {

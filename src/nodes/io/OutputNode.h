@@ -4,7 +4,7 @@
 
 class OutputNodeUi final : public NodeUi {
 public:
-  OutputNodeUi(NodeUiParam param) : NodeUi(param) {
+  OutputNodeUi(NodeShared* param) : NodeUi(param) {
   }
 };
 
@@ -16,7 +16,7 @@ public:
   }
 
   void ProcessBlock(int) {
-    NodeSocket* in = mSocketsIn.Get(0)->mConnectedTo;
+    NodeSocket* in = shared.socketsIn.Get(0)->mConnectedTo;
     if (in == nullptr) {
       mIsProcessed = true;
     }
@@ -26,7 +26,7 @@ public:
   }
 
   void CopyOut(iplug::sample** out, int nFrames) {
-    NodeSocket* in = mSocketsIn.Get(0)->mConnectedTo;
+    NodeSocket* in = shared.socketsIn.Get(0)->mConnectedTo;
     if (mMaxBuffer < nFrames || in == nullptr || !in->mParentNode->mIsProcessed) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
@@ -50,16 +50,13 @@ public:
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    if (mX == mY && mX == 0) {
+    if (shared.X == shared.Y && shared.X == 0) {
       // Place it at the screen edge if no position is set
-      mY = pGrahics->Height() / 2.f;
-      mX = pGrahics->Width();
+      shared.Y = pGrahics->Height() / 2.f;
+      shared.X = pGrahics->Width();
     }
-    mUi = new OutputNodeUi(NodeUiParam{
-      mBus, pGrahics,
-      250, 150,
-      &mX, &mY, &mParameters, &mSocketsIn, &mSocketsOut, this
-    });
+    shared.graphics = pGrahics;
+    mUi = new OutputNodeUi(&shared);
     mUi->setColor(IColor(255, 100, 150, 100));
     pGrahics->AttachControl(mUi);
     mUi->setUp();

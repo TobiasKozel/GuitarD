@@ -4,25 +4,20 @@
 #include "IGraphics.h"
 #include "src/node/NodeUi.h"
 #include "src/node/NodeSocket.h"
-#include "src/parameter/ParameterCoupling.h"
-#include "src/misc/MessageBus.h"
+#include "NodeShared.h"
 
 /**
  * Virtual class which all nodes will derive from
  */
 class Node {
 protected:
-  MessageBus::Bus* mBus = nullptr;
   bool mUiReady = false;
 public:
+  NodeShared shared;
   std::string mType;
-
-  WDL_PtrList<ParameterCoupling> mParameters;
   // The dsp will get the data from the buffer inside the socket
   int mInputCount = 0;
-  WDL_PtrList<NodeSocket> mSocketsIn;
   int mOutputCount = 0;
-  WDL_PtrList<NodeSocket> mSocketsOut;
   // Flag to skip automation if there's none
   bool mIsAutomated = false;
   // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
@@ -31,10 +26,6 @@ public:
   NodeUi* mUi = nullptr;
   bool mIsProcessed = false;
   
-  float mX = 0;
-  float mY = 0;
-  float rotation = 0;
-
   int mSampleRate = 0;
   int mChannelCount = 0;
   int mMaxBuffer = 0;
@@ -51,7 +42,8 @@ public:
                      const int pMaxBuffer = MAX_BUFFER, const int pChannles = 2,
                      const int pInputs = 1, const int pOutputs = 1)
   {
-    mBus = pBus;
+    shared.bus = pBus;
+    shared.node = this;
     mSampleRate = 0;
     mChannelCount = 0;
     mMaxBuffer = pMaxBuffer;
@@ -63,11 +55,11 @@ public:
 
     // Setup the sockets for the node connections
     for (int i = 0; i < mInputCount; i++) {
-      mSocketsIn.Add(new NodeSocket(mBus, i, this));
+      shared.socketsIn.Add(new NodeSocket(shared.bus, i, this));
     }
 
     for (int i = 0; i < mOutputCount; i++) {
-      mSocketsOut.Add(new NodeSocket(mBus, i, this, mBuffersOut[i]));
+      shared.socketsOut.Add(new NodeSocket(shared.bus, i, this, mBuffersOut[i]));
     }
   }
 
@@ -116,12 +108,13 @@ public:
       WDBGMSG("Warning, UI of node was not cleaned up!\n");
     }
 
-    for (int i = 0; i < mParameters.GetSize(); i++) {
-      detachAutomation(mParameters.Get(i));
+    for (int i = 0; i < shared.parameters.GetSize(); i++) {
+      detachAutomation(shared.parameters.Get(i));
     }
-    mParameters.Empty(true);
-    mSocketsIn.Empty(true);
-    mSocketsOut.Empty(true);
+    shared.meters.Empty(true);
+    shared.parameters.Empty(true);
+    shared.socketsIn.Empty(true);
+    shared.socketsOut.Empty(true);
   }
 
   /**
@@ -143,9 +136,9 @@ public:
    */
   bool byPass() {
     // The first param will always be bypass
-    mParameters.Get(0)->update();
+    shared.parameters.Get(0)->update();
     if (mByPassed < 0.5) { return false; }
-    sample** in = mSocketsIn.Get(0)->mConnectedTo->mParentBuffer;
+    sample** in = shared.socketsIn.Get(0)->mConnectedTo->mParentBuffer;
     for (int o = 0; o < mOutputCount; o++) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < mMaxBuffer; i++) {
@@ -167,8 +160,8 @@ public:
      * If one input isn't connected, skip the processing and output silence
      * If that's not desired, this function has to be overriden
      */
-    for (int i = 0; i < mSocketsIn.GetSize(); i++) {
-      if (mSocketsIn.Get(i)->mConnectedTo == nullptr) {
+    for (int i = 0; i < shared.socketsIn.GetSize(); i++) {
+      if (shared.socketsIn.Get(i)->mConnectedTo == nullptr) {
         outputSilence();
         return false;
       }
@@ -178,7 +171,7 @@ public:
      * Check for inputs which are connected to unprocessed nodes
      */
     for (int i = 0; i < mInputCount; i++) {
-      if (!mSocketsIn.Get(i)->mConnectedTo->mParentNode->mIsProcessed) {
+      if (!shared.socketsIn.Get(i)->mConnectedTo->mParentNode->mIsProcessed) {
         // A node isn't ready so return false
         return false;
       }
@@ -188,8 +181,8 @@ public:
      * Check for automation
      */
     if (mIsAutomated) {
-      for (int i = 0; i < mParameters.GetSize(); i++) {
-        Node* n = mParameters.Get(i)->automationDependency;
+      for (int i = 0; i < shared.parameters.GetSize(); i++) {
+        Node* n = shared.parameters.Get(i)->automationDependency;
         if (n != nullptr && !n->mIsProcessed) {
           return false;
         }
@@ -200,8 +193,8 @@ public:
   }
 
   void checkIsAutomated() {
-    for (int i = 0; i < mParameters.GetSize(); i++) {
-      if (mParameters.Get(i)->automationDependency != nullptr) {
+    for (int i = 0; i < shared.parameters.GetSize(); i++) {
+      if (shared.parameters.Get(i)->automationDependency != nullptr) {
         mIsAutomated = true;
         return;
       }
@@ -255,7 +248,7 @@ public:
    * Connects a given socket to a input at a given index of this node
    */
   virtual void connectInput(NodeSocket* out, int inputNumber = 0) {
-    NodeSocket* inSocket = mSocketsIn.Get(inputNumber);
+    NodeSocket* inSocket = shared.socketsIn.Get(inputNumber);
     if (inSocket != nullptr) {
       if (out == nullptr) {
         inSocket->disconnect();
@@ -273,7 +266,7 @@ public:
    * The requested ParameterCoupling is returned to be used in the automation node
    */
   virtual void attachAutomation(Node* n, const int index) {
-    ParameterCoupling* p = mParameters.Get(index);
+    ParameterCoupling* p = shared.parameters.Get(index);
     if (p != nullptr) {
       n->addAutomationTarget(p);
     }
@@ -312,7 +305,7 @@ public:
    * Generic function to call when the node can be bypassed
    */
   void addByPassParam() {
-    mParameters.Add(new ParameterCoupling(
+    shared.parameters.Add(new ParameterCoupling(
       "Bypass", &mByPassed, 0.0, 0.0, 1.0, 1
     ));
   }
@@ -324,7 +317,7 @@ public:
         "Stereo", &mStereo, 1.0, 0.0, 1.0, 1
       );
     }
-    mParameters.Add(p);
+    shared.parameters.Add(p);
   }
 
   /**
@@ -345,11 +338,8 @@ public:
    * Generic setup of the parameters to get something on the screen
    */
   virtual void setupUi(IGraphics* pGrahics) {
-
-    mUi = new NodeUi(NodeUiParam {
-      mBus, pGrahics, 300, 300, &mX, &mY,
-      &mParameters, &mSocketsIn, &mSocketsOut, this
-    });
+    shared.graphics = pGrahics;
+    mUi = new NodeUi(&shared);
     mUi->setColor(IColor(255, 100, 100, 100));
     pGrahics->AttachControl(mUi);
     mUi->setUp();
@@ -365,8 +355,8 @@ public:
      * If the node is not connected this won't happen, so always do the update when the
      * Gui window is closed just in case
      */
-    for (int i = 0; i < mParameters.GetSize(); i++) {
-      mParameters.Get(i)->update();
+    for (int i = 0; i < shared.parameters.GetSize(); i++) {
+      shared.parameters.Get(i)->update();
     }
     if (mUi != nullptr) {
       mUi->cleanUp();

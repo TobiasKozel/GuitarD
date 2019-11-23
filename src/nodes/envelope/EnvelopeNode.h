@@ -5,7 +5,7 @@ class EnvelopeNodeUi final : public NodeUi {
   IVButtonControl* mPicker = nullptr;
   bool mPickerMode = false;
 public:
-  EnvelopeNodeUi(const NodeUiParam param) : NodeUi(param) {
+  EnvelopeNodeUi(NodeShared* param) : NodeUi(param) {
   }
 
   void setUpControls() override {
@@ -13,16 +13,16 @@ public:
     mPicker = new IVButtonControl(mRECT.GetPadded(-100), [&](IControl* pCaller) {
       this->mPickerMode = true;
       MessageBus::fireEvent<Node*>(
-        mBus, MessageBus::PickAutomationTarget, mParentNode
+        shared->bus, MessageBus::PickAutomationTarget, shared->node
       );
     });
     mElements.Add(mPicker);
-    mGraphics->AttachControl(mPicker);
+    shared->graphics->AttachControl(mPicker);
   }
 
   void cleanUp() const override {
     NodeUi::cleanUp();
-    mGraphics->RemoveControl(mPicker, true);
+    shared->graphics->RemoveControl(mPicker, true);
   }
 
 
@@ -37,14 +37,14 @@ public:
   void OnMouseOver(float x, float y, const IMouseMod& mod) override {
     mMouseIsOver = true;
     MessageBus::fireEvent<Node*>(
-      mBus, MessageBus::VisualizeAutomationTargets, mParentNode
+      shared->bus, MessageBus::VisualizeAutomationTargets, shared->node
     );
   }
 
   void OnMouseOut() override {
     mMouseIsOver = false;
     MessageBus::fireEvent<Node*>(
-      mBus, MessageBus::VisualizeAutomationTargets, nullptr
+      shared->bus, MessageBus::VisualizeAutomationTargets, nullptr
     );
   }
 
@@ -87,7 +87,7 @@ public:
     );
     p->x = -100;
     p->y = -100;
-    mParameters.Add(p);
+    shared.parameters.Add(p);
 
     p = new ParameterCoupling(
       "Filter", &filter, 0, 0, 1, 0.01
@@ -95,7 +95,7 @@ public:
     p->type = ParameterCoupling::Frequency;
     p->x = 0;
     p->y = -100;
-    mParameters.Add(p);
+    shared.parameters.Add(p);
 
   }
 
@@ -132,9 +132,9 @@ public:
 
   void ProcessBlock(const int nFrames) override {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
-    sample** buffer = mSocketsIn.Get(0)->mConnectedTo->mParentBuffer;
-    mParameters.Get(1)->update();
-    mParameters.Get(2)->update();
+    sample** buffer = shared.socketsIn.Get(0)->mConnectedTo->mParentBuffer;
+    shared.parameters.Get(1)->update();
+    shared.parameters.Get(2)->update();
     double value = 0;
     for (int i = 0; i < nFrames; i++) {
       value += abs(buffer[0][i]);
@@ -150,10 +150,8 @@ public:
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    mUi = new EnvelopeNodeUi(NodeUiParam{
-      mBus, pGrahics, 300, 300, &mX, &mY,
-      &mParameters, &mSocketsIn, &mSocketsOut, this
-    });
+    mUi = new OutputNodeUi(&shared);
+    mUi = new EnvelopeNodeUi(&shared);
     pGrahics->AttachControl(mUi);
     mUi->setColor(Theme::Categories::AUTOMATION);
     mUi->setUp();
