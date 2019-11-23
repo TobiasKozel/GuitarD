@@ -115,7 +115,7 @@ public:
 
   void testadd() {
     return;
-    Node* test = NodeList::createNode("BitCrusherNode");
+    Node* test = NodeList::createNode("SimpleCabNode");
     addNode(test, mInputNode, 0, 500, 300);
     mOutputNode->connectInput(test->shared.socketsOut.Get(0));
   }

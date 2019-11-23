@@ -22,55 +22,6 @@
 #include <omp.h>
 #endif
 
-class FileBrowser : public IDirBrowseControlBase
-{
-private:
-  WDL_String mLabel;
-  IBitmap mBitmap;
-public:
-  FileBrowser(const IRECT& bounds)
-    : IDirBrowseControlBase(bounds, ".wav")
-  {
-    WDL_String path;
-    //    DesktopPath(path);
-    path.Set(__FILE__);
-    path.remove_filepart();
-#ifdef OS_WIN
-    path.Append("\\resources\\img\\");
-#else
-    path.Append("/resources/img/");
-#endif
-    AddPath(path.Get(), "");
-
-    mLabel.Set("Click here to browse IR files...");
-  }
-
-  void Draw(IGraphics& g) override
-  {
-    g.FillRect(COLOR_TRANSLUCENT, mRECT);
-
-  }
-
-  void OnMouseDown(float x, float y, const IMouseMod& mod) override
-  {
-    SetUpMenu();
-
-    GetUI()->CreatePopupMenu(*this, mMainMenu, x, y);
-  }
-
-  void OnPopupMenuSelection(IPopupMenu* pSelectedMenu, int valIdx) override
-  {
-    if (pSelectedMenu)
-    {
-      IPopupMenu::Item* pItem = pSelectedMenu->GetChosenItem();
-      WDL_String* pStr = mFiles.Get(pItem->GetTag());
-      mLabel.Set(pStr);
-      mBitmap = GetUI()->LoadBitmap(pStr->Get());
-      SetTooltip(pStr->Get());
-      SetDirty(false);
-    }
-  }
-};
 
 class SimpleCabNodeUi : public NodeUi {
   iplug::igraphics::IText mBlocksizeText;
@@ -104,6 +55,8 @@ public:
     else {
       WDBGMSG("No file selected.\n");
     }
+    // This is needed so the button which opened the pop up doesn't trigger the dialog again
+    shared->graphics->ReleaseMouseCapture();
   }
 
   /**
