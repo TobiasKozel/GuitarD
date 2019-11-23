@@ -359,6 +359,15 @@
 		9444896A238049FE008A11C6 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 4FC82B4620BD522B00722133 /* fonts */; };
 		9461A5E52362531200FB9381 /* resample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94E7662D236251A0000B599F /* resample.cpp */; };
 		947151C5237D99F600867A1F /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 947151C4237D99E200867A1F /* Accelerate.framework */; };
+		9483AF7723898D68002E0332 /* swell-dlg.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D0413B634AA001D0217 /* swell-dlg.mm */; };
+		9483AF7823898D68002E0332 /* swell-kb.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D3913B63582001D0217 /* swell-kb.mm */; };
+		9483AF7923898D68002E0332 /* swell-miscdlg.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D3B13B6358C001D0217 /* swell-miscdlg.mm */; };
+		9483AF7A23898D68002E0332 /* swell-menu.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D3D13B63595001D0217 /* swell-menu.mm */; };
+		9483AF7B23898D68002E0332 /* swell-wnd.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D4113B635AB001D0217 /* swell-wnd.mm */; };
+		9483AF7C23898D68002E0332 /* swell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D4313B635B2001D0217 /* swell.cpp */; };
+		9483AF7D23898D68002E0332 /* swell-misc.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D3F13B635A0001D0217 /* swell-misc.mm */; };
+		9483AF7E23898D68002E0332 /* swell-gdi.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D0B13B634BF001D0217 /* swell-gdi.mm */; };
+		9483AF8623898E98002E0332 /* filebrowse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9483AF8523898E8D002E0332 /* filebrowse.cpp */; };
 		94B9451B237D9E410093CE4A /* resample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94E7662D236251A0000B599F /* resample.cpp */; };
 		94B9451E237D9E710093CE4A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 947151C4237D99E200867A1F /* Accelerate.framework */; };
 		94B94523237DA0220093CE4A /* resample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94E7662D236251A0000B599F /* resample.cpp */; };
@@ -850,6 +859,7 @@
 		944489562380408A008A11C6 /* Utilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Utilities.cpp; path = ../thirdparty/fftconvolver/Utilities.cpp; sourceTree = "<group>"; };
 		9444895B238040CB008A11C6 /* TwoStageFFTConvolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TwoStageFFTConvolver.cpp; path = ../thirdparty/fftconvolver/TwoStageFFTConvolver.cpp; sourceTree = "<group>"; };
 		947151C4237D99E200867A1F /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		9483AF8523898E8D002E0332 /* filebrowse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = filebrowse.cpp; path = ../../../WDL/filebrowse.cpp; sourceTree = "<group>"; };
 		94E5BA23237DA1EE00D42D87 /* AUv3Framework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AUv3Framework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		94E7662D236251A0000B599F /* resample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = resample.cpp; path = ../../../WDL/resample.cpp; sourceTree = "<group>"; };
 		B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.cpp.cpp; name = IPlugVST3_ProcessorBase.cpp; path = ../../../IPlug/VST3/IPlugVST3_ProcessorBase.cpp; sourceTree = "<group>"; tabWidth = 2; };
@@ -1702,6 +1712,7 @@
 		4FF01613134E0BCD001447BA /* WDL */ = {
 			isa = PBXGroup;
 			children = (
+				9483AF8523898E8D002E0332 /* filebrowse.cpp */,
 				94E7662D236251A0000B599F /* resample.cpp */,
 				4FD16CF713B6343B001D0217 /* SWELL */,
 				4F1F1BE9135B1F60003A5BB2 /* wdlendian.h */,
@@ -2373,6 +2384,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9483AF8623898E98002E0332 /* filebrowse.cpp in Sources */,
+				9483AF7723898D68002E0332 /* swell-dlg.mm in Sources */,
+				9483AF7823898D68002E0332 /* swell-kb.mm in Sources */,
+				9483AF7923898D68002E0332 /* swell-miscdlg.mm in Sources */,
+				9483AF7A23898D68002E0332 /* swell-menu.mm in Sources */,
+				9483AF7B23898D68002E0332 /* swell-wnd.mm in Sources */,
+				9483AF7C23898D68002E0332 /* swell.cpp in Sources */,
+				9483AF7D23898D68002E0332 /* swell-misc.mm in Sources */,
+				9483AF7E23898D68002E0332 /* swell-gdi.mm in Sources */,
 				9444895C238040D5008A11C6 /* TwoStageFFTConvolver.cpp in Sources */,
 				9444895723804092008A11C6 /* AudioFFT.cpp in Sources */,
 				9444895823804092008A11C6 /* FFTConvolver.cpp in Sources */,

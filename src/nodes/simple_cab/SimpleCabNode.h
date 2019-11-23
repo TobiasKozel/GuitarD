@@ -6,6 +6,15 @@
 #include "thirdparty/threadpool.h"
 #include "filebrowse.h"
 
+// TODOG figure out this swell stuff
+#ifdef FillRect
+#undef FillRect
+#endif
+#ifdef DrawText
+#undef DrawText
+#endif
+
+
 // #define useThreadPool
 // #define useOpenMP
 
