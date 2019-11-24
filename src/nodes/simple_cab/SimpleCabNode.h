@@ -2,9 +2,12 @@
 #include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
 #include "resample.h"
 #include "src/node/Node.h"
-#include "clean.h"
 #include "thirdparty/threadpool.h"
 #include "filebrowse.h"
+#include "InternalIRs.h"
+
+#define DR_WAV_IMPLEMENTATION
+#include "thirdparty/dr_wav.h"
 
 // TODOG figure out this swell stuff
 #ifdef FillRect
@@ -43,7 +46,8 @@ public:
     shared->graphics->AttachControl(mBrowseButton);
   }
 
-  void openFileDialog() {
+
+  void openFileDialog() const {
     HWND handle = reinterpret_cast<HWND>(shared->graphics->GetWindow());
     const char* result = WDL_ChooseFileForOpen(
       handle, "Open IR", nullptr, nullptr, "Wave Files\0*.wav;*.WAV\0AIFF Files\0*.aiff;*.AIFF\0", "*.wav",
@@ -51,6 +55,7 @@ public:
     );
     if (result != nullptr) {
       WDBGMSG(result);
+      // loadWave(result);
     }
     else {
       WDBGMSG("No file selected.\n");
@@ -76,16 +81,14 @@ public:
     NodeUi::cleanUp();
     shared->graphics->RemoveControl(mBrowseButton, true);
   }
-
-
 };
 
 class SimpleCabNode final : public Node {
-  fftconvolver::TwoStageFFTConvolver* mConvolvers[8];
-  WDL_Resampler mResampler;
-  WDL_RESAMPLE_TYPE* mResampledIR;
-  WDL_RESAMPLE_TYPE** mConversionBufferIn;
-  WDL_RESAMPLE_TYPE** mConversionBufferOut;
+  fftconvolver::TwoStageFFTConvolver* mConvolvers[8] = { nullptr };
+  WDL_RESAMPLE_TYPE** mConversionBufferIn = nullptr;
+  WDL_RESAMPLE_TYPE** mConversionBufferOut = nullptr;
+  bool mIRLoaded = false;
+  IRBundle mLoadedIR;
 
 #ifdef useThreadPool
   ctpl::thread_pool tPool;
@@ -94,12 +97,8 @@ class SimpleCabNode final : public Node {
 public:
   SimpleCabNode(std::string pType) : Node() {
     mType = pType;
-    mResampledIR = nullptr;
-    mConversionBufferIn = nullptr;
-    mConversionBufferOut = nullptr;
   }
 
-  // TODOG FIX THIS MESS
   void setup(MessageBus::Bus* pBus, int pSamplerate = 48000, int pMaxBuffer = MAX_BUFFER, int pChannles = 2, int pInputs = 1, int pOutputs = 1) override {
     Node::setup(pBus, pSamplerate, pMaxBuffer, 2, 1, 1);
 
@@ -111,12 +110,61 @@ public:
 #endif
   }
 
+  void resampleAndLoadIR(const IRBundle b) {
+    mIRLoaded = false;
+    for (int c = 0; c < b.channelCount; c++) {
+      WDL_Resampler resampler;
+      resampler.SetMode(true, 0, true);
+      resampler.SetFilterParms();
+      resampler.SetFeedMode(true);
+      resampler.SetRates(b.sampleRate, mSampleRate);
+      WDL_RESAMPLE_TYPE* inBuffer;
+      const int inSamples = resampler.ResamplePrepare(b.sampleCount, 1, &inBuffer);
+      for (int i = 0; i < b.sampleCount; i++) {
+        // Adjust the volume, since higher samplerates result in louder outputs
+        inBuffer[i] = b.samples[c][i] * (b.sampleRate / static_cast<float>(mSampleRate)) * 0.2f;
+      }
+      const int newSize = ceil(b.sampleCount * ((mSampleRate / static_cast<float>(b.sampleRate))));
+      WDL_RESAMPLE_TYPE* outBuffer = new WDL_RESAMPLE_TYPE[newSize];
+      const int outSamples = resampler.ResampleOut(outBuffer, inSamples, b.sampleCount, 1);
+      if (b.channelCount == 1) {
+        for (int ch = 0; ch < mChannelCount; ch++) {
+          mConvolvers[ch]->init(128, 1024 * 4, outBuffer, outSamples);
+        }
+      }
+      else if (b.channelCount == mChannelCount) {
+        mConvolvers[c]->init(128, 1024 * 4, outBuffer, outSamples);
+      }
+      delete[] outBuffer;
+    }
+    mLoadedIR = b;
+    mIRLoaded = true;
+  }
+
+  static void loadWave(const char* path, bool embed = false) {
+    drwav wav;
+    if (!drwav_init_file(&wav, path, nullptr)) {
+      return;
+    }
+
+    float* pSampleData = static_cast<float*>(malloc(
+      static_cast<size_t>(wav.totalPCMFrameCount) * wav.channels * sizeof(float)
+    ));
+    const size_t samplesRead = drwav_read_pcm_frames_f32(&wav, wav.totalPCMFrameCount, pSampleData);
+    const float length = samplesRead / static_cast<float>(wav.sampleRate);
+    if (length > 10.f || samplesRead < 1) {
+      assert(false);
+    }
+    drwav_uninit(&wav);
+  }
+
 
   void createBuffers() override {
     Node::createBuffers();
     for (int c = 0; c < mChannelCount; c++) {
       mConvolvers[c] = new fftconvolver::TwoStageFFTConvolver();
     }
+
 #ifdef FLOATCONV
     mConversionBufferIn = new WDL_RESAMPLE_TYPE * [mChannelCount];
     mConversionBufferOut = new WDL_RESAMPLE_TYPE * [mChannelCount];
@@ -125,38 +173,22 @@ public:
       mConversionBufferOut[c] = new WDL_RESAMPLE_TYPE[mMaxBuffer];
     }
 #endif
-    mResampler.SetMode(true, 0, true);
-    mResampler.SetFilterParms();
-    mResampler.SetFeedMode(true);
-    mResampler.SetRates(48000, mSampleRate);
-    WDL_RESAMPLE_TYPE* test;
-    const int inSamples = mResampler.ResamplePrepare(cleanIRLength, 1, &test);
-    for (int i = 0; i < cleanIRLength; i++) {
-      test[i] = cleanIR[i] * (48000.f / static_cast<float>(mSampleRate) ) * 0.2;
-    }
-    mResampledIR = new WDL_RESAMPLE_TYPE[
-      static_cast<size_t>(ceil(cleanIRLength * ((mSampleRate / 48000.f))))
-    ];
-    const int outSamples = mResampler.ResampleOut(mResampledIR, inSamples, cleanIRLength, 1);
-    for (int c = 0; c < mChannelCount; c++) {
-      mConvolvers[c]->init(128, 1024 * 4, mResampledIR, outSamples);
-    }
+    resampleAndLoadIR(InternalIRs[1]);
   }
 
   void deleteBuffers() override {
     Node::deleteBuffers();
-    delete mResampledIR;
-    mResampledIR = nullptr;
+   
     for (int c = 0; c < mChannelCount; c++) {
       delete mConvolvers[c];
     }
 #ifdef FLOATCONV
     for (int c = 0; c < mChannelCount; c++) {
-      delete mConversionBufferIn[c];
-      delete mConversionBufferOut[c];
+      delete[] mConversionBufferIn[c];
+      delete[] mConversionBufferOut[c];
     }
-    delete mConversionBufferIn;
-    delete mConversionBufferOut;
+    delete[] mConversionBufferIn;
+    delete[] mConversionBufferOut;
     mConversionBufferIn = nullptr;
     mConversionBufferOut = nullptr;
 #endif
@@ -164,6 +196,10 @@ public:
 
   void ProcessBlock(const int nFrames) {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
+    if (!mIRLoaded) {
+      outputSilence();
+      return;
+    }
     shared.parameters.Get(1)->update();
 
     sample** buffer = shared.socketsIn.Get(0)->mConnectedTo->mParentBuffer;

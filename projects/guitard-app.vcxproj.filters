@@ -447,6 +447,9 @@
     <ClInclude Include="..\src\node\NodeShared.h">
       <Filter>src\node</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\simple_cab\InternalIRs.h">
+      <Filter>src\nodes\cabs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

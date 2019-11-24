@@ -352,6 +352,7 @@
     <ClInclude Include="..\src\nodes\paramerticeq\ParametricEqNode.h" />
     <ClInclude Include="..\src\nodes\phasetool\PhaseToolNode.h" />
     <ClInclude Include="..\src\nodes\RegisterNodes.h" />
+    <ClInclude Include="..\src\nodes\simple_cab\InternalIRs.h" />
     <ClInclude Include="..\src\nodes\simple_cab\SimpleCabNode.h" />
     <ClInclude Include="..\src\nodes\simple_compressor\SimpleComressorNode.h" />
     <ClInclude Include="..\src\nodes\simple_delay\SimpleDelayNode.h" />
