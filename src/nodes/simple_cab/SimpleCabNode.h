@@ -25,11 +25,17 @@
 #include <omp.h>
 #endif
 
+struct CabNodeSharedData {
+  function<void(IRBundle)> callback;
+  IRBundle loadedIr;
+  bool embedIr = false;
+};
 
 class SimpleCabNodeUi : public NodeUi {
   iplug::igraphics::IText mBlocksizeText;
   IVButtonControl* mBrowseButton = nullptr;
   string mInfo;
+  CabNodeSharedData* mCabShared = nullptr;
 public:
   SimpleCabNodeUi(NodeShared* param) : NodeUi(param) {
     mInfo = "None";
@@ -55,7 +61,10 @@ public:
     );
     if (result != nullptr) {
       WDBGMSG(result);
-      // loadWave(result);
+      IRBundle load;
+      load.name = "custom";
+      load.path = result;
+      mCabShared->callback(load);
     }
     else {
       WDBGMSG("No file selected.\n");
@@ -81,14 +90,23 @@ public:
     NodeUi::cleanUp();
     shared->graphics->RemoveControl(mBrowseButton, true);
   }
+
+  void registerSharedData(CabNodeSharedData* data) {
+    mCabShared = data;
+  }
 };
+
+
+
 
 class SimpleCabNode final : public Node {
   fftconvolver::TwoStageFFTConvolver* mConvolvers[8] = { nullptr };
   WDL_RESAMPLE_TYPE** mConversionBufferIn = nullptr;
   WDL_RESAMPLE_TYPE** mConversionBufferOut = nullptr;
   bool mIRLoaded = false;
-  IRBundle mLoadedIR;
+  CabNodeSharedData mCabShared = { [&](IRBundle ir) {
+    this->resampleAndLoadIR(ir);
+  }};
 
 #ifdef useThreadPool
   ctpl::thread_pool tPool;
@@ -110,16 +128,20 @@ public:
 #endif
   }
 
-  void resampleAndLoadIR(IRBundle b) {
-    mIRLoaded = false;
-    if (mLoadedIR.path != nullptr && mLoadedIR.samples != nullptr) {
+  void clearLoadedIR() {
+    if (mCabShared.loadedIr.path != nullptr && mCabShared.loadedIr.samples != nullptr) {
       // Check if the previous IR is custom and clear out the allocated data
-      for (int c = 0; c < mLoadedIR.channelCount; c++) {
-        delete[] mLoadedIR.samples[c];
+      for (int c = 0; c < mCabShared.loadedIr.channelCount; c++) {
+        delete[] mCabShared.loadedIr.samples[c];
       }
-      delete[] mLoadedIR.samples;
+      delete[] mCabShared.loadedIr.samples;
       // TODOG check if the names leak
     }
+  }
+
+  void resampleAndLoadIR(IRBundle b) {
+    mIRLoaded = false;
+    clearLoadedIR();
 
     if (b.path != nullptr && b.samples == nullptr) {
       // Load the wav file if the to be loaded IR is custom
@@ -150,7 +172,7 @@ public:
       }
       delete[] outBuffer;
     }
-    mLoadedIR = b;
+    mCabShared.loadedIr = b;
     mIRLoaded = true;
   }
 
@@ -170,12 +192,12 @@ public:
     }
     b.sampleRate = wav.sampleRate;
     b.channelCount = wav.channels;
-    b.sampleCount = samplesRead / b.channelCount;
+    b.sampleCount = samplesRead;
     b.samples = new float* [b.channelCount];
     for (int c = 0; c < b.channelCount; c++) {
-      b.samples[0] = new float[b.sampleCount];
+      b.samples[c] = new float[b.sampleCount];
     }
-    for (int s = 0; s < samplesRead; s++) {
+    for (int s = 0; s < samplesRead * b.channelCount; s++) {
       int channel = s % b.channelCount;
       size_t sample = s / b.channelCount;
       b.samples[channel][sample] = pSampleData[s];
@@ -185,9 +207,9 @@ public:
   }
 
   void serializeAdditional(nlohmann::json& serialized) override {
-    serialized["irName"] = mLoadedIR.name;
-    serialized["customIR"] = mLoadedIR.path != nullptr;
-    serialized["path"] = mLoadedIR.path != nullptr ? mLoadedIR.path: "";
+    serialized["irName"] = mCabShared.loadedIr.name;
+    serialized["customIR"] = mCabShared.loadedIr.path != nullptr;
+    serialized["path"] = mCabShared.loadedIr.path != nullptr ? mCabShared.loadedIr.path: "";
   }
 
   void deserializeAdditional(nlohmann::json& serialized) override {
@@ -233,7 +255,7 @@ public:
 
   void deleteBuffers() override {
     Node::deleteBuffers();
-   
+    clearLoadedIR();
     for (int c = 0; c < mChannelCount; c++) {
       delete mConvolvers[c];
     }
@@ -352,7 +374,9 @@ public:
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     shared.graphics = pGrahics;
-    mUi = new SimpleCabNodeUi(&shared);
+    SimpleCabNodeUi* ui = new SimpleCabNodeUi(&shared);
+    ui->registerSharedData(&mCabShared);
+    mUi = ui;
     pGrahics->AttachControl(mUi);
     mUi->setColor(IColor(255, 150, 100, 100));
     mUi->setUp();
