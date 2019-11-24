@@ -82,6 +82,8 @@ public:
 
   /**
    * Deletes all the allocated buffers
+   * NOTE: The derived class needs to call its own implementation
+   * in its own destructor since it can't be called from the base destructor!
    */
   virtual void deleteBuffers() {
     if (mBuffersOut != nullptr) {
@@ -102,7 +104,7 @@ public:
   virtual ~Node() {
     // TODOG it's probably not a good idea to call a virtual function here
     // Seems to work for now though
-    deleteBuffers();
+    Node::deleteBuffers();
 
     if (mUiReady || mUi != nullptr) {
       WDBGMSG("Warning, UI of node was not cleaned up!\n");

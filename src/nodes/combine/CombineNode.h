@@ -15,6 +15,10 @@ public:
     shared.height = 300;
   }
 
+  ~CombineNode() {
+    CombineNode::deleteBuffers();
+  }
+
   void ProcessBlock(const int nFrames) {
     if (mIsProcessed) { return; }
     NodeSocket* s1 = shared.socketsIn.Get(0);

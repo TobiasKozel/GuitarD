@@ -55,15 +55,15 @@ public:
 
   void openFileDialog() const {
     HWND handle = reinterpret_cast<HWND>(shared->graphics->GetWindow());
-    const char* result = WDL_ChooseFileForOpen(
+    char* result = WDL_ChooseFileForOpen(
       handle, "Open IR", nullptr, nullptr, "Wave Files\0*.wav;*.WAV\0AIFF Files\0*.aiff;*.AIFF\0", "*.wav",
       true, false
     );
     if (result != nullptr) {
       WDBGMSG(result);
       IRBundle load;
-      load.name = "custom";
-      load.path = result;
+      load.path.Set(result);
+      load.name.Set(load.path.get_filepart());
       mCabShared->callback(load);
     }
     else {
@@ -106,7 +106,7 @@ class SimpleCabNode final : public Node {
   bool mIRLoaded = false;
   CabNodeSharedData mCabShared = { [&](IRBundle ir) {
     this->resampleAndLoadIR(ir);
-  }};
+  } };
 
 #ifdef useThreadPool
   ctpl::thread_pool tPool;
@@ -115,6 +115,10 @@ class SimpleCabNode final : public Node {
 public:
   SimpleCabNode(std::string pType) : Node() {
     mType = pType;
+  }
+
+  ~SimpleCabNode() {
+    SimpleCabNode::deleteBuffers();
   }
 
   void setup(MessageBus::Bus* pBus, int pSamplerate = 48000, int pMaxBuffer = MAX_BUFFER, int pChannles = 2, int pInputs = 1, int pOutputs = 1) override {
@@ -129,7 +133,7 @@ public:
   }
 
   void clearLoadedIR() {
-    if (mCabShared.loadedIr.path != nullptr && mCabShared.loadedIr.samples != nullptr) {
+    if (mCabShared.loadedIr.path.GetLength() != 0 && mCabShared.loadedIr.samples != nullptr) {
       // Check if the previous IR is custom and clear out the allocated data
       for (int c = 0; c < mCabShared.loadedIr.channelCount; c++) {
         delete[] mCabShared.loadedIr.samples[c];
@@ -143,7 +147,7 @@ public:
     mIRLoaded = false;
     clearLoadedIR();
 
-    if (b.path != nullptr && b.samples == nullptr) {
+    if (b.path.GetLength() != 0 && b.samples == nullptr) {
       // Load the wav file if the to be loaded IR is custom
       loadWave(b);
     }
@@ -178,7 +182,7 @@ public:
 
   static void loadWave(IRBundle &b) {
     drwav wav;
-    if (!drwav_init_file(&wav, b.path, nullptr)) {
+    if (!drwav_init_file(&wav, b.path.Get(), nullptr)) {
       return;
     }
 
@@ -207,25 +211,26 @@ public:
   }
 
   void serializeAdditional(nlohmann::json& serialized) override {
-    serialized["irName"] = mCabShared.loadedIr.name;
-    serialized["customIR"] = mCabShared.loadedIr.path != nullptr;
-    serialized["path"] = mCabShared.loadedIr.path != nullptr ? mCabShared.loadedIr.path: "";
+    serialized["irName"] = mCabShared.loadedIr.name.Get();
+    bool custom = mCabShared.loadedIr.path.GetLength() != 0;
+    serialized["customIR"] = custom;
+    serialized["path"] = custom ? mCabShared.loadedIr.path.Get() : "";
   }
 
   void deserializeAdditional(nlohmann::json& serialized) override {
     try {
       IRBundle load;
-      string name = serialized.at("irName");
-      load.name = name.c_str();
-      bool customIR = serialized.at("customIR");
+      const string name = serialized.at("irName");
+      load.name.Set(name.c_str());
+      const bool customIR = serialized.at("customIR");
       if (customIR) {
-        string path = serialized.at("path");
-        load.path = name.c_str();
+        const string path = serialized.at("path");
+        load.path.Set(path.c_str());
       }
       else {
         for (int i = 0; i < InternalIRsCount; i++) {
           // Go look for the right internal IR
-          if (strncmp(load.name, InternalIRs[i].name, 30) == 0) {
+          if (strncmp(load.name.Get(), InternalIRs[i].name.Get(), 30) == 0) {
             load = InternalIRs[i];
             break;
           }
