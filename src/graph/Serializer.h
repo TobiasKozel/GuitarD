@@ -55,7 +55,7 @@ namespace Serializer {
         };
       }
 
-      node->serializeAdditional(serialized);
+      node->serializeAdditional(serialized["nodes"][i]);
     }
     // Handle the output node
     serialized["output"]["gain"] = 1.0;
@@ -163,7 +163,7 @@ namespace Serializer {
           }
         }
       }
-      node->deserializeAdditional(serialized);
+      node->deserializeAdditional(sNode);
       currentNodeIdx++;
     }
 

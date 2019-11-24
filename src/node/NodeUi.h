@@ -218,7 +218,7 @@ public:
   virtual void setUp() {
     for (int i = 0; i < shared->parameters.GetSize(); i++) {
       ParameterCoupling* p = shared->parameters.Get(i);
-      if (p->name == "Bypass") {
+      if (strncmp(p->name, "Bypass", 10) == 0) {
         mHeader.hasByPass = true;
         break;
       }

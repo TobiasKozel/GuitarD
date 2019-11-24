@@ -110,8 +110,21 @@ public:
 #endif
   }
 
-  void resampleAndLoadIR(const IRBundle b) {
+  void resampleAndLoadIR(IRBundle b) {
     mIRLoaded = false;
+    if (mLoadedIR.path != nullptr && mLoadedIR.samples != nullptr) {
+      // Check if the previous IR is custom and clear out the allocated data
+      for (int c = 0; c < mLoadedIR.channelCount; c++) {
+        delete[] mLoadedIR.samples[c];
+      }
+      delete[] mLoadedIR.samples;
+      // TODOG check if the names leak
+    }
+
+    if (b.path != nullptr && b.samples == nullptr) {
+      // Load the wav file if the to be loaded IR is custom
+      loadWave(b);
+    }
     for (int c = 0; c < b.channelCount; c++) {
       WDL_Resampler resampler;
       resampler.SetMode(true, 0, true);
@@ -141,9 +154,9 @@ public:
     mIRLoaded = true;
   }
 
-  static void loadWave(const char* path, bool embed = false) {
+  static void loadWave(IRBundle &b) {
     drwav wav;
-    if (!drwav_init_file(&wav, path, nullptr)) {
+    if (!drwav_init_file(&wav, b.path, nullptr)) {
       return;
     }
 
@@ -155,9 +168,51 @@ public:
     if (length > 10.f || samplesRead < 1) {
       assert(false);
     }
+    b.sampleRate = wav.sampleRate;
+    b.channelCount = wav.channels;
+    b.sampleCount = samplesRead / b.channelCount;
+    b.samples = new float* [b.channelCount];
+    for (int c = 0; c < b.channelCount; c++) {
+      b.samples[0] = new float[b.sampleCount];
+    }
+    for (int s = 0; s < samplesRead; s++) {
+      int channel = s % b.channelCount;
+      size_t sample = s / b.channelCount;
+      b.samples[channel][sample] = pSampleData[s];
+    }
+    free(pSampleData);
     drwav_uninit(&wav);
   }
 
+  void serializeAdditional(nlohmann::json& serialized) override {
+    serialized["irName"] = mLoadedIR.name;
+    serialized["customIR"] = mLoadedIR.path != nullptr;
+    serialized["path"] = mLoadedIR.path != nullptr ? mLoadedIR.path: "";
+  }
+
+  void deserializeAdditional(nlohmann::json& serialized) override {
+    try {
+      IRBundle load;
+      string name = serialized.at("irName");
+      load.name = name.c_str();
+      bool customIR = serialized.at("customIR");
+      if (customIR) {
+        string path = serialized.at("path");
+        load.path = name.c_str();
+      }
+      else {
+        for (int i = 0; i < InternalIRsCount; i++) {
+          // Go look for the right internal IR
+          if (strncmp(load.name, InternalIRs[i].name, 30) == 0) {
+            load = InternalIRs[i];
+            break;
+          }
+        }
+      }
+      resampleAndLoadIR(load);
+    }
+    catch (...) {}
+  }
 
   void createBuffers() override {
     Node::createBuffers();
@@ -173,7 +228,7 @@ public:
       mConversionBufferOut[c] = new WDL_RESAMPLE_TYPE[mMaxBuffer];
     }
 #endif
-    resampleAndLoadIR(InternalIRs[1]);
+    resampleAndLoadIR(InternalIRs[0]);
   }
 
   void deleteBuffers() override {
