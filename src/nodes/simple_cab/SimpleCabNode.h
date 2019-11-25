@@ -106,7 +106,7 @@ class SimpleCabNode final : public Node {
   bool mIRLoaded = false;
   CabNodeSharedData mCabShared = { [&](IRBundle ir) {
     this->resampleAndLoadIR(ir);
-  } };
+  }, IRBundle(), false };
 
 #ifdef useThreadPool
   ctpl::thread_pool tPool;

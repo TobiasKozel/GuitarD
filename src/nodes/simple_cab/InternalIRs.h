@@ -16,8 +16,8 @@ struct IRBundle {
 };
 
 IRBundle InternalIRs[] = {
-  { WDL_String("Clean"), 1, 48000, InteralIR::cleanIRLength, InteralIR::cleanIR },
-  { WDL_String("Air"), 1, 48000, InteralIR::airIRLength, InteralIR::airIR }
+  { WDL_String("Clean"), 1, 48000, InteralIR::cleanIRLength, InteralIR::cleanIR, nullptr },
+  { WDL_String("Air"), 1, 48000, InteralIR::airIRLength, InteralIR::airIR, nullptr }
 };
 
 int InternalIRsCount = 2;

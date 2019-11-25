@@ -8,7 +8,7 @@ for f in files:
     headerFile = open(f.replace(".wav", ".h"), "w+")
     out ="""#pragma once
 namespace InteralIR {
-int """ + ntpath.basename(f).replace(".wav", "IR") + """Length = """ + str(length) + """;
+size_t """ + ntpath.basename(f).replace(".wav", "IR") + """Length = """ + str(length) + """;
 float """ + ntpath.basename(f).replace(".wav", "IRL") + "[] = {"
     for s in range(0, length):
         waveData = wav.readframes(1)
