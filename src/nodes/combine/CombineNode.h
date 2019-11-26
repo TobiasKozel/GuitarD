@@ -21,8 +21,8 @@ public:
 
   void ProcessBlock(const int nFrames) {
     if (mIsProcessed) { return; }
-    NodeSocket* s1 = shared.socketsIn.Get(0);
-    NodeSocket* s2 = shared.socketsIn.Get(1);
+    NodeSocket* s1 = shared.socketsIn[0];
+    NodeSocket* s2 = shared.socketsIn[1];
 
     // see which inputs are connected
     const bool has1 = s1->mConnectedNode != nullptr;

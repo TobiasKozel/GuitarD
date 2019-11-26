@@ -23,8 +23,8 @@ public:
       }
     }
 
-    shared.socketsIn.Get(0)->mX = shared.X + 100;
-    shared.socketsOut.Get(0)->mX = shared.Y - 100;
+    shared.socketsIn[0]->mX = shared.X + 100;
+    shared.socketsOut[0]->mX = shared.Y - 100;
     hasLastBuffer = false;
   }
 
@@ -44,7 +44,7 @@ public:
     mIsProcessed = true;
     if (inputsReady() && !hasLastBuffer) {
       shared.parameters.Get(0)->update();
-      sample** buffer = shared.socketsIn.Get(0)->mConnectedTo->mParentBuffer;
+      sample** buffer = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
           mBuffersOut[0][c][i] = prevBlock[c][i] * gain;

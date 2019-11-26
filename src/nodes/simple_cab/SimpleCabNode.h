@@ -284,7 +284,7 @@ public:
     }
     shared.parameters.Get(1)->update();
 
-    sample** buffer = shared.socketsIn.Get(0)->mConnectedTo->mParentBuffer;
+    sample** buffer = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
 
 #ifdef FLOATCONV
     /**                           THREADPOOLING ATTEMPT                           */

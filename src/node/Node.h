@@ -15,9 +15,7 @@ protected:
 public:
   NodeShared shared;
   std::string mType;
-  // The dsp will get the data from the buffer inside the socket
-  int mInputCount = 0;
-  int mOutputCount = 0;
+
   // Flag to skip automation if there's none
   bool mIsAutomated = false;
   // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
@@ -47,19 +45,19 @@ public:
     mSampleRate = 0;
     mChannelCount = 0;
     mMaxBuffer = pMaxBuffer;
-    mInputCount = pInputs;
-    mOutputCount = pOutputs;
+    shared.inputCount = pInputs;
+    shared.outputCount = pOutputs;
     mIsProcessed = false;
     mUiReady = false;
     OnReset(pSamplerate, pChannles);
 
     // Setup the sockets for the node connections
-    for (int i = 0; i < mInputCount; i++) {
-      shared.socketsIn.Add(new NodeSocket(shared.bus, i, this));
+    for (int i = 0; i < shared.inputCount; i++) {
+      shared.socketsIn[i] = new NodeSocket(shared.bus, i, this);
     }
 
-    for (int i = 0; i < mOutputCount; i++) {
-      shared.socketsOut.Add(new NodeSocket(shared.bus, i, this, mBuffersOut[i]));
+    for (int i = 0; i < shared.outputCount; i++) {
+      shared.socketsOut[i] = new NodeSocket(shared.bus, i, this, mBuffersOut[i]);
     }
   }
 
@@ -71,8 +69,8 @@ public:
       WDBGMSG("Trying to create a new dsp buffer without cleanung up the old one");
       assert(true);
     }
-    mBuffersOut = new sample **[mOutputCount];
-    for (int i = 0; i < mOutputCount; i++) {
+    mBuffersOut = new sample **[shared.outputCount];
+    for (int i = 0; i < shared.outputCount; i++) {
       mBuffersOut[i] = new sample * [mChannelCount];
       for (int c = 0; c < mChannelCount; c++) {
         mBuffersOut[i][c] = new sample[mMaxBuffer];
@@ -87,7 +85,7 @@ public:
    */
   virtual void deleteBuffers() {
     if (mBuffersOut != nullptr) {
-      for (int i = 0; i < mOutputCount; i++) {
+      for (int i = 0; i < shared.outputCount; i++) {
         for (int c = 0; c < mChannelCount; c++) {
           delete mBuffersOut[i][c];
         }
@@ -115,15 +113,20 @@ public:
     }
     shared.meters.Empty(true);
     shared.parameters.Empty(true);
-    shared.socketsIn.Empty(true);
-    shared.socketsOut.Empty(true);
+    for(int i = 0; i < shared.inputCount; i++) {
+      delete shared.socketsIn[i];
+    }
+
+    for (int i = 0; i < shared.outputCount; i++) {
+      delete shared.socketsOut[i];
+    }
   }
 
   /**
    * Will fill all the output buffers with silence
    */
   void outputSilence() {
-    for (int o = 0; o < mOutputCount; o++) {
+    for (int o = 0; o < shared.outputCount; o++) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < mMaxBuffer; i++) {
           mBuffersOut[o][c][i] = 0;
@@ -140,8 +143,8 @@ public:
     // The first param will always be bypass
     shared.parameters.Get(0)->update();
     if (mByPassed < 0.5) { return false; }
-    sample** in = shared.socketsIn.Get(0)->mConnectedTo->mParentBuffer;
-    for (int o = 0; o < mOutputCount; o++) {
+    sample** in = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
+    for (int o = 0; o < shared.outputCount; o++) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < mMaxBuffer; i++) {
           mBuffersOut[o][c][i] = in[c][i];
@@ -162,8 +165,8 @@ public:
      * If one input isn't connected, skip the processing and output silence
      * If that's not desired, this function has to be overriden
      */
-    for (int i = 0; i < shared.socketsIn.GetSize(); i++) {
-      if (shared.socketsIn.Get(i)->mConnectedTo == nullptr) {
+    for (int i = 0; i < shared.inputCount; i++) {
+      if (shared.socketsIn[i]->mConnectedTo == nullptr) {
         outputSilence();
         return false;
       }
@@ -172,8 +175,8 @@ public:
     /**
      * Check for inputs which are connected to unprocessed nodes
      */
-    for (int i = 0; i < mInputCount; i++) {
-      if (!shared.socketsIn.Get(i)->mConnectedTo->mParentNode->mIsProcessed) {
+    for (int i = 0; i < shared.inputCount; i++) {
+      if (!shared.socketsIn[i]->mConnectedTo->mParentNode->mIsProcessed) {
         // A node isn't ready so return false
         return false;
       }
@@ -250,7 +253,7 @@ public:
    * Connects a given socket to a input at a given index of this node
    */
   virtual void connectInput(NodeSocket* out, int inputNumber = 0) {
-    NodeSocket* inSocket = shared.socketsIn.Get(inputNumber);
+    NodeSocket* inSocket = shared.socketsIn[inputNumber];
     if (inSocket != nullptr) {
       if (out == nullptr) {
         inSocket->disconnect();

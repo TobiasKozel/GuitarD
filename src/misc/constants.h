@@ -14,6 +14,8 @@
 // Amounts of daw params to register at start since dynamic amounts are not well supported
 #define MAX_DAW_PARAMS 256
 
+#define MAX_NODE_SOCKETS 8
+
 // This is the name of a node if it wasn't overridden anywhere
 #define DEFAULT_NODE_NAME "DEFAULTNODENAME"
 

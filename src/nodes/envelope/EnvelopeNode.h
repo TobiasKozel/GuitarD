@@ -133,7 +133,7 @@ public:
 
   void ProcessBlock(const int nFrames) override {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
-    sample** buffer = shared.socketsIn.Get(0)->mConnectedTo->mParentBuffer;
+    sample** buffer = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
     shared.parameters.Get(1)->update();
     shared.parameters.Get(2)->update();
     double value = 0;

@@ -5,6 +5,9 @@
 #include "src/parameter/MeterCoupling.h"
 #include "src/parameter/ParameterCoupling.h"
 
+/**
+ * A struct of data that is shared between the node and its UI
+ */
 struct NodeShared {
   MessageBus::Bus* bus = nullptr;
   iplug::igraphics::IGraphics* graphics = nullptr;
@@ -16,7 +19,9 @@ struct NodeShared {
   WDL_PtrList<ParameterCoupling> parameters;
   WDL_PtrList<MeterCoupling> meters;
 
-  WDL_PtrList<NodeSocket> socketsIn;
-  WDL_PtrList<NodeSocket> socketsOut;
+  int inputCount = 0;
+  NodeSocket* socketsIn [MAX_NODE_SOCKETS];
+  int outputCount = 0;
+  NodeSocket* socketsOut[MAX_NODE_SOCKETS];
   Node* node = nullptr;
 };

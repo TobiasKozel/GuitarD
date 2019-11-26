@@ -16,7 +16,7 @@ public:
   }
 
   void ProcessBlock(int) {
-    NodeSocket* in = shared.socketsIn.Get(0)->mConnectedTo;
+    NodeSocket* in = shared.socketsIn[0]->mConnectedTo;
     if (in == nullptr) {
       mIsProcessed = true;
     }
@@ -26,7 +26,7 @@ public:
   }
 
   void CopyOut(iplug::sample** out, int nFrames) {
-    NodeSocket* in = shared.socketsIn.Get(0)->mConnectedTo;
+    NodeSocket* in = shared.socketsIn[0]->mConnectedTo;
     if (mMaxBuffer < nFrames || in == nullptr || !in->mParentNode->mIsProcessed) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {

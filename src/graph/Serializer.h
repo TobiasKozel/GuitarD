@@ -25,8 +25,8 @@ namespace Serializer {
       serialized["nodes"][i]["idx"] = i;
       serialized["nodes"][i]["type"] = node->mType;
       serialized["nodes"][i]["inputs"] = nlohmann::json::array();
-      for (int prev = 0; prev < node->mInputCount; prev++) {
-        Node* cNode = node->shared.socketsIn.Get(prev)->mConnectedNode;
+      for (int prev = 0; prev < node->shared.inputCount; prev++) {
+        Node* cNode = node->shared.socketsIn[prev]->mConnectedNode;
         if (cNode == nullptr) {
           serialized["nodes"][i]["inputs"][prev] = { NoNode, 0 };
         }
@@ -36,7 +36,7 @@ namespace Serializer {
         else {
           serialized["nodes"][i]["inputs"][prev] = {
             nodes.Find(cNode),
-            node->shared.socketsIn.Get(prev)->mConnectedSocketIndex
+            node->shared.socketsIn[prev]->mConnectedSocketIndex
           };
         }
       }
@@ -62,7 +62,7 @@ namespace Serializer {
     serialized["output"]["position"] = {
       output->shared.X, output->shared.Y
     };
-    Node* lastNode = output->shared.socketsIn.Get(0)->mConnectedNode;
+    Node* lastNode = output->shared.socketsIn[0]->mConnectedNode;
     int lastNodeIndex = NoNode;
     if (lastNode == input) {
       lastNodeIndex = InputNode;
@@ -72,7 +72,7 @@ namespace Serializer {
     }
     serialized["output"]["inputs"][0] = {
       lastNodeIndex,
-      output->shared.socketsIn.Get(0)->mConnectedSocketIndex
+      output->shared.socketsIn[0]->mConnectedSocketIndex
     };
   }
 
@@ -132,14 +132,14 @@ namespace Serializer {
         const int inBufferIdx = connection[1];
         if (inNodeIdx >= 0 && nodes.Get(inNodeIdx) != nullptr) {
           node->connectInput(
-            nodes.Get(inNodeIdx)->shared.socketsOut.Get(inBufferIdx),
+            nodes.Get(inNodeIdx)->shared.socketsOut[inBufferIdx],
             currentInputIdx
           );
         }
         else if (inNodeIdx == InputNode) {
           // if it's NoNode it's not connected at all and we'll just leave it at a nullptr
           node->connectInput(
-            input->shared.socketsOut.Get(0),
+            input->shared.socketsOut[0],
             currentInputIdx
           );
         }
@@ -172,11 +172,11 @@ namespace Serializer {
     const int outConnectionIndex = serialized["output"]["inputs"][0][1];
     if (nodes.Get(outNodeIndex) != nullptr) {
       output->connectInput(
-        nodes.Get(outNodeIndex)->shared.socketsOut.Get(outConnectionIndex)
+        nodes.Get(outNodeIndex)->shared.socketsOut[outConnectionIndex]
       );
     }
     else if (outNodeIndex == InputNode) {
-      output->connectInput(input->shared.socketsOut.Get(0));
+      output->connectInput(input->shared.socketsOut[0]);
     }
 
     //output->X = serialized["output"]["position"][0];

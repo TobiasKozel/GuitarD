@@ -72,8 +72,8 @@ public:
        * Since there's no way to choose from multiple ones, the first ones will
        * always be used
        */
-      NodeSocket* in = shared->socketsIn.Get(0);
-      NodeSocket* out = shared->socketsOut.Get(0);
+      NodeSocket* in = shared->socketsIn[0];
+      NodeSocket* out = shared->socketsOut[0];
       NodeSocket* prev = pair.socket->mConnectedTo;
       if (in != nullptr && out != nullptr) {
         pair.socket->disconnect();
@@ -155,18 +155,18 @@ public:
   }
 
   virtual void setUpSockets() {
-    for (int i = 0; i < shared->socketsIn.GetSize(); i++) {
+    for (int i = 0; i < shared->inputCount; i++) {
       NodeSocketUi* socket = new NodeSocketUi(
-        shared->bus, shared->graphics, shared->socketsIn.Get(i), mTargetRECT.L, mTargetRECT.T + i * 50.f + mTargetRECT.H() * 0.5f
+        shared->bus, shared->graphics, shared->socketsIn[i], mTargetRECT.L, mTargetRECT.T + i * 50.f + mTargetRECT.H() * 0.5f
       );
       shared->graphics->AttachControl(socket);
       mInSocketsUi.Add(socket);
       mElements.Add(socket);
     }
 
-    for (int i = 0; i < shared->socketsOut.GetSize(); i++) {
+    for (int i = 0; i < shared->outputCount; i++) {
       NodeSocketUi* socket = new NodeSocketUi(
-        shared->bus, shared->graphics, shared->socketsOut.Get(i), mTargetRECT.R - 30, mTargetRECT.T + i * 50.f + mTargetRECT.H() * 0.5f
+        shared->bus, shared->graphics, shared->socketsOut[i], mTargetRECT.R - 30, mTargetRECT.T + i * 50.f + mTargetRECT.H() * 0.5f
       );
       shared->graphics->AttachControl(socket);
       mOutSocketsUi.Add(socket);
@@ -319,14 +319,14 @@ public:
       moveControl(mElements.Get(i), dX, dY);
     }
 
-    for (int i = 0; i < shared->socketsIn.GetSize(); i++) {
-      shared->socketsIn.Get(i)->mX += dX;
-      shared->socketsIn.Get(i)->mY += dY;
+    for (int i = 0; i < shared->inputCount; i++) {
+      shared->socketsIn[i]->mX += dX;
+      shared->socketsIn[i]->mY += dY;
     }
 
-    for (int i = 0; i < shared->socketsOut.GetSize(); i++) {
-      shared->socketsOut.Get(i)->mX += dX;
-      shared->socketsOut.Get(i)->mY += dY;
+    for (int i = 0; i < shared->outputCount; i++) {
+      shared->socketsOut[i]->mX += dX;
+      shared->socketsOut[i]->mY += dY;
     }
 
     shared->X += dX;

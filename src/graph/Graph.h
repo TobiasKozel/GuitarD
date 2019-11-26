@@ -117,7 +117,7 @@ public:
     return;
     Node* test = NodeList::createNode("SimpleCabNode");
     addNode(test, mInputNode, 0, 500, 300);
-    mOutputNode->connectInput(test->shared.socketsOut.Get(0));
+    mOutputNode->connectInput(test->shared.socketsOut[0]);
   }
 
   ~Graph() {
@@ -306,7 +306,7 @@ public:
     mParamManager.claimNode(node);
     node->setupUi(mGraphics);
     if (pInput != nullptr) {
-      node->connectInput(pInput->shared.socketsOut.Get(index));
+      node->connectInput(pInput->shared.socketsOut[index]);
     }
     mNodes.Add(node);
     sortRenderStack();
@@ -322,8 +322,8 @@ public:
     if (node == mInputNode || node == mOutputNode) { return; }
     WDL_MutexLock lock(&mIsProcessing);
     if (reconnect) {
-      NodeSocket* prevSock = node->shared.socketsIn.Get(0);
-      NodeSocket* nextSock = node->shared.socketsOut.Get(0);
+      NodeSocket* prevSock = node->shared.socketsIn[0];
+      NodeSocket* nextSock = node->shared.socketsOut[0];
       if (prevSock != nullptr && prevSock->mConnectedTo && nextSock != nullptr) {
         MessageBus::fireEvent<SocketConnectRequest>(
           mBus,

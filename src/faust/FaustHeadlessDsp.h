@@ -128,7 +128,7 @@ public:
     for (int i = 1; i < shared.parameters.GetSize(); i++) {
       shared.parameters.Get(i)->update();
     }
-    compute(nFrames, shared.socketsIn.Get(0)->mConnectedTo->mParentBuffer, mBuffersOut[0]);
+    compute(nFrames, shared.socketsIn[0]->mConnectedTo->mParentBuffer, mBuffersOut[0]);
     mIsProcessed = true;
   }
 };
