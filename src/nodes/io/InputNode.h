@@ -3,41 +3,21 @@
 #include "src/node/Node.h"
 #include "src/node/NodeUi.h"
 
-#define TWO_YROOT_TWELVE 1.05946309435929526456f
 
 class InputNodeUi final : public NodeUi {
-  map<float, string> equalPitches;
-  const char* mNotes[12] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
-  bool mEnableTuner;
-  const char* mCurrentQuantizedPitch;
-  int mTunerCentsOff;
-  float mCurrentFrequency;
-  void update() { }
+  
   iplug::igraphics::IText mBlocksizeText;
   string mInfo;
 public:
   InputNodeUi(NodeShared* param) : NodeUi(param) {
     mInfo = "";
     mBlocksizeText = DEBUG_FONT;
-    mCurrentFrequency = 440.f;
-    mCurrentQuantizedPitch = mNotes[0];
-    mTunerCentsOff = 0;
-    mEnableTuner = true;
-    float freq = 16.35159783f;
-    for (int i = 0; i < 108; i++) {
-      equalPitches.insert(pair<float, const char*>(freq, mNotes[i % 12]));
-      freq *= TWO_YROOT_TWELVE;
-    }
   }
 
   void Draw(IGraphics& g) override {
     NodeUi::Draw(g);
     mInfo = "Blocksize: " + to_string(shared->node->mLastBlockSize) + " Sample-Rate: " + to_string(shared->node->mSampleRate);
     g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
-    if (mEnableTuner) {
-      // g.DrawRect(IColor(255, 0, 255, 0), mDisconnectAllButton);
-      // mDirty = true;
-    }
   }
 };
 
