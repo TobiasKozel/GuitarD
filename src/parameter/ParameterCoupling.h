@@ -16,6 +16,7 @@ struct ParameterCoupling {
     Boolean,
     Frequency,
     Gain,
+    GainToLinear,
     Seconds,
     Milliseconds,
     Percentage
@@ -144,6 +145,10 @@ struct ParameterCoupling {
     return (std::log(v) - mAdd) / mMul;
   }
 
+  static inline double dbToLinear(const double v) {
+    return pow(10, v / 20.0);
+  }
+
   /**
    * Usually called from the IControl callback with a linear
    * normalized value, this will scale it to the internal DSP value
@@ -173,6 +178,9 @@ struct ParameterCoupling {
     return scaledToNormalized(baseValue);
   }
 
+  /**
+   * Sets the visual properties used when setting up a IControl based on this Coupling
+   */
   void setPos(const float pX, const float pY, const float size = -1, const bool pShowLabel = true, const bool pShowValue = true) {
     x = pX;
     y = pY;

@@ -16,6 +16,7 @@
 #include "src/nodes/paramerticeq/ParametricEqNode.h"
 #include "src/nodes/phasetool/PhaseToolNode.h"
 #include "src/nodes/envelope/EnvelopeNode.h"
+#include "src/nodes/autogain/AutoGainNode.h"
 
 
 namespace NodeList {
@@ -147,5 +148,13 @@ namespace NodeList {
       "asd",
       "Dynamics"
     });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new AutoGainNode("AutoGainNode"); },
+      "AutoGainNode",
+      "Auto Linear Gain",
+      "asd",
+      "Dynamics"
+      });
   }
 }

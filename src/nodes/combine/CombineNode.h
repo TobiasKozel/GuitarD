@@ -19,7 +19,7 @@ public:
     CombineNode::deleteBuffers();
   }
 
-  void ProcessBlock(const int nFrames) {
+  void ProcessBlock(const int nFrames) override {
     if (mIsProcessed) { return; }
     NodeSocket* s1 = shared.socketsIn[0];
     NodeSocket* s2 = shared.socketsIn[1];
