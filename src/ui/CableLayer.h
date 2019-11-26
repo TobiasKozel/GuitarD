@@ -267,8 +267,8 @@ public:
     if (automation != nullptr) {
       for (int n = 0; n < mNodes->GetSize(); n++) {
         Node* curNode = mNodes->Get(n);
-        for (int p = 0; p < curNode->shared.parameters.GetSize(); p++) {
-          ParameterCoupling* pc = curNode->shared.parameters.Get(p);
+        for (int p = 0; p < curNode->shared.parameterCount; p++) {
+          ParameterCoupling* pc = curNode->shared.parameters[p];
           if (pc->automationDependency == automation) {
             const IRECT pos = pc->control->GetRECT();
             g.DrawLine(

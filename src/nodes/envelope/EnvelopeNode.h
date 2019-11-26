@@ -88,7 +88,8 @@ public:
     );
     p->x = -100;
     p->y = -30;
-    shared.parameters.Add(p);
+    shared.parameters[shared.parameterCount] = p;
+    shared.parameterCount++;
 
     p = new ParameterCoupling(
       "Filter", &filter, 0, 0, 1, 0.01
@@ -96,7 +97,8 @@ public:
     p->type = ParameterCoupling::Frequency;
     p->x = 0;
     p->y = -30;
-    shared.parameters.Add(p);
+    shared.parameters[shared.parameterCount] = p;
+    shared.parameterCount++;
 
   }
 
@@ -134,8 +136,8 @@ public:
   void ProcessBlock(const int nFrames) override {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
     sample** buffer = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
-    shared.parameters.Get(1)->update();
-    shared.parameters.Get(2)->update();
+    shared.parameters[1]->update();
+    shared.parameters[2]->update();
     double value = 0;
     for (int i = 0; i < nFrames; i++) {
       value += abs(buffer[0][i]);

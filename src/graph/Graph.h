@@ -61,7 +61,7 @@ public:
     
     mInputNode = new InputNode(mBus);
     mOutputNode = new OutputNode(mBus);
-    mOutputNode->connectInput(mInputNode->shared.socketsOut.Get(0));
+    mOutputNode->connectInput(mInputNode->shared.socketsOut[0]);
 
     // output->connectInput(input->outSockets.Get(0));
     mNodeDelSub.subscribe(mBus, MessageBus::NodeDeleted, [&](Node* param) {
@@ -101,8 +101,8 @@ public:
       for (int i = 0; i < n.GetSize(); i++) {
         Node* node = n.Get(i);
         if (node == nullptr) { continue; }
-        for (int p = 0; p < node->shared.parameters.GetSize(); p++) {
-          if (node->shared.parameters.Get(p)->control == r.targetControl) {
+        for (int p = 0; p < node->shared.parameterCount; p++) {
+          if (node->shared.parameters[p]->control == r.targetControl) {
             if (node != r.automationNode) {
               // Don't allow automation on self
               node->attachAutomation(r.automationNode, p);

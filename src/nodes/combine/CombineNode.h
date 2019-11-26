@@ -42,15 +42,15 @@ public:
     sample** buffer2 = has2 ? s2->mConnectedTo->mParentBuffer : emptyBuffer;
 
     // Update the params
-    shared.parameters.Get(0)->update();
-    shared.parameters.Get(1)->update();
-    shared.parameters.Get(2)->update();
+    shared.parameters[0]->update();
+    shared.parameters[1]->update();
+    shared.parameters[2]->update();
 
     // prepare the values
-    const double mix = *(shared.parameters.Get(2)->value);
+    const double mix = *(shared.parameters[2]->value);
     const double invMix = 1 - mix;
-    const double pan1 = *(shared.parameters.Get(0)->value);
-    const double pan2 = *(shared.parameters.Get(1)->value);
+    const double pan1 = *(shared.parameters[0]->value);
+    const double pan2 = *(shared.parameters[1]->value);
     const double pan1l = min(1.0, max(-pan1 + 1.0, 0.0)) * invMix;
     const double pan1r = min(1.0, max(+pan1 + 1.0, 0.0)) * invMix;
     const double pan2l = min(1.0, max(-pan2 + 1.0, 0.0)) * mix;
@@ -74,21 +74,24 @@ public:
     );
     p->x = -100;
     p->y = -100;
-    shared.parameters.Add(p);
+    shared.parameters[shared.parameterCount] = p;
+    shared.parameterCount++;
 
     p = new ParameterCoupling(
       "PAN 2", &pan2, 0.0, -1.0, 1.0, 0.01
     );
     p->x = -100;
     p->y = 100;
-    shared.parameters.Add(p);
+    shared.parameters[shared.parameterCount] = p;
+    shared.parameterCount++;
 
     p = new ParameterCoupling(
       "MIX", &mix, 0.5, 0.0, 1.0, 0.01
     );
     p->x = 0;
     p->y = 0;
-    shared.parameters.Add(p);
+    shared.parameters[shared.parameterCount] = p;
+    shared.parameterCount++;
   }
 
   void deleteBuffers() override {

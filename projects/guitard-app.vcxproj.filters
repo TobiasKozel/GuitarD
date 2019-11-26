@@ -450,6 +450,12 @@
     <ClInclude Include="..\src\nodes\simple_cab\InternalIRs.h">
       <Filter>src\nodes\cabs</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\tuner\TunerNode.h">
+      <Filter>src\nodes\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nodes\autogain\AutoGainNode.h">
+      <Filter>src\nodes\dynamics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

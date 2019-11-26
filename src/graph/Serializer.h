@@ -41,8 +41,8 @@ namespace Serializer {
         }
       }
       serialized["nodes"][i]["parameters"] = nlohmann::json::array();
-      for (int p = 0; p < node->shared.parameters.GetSize(); p++) {
-        ParameterCoupling* para = node->shared.parameters.Get(p);
+      for (int p = 0; p < node->shared.parameterCount; p++) {
+        ParameterCoupling* para = node->shared.parameters[p];
         const char* name = para->name;
         double val = para->parameter != nullptr ? para->parameter->Value() : para->baseValue;
         int idx = para->parameterIdx;
@@ -110,8 +110,8 @@ namespace Serializer {
       nodes.Add(node);
       for (auto param : sNode["parameters"]) {
         string name = param["name"];
-        for (int i = 0; i < node->shared.parameters.GetSize(); i++) {
-          ParameterCoupling* para = node->shared.parameters.Get(i);
+        for (int i = 0; i < node->shared.parameterCount; i++) {
+          ParameterCoupling* para = node->shared.parameters[i];
           if (para->name == name) {
             para->parameterIdx = param["idx"];
             *(para->value) = param["value"];
@@ -149,8 +149,8 @@ namespace Serializer {
       // Link up the automation
       for (auto param : sNode["parameters"]) {
         string name = param["name"];
-        for (int i = 0; i < node->shared.parameters.GetSize(); i++) {
-          ParameterCoupling* para = node->shared.parameters.Get(i);
+        for (int i = 0; i < node->shared.parameterCount; i++) {
+          ParameterCoupling* para = node->shared.parameters[i];
           if (para->name == name) {
             int automationIndex = -1;
             try {

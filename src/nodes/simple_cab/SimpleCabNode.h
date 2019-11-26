@@ -282,7 +282,7 @@ public:
       outputSilence();
       return;
     }
-    shared.parameters.Get(1)->update();
+    shared.parameters[1]->update();
 
     sample** buffer = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
 

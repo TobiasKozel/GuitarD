@@ -7,7 +7,7 @@ public:
   }
 
   void Draw(IGraphics & g) override {
-    const float val = *(shared->meters.Get(0)->value);
+    const float val = *(shared->meters[0]->value);
     const int bright = std::min(255.f, val * 1000);
     NodeUi::Draw(g);
     g.FillRect(

@@ -212,6 +212,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OpenMPSupport>true</OpenMPSupport>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -340,6 +342,7 @@
     <ClInclude Include="..\src\misc\HistoryStack.h" />
     <ClInclude Include="..\src\misc\MessageBus.h" />
     <ClInclude Include="..\src\misc\NodeList.h" />
+    <ClInclude Include="..\src\nodes\autogain\AutoGainNode.h" />
     <ClInclude Include="..\src\nodes\bitcrusher\BitCrusherNode.h" />
     <ClInclude Include="..\src\nodes\combine\CombineNode.h" />
     <ClInclude Include="..\src\nodes\crybaby\CryBabyNode.h" />
@@ -360,6 +363,7 @@
     <ClInclude Include="..\src\nodes\simple_gate\SimpleGateNode.h" />
     <ClInclude Include="..\src\nodes\simple_reverb\SimpleReverbNode.h" />
     <ClInclude Include="..\src\nodes\stereo_tool\StereoToolNode.h" />
+    <ClInclude Include="..\src\nodes\tuner\TunerNode.h" />
     <ClInclude Include="..\src\node\Node.h" />
     <ClInclude Include="..\src\node\NodeInfo.h" />
     <ClInclude Include="..\src\node\NodeShared.h" />

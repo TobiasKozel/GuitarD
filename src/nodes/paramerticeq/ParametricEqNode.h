@@ -8,8 +8,8 @@ public:
 
   void setUpControls() override {
     NodeUi::setUpControls();
-    for (int i = 0; i < shared->parameters.GetSize(); i++) {
-      IControl* c = shared->parameters.Get(i)->control;
+    for (int i = 0; i < shared->parameterCount; i++) {
+      IControl* c = shared->parameters[i]->control;
       if (c != nullptr) {
         ////c->Hide(true);
       }

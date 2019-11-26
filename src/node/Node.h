@@ -108,11 +108,15 @@ public:
       WDBGMSG("Warning, UI of node was not cleaned up!\n");
     }
 
-    for (int i = 0; i < shared.parameters.GetSize(); i++) {
-      detachAutomation(shared.parameters.Get(i));
+    for (int i = 0; i < shared.parameterCount; i++) {
+      detachAutomation(shared.parameters[i]);
+      delete shared.parameters[i];
     }
-    shared.meters.Empty(true);
-    shared.parameters.Empty(true);
+
+    for (int i = 0; i < shared.meterCount; i++) {
+      delete shared.meters[i];
+    }
+
     for(int i = 0; i < shared.inputCount; i++) {
       delete shared.socketsIn[i];
     }
@@ -141,7 +145,7 @@ public:
    */
   bool byPass() {
     // The first param will always be bypass
-    shared.parameters.Get(0)->update();
+    shared.parameters[0]->update();
     if (mByPassed < 0.5) { return false; }
     sample** in = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
     for (int o = 0; o < shared.outputCount; o++) {
@@ -186,8 +190,8 @@ public:
      * Check for automation
      */
     if (mIsAutomated) {
-      for (int i = 0; i < shared.parameters.GetSize(); i++) {
-        Node* n = shared.parameters.Get(i)->automationDependency;
+      for (int i = 0; i < shared.parameterCount; i++) {
+        Node* n = shared.parameters[i]->automationDependency;
         if (n != nullptr && !n->mIsProcessed) {
           return false;
         }
@@ -198,8 +202,8 @@ public:
   }
 
   void checkIsAutomated() {
-    for (int i = 0; i < shared.parameters.GetSize(); i++) {
-      if (shared.parameters.Get(i)->automationDependency != nullptr) {
+    for (int i = 0; i < shared.parameterCount; i++) {
+      if (shared.parameters[i]->automationDependency != nullptr) {
         mIsAutomated = true;
         return;
       }
@@ -271,7 +275,7 @@ public:
    * The requested ParameterCoupling is returned to be used in the automation node
    */
   virtual void attachAutomation(Node* n, const int index) {
-    ParameterCoupling* p = shared.parameters.Get(index);
+    ParameterCoupling* p = shared.parameters[index];
     if (p != nullptr) {
       n->addAutomationTarget(p);
     }
@@ -310,9 +314,10 @@ public:
    * Generic function to call when the node can be bypassed
    */
   void addByPassParam() {
-    shared.parameters.Add(new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = new ParameterCoupling(
       "Bypass", &mByPassed, 0.0, 0.0, 1.0, 1
-    ));
+    );
+    shared.parameterCount++;
   }
 
   /** Generic function to call when the node can switch between mono/stereo */
@@ -322,7 +327,8 @@ public:
         "Stereo", &mStereo, 1.0, 0.0, 1.0, 1
       );
     }
-    shared.parameters.Add(p);
+    shared.parameters[shared.parameterCount] = p;
+    shared.parameterCount++;
   }
 
   /**
@@ -360,8 +366,8 @@ public:
      * If the node is not connected this won't happen, so always do the update when the
      * Gui window is closed just in case
      */
-    for (int i = 0; i < shared.parameters.GetSize(); i++) {
-      shared.parameters.Get(i)->update();
+    for (int i = 0; i < shared.parameterCount; i++) {
+      shared.parameters[i]->update();
     }
     if (mUi != nullptr) {
       mUi->cleanUp();

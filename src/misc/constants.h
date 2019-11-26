@@ -14,7 +14,14 @@
 // Amounts of daw params to register at start since dynamic amounts are not well supported
 #define MAX_DAW_PARAMS 256
 
+// 8 Should be enough for most nodes
 #define MAX_NODE_SOCKETS 8
+
+// Max amount of Parametercouplings for a node
+#define MAX_NODE_PARAMETERS 32
+
+// Meters are structs to share info about the dsp to the gui
+#define MAX_NODE_METERS 32
 
 // This is the name of a node if it wasn't overridden anywhere
 #define DEFAULT_NODE_NAME "DEFAULTNODENAME"

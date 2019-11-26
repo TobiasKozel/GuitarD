@@ -16,13 +16,11 @@ struct Meta {
  * This is a shim to collect pointers to all the properties/parameters from the faust DSP code
  */
 struct UI {
-  WDL_PtrList<ParameterCoupling>* params;
-  WDL_PtrList<MeterCoupling>* meters;
+  NodeShared* shared;
   const char* name;
 
-  UI(WDL_PtrList<ParameterCoupling>* pParams, WDL_PtrList<MeterCoupling>* pMeters) {
-    params = pParams;
-    meters = pMeters;
+  UI(NodeShared* data) {
+    shared = data;
     name = DEFAULT_NODE_NAME;
   }
 
@@ -39,23 +37,28 @@ struct UI {
   static void declare(FAUSTFLOAT*, const char*, const char*) {};
 
   void addHorizontalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT pDefault, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) const {
-    params->Add(new ParameterCoupling(name, prop, pDefault, min, max, stepSize));
+    shared->parameters[shared->parameterCount] = new ParameterCoupling(name, prop, pDefault, min, max, stepSize);
+    shared->parameterCount++;
   }
 
   void addVerticalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT pDefault, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) const {
-    params->Add(new ParameterCoupling(name, prop, pDefault, min, max, stepSize));
+    shared->parameters[shared->parameterCount] = new ParameterCoupling(name, prop, pDefault, min, max, stepSize);
+    shared->parameterCount++;
   }
 
   void addCheckButton(const char* name, FAUSTFLOAT* prop) const {
-    params->Add(new ParameterCoupling(name, prop, 0, 0, 1, 1));
+    shared->parameters[shared->parameterCount] = new ParameterCoupling(name, prop, 0, 0, 1, 1);
+    shared->parameterCount++;
   }
 
   void addVerticalBargraph(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT min, FAUSTFLOAT max) const {
-    meters->Add(new MeterCoupling{ prop, name, min, max });
+    shared->meters[shared->meterCount] = new MeterCoupling{ prop, name, min, max };
+    shared->meterCount++;
   };
 
   void addHorizontalBargraph(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT min, FAUSTFLOAT max) const {
-    meters->Add(new MeterCoupling{ prop, name, min, max });
+    shared->meters[shared->meterCount] = new MeterCoupling{ prop, name, min, max };
+    shared->meterCount++;
   };
 };
 
@@ -83,7 +86,7 @@ public:
      * However they will not be registered to the daw yet, since loading a preset will need them to claim
      * the right ones so the automation will affect the correct parameters
      */
-    UI faustUi(&shared.parameters, &shared.meters);
+    UI faustUi(&shared);
 
     buildUserInterface(&faustUi);
     init(pSamplerate);
@@ -92,8 +95,8 @@ public:
     }
 
 
-    for (int i = 0, pos = 0; i < shared.parameters.GetSize(); i++) {
-      ParameterCoupling* p = shared.parameters.Get(i);
+    for (int i = 0, pos = 0; i < shared.parameterCount; i++) {
+      ParameterCoupling* p = shared.parameters[i];
       if (strncmp(p->name, "Stereo", 32) == 0) {
         //continue;
       }
@@ -125,8 +128,8 @@ public:
    */
   virtual void ProcessBlock(const int nFrames) {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
-    for (int i = 1; i < shared.parameters.GetSize(); i++) {
-      shared.parameters.Get(i)->update();
+    for (int i = 1; i < shared.parameterCount; i++) {
+      shared.parameters[i]->update();
     }
     compute(nFrames, shared.socketsIn[0]->mConnectedTo->mParentBuffer, mBuffersOut[0]);
     mIsProcessed = true;

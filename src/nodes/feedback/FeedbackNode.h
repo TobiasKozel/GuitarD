@@ -13,7 +13,8 @@ public:
   void setup(MessageBus::Bus* pBus, int p_samplerate = 48000, int p_maxBuffer = MAX_BUFFER, int p_channels = 2, int p_inputs = 1, int p_outputs = 1) {
     Node::setup(pBus, p_samplerate, p_maxBuffer, p_channels, p_inputs, p_outputs);
     ParameterCoupling* p = new ParameterCoupling("Gain", &gain, 0.0, 0.0, 3.0, 0.01);
-    shared.parameters.Add(p);
+    shared.parameters[shared.parameterCount] = p;
+    shared.parameterCount++;
     prevBlock = new sample * [p_channels];
     for (int c = 0; c < p_channels; c++) {
       prevBlock[c] = new sample[p_maxBuffer];
@@ -43,7 +44,7 @@ public:
   void ProcessBlock(int nFrames) {
     mIsProcessed = true;
     if (inputsReady() && !hasLastBuffer) {
-      shared.parameters.Get(0)->update();
+      shared.parameters[0]->update();
       sample** buffer = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {

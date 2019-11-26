@@ -16,8 +16,11 @@ struct NodeShared {
   float X;
   float Y;
   float rotation = 0;
-  WDL_PtrList<ParameterCoupling> parameters;
-  WDL_PtrList<MeterCoupling> meters;
+
+  int parameterCount = 0;
+  ParameterCoupling* parameters[MAX_NODE_PARAMETERS];
+  int meterCount = 0; 
+  MeterCoupling* meters[MAX_NODE_METERS];
 
   int inputCount = 0;
   NodeSocket* socketsIn [MAX_NODE_SOCKETS];
