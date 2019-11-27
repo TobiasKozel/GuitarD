@@ -56,7 +56,9 @@ public:
   void openFileDialog() const {
     HWND handle = reinterpret_cast<HWND>(shared->graphics->GetWindow());
     char* result = WDL_ChooseFileForOpen(
-      handle, "Open IR", nullptr, nullptr, "Wave Files\0*.wav;*.WAV\0AIFF Files\0*.aiff;*.AIFF\0", "*.wav",
+      handle, "Open IR", nullptr, nullptr,
+      //"Wave Files\0*.wav;*.WAV\0AIFF Files\0*.aiff;*.AIFF\0", "*.wav",
+      "Wave Files\0*.wav;*.WAV\0", "*.wav",
       true, false
     );
     if (result != nullptr) {
@@ -64,6 +66,7 @@ public:
       IRBundle load;
       load.path.Set(result);
       load.name.Set(load.path.get_filepart());
+      free(result);
       mCabShared->callback(load);
     }
     else {
@@ -77,8 +80,13 @@ public:
    * File drop is only supported in the standalone app
    */
   void OnDrop(const char* str) override {
-    mInfo = "Path: " + string(str);
-    mDirty = true;
+    IRBundle load;
+    load.path.Set(str);
+    load.name.Set(load.path.get_filepart());
+    if (strncmp(load.name.get_fileext(), ".wav", 4) == 0) {
+      mInfo = "Path: " + string(str);
+      mCabShared->callback(load);
+    }
   }
 
   void Draw(IGraphics& g) override {
@@ -276,7 +284,7 @@ public:
 #endif
   }
 
-  void ProcessBlock(const int nFrames) {
+  void ProcessBlock(const int nFrames) override {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
     if (!mIRLoaded) {
       outputSilence();
