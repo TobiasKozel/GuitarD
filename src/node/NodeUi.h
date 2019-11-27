@@ -48,6 +48,9 @@ protected:
   IText mIconFont;
 
 public:
+
+  map<const char*, ParameterCoupling*> mParamsByName;
+
   explicit NodeUi(NodeShared* pShared) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
   {
@@ -154,20 +157,31 @@ public:
     shared->graphics->AttachControl(mHeader.remove);
   }
 
-  virtual void setUpSockets() {
+  virtual void autoAllignSockets() {
     for (int i = 0; i < shared->inputCount; i++) {
-      NodeSocketUi* socket = new NodeSocketUi(
-        shared->bus, shared->graphics, shared->socketsIn[i], mTargetRECT.L, mTargetRECT.T + i * 50.f + mTargetRECT.H() * 0.5f
-      );
+      NodeSocket* s = shared->socketsIn[i];
+      s->mX = 0;
+      s->mY = i * 50.f + mTargetRECT.H() * 0.5f;
+    }
+
+    for (int i = 0; i < shared->outputCount; i++) {
+      NodeSocket* s = shared->socketsOut[i];
+      s->mX = mTargetRECT.W() - 30;
+      s->mY = i * 50.f + mTargetRECT.H() * 0.5f;
+    }
+  }
+
+  virtual void setUpSockets() {
+    autoAllignSockets();
+    for (int i = 0; i < shared->inputCount; i++) {
+      NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsIn[i], mTargetRECT.L, mTargetRECT.T);
       shared->graphics->AttachControl(socket);
       mInSocketsUi.Add(socket);
       mElements.Add(socket);
     }
 
     for (int i = 0; i < shared->outputCount; i++) {
-      NodeSocketUi* socket = new NodeSocketUi(
-        shared->bus, shared->graphics, shared->socketsOut[i], mTargetRECT.R - 30, mTargetRECT.T + i * 50.f + mTargetRECT.H() * 0.5f
-      );
+      NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsOut[i], mTargetRECT.L, mTargetRECT.T);
       shared->graphics->AttachControl(socket);
       mOutSocketsUi.Add(socket);
       mElements.Add(socket);
@@ -348,7 +362,7 @@ public:
     translate(dX, dY);
   }
 
-  map<const char*, ParameterCoupling*> mParamsByName;
+  
 
 
 private:

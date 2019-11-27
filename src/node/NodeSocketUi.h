@@ -1,9 +1,9 @@
 #pragma once
 #include "IControl.h"
-#include "src/misc/constants.h"
 #include "src/node/NodeSocket.h"
 #include "src/misc/MessageBus.h"
 #include "src/ui/theme.h"
+#include "src/node/NodeShared.h"
 
 using namespace iplug;
 using namespace igraphics;
@@ -15,30 +15,32 @@ class NodeSocketUi : public IControl {
   MessageBus::Subscription<NodeSocket*> mOnDisconnectEvent;
   IMouseMod mMouseDown;
 protected:
+  NodeShared* mShared = nullptr;
   ConnectionDragData mDragData;
-  MessageBus::Bus* mBus = nullptr;
-  NodeSocket* mSocket = nullptr;
-  IBlend mBlend;
   IGraphics* mGraphics = nullptr;
+  NodeSocket* mSocket = nullptr;
+  MessageBus::Bus* mBus = nullptr;
+  IBlend mBlend;
   float mDiameter = 0;
   float mRadius = 0;
   int mIndex = -1;
   bool mOut = false;
 public:
-  NodeSocketUi(MessageBus::Bus* pBus, IGraphics* g, NodeSocket* socket, const float x, const float y) :
+  NodeSocketUi(NodeShared* shared,  NodeSocket* socket, const float x, const float y) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
   {
-    mBus = pBus;
+    mShared = shared;
+    mBus = shared->bus;
+    mGraphics = shared->graphics;
     mSocket = socket;
     mDiameter = Theme::Sockets::DIAMETER;
     mRadius = Theme::Sockets::DIAMETER * 0.5f;
-    mRECT.L = x;
-    mRECT.T = y;
+    mRECT.L = socket->mX + x;
+    mRECT.T = socket->mY + y;
     mRECT.R = mRECT.L + mDiameter;
     mRECT.B = mRECT.T + mDiameter;
     SetTargetAndDrawRECTs(mRECT);
     mBlend = EBlend::Clobber;
-    mGraphics = g;
 
     mSocket->mX = mTargetRECT.L;
     mSocket->mY = mTargetRECT.T;

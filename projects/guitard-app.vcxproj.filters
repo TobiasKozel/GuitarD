@@ -456,6 +456,9 @@
     <ClInclude Include="..\src\nodes\autogain\AutoGainNode.h">
       <Filter>src\nodes\dynamics</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\powersag\PowerSagNode.h">
+      <Filter>src\nodes\distortion</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
