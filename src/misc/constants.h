@@ -30,6 +30,7 @@
 
 #define MAX_UNDOS 8
 
+// Distance in pixels from the cable the cursor needs to be within for the splice in to happen
 #define SPLICEIN_DISTANCE 14
 
 

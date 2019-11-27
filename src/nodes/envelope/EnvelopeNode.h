@@ -16,7 +16,7 @@ public:
       MessageBus::fireEvent<Node*>(
         shared->bus, MessageBus::PickAutomationTarget, shared->node
       );
-    });
+    }, "Pick Automation Target", DEFAULT_STYLE, true);
     mElements.Add(mPicker);
     shared->graphics->AttachControl(mPicker);
   }

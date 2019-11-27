@@ -47,7 +47,7 @@ public:
     const IRECT button{ mTargetRECT.L + 50, mTargetRECT.T + 100, mTargetRECT.R - 50, mTargetRECT.B - 20 };
     mBrowseButton = new IVButtonControl(button, [&](IControl* pCaller) {
       this->openFileDialog();
-    });
+    }, "Open IR File", DEFAULT_STYLE, true);
     mElements.Add(mBrowseButton);
     shared->graphics->AttachControl(mBrowseButton);
   }
@@ -121,7 +121,7 @@ class SimpleCabNode final : public Node {
 #endif
   
 public:
-  SimpleCabNode(std::string pType) : Node() {
+  SimpleCabNode(const std::string pType) {
     mType = pType;
   }
 
@@ -151,7 +151,7 @@ public:
     }
   }
 
-  void resampleAndLoadIR(IRBundle b) {
+  void resampleAndLoadIR(IRBundle &b) {
     mIRLoaded = false;
     clearLoadedIR();
 

@@ -17,6 +17,7 @@
 #include "src/nodes/phasetool/PhaseToolNode.h"
 #include "src/nodes/envelope/EnvelopeNode.h"
 #include "src/nodes/autogain/AutoGainNode.h"
+#include "src/nodes/powersag/PowerSagNode.h"
 
 
 namespace NodeList {
@@ -89,6 +90,14 @@ namespace NodeList {
       []() { return new BitCrusherNode("BitCrusherNode"); },
       "BitCrusherNode",
       "Bitcrusher",
+      "asd",
+      "Distortion"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new PowerSagNode("PowerSagNode"); },
+      "PowerSagNode",
+      "Power Sag",
       "asd",
       "Distortion"
     });
