@@ -194,6 +194,10 @@ public:
       mOutputNode->ProcessBlock(nFrames);
       attempts++;
     }
+    // HACK only used for the feedback node to get the latest data in the graph
+    for (int n = 0; n < nodeCount; n++) {
+      mNodes.Get(n)->ProcessBlock(nFrames);
+    }
 
     mOutputNode->CopyOut(out, nFrames);
     const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
