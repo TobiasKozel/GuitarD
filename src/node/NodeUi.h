@@ -46,7 +46,7 @@ protected:
   IColor mColor;
   ISVG mSvgBg = ISVG(nullptr);
   IText mIconFont;
-
+  bool mDoRender = true;
 public:
 
   map<const char*, ParameterCoupling*> mParamsByName;
@@ -160,14 +160,20 @@ public:
   virtual void autoAllignSockets() {
     for (int i = 0; i < shared->inputCount; i++) {
       NodeSocket* s = shared->socketsIn[i];
-      s->mX = 0;
-      s->mY = i * 50.f + mTargetRECT.H() * 0.5f;
+      if (s->mX == s->mY && s->mX == 0) {
+        s->mX = 0;
+        s->mY = i * 50.f + mTargetRECT.H() * 0.5f;
+      }
     }
 
     for (int i = 0; i < shared->outputCount; i++) {
       NodeSocket* s = shared->socketsOut[i];
-      s->mX = mTargetRECT.W() - 30;
-      s->mY = i * 50.f + mTargetRECT.H() * 0.5f;
+      if (s->mX == 0) {
+        s->mX = mTargetRECT.W() - 30;
+      }
+      if (s->mY == 0) {
+        s->mY = i * 50.f + mTargetRECT.H() * 0.5f;
+      }
     }
   }
 
@@ -244,7 +250,8 @@ public:
     translate(0, 0);
   }
 
-  virtual void cleanUp() const {
+  virtual void cleanUp() {
+    mDoRender = false;
     for (int i = 0; i < shared->parameterCount; i++) {
       ParameterCoupling* param = shared->parameters[i];
       if (param->control != nullptr) {

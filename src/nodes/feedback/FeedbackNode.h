@@ -40,8 +40,8 @@ public:
 
   void createBuffers() override {
     Node::createBuffers();
-    mPrevL.SetSize(mSampleRate);
-    mPrevR.SetSize(mSampleRate);
+    mPrevL.SetSize(mMaxBuffer);
+    mPrevR.SetSize(mMaxBuffer);
   }
 
   void deleteBuffers() override {

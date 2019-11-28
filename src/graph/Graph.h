@@ -114,9 +114,10 @@ public:
   }
 
   void testadd() {
-    Node* test = NodeList::createNode("CombineNode");
+    return;
+    Node* test = NodeList::createNode("EnvelopeNode");
     addNode(test, mInputNode, 0, 500, 300);
-    mOutputNode->connectInput(test->shared.socketsOut[0]);
+    // mOutputNode->connectInput(test->shared.socketsOut[0]);
   }
 
   ~Graph() {
@@ -325,7 +326,7 @@ public:
   void removeNode(Node* node, const bool reconnect = false) {
     if (node == mInputNode || node == mOutputNode) { return; }
     WDL_MutexLock lock(&mIsProcessing);
-    if (reconnect) {
+    if (reconnect && node->shared.inputCount > 0 && node->shared.outputCount > 0) {
       NodeSocket* prevSock = node->shared.socketsIn[0];
       NodeSocket* nextSock = node->shared.socketsOut[0];
       if (prevSock != nullptr && prevSock->mConnectedTo && nextSock != nullptr) {

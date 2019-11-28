@@ -98,8 +98,10 @@ public:
     shared.parameters[shared.parameterCount] = p;
     shared.parameterCount++;
 
-    shared.socketsIn[0]->mY = -90;
-    shared.socketsIn[1]->mY = +90;
+    shared.socketsIn[0]->mY = +40;
+    shared.socketsIn[1]->mY = +100;
+    shared.socketsOut[0]->mY = +70;
+    shared.socketsOut[0]->mY = +70;
   }
 
   void deleteBuffers() override {

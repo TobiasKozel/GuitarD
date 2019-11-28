@@ -113,7 +113,7 @@ public:
     }
   }
 
-  void cleanUp() const override {
+  void cleanUp() override {
     NodeUi::cleanUp();
     shared->graphics->RemoveControl(mBrowseButton, true);
   }

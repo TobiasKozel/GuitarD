@@ -101,6 +101,7 @@ public:
       NodeSocket* target = mHighlightSocket;
       mHighlightSocket = nullptr;
       mDirty = true;
+      if (node->shared.inputCount == 0 || node->shared.outputCount == 0) { return; }
       if (target != nullptr) {
         if (target->mParentNode == node) {
           return;
