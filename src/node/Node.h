@@ -96,13 +96,11 @@ public:
     }
   }
 
-  /**
-   * Should do all the required cleanup
-   */
-  virtual ~Node() {
-    // TODOG it's probably not a good idea to call a virtual function here
-    // Seems to work for now though
-    Node::deleteBuffers();
+  virtual ~Node() { }
+
+
+  virtual void cleanUp() {
+    deleteBuffers();
 
     if (mUiReady || mUi != nullptr) {
       WDBGMSG("Warning, UI of node was not cleaned up!\n");
@@ -117,7 +115,7 @@ public:
       delete shared.meters[i];
     }
 
-    for(int i = 0; i < shared.inputCount; i++) {
+    for (int i = 0; i < shared.inputCount; i++) {
       delete shared.socketsIn[i];
     }
 

@@ -46,12 +46,10 @@ public:
 
   void deleteBuffers() override {
     Node::deleteBuffers();
-
+    mPrevL.Reset();
+    mPrevR.Reset();
   }
 
-  ~FeedbackNode() {
-    FeedbackNode::deleteBuffers();
-  }
 
   void ProcessBlock(int nFrames) {
     if (byPass()) { return; }

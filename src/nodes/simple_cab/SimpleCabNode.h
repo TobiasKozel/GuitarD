@@ -124,8 +124,6 @@ public:
 };
 
 
-
-
 class SimpleCabNode final : public Node {
   fftconvolver::TwoStageFFTConvolver* mConvolvers[8] = { nullptr };
   WDL_RESAMPLE_TYPE** mConversionBufferIn = nullptr;
@@ -151,11 +149,7 @@ public:
 #endif
   }
 
-  ~SimpleCabNode() {
-    SimpleCabNode::deleteBuffers();
-  }
-
-  void clearLoadedIR() {
+  void clearLoadedIR() const {
     if (mCabShared.loadedIr.path.GetLength() != 0 && mCabShared.loadedIr.samples != nullptr) {
       // Check if the previous IR is custom and clear out the allocated data
       for (int c = 0; c < mCabShared.loadedIr.channelCount; c++) {

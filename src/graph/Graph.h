@@ -114,13 +114,13 @@ public:
   }
 
   void testadd() {
-    return;
-    Node* test = NodeList::createNode("SimpleCabNode");
+    Node* test = NodeList::createNode("CombineNode");
     addNode(test, mInputNode, 0, 500, 300);
     mOutputNode->connectInput(test->shared.socketsOut[0]);
   }
 
   ~Graph() {
+    removeAllNodes();
     // TODOG get rid of all the things
   }
 
@@ -340,6 +340,7 @@ public:
       }
     }
     node->cleanupUi(mGraphics);
+    node->cleanUp();
     mParamManager.releaseNode(node);
     mNodes.DeletePtr(node, true);
     mNodes.Compact();

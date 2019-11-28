@@ -1,22 +1,21 @@
 #pragma once
 #include "src/node/Node.h"
 
+
 class CombineNode final : public Node {
-  double pan1;
-  double pan2;
-  double mix;
+  const double smoothing = 0.999;
+  double pan1 = 0;
+  double pan2 = 0;
+  double mix = 0.5;
+  double prevMix = 0;
   sample** emptyBuffer;
 public:
   CombineNode(std::string pType) : Node() {
     pan1 = pan2 = 0;
     mix = 0.5;
     mType = pType;
-    shared.width = 300;
-    shared.height = 300;
-  }
-
-  ~CombineNode() {
-    CombineNode::deleteBuffers();
+    shared.width = 200;
+    shared.height = 150;
   }
 
   void ProcessBlock(const int nFrames) override {
@@ -59,8 +58,6 @@ public:
     // do the math
     for (int i = 0; i < nFrames; i++) {
       mBuffersOut[0][0][i] = buffer1[0][i] * pan1l + buffer2[0][i] * pan2l;
-    }
-    for (int i = 0; i < nFrames; i++) {
       mBuffersOut[0][1][i] = buffer1[1][i] * pan1r + buffer2[1][i] * pan2r;
     }
 
@@ -72,26 +69,29 @@ public:
     ParameterCoupling* p = new ParameterCoupling(
       "PAN 1", &pan1, 0.0, -1.0, 1.0, 0.01
     );
-    p->x = -100;
-    p->y = -100;
+    p->x = -40;
+    p->y = -20;
     shared.parameters[shared.parameterCount] = p;
     shared.parameterCount++;
 
     p = new ParameterCoupling(
       "PAN 2", &pan2, 0.0, -1.0, 1.0, 0.01
     );
-    p->x = -100;
-    p->y = 100;
+    p->x = -40;
+    p->y = 40;
     shared.parameters[shared.parameterCount] = p;
     shared.parameterCount++;
 
     p = new ParameterCoupling(
       "MIX", &mix, 0.5, 0.0, 1.0, 0.01
     );
-    p->x = 0;
-    p->y = 0;
+    p->x = 40;
+    p->y = 5;
     shared.parameters[shared.parameterCount] = p;
     shared.parameterCount++;
+
+    shared.socketsIn[0]->mY = -90;
+    shared.socketsIn[1]->mY = +90;
   }
 
   void deleteBuffers() override {

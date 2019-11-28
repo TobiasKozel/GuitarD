@@ -26,7 +26,6 @@ public:
     shared->graphics->RemoveControl(mPicker, true);
   }
 
-
   void OnMouseDown(const float x, const float y, const IMouseMod& mod) override {
     if (mPickerMode) {
       mPickerMode = false;
@@ -73,12 +72,6 @@ public:
     mType = pType;
   }
 
-  ~EnvelopeNode() {
-    for(int i = 0; i < mAutomationTargets.GetSize(); i++) {
-      removeAutomationTarget(mAutomationTargets.Get(i));
-    }
-  }
-
   void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, int pMaxBuffer = MAX_BUFFER, int pChannles = 2, int pInputs = 1, int pOutputs = 1) override {
     Node::setup(pBus, pSamplerate, pMaxBuffer, 2, 1, 0);
     addByPassParam();
@@ -100,6 +93,13 @@ public:
     shared.parameters[shared.parameterCount] = p;
     shared.parameterCount++;
 
+  }
+
+  void cleanUp() override {
+    Node::cleanUp();
+    for (int i = 0; i < mAutomationTargets.GetSize(); i++) {
+      removeAutomationTarget(mAutomationTargets.Get(i));
+    }
   }
 
   void addAutomationTarget(ParameterCoupling* c) override {
