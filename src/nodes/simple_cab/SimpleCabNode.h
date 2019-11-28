@@ -34,27 +34,45 @@ struct CabNodeSharedData {
 class SimpleCabNodeUi : public NodeUi {
   iplug::igraphics::IText mBlocksizeText;
   IVButtonControl* mBrowseButton = nullptr;
-  string mInfo;
   CabNodeSharedData* mCabShared = nullptr;
+  IPopupMenu mMenu{ "Choose IR", {"Clean", "Air", "From File"}, [&](int indexInMenu, IPopupMenu::Item* itemChosen) {
+    if (itemChosen) {
+      const char* text = itemChosen->GetText();
+      if (strncmp(text, "From File", 10) == 0) {
+        this->openFileDialog();
+      }
+      else {
+        for (int i = 0; i < InternalIRsCount; i++) {
+          if (strncmp(InternalIRs[i].name.Get(), text, 30) == 0) {
+            mCabShared->callback(InternalIRs[i]);
+          }
+        }
+      }
+    }
+  }};
+
 public:
   SimpleCabNodeUi(NodeShared* param) : NodeUi(param) {
-    mInfo = "None";
     mBlocksizeText = DEBUG_FONT;
   }
 
   void setUpControls() override {
     NodeUi::setUpControls();
-    const IRECT button{ mTargetRECT.L + 50, mTargetRECT.T + 100, mTargetRECT.R - 50, mTargetRECT.B - 20 };
+    const IRECT button{ mTargetRECT.L + 50, mTargetRECT.T + 130, mTargetRECT.R - 50, mTargetRECT.B - 20 };
     mBrowseButton = new IVButtonControl(button, [&](IControl* pCaller) {
-      this->openFileDialog();
-    }, "Open IR File", DEFAULT_STYLE, true);
+      SplashClickActionFunc(pCaller);
+      float x, y;
+      this->shared->graphics->GetMouseDownPoint(x, y);
+      this->shared->graphics->CreatePopupMenu(*pCaller, mMenu, x, y);
+
+    }, "Select IR", DEFAULT_STYLE, true, false);
     mElements.Add(mBrowseButton);
     shared->graphics->AttachControl(mBrowseButton);
   }
 
 
   void openFileDialog() const {
-    HWND handle = reinterpret_cast<HWND>(shared->graphics->GetWindow());
+    const HWND handle = reinterpret_cast<HWND>(shared->graphics->GetWindow());
     char* result = WDL_ChooseFileForOpen(
       handle, "Open IR", nullptr, nullptr,
       //"Wave Files\0*.wav;*.WAV\0AIFF Files\0*.aiff;*.AIFF\0", "*.wav",
@@ -84,14 +102,15 @@ public:
     load.path.Set(str);
     load.name.Set(load.path.get_filepart());
     if (strncmp(load.name.get_fileext(), ".wav", 4) == 0) {
-      mInfo = "Path: " + string(str);
       mCabShared->callback(load);
     }
   }
 
   void Draw(IGraphics& g) override {
     NodeUi::Draw(g);
-    g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
+    if (mCabShared != nullptr) {
+      g.DrawText(mBlocksizeText, mCabShared->loadedIr.name.Get(), mRECT.GetVShifted(20));
+    }
   }
 
   void cleanUp() const override {
@@ -123,21 +142,17 @@ class SimpleCabNode final : public Node {
 public:
   SimpleCabNode(const std::string pType) {
     mType = pType;
+    mStereo = 0;
+    addByPassParam();
+    addStereoParam();
+    shared.parameters[1]->y = -30;
+#ifdef useThreadPool
+    tPool.resize(2);
+#endif
   }
 
   ~SimpleCabNode() {
     SimpleCabNode::deleteBuffers();
-  }
-
-  void setup(MessageBus::Bus* pBus, int pSamplerate = 48000, int pMaxBuffer = MAX_BUFFER, int pChannles = 2, int pInputs = 1, int pOutputs = 1) override {
-    Node::setup(pBus, pSamplerate, pMaxBuffer, 2, 1, 1);
-
-    mStereo = 0;
-    addByPassParam();
-    addStereoParam();
-#ifdef useThreadPool
-    tPool.resize(2);
-#endif
   }
 
   void clearLoadedIR() {
