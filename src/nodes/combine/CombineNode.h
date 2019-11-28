@@ -4,13 +4,13 @@
 
 class CombineNode final : public Node {
   const double smoothing = 0.999;
+  double smoothed[8] = { 0 };
   double pan1 = 0;
   double pan2 = 0;
   double mix = 0.5;
-  double prevMix = 0;
   sample** emptyBuffer;
 public:
-  CombineNode(std::string pType) : Node() {
+  CombineNode(std::string pType) {
     pan1 = pan2 = 0;
     mix = 0.5;
     mType = pType;
@@ -50,15 +50,23 @@ public:
     const double invMix = 1 - mix;
     const double pan1 = *(shared.parameters[0]->value);
     const double pan2 = *(shared.parameters[1]->value);
-    const double pan1l = min(1.0, max(-pan1 + 1.0, 0.0)) * invMix;
-    const double pan1r = min(1.0, max(+pan1 + 1.0, 0.0)) * invMix;
-    const double pan2l = min(1.0, max(-pan2 + 1.0, 0.0)) * mix;
-    const double pan2r = min(1.0, max(+pan2 + 1.0, 0.0)) * mix;
+    const double pan1l = min(1.0, max(-pan1 + 1.0, 0.0)) * invMix * (1.0 - smoothing);
+    const double pan1r = min(1.0, max(+pan1 + 1.0, 0.0)) * invMix * (1.0 - smoothing);
+    const double pan2l = min(1.0, max(-pan2 + 1.0, 0.0)) * mix * (1.0 - smoothing);
+    const double pan2r = min(1.0, max(+pan2 + 1.0, 0.0)) * mix * (1.0 - smoothing);
 
     // do the math
     for (int i = 0; i < nFrames; i++) {
-      mBuffersOut[0][0][i] = buffer1[0][i] * pan1l + buffer2[0][i] * pan2l;
-      mBuffersOut[0][1][i] = buffer1[1][i] * pan1r + buffer2[1][i] * pan2r;
+      smoothed[0] = pan1l + smoothed[1] * smoothing;
+      smoothed[2] = pan2l + smoothed[3] * smoothing;
+      smoothed[4] = pan1r + smoothed[5] * smoothing;
+      smoothed[6] = pan2r + smoothed[7] * smoothing;
+      mBuffersOut[0][0][i] = buffer1[0][i] * smoothed[0] + buffer2[0][i] * smoothed[2];
+      mBuffersOut[0][1][i] = buffer1[1][i] * smoothed[4] + buffer2[1][i] * smoothed[6];
+      smoothed[1] = smoothed[0];
+      smoothed[3] = smoothed[2];
+      smoothed[5] = smoothed[4];
+      smoothed[7] = smoothed[6];
     }
 
     mIsProcessed = true;
