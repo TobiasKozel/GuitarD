@@ -56,7 +56,7 @@ public:
     NodeUi::Draw(g);
     if (!mDoRender) { return; }
     mHistoryIndex++;
-    if (mHistoryIndex > mHistoryLength) {
+    if (mHistoryIndex >= mHistoryLength) {
       mHistoryIndex = 0;
     }
 
