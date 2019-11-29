@@ -54,7 +54,6 @@ namespace Serializer {
           { "automation", automation }
         };
       }
-
       node->serializeAdditional(serialized["nodes"][i]);
     }
     // Handle the output node

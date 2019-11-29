@@ -8,7 +8,6 @@ public:
 
   }
 
-  virtual void autoAllignSockets() override { }
 };
 
 class FeedbackNode final : public Node {

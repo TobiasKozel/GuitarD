@@ -1,7 +1,6 @@
 #pragma once
 #include "src/misc/MessageBus.h"
 #include "src/misc/GStructs.h"
-#include "ptrlist.h"
 #include "src/parameter/MeterCoupling.h"
 #include "src/parameter/ParameterCoupling.h"
 

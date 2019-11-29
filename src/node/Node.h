@@ -59,10 +59,13 @@ public:
     for (int i = 0; i < shared.outputCount; i++) {
       shared.socketsOut[i] = new NodeSocket(shared.bus, i, this, mBuffersOut[i]);
     }
+
+    autoAllignSockets();
   }
 
   /**
    * Create all the needed buffers for the dsp
+   * Called from on reset when the channelcount changes
    */
   virtual void createBuffers() {
     if (mBuffersOut != nullptr) {
@@ -80,8 +83,6 @@ public:
 
   /**
    * Deletes all the allocated buffers
-   * NOTE: The derived class needs to call its own implementation
-   * in its own destructor since it can't be called from the base destructor!
    */
   virtual void deleteBuffers() {
     if (mBuffersOut != nullptr) {
@@ -96,9 +97,14 @@ public:
     }
   }
 
-  virtual ~Node() { }
+  /**
+   * Usually clean up should happen deleteBuffers() or cleanUp()
+   */
+  virtual ~Node() = default;
 
-
+  /**
+   * Called right before the node is destroyed
+   */
   virtual void cleanUp() {
     deleteBuffers();
 
@@ -125,7 +131,7 @@ public:
   }
 
   /**
-   * Will fill all the output buffers with silence
+   * Will fill all the output buffers with silence and set the processed flag to true
    */
   void outputSilence() {
     for (int o = 0; o < shared.outputCount; o++) {
@@ -222,28 +228,33 @@ public:
   }
 
   /** Called if the daw changed the channelcount*/
-  virtual void OnChannelsChanged(int p_channels) {
+  virtual void OnChannelsChanged(const int pChannels) {
     deleteBuffers();
-    mChannelCount = p_channels;
+    mChannelCount = pChannels;
     createBuffers();
   }
 
-  virtual void OnSamplerateChanged(int p_sampleRate) {
-    mSampleRate = p_sampleRate;
+  virtual void OnSamplerateChanged(const int pSampleRate) {
+    mSampleRate = pSampleRate;
   }
 
-  /** Called on DAW transport e.g. to clear dsp buffers and cut reverbs */
+  /**
+   * Called on DAW transport e.g. to clear dsp buffers and cut reverbs
+   * TODOG doesn't seem to work
+   */
   virtual void OnTransport() { }
 
-  /** Called from the graph to either signal a change in samplerate/channel count or transport */
-  virtual void OnReset(int p_sampleRate, int p_channels) {
+  /**
+   * Called from the graph to either signal a change in samplerate/channel count or transport
+   */
+  virtual void OnReset(const int pSampleRate, const int pChannels) {
     bool isTransport = true;
-    if (p_sampleRate != mSampleRate) {
-      OnSamplerateChanged(p_sampleRate);
+    if (pSampleRate != mSampleRate) {
+      OnSamplerateChanged(pSampleRate);
       isTransport = false;
     }
-    if (p_channels != mChannelCount) {
-      OnChannelsChanged(p_channels);
+    if (pChannels != mChannelCount) {
+      OnChannelsChanged(pChannels);
       isTransport = false;
     }
     if (isTransport) {
@@ -254,7 +265,7 @@ public:
   /**
    * Connects a given socket to a input at a given index of this node
    */
-  virtual void connectInput(NodeSocket* out, int inputNumber = 0) {
+  virtual void connectInput(NodeSocket* out, const int inputNumber = 0) {
     NodeSocket* inSocket = shared.socketsIn[inputNumber];
     if (inSocket != nullptr) {
       if (out == nullptr) {
@@ -295,7 +306,7 @@ public:
   }
 
   /**
-   * This is for nodes that provide can provide automation for other nodes
+   * This is for nodes that can provide automation for other nodes
    * They will keep track of all the ParameterCouplings and update them accordingly
    * These should only be called from the attach/detachAutomation functions
    */
@@ -353,6 +364,26 @@ public:
     pGrahics->AttachControl(mUi);
     mUi->setUp();
     mUiReady = true;
+  }
+
+  virtual void autoAllignSockets() {
+    for (int i = 0; i < shared.inputCount; i++) {
+      NodeSocket* s = shared.socketsIn[i];
+      if (s->mX == s->mY && s->mX == 0) {
+        s->mX = 0;
+        s->mY = i * 50.f + shared.height * 0.5f;
+      }
+    }
+
+    for (int i = 0; i < shared.outputCount; i++) {
+      NodeSocket* s = shared.socketsOut[i];
+      if (s->mX == 0) {
+        s->mX = shared.width - 30;
+      }
+      if (s->mY == 0) {
+        s->mY = i * 50.f + shared.height * 0.5f;
+      }
+    }
   }
 
   /**

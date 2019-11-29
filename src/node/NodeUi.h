@@ -157,28 +157,8 @@ public:
     shared->graphics->AttachControl(mHeader.remove);
   }
 
-  virtual void autoAllignSockets() {
-    for (int i = 0; i < shared->inputCount; i++) {
-      NodeSocket* s = shared->socketsIn[i];
-      if (s->mX == s->mY && s->mX == 0) {
-        s->mX = 0;
-        s->mY = i * 50.f + mTargetRECT.H() * 0.5f;
-      }
-    }
-
-    for (int i = 0; i < shared->outputCount; i++) {
-      NodeSocket* s = shared->socketsOut[i];
-      if (s->mX == 0) {
-        s->mX = mTargetRECT.W() - 30;
-      }
-      if (s->mY == 0) {
-        s->mY = i * 50.f + mTargetRECT.H() * 0.5f;
-      }
-    }
-  }
 
   virtual void setUpSockets() {
-    autoAllignSockets();
     for (int i = 0; i < shared->inputCount; i++) {
       NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsIn[i], mTargetRECT.L, mTargetRECT.T);
       shared->graphics->AttachControl(socket);
@@ -251,6 +231,7 @@ public:
   }
 
   virtual void cleanUp() {
+    mDirty = false;
     mDoRender = false;
     for (int i = 0; i < shared->parameterCount; i++) {
       ParameterCoupling* param = shared->parameters[i];

@@ -207,7 +207,9 @@ public:
     mStats.executionTime = duration.count();
   }
 
-  /** The graph needs to know about the graphics context to add and remove the controls for the nodes */
+  /**
+   * The graph needs to know about the graphics context to add and remove the controls for the nodes
+   */
   void setupUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
     if (pGraphics != nullptr && pGraphics != mGraphics) {
       WDBGMSG("Graphics context changed");
@@ -217,6 +219,8 @@ public:
     pGraphics->HandleMouseOver(true);
     
     mGraphics->SetKeyHandlerFunc([&](const IKeyPress & key, const bool isUp) {
+      // Gets the keystrokes in the standalone app
+      // TODOG figure out why this doesn't work in vst3
       if (key.C && key.VK == kVK_Z && !isUp) {
         MessageBus::fireEvent<bool>(this->mBus, MessageBus::PopUndoState, false);
         return true;
@@ -301,7 +305,7 @@ public:
   }
 
   /**
-   * Used to add nodes and push a state to the history stack
+   * Used to add nodes and pause the audio thread
    */
   void addNode(Node* node, Node* pInput = nullptr, const int index = 0, const float x = 0, const float y = 0) {
     WDL_MutexLock lock(&mIsProcessing);
@@ -323,6 +327,10 @@ public:
     }
   }
 
+  /**
+   * Removes the node and pauses the audio thread
+   * Can also bridge the connection if possible
+   */
   void removeNode(Node* node, const bool reconnect = false) {
     if (node == mInputNode || node == mOutputNode) { return; }
     WDL_MutexLock lock(&mIsProcessing);
