@@ -17,7 +17,7 @@ class FeedbackNode final : public Node {
 
 public:
   FeedbackNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
   }
 
   void setup(MessageBus::Bus* pBus, int pSamplerate = 48000, int pMaxBuffer = MAX_BUFFER, int pChannels = 2, int pInputs = 1, int pOutputs = 1) {

@@ -43,7 +43,7 @@ public:
     gcount = 0;
     fpNShapeL = 0.0;
     fpNShapeR = 0.0;
-    mType = pType;
+    shared.type = pType;
     shared.width = 200;
     shared.height = 100;
     addByPassParam();

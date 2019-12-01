@@ -4,7 +4,7 @@
 class OverDriveNode final : public OverDrive {
 public:
   OverDriveNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

@@ -4,7 +4,7 @@
 class SimpleDelayNode final : public SimpleDelay {
 public:
   SimpleDelayNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
     shared.width = 300;
   }
 

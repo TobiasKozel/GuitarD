@@ -4,7 +4,7 @@
 class SimpleReverbNode final : public SimpleReverb {
 public:
   SimpleReverbNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

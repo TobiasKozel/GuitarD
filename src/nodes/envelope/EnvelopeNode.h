@@ -101,7 +101,7 @@ class EnvelopeNode final : public Node {
   double current = 0;
 public:
   explicit EnvelopeNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
     shared.meters[shared.meterCount] = new MeterCoupling{ &avg, "Value", 0, 1 };
     shared.meterCount++;
   }

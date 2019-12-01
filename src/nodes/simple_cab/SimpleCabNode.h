@@ -139,7 +139,7 @@ class SimpleCabNode final : public Node {
   
 public:
   SimpleCabNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
     mStereo = 0;
     addByPassParam();
     addStereoParam();

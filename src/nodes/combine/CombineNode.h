@@ -13,7 +13,7 @@ public:
   CombineNode(std::string pType) {
     pan1 = pan2 = 0;
     mix = 0.5;
-    mType = pType;
+    shared.type = pType;
     shared.width = 200;
     shared.height = 150;
   }

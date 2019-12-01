@@ -59,7 +59,7 @@ public:
 class ParametricEqNode final : public ParametricEq {
 public:
   ParametricEqNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
     shared.width = 400;
     shared.height = 200;
   }

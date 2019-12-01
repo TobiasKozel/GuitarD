@@ -4,7 +4,7 @@
 class FuzzNode final : public Fuzz {
 public:
   FuzzNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

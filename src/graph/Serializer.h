@@ -23,7 +23,7 @@ namespace Serializer {
       serialized["nodes"][i]["position"] = { node->shared.X, node->shared.Y };
       // The index shouldn't really matter since they're all in order
       serialized["nodes"][i]["idx"] = i;
-      serialized["nodes"][i]["type"] = node->mType;
+      serialized["nodes"][i]["type"] = node->shared.type;
       serialized["nodes"][i]["inputs"] = nlohmann::json::array();
       for (int prev = 0; prev < node->shared.inputCount; prev++) {
         Node* cNode = node->shared.socketsIn[prev]->getConnectedNode();

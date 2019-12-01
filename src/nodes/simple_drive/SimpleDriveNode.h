@@ -28,7 +28,7 @@ public:
 class SimpleDriveNode final : public SimpleDrive {
 public:
   SimpleDriveNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
   }
 
 

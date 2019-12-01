@@ -8,6 +8,7 @@
  * A struct of data that is shared between the node and its UI
  */
 struct NodeShared {
+  std::string type;
   MessageBus::Bus* bus = nullptr;
   iplug::igraphics::IGraphics* graphics = nullptr;
   float width = 250;

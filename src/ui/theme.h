@@ -71,6 +71,7 @@ namespace Theme {
 #define NODE_ROUNDED_CORNER
 #define NODE_SHADOW
     const IColor HEADER{ 255, 30, 30, 30 };
+    const IText HEADER_TEXT(16, COLOR_WHITE, "Roboto-Regular", iplug::igraphics::EAlign::Center, iplug::igraphics::EVAlign::Middle, 0);
     const float HEADER_SIZE = 20;
     const float HEADER_BYPASS_LEFT = 6;
     const float HEADER_BYPASS_TOP = 2;

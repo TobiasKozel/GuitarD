@@ -24,6 +24,7 @@ public:
 class InputNode final : public Node {
 public:
   InputNode(MessageBus::Bus* pBus) : Node() {
+    shared.type = "Input";
     mLastBlockSize = -1;
     if (shared.X == shared.Y && shared.X == 0) {
       // Place it at the screen edge if no position is set

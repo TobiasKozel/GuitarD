@@ -4,7 +4,7 @@
 class StereoToolNode final : public StereoTool {
  public:
   StereoToolNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

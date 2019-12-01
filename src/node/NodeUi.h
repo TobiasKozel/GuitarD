@@ -27,7 +27,6 @@ struct NodeUiHeader {
 class NodeUi : public IControl {
 protected:
   NodeShared* shared;
-
   MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
 
   WDL_PtrList<NodeSocketUi> mInSocketsUi;
@@ -47,6 +46,8 @@ protected:
   ISVG mSvgBg = ISVG(nullptr);
   IText mIconFont;
   bool mDoRender = true;
+
+  
 public:
 
   map<const char*, ParameterCoupling*> mParamsByName;
@@ -258,11 +259,11 @@ public:
   }
 
   virtual void DrawHeader(IGraphics& g) {
-    g.FillRect(Theme::Node::HEADER,
-      IRECT(
-        mTargetRECT.L, mTargetRECT.T, mTargetRECT.R, mTargetRECT.T + Theme::Node::HEADER_SIZE
-      )
+    IRECT bound = IRECT(
+      mTargetRECT.L, mTargetRECT.T, mTargetRECT.R, mTargetRECT.T + Theme::Node::HEADER_SIZE
     );
+    g.FillRect(Theme::Node::HEADER, bound);
+    g.DrawText(Theme::Node::HEADER_TEXT, shared->type.c_str(), bound);
   }
 
   virtual void DrawBg(IGraphics& g) {

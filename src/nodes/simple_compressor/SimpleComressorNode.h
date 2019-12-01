@@ -4,7 +4,7 @@
 class SimpleComressorNode final : public SimpleComressor {
 public:
   SimpleComressorNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

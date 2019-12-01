@@ -4,7 +4,7 @@
 class CryBabyNode final : public CryBaby {
 public:
   CryBabyNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

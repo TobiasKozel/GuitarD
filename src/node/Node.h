@@ -14,7 +14,6 @@ protected:
   bool mUiReady = false;
 public:
   NodeShared shared;
-  std::string mType;
 
   // Flag to skip automation if there's none
   bool mIsAutomated = false;

@@ -12,6 +12,7 @@ public:
 class OutputNode final : public Node {
 public:
   OutputNode(MessageBus::Bus* pBus) : Node() {
+    shared.type = "Output";
     if (shared.X == shared.Y && shared.X == 0) {
       // Place it at the screen edge if no position is set
       shared.Y = PLUG_HEIGHT * 0.5;

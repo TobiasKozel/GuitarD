@@ -5,7 +5,7 @@ public:
   explicit BitCrusherNode(const std::string pType) {
     shared.width = 250;
     shared.height = 240;
-    mType = pType;
+    shared.type = pType;
   }
   void setupUi(iplug::igraphics::IGraphics* pGraphics) override {
     shared.graphics = pGraphics;

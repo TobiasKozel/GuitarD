@@ -11,7 +11,7 @@ class AutoGainNode final : public Node {
   int samplesTarget = 0;
 public:
   AutoGainNode(const std::string pType) {
-    mType = pType;
+    shared.type = pType;
     shared.width = 100;
     shared.height = 100;
     addByPassParam();

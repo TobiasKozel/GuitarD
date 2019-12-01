@@ -31,7 +31,7 @@
 #define PLUG_MIN_WIDTH 100
 #define PLUG_MIN_HEIGHT 100
 
-#define PLUG_FPS 90
+#define PLUG_FPS 60
 #define PLUG_SHARED_RESOURCES 0
 
 #define AUV2_ENTRY GuitarD_Entry

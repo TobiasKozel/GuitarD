@@ -89,8 +89,8 @@ public:
 
     buildUserInterface(&faustUi);
     init(pSamplerate);
-    if (mType == DEFAULT_NODE_NAME) {
-      mType = faustUi.name;
+    if (shared.type == DEFAULT_NODE_NAME) {
+      shared.type = faustUi.name;
     }
 
     const int perColumn = 2;
