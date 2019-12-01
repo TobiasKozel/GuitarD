@@ -44,7 +44,8 @@ public:
     const float top2 = 40;
     mUi->mParamsByName.at("Drive")->setPos(left1, top1, size);
     mUi->mParamsByName.at("Offset")->setPos(left2, top1, size);
-    mUi->mParamsByName.at("Post gain")->setPos(center, top2, size);
+    mUi->mParamsByName.at("Post gain")->setPos(left2, top2, size);
+    mUi->mParamsByName.at("Bass")->setPos(left1, top2, size);
     pGrahics->AttachControl(mUi);
     mUi->setUp();
     mUiReady = true;
