@@ -301,7 +301,7 @@ public:
     }
     shared.parameters[1]->update();
 
-    sample** buffer = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
+    sample** buffer = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
 
 #ifdef FLOATCONV
     /**                           THREADPOOLING ATTEMPT                           */

@@ -77,7 +77,7 @@ public:
        */
       NodeSocket* in = shared->socketsIn[0];
       NodeSocket* out = shared->socketsOut[0];
-      NodeSocket* prev = pair.socket->mConnectedTo;
+      NodeSocket* prev = pair.socket->mConnectedTo[0];
       if (in != nullptr && out != nullptr) {
         pair.socket->disconnect();
         in->connect(prev);
@@ -160,14 +160,14 @@ public:
 
   virtual void setUpSockets() {
     for (int i = 0; i < shared->inputCount; i++) {
-      NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsIn[i], mTargetRECT.L, mTargetRECT.T);
+      NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsIn[i]);
       shared->graphics->AttachControl(socket);
       mInSocketsUi.Add(socket);
       mElements.Add(socket);
     }
 
     for (int i = 0; i < shared->outputCount; i++) {
-      NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsOut[i], mTargetRECT.L, mTargetRECT.T);
+      NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsOut[i]);
       shared->graphics->AttachControl(socket);
       mOutSocketsUi.Add(socket);
       mElements.Add(socket);

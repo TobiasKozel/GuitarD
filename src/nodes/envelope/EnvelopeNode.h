@@ -180,7 +180,7 @@ public:
 
   void ProcessBlock(const int nFrames) override {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
-    sample** buffer = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
+    sample** buffer = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
     shared.parameters[1]->update();
     shared.parameters[2]->update();
     shared.parameters[3]->update();

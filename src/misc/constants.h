@@ -17,6 +17,8 @@
 // 8 Should be enough for most nodes
 #define MAX_NODE_SOCKETS 8
 
+#define MAX_SOCKET_CONNECTIONS 32
+
 // Max amount of Parametercouplings for a node
 #define MAX_NODE_PARAMETERS 32
 

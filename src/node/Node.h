@@ -53,14 +53,14 @@ public:
 
     // Setup the sockets for the node connections
     for (int i = 0; i < shared.inputCount; i++) {
-      shared.socketsIn[i] = new NodeSocket(shared.bus, i, this);
+      shared.socketsIn[i] = new NodeSocketIn(this, i);
     }
 
     for (int i = 0; i < shared.outputCount; i++) {
-      shared.socketsOut[i] = new NodeSocket(shared.bus, i, this, mBuffersOut[i]);
+      shared.socketsOut[i] = new NodeSocketOut(this, i, mBuffersOut[i]);
     }
 
-    autoAllignSockets();
+    positionSockets();
   }
 
   /**
@@ -151,7 +151,7 @@ public:
     // The first param will always be bypass
     shared.parameters[0]->update();
     if (mByPassed < 0.5) { return false; }
-    sample** in = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
+    sample** in = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
     for (int o = 0; o < shared.outputCount; o++) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < mMaxBuffer; i++) {
@@ -174,7 +174,7 @@ public:
      * If that's not desired, this function has to be overriden
      */
     for (int i = 0; i < shared.inputCount; i++) {
-      if (shared.socketsIn[i]->mConnectedTo == nullptr) {
+      if (shared.socketsIn[i]->mConnectedTo[0] == nullptr) {
         outputSilence();
         return false;
       }
@@ -184,7 +184,7 @@ public:
      * Check for inputs which are connected to unprocessed nodes
      */
     for (int i = 0; i < shared.inputCount; i++) {
-      if (!shared.socketsIn[i]->mConnectedTo->mParentNode->mIsProcessed) {
+      if (!shared.socketsIn[i]->mConnectedTo[0]->mParentNode->mIsProcessed) {
         // A node isn't ready so return false
         return false;
       }
@@ -366,23 +366,17 @@ public:
     mUiReady = true;
   }
 
-  virtual void autoAllignSockets() {
+  virtual void positionSockets() {
     for (int i = 0; i < shared.inputCount; i++) {
       NodeSocket* s = shared.socketsIn[i];
-      if (s->mX == s->mY && s->mX == 0) {
-        s->mX = 0;
-        s->mY = i * 50.f + shared.height * 0.5f;
-      }
+      s->mX = shared.X - shared.width * 0.5;
+      s->mY = i * 50.f + shared.Y;
     }
 
     for (int i = 0; i < shared.outputCount; i++) {
       NodeSocket* s = shared.socketsOut[i];
-      if (s->mX == 0) {
-        s->mX = shared.width - 30;
-      }
-      if (s->mY == 0) {
-        s->mY = i * 50.f + shared.height * 0.5f;
-      }
+      s->mX = shared.width * 0.5 + shared.X - 30;
+      s->mY = i * 50.f + shared.Y;
     }
   }
 
@@ -404,6 +398,20 @@ public:
       mUi = nullptr;
     }
     mUiReady = false;
+  }
+
+  void moveAlong(float x) {
+    for (int i = 0; i < shared.outputCount; i++) {
+      if (mUi != nullptr) {
+        mUi->translate(x, 0);
+      }
+      NodeSocket* socket = shared.socketsOut[i];
+      for (int s = 0; s < MAX_SOCKET_CONNECTIONS; s++) {
+        if (socket->mConnectedTo[s] != nullptr) {
+          socket->mConnectedTo[s]->mParentNode->moveAlong(x);
+        }
+      }
+    }
   }
 
   /** Called if the ui is resized TODOG move over to NodeUI */

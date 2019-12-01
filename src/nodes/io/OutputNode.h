@@ -12,11 +12,16 @@ public:
 class OutputNode final : public Node {
 public:
   OutputNode(MessageBus::Bus* pBus) : Node() {
+    if (shared.X == shared.Y && shared.X == 0) {
+      // Place it at the screen edge if no position is set
+      shared.Y = PLUG_HEIGHT * 0.5;
+      shared.X = PLUG_WIDTH - shared.width * 0.3;
+    }
     setup(pBus, 0, MAX_BUFFER, 2, 1, 0);
   }
 
   void ProcessBlock(int) {
-    NodeSocket* in = shared.socketsIn[0]->mConnectedTo;
+    NodeSocket* in = shared.socketsIn[0]->mConnectedTo[0];
     if (in == nullptr) {
       mIsProcessed = true;
     }
@@ -26,7 +31,7 @@ public:
   }
 
   void CopyOut(iplug::sample** out, int nFrames) {
-    NodeSocket* in = shared.socketsIn[0]->mConnectedTo;
+    NodeSocket* in = shared.socketsIn[0]->mConnectedTo[0];
     if (mMaxBuffer < nFrames || in == nullptr || !in->mParentNode->mIsProcessed) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
@@ -50,11 +55,6 @@ public:
   }
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    if (shared.X == shared.Y && shared.X == 0) {
-      // Place it at the screen edge if no position is set
-      shared.Y = pGrahics->Height() / 2.f;
-      shared.X = pGrahics->Width();
-    }
     shared.graphics = pGrahics;
     mUi = new OutputNodeUi(&shared);
     mUi->setColor(IColor(255, 100, 150, 100));

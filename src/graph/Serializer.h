@@ -26,7 +26,7 @@ namespace Serializer {
       serialized["nodes"][i]["type"] = node->mType;
       serialized["nodes"][i]["inputs"] = nlohmann::json::array();
       for (int prev = 0; prev < node->shared.inputCount; prev++) {
-        Node* cNode = node->shared.socketsIn[prev]->mConnectedNode;
+        Node* cNode = node->shared.socketsIn[prev]->getConnectedNode();
         if (cNode == nullptr) {
           serialized["nodes"][i]["inputs"][prev] = { NoNode, 0 };
         }
@@ -36,7 +36,7 @@ namespace Serializer {
         else {
           serialized["nodes"][i]["inputs"][prev] = {
             nodes.Find(cNode),
-            node->shared.socketsIn[prev]->mConnectedSocketIndex
+            node->shared.socketsIn[prev]->getConnectedSocketIndex()
           };
         }
       }
@@ -61,7 +61,7 @@ namespace Serializer {
     serialized["output"]["position"] = {
       output->shared.X, output->shared.Y
     };
-    Node* lastNode = output->shared.socketsIn[0]->mConnectedNode;
+    Node* lastNode = output->shared.socketsIn[0]->getConnectedNode();
     int lastNodeIndex = NoNode;
     if (lastNode == input) {
       lastNodeIndex = InputNode;
@@ -71,7 +71,7 @@ namespace Serializer {
     }
     serialized["output"]["inputs"][0] = {
       lastNodeIndex,
-      output->shared.socketsIn[0]->mConnectedSocketIndex
+      output->shared.socketsIn[0]->getConnectedSocketIndex()
     };
   }
 
@@ -91,6 +91,7 @@ namespace Serializer {
     else {
       input->shared.X = serialized["input"]["position"][0];
       input->shared.Y = serialized["input"]["position"][1];
+      input->positionSockets();
     }
 
     int expectedIndex = 0;
@@ -189,6 +190,7 @@ namespace Serializer {
     else {
       output->shared.X = serialized["output"]["position"][0];
       output->shared.Y = serialized["output"]["position"][1];
+      output->positionSockets();
     }
   }
 }

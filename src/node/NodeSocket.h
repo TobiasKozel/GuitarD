@@ -1,78 +1,125 @@
 #pragma once
-#include "IPlugConstants.h"
-#include "src/misc/MessageBus.h"
-
+#include "src/misc/constants.h"
 class Node;
 
+/**
+ * Base class of a node socket, only the implementations of disconnect and connect differ
+ * The member variables are identical
+ */
 struct NodeSocket {
   bool mIsInput = false;
-  NodeSocket* mConnectedTo = nullptr;
-  Node* mParentNode = nullptr;
-  int mIndex = -1;
-  iplug::sample** mParentBuffer = nullptr;
   float mX = 0;
   float mY = 0;
+  Node* mParentNode = nullptr;
+  int mIndex = -1;
+  bool mConnected = false;
+  NodeSocket* mConnectedTo[MAX_SOCKET_CONNECTIONS] = { nullptr };
+  // Buffer is only relevant for a output node
+  iplug::sample** mParentBuffer = nullptr;
 
-  Node* mConnectedNode = nullptr;
-  int mConnectedSocketIndex = -1;
-  // TODOG Get the message bus ouf here, since it shouldn't be needed without the GUI running
-  MessageBus::Bus* mBus = nullptr;
+  virtual void disconnect(NodeSocket* to = nullptr, bool other = true) = 0;
+  virtual void connect(NodeSocket* to, bool other = true) = 0;
 
-  /**
-   * Constructor if it's a input socket, meaning it has no buffer
-   * (Nodes only have an output buffer)
-   */
-  NodeSocket(MessageBus::Bus* pBus, const int pIndex, Node* pNode) {
-    mBus = pBus;
+  Node* getConnectedNode(int index = 0) const {
+    if (mConnectedTo[index] != nullptr) {
+      return mConnectedTo[index]->mParentNode;
+    }
+    return nullptr;
+  }
+
+  int getConnectedSocketIndex(int index = 0) {
+    if (mConnectedTo[index] != nullptr) {
+      return mConnectedTo[index]->mIndex;
+    }
+    return -1;
+  }
+};
+
+/**
+ * Only allowed to have one connection
+ * Will only write in the first index of mConnectedTo
+ */
+struct NodeSocketIn : public NodeSocket {
+  NodeSocketIn(Node* parent, int index) {
+    mParentNode = parent;
+    mIndex = index;
     mIsInput = true;
-    mParentNode = pNode;
-    mIndex = pIndex;
+  }
+  void disconnect(NodeSocket* to, bool other) override {
+    if (mConnectedTo[0] != nullptr) {
+      if (other) {
+        mConnectedTo[0]->disconnect(this, false);
+      }
+      mConnected = false;
+      mConnectedTo[0] = nullptr;
+    }
   }
 
-  /**
-   * Constructor if it's a output socket, will need to know
-   * the buffer since other sockets will read from it
-   */
-  NodeSocket(MessageBus::Bus* pBus, int pIndex, Node* pNode, iplug::sample** pBuffer) {
-    mBus = pBus;
+  void connect(NodeSocket* to, bool other) override {
+    if (other) {
+      disconnect(to, false);
+      to->connect(to, false);
+    }
+    mConnected = true;
+    mConnectedTo[0] = to;
+  }
+};
+
+struct NodeSocketOut : public NodeSocket {
+  NodeSocketOut(Node* parent, int index, iplug::sample** buffer) {
+    mParentNode = parent;
+    mIndex = index;
+    mParentBuffer = buffer;
     mIsInput = false;
-    mParentNode = pNode;
-    mIndex = pIndex;
-    mParentBuffer = pBuffer;
   }
 
-  ~NodeSocket() {
-    disconnect();
+  void updatedConnected() {
+    for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+      if (mConnectedTo[i] != nullptr) {
+        mConnected = true;
+        return;
+      }
+    }
+    mConnected = false;
   }
 
-  void disconnect() {
-    MessageBus::fireEvent<bool>(mBus, MessageBus::AwaitAudioMutex, false);
-    if (mIsInput) {
-      mConnectedNode = nullptr;
-      mConnectedSocketIndex = -1;
-      mConnectedTo = nullptr;
+  void disconnect(NodeSocket* to, bool other) override {
+    for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+      if (mConnectedTo[i] != nullptr && mConnectedTo[i] == to) {
+        mConnectedTo[i] = nullptr;
+        if (other) {
+          to->disconnect(nullptr, false);
+        }
+        break;
+      }
     }
-    else {
-      MessageBus::fireEvent<NodeSocket*>(mBus, MessageBus::DisconnectSocket, this);
-    }
+    updatedConnected();
   }
 
-  void connect(NodeSocket* to) {
-    MessageBus::fireEvent<bool>(mBus, MessageBus::AwaitAudioMutex, false);
-    if (to->mIsInput == mIsInput) {
-      WDBGMSG("Trying to connect an input to input / output to output!");
-      return;
+  void connect(NodeSocket* to, bool other) override {
+    NodeSocketIn* toIn = dynamic_cast<NodeSocketIn*>(to);
+    if (toIn != nullptr) {
+      for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+        if (mConnectedTo[i] == to) {
+          assert(true);
+        }
+      }
+      for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+        if (mConnectedTo[i] == nullptr) {
+          mConnectedTo[i] = toIn;
+          if (toIn->mConnectedTo[0] != this) {
+            if (other) {
+              toIn->connect(this, false);
+            }
+          }
+          break;
+        }
+        if (i == MAX_SOCKET_CONNECTIONS - 1) {
+          // Couldn't find a free slot
+          assert(true);
+        }
+      }
+      updatedConnected();
     }
-    if (mIsInput) {
-      mConnectedTo = to;
-      mConnectedNode = to->mParentNode;
-      mConnectedSocketIndex = to->mIndex;
-    }
-    else {
-      to->mConnectedTo = this;
-      to->mConnectedNode = mParentNode;
-      to->mConnectedSocketIndex = mIndex;
-    }
-
   }
 };

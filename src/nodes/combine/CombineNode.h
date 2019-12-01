@@ -24,21 +24,21 @@ public:
     NodeSocket* s2 = shared.socketsIn[1];
 
     // see which inputs are connected
-    const bool has1 = s1->mConnectedNode != nullptr;
-    const bool has2 = s2->mConnectedNode != nullptr;
+    const bool has1 = s1->getConnectedNode() != nullptr;
+    const bool has2 = s2->getConnectedNode() != nullptr;
     if (has1 == has2 && has1 == false) {
       outputSilence();
       return;
     }
 
-    if ((has1 && !s1->mConnectedNode->mIsProcessed) || has2 && !s2->mConnectedNode->mIsProcessed) {
+    if ((has1 && !s1->getConnectedNode()->mIsProcessed) || has2 && !s2->getConnectedNode()->mIsProcessed) {
       // skip until inputs are ready
       return;
     }
 
     // Choose the buffer from the input or use silence
-    sample** buffer1 = has1 ? s1->mConnectedTo->mParentBuffer : emptyBuffer;
-    sample** buffer2 = has2 ? s2->mConnectedTo->mParentBuffer : emptyBuffer;
+    sample** buffer1 = has1 ? s1->mConnectedTo[0]->mParentBuffer : emptyBuffer;
+    sample** buffer2 = has2 ? s2->mConnectedTo[0]->mParentBuffer : emptyBuffer;
 
     // Update the params
     shared.parameters[0]->update();
@@ -98,10 +98,9 @@ public:
     shared.parameters[shared.parameterCount] = p;
     shared.parameterCount++;
 
-    shared.socketsIn[0]->mY = +40;
-    shared.socketsIn[1]->mY = +100;
-    shared.socketsOut[0]->mY = +70;
-    shared.socketsOut[0]->mY = +70;
+    shared.socketsIn[0]->mY += -35;
+    shared.socketsIn[1]->mY += -25;
+    shared.socketsOut[0]->mY += -10;
   }
 
   void deleteBuffers() override {

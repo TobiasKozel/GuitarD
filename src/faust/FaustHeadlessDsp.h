@@ -131,7 +131,7 @@ public:
     for (int i = 1; i < shared.parameterCount; i++) {
       shared.parameters[i]->update();
     }
-    compute(nFrames, shared.socketsIn[0]->mConnectedTo->mParentBuffer, mBuffersOut[0]);
+    compute(nFrames, shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0]);
     mIsProcessed = true;
   }
 };

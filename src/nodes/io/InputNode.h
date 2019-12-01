@@ -25,6 +25,11 @@ class InputNode final : public Node {
 public:
   InputNode(MessageBus::Bus* pBus) : Node() {
     mLastBlockSize = -1;
+    if (shared.X == shared.Y && shared.X == 0) {
+      // Place it at the screen edge if no position is set
+      shared.Y = PLUG_HEIGHT * 0.5;
+      shared.X = shared.width * 0.3;
+    }
     setup(pBus, 48000, MAX_BUFFER, 2, 0, 1);
   }
 
@@ -42,10 +47,6 @@ public:
 
   void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
     shared.graphics = pGrahics;
-    if (shared.X == shared.Y && shared.X == 0) {
-      // Place it at the screen edge if no position is set
-      shared.Y = pGrahics->Height() / 2.f;
-    }
     mUi = new InputNodeUi(&shared);
     mUi->setColor(IColor(255, 100, 150, 100));
     pGrahics->AttachControl(mUi);

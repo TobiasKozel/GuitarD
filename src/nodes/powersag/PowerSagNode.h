@@ -65,7 +65,7 @@ public:
 
   void ProcessBlock(int nFrames) override {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
-    sample** buffer = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
+    sample** buffer = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
     sample* in1 = buffer[0];
     sample* in2 = buffer[1];
     sample* out1 = mBuffersOut[0][0];

@@ -343,7 +343,7 @@ public:
           MessageBus::SocketRedirectConnection,
           SocketConnectRequest {
             nextSock,
-            prevSock->mConnectedTo
+            prevSock->mConnectedTo[0]
           }
         );
       }

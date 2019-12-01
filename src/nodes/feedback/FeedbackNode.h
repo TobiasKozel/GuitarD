@@ -69,7 +69,7 @@ public:
     }
 
     if (inputsReady()) {
-      sample** buffer = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
+      sample** buffer = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
       mPrevL.Add(buffer[0], nFrames);
       mPrevR.Add(buffer[1], nFrames);
     }

@@ -71,7 +71,7 @@ public:
         }
         for (int i = 0; i < curNode->shared.inputCount; i++) {
           NodeSocket* curSock = curNode->shared.socketsIn[i];
-          NodeSocket* tarSock = curSock->mConnectedTo;
+          NodeSocket* tarSock = curSock->mConnectedTo[0];
           if (tarSock != nullptr) {
             float x1 = tarSock->mX + socketRadius;
             float x2 = curSock->mX + socketRadius;
@@ -108,12 +108,13 @@ public:
         }
         Node* targetNode = target->mParentNode;
         for (int i = 0; i < targetNode->shared.inputCount; i++) {
-          if (targetNode->shared.socketsIn[i]->mConnectedTo != nullptr &&
-              targetNode->shared.socketsIn[i]->mConnectedTo->mParentNode == node) {
+          if (targetNode->shared.socketsIn[i]->mConnectedTo[0] != nullptr &&
+              targetNode->shared.socketsIn[i]->mConnectedTo[0]->mParentNode == node) {
             return;
           }
         }
         MessageBus::fireEvent<NodeSpliceInPair>(this->mBus, MessageBus::NodeSpliceIn, NodeSpliceInPair{ node, target });
+        // targetNode->moveAlong(300);
       }
     });
 
@@ -131,10 +132,10 @@ public:
       }
       else {
         // Don't do anything if the socket is already connected to the output node
-        if (outSocket->mConnectedTo == socket) { return; }
+        if (outSocket->mConnectedTo[0] == socket) { return; }
         // Save the currently connected socket and connect it to the one provided
         if (this->mPreviewSocket == nullptr) {
-          this->mPreviewSocketPrev = outSocket->mConnectedTo;
+          this->mPreviewSocketPrev = outSocket->mConnectedTo[0];
         }
         this->mPreviewSocket = socket;
         outSocket->connect(socket);
@@ -201,8 +202,8 @@ public:
       }
       for (int i = 0; i < curNode->shared.inputCount; i++) {
         NodeSocket* curSock = curNode->shared.socketsIn[i];
-        if (curSock->mConnectedTo != nullptr) {
-          NodeSocket* tarSock = curSock->mConnectedTo;
+        if (curSock->mConnectedTo[0] != nullptr) {
+          NodeSocket* tarSock = curSock->mConnectedTo[0];
           if (tarSock == mPreviewSocket && curSock == mOutNode->shared.socketsIn[0]) {
             // Draw the temporary bypass
             g.DrawDottedLine(

@@ -37,7 +37,7 @@ public:
 
   void ProcessBlock(const int nFrames) override {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
-    sample** buffer = shared.socketsIn[0]->mConnectedTo->mParentBuffer;
+    sample** buffer = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
     double avg = 0;
     for (int c = 0; c < mChannelCount; c++) {
       for (int i = 0; i < nFrames; i++) {

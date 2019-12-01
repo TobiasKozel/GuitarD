@@ -12,7 +12,6 @@ class NodeSocketUi : public IControl {
   MessageBus::Subscription<SocketConnectRequest> mOnConnectionEvent;
   MessageBus::Subscription<SocketConnectRequest> mOnConnectionRedirectEvent;
   MessageBus::Subscription<Node*> mOnDisconnectAllEvent;
-  MessageBus::Subscription<NodeSocket*> mOnDisconnectEvent;
   IMouseMod mMouseDown;
 protected:
   NodeShared* mShared = nullptr;
@@ -26,7 +25,7 @@ protected:
   int mIndex = -1;
   bool mOut = false;
 public:
-  NodeSocketUi(NodeShared* shared,  NodeSocket* socket, const float x, const float y) :
+  NodeSocketUi(NodeShared* shared,  NodeSocket* socket) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
   {
     mShared = shared;
@@ -35,15 +34,12 @@ public:
     mSocket = socket;
     mDiameter = Theme::Sockets::DIAMETER;
     mRadius = Theme::Sockets::DIAMETER * 0.5f;
-    mRECT.L = socket->mX + x;
-    mRECT.T = socket->mY + y;
+    mRECT.L = socket->mX;
+    mRECT.T = socket->mY;
     mRECT.R = mRECT.L + mDiameter;
     mRECT.B = mRECT.T + mDiameter;
     SetTargetAndDrawRECTs(mRECT);
     mBlend = EBlend::Clobber;
-
-    mSocket->mX = mTargetRECT.L;
-    mSocket->mY = mTargetRECT.T;
 
     mOnConnectionEvent.subscribe(mBus, MessageBus::SocketConnect, [&](const SocketConnectRequest req) {
       if (req.to == this->mSocket) {
@@ -52,7 +48,7 @@ public:
     });
 
     mOnConnectionRedirectEvent.subscribe(mBus, MessageBus::SocketRedirectConnection, [&](const SocketConnectRequest req) {
-      if (req.from == this->mSocket->mConnectedTo) {
+      if (req.from == this->mSocket->mConnectedTo[0]) {
         this->mSocket->connect(req.to);
       }
     });
@@ -63,11 +59,10 @@ public:
       }
     });
 
-    mOnDisconnectEvent.subscribe(mBus, MessageBus::DisconnectSocket, [&](NodeSocket * socket) {
-      if (this->mSocket->mConnectedTo == socket && this->mSocket->mIsInput) {
-        this->mSocket->disconnect();
-      }
-    });
+  }
+
+  ~NodeSocketUi() {
+    
   }
 
   void Draw(IGraphics& g) override {
