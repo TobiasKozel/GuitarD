@@ -42,23 +42,22 @@ struct UI {
   }
 
   void addVerticalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT pDefault, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) const {
-    shared->parameters[shared->parameterCount] = new ParameterCoupling(name, prop, pDefault, min, max, stepSize);
-    shared->parameterCount++;
+    addHorizontalSlider(name, prop, pDefault, min, max, stepSize);
   }
 
   void addCheckButton(const char* name, FAUSTFLOAT* prop) const {
-    shared->parameters[shared->parameterCount] = new ParameterCoupling(name, prop, 0, 0, 1, 1);
-    shared->parameterCount++;
+    addHorizontalSlider(name, prop, 0, 0, 1, 1);
   }
 
   void addVerticalBargraph(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT min, FAUSTFLOAT max) const {
+    // They never get initialized in the Faust code
+    *prop = 0;
     shared->meters[shared->meterCount] = new MeterCoupling{ prop, name, min, max };
     shared->meterCount++;
   };
 
   void addHorizontalBargraph(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT min, FAUSTFLOAT max) const {
-    shared->meters[shared->meterCount] = new MeterCoupling{ prop, name, min, max };
-    shared->meterCount++;
+    addHorizontalBargraph(name, prop, min, max);
   };
 };
 

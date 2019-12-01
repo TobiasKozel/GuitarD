@@ -24,16 +24,16 @@ public:
     Node::setup(pBus, pSamplerate, pMaxBuffer, pChannels, pInputs, pOutputs);
     addByPassParam();
     ParameterCoupling* p = new ParameterCoupling(
-      "Gain", &gain, 0.0, -130.0, 60.0, 0.1
+      "Gain", &gain, -40, -130.0, 40.0, 0.1
     );
     p->type = ParameterCoupling::Gain;
     shared.parameters[shared.parameterCount] = p;
     shared.parameterCount++;
 
-    shared.socketsIn[0]->mX = 180;
-    shared.socketsIn[0]->mY = 50;
-    shared.socketsOut[0]->mX = 30;
-    shared.socketsOut[0]->mY = 50;
+    shared.socketsIn[0]->mX += shared.width - 30;
+    //shared.socketsIn[0]->mY = 50;
+    shared.socketsOut[0]->mX -= shared.width - 30;
+    //shared.socketsOut[0]->mY = 50;
     
   }
 
