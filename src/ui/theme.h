@@ -43,7 +43,7 @@ namespace Theme {
     const IColor FILTER(255, 50, 150, 70);
     const IColor DISTORTION(255, 200, 80, 60);
     const IColor DYNAMICS(255, 120, 50, 130);
-    const IColor SPATIAL(255, 60, 50, 160);
+    const IColor SPATIAL(255, 160, 50, 160);
   }
 
   namespace Cables {

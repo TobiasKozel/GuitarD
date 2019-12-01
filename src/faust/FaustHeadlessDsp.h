@@ -93,13 +93,17 @@ public:
       mType = faustUi.name;
     }
 
+    const int perColumn = 2;
+    const int columns = ceil(shared.parameterCount / static_cast<float>(perColumn));
 
     for (int i = 0, pos = 0; i < shared.parameterCount; i++) {
+      const int column = pos / perColumn;
       ParameterCoupling* p = shared.parameters[i];
-      if (strncmp(p->name, "Stereo", 32) == 0) {
-        //continue;
+      if (strncmp(p->name, "Bypass", 32) == 0) {
+        continue;
       }
-      p->y = p->h * pos - 80;
+      p->x = column * 60 + 50 - shared.width * 0.5;
+      p->y = 60 * (pos % perColumn) - 40;
       pos++;
     }
   }

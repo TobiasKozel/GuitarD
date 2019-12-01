@@ -12,12 +12,12 @@ class AutoGainNode final : public Node {
 public:
   AutoGainNode(const std::string pType) {
     mType = pType;
-    shared.width = 300;
-    shared.height = 300;
+    shared.width = 100;
+    shared.height = 100;
     addByPassParam();
 
     ParameterCoupling* p = new ParameterCoupling(
-      "Gain", &gain, 0.0, -130.0, 60.0, 0.1
+      "Gain", &gain, 0.0, -90.0, 40.0, 0.1
     );
     p->type = ParameterCoupling::Gain;
 
@@ -71,5 +71,10 @@ public:
       }
     }
     mIsProcessed = true;
+  }
+
+  void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+    Node::setupUi(pGrahics);
+    mUi->setColor(Theme::Categories::DYNAMICS);
   }
 };

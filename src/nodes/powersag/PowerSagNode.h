@@ -195,5 +195,10 @@ public:
 
     mIsProcessed = true;
   }
+
+  void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+    Node::setupUi(pGrahics);
+    mUi->setColor(Theme::Categories::DISTORTION);
+  }
 };
 

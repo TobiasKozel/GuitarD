@@ -115,7 +115,7 @@ public:
 
   void testadd() {
     return;
-    Node* test = NodeList::createNode("EnvelopeNode");
+    Node* test = NodeList::createNode("ParametricEqNode");
     addNode(test, mInputNode, 0, 500, 300);
     // mOutputNode->connectInput(test->shared.socketsOut[0]);
   }
