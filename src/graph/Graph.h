@@ -337,7 +337,7 @@ public:
     if (reconnect && node->shared.inputCount > 0 && node->shared.outputCount > 0) {
       NodeSocket* prevSock = node->shared.socketsIn[0];
       NodeSocket* nextSock = node->shared.socketsOut[0];
-      if (prevSock != nullptr && prevSock->mConnectedTo && nextSock != nullptr) {
+      if (prevSock != nullptr && prevSock->mConnectedTo[0] != nullptr && nextSock != nullptr) {
         MessageBus::fireEvent<SocketConnectRequest>(
           mBus,
           MessageBus::SocketRedirectConnection,

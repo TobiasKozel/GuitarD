@@ -58,7 +58,7 @@ struct NodeSocketIn : public NodeSocket {
   void connect(NodeSocket* to, bool other) override {
     if (other) {
       disconnect(to, false);
-      to->connect(to, false);
+      to->connect(this, false);
     }
     mConnected = true;
     mConnectedTo[0] = to;
