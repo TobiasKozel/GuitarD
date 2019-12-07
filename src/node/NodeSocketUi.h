@@ -48,14 +48,14 @@ public:
     });
 
     mOnConnectionRedirectEvent.subscribe(mBus, MessageBus::SocketRedirectConnection, [&](const SocketConnectRequest req) {
-      if (req.from == this->mSocket->mConnectedTo[0]) {
+      if (req.from == this->mSocket) {
         this->mSocket->connect(req.to);
       }
     });
 
     mOnDisconnectAllEvent.subscribe(mBus, MessageBus::NodeDisconnectAll, [&](Node* node) {
       if (this->mSocket->mParentNode == node) {
-        this->mSocket->disconnect();
+        this->mSocket->disconnectAll();
       }
     });
 
@@ -139,7 +139,7 @@ public:
    * Disconnect the input on double click
    */
   void OnMouseDblClick(float x, float y, const IMouseMod& mod) override {
-    mSocket->disconnect();
+    mSocket->disconnectAll();
     mGraphics->SetAllControlsDirty();
   }
 };

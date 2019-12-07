@@ -121,10 +121,12 @@ public:
     }
 
     for (int i = 0; i < shared.inputCount; i++) {
+      shared.socketsIn[i]->disconnectAll();
       delete shared.socketsIn[i];
     }
 
     for (int i = 0; i < shared.outputCount; i++) {
+      shared.socketsOut[i]->disconnectAll();
       delete shared.socketsOut[i];
     }
   }

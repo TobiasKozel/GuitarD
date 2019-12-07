@@ -221,7 +221,7 @@ public:
     mGraphics->SetKeyHandlerFunc([&](const IKeyPress & key, const bool isUp) {
       // Gets the keystrokes in the standalone app
       // TODOG figure out why this doesn't work in vst3
-      if (key.C && key.VK == kVK_Z && !isUp) {
+      if (key.C && (key.VK == kVK_Z) && !isUp) {
         MessageBus::fireEvent<bool>(this->mBus, MessageBus::PopUndoState, false);
         return true;
       }
@@ -333,17 +333,20 @@ public:
    */
   void removeNode(Node* node, const bool reconnect = false) {
     if (node == mInputNode || node == mOutputNode) { return; }
+    /**
+     * Since the cleanup will sever all connections to a node, it will have to be done before the
+     * connection is bridged, or else the bridged connection will be severed again
+     */
     WDL_MutexLock lock(&mIsProcessing);
     if (reconnect && node->shared.inputCount > 0 && node->shared.outputCount > 0) {
       NodeSocket* prevSock = node->shared.socketsIn[0];
       NodeSocket* nextSock = node->shared.socketsOut[0];
-      if (prevSock != nullptr && prevSock->mConnectedTo[0] != nullptr && nextSock != nullptr) {
-        MessageBus::fireEvent<SocketConnectRequest>(
-          mBus,
+      if (prevSock != nullptr && prevSock->mConnectedTo[0] != nullptr && nextSock != nullptr && nextSock->mConnectedTo[0] != nullptr) {
+        MessageBus::fireEvent<SocketConnectRequest>( mBus,
           MessageBus::SocketRedirectConnection,
           SocketConnectRequest {
-            nextSock,
-            prevSock->mConnectedTo[0]
+            prevSock->mConnectedTo[0],
+            nextSock->mConnectedTo[0]
           }
         );
       }
