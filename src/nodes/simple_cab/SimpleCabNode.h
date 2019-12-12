@@ -237,6 +237,9 @@ public:
   void deserializeAdditional(nlohmann::json& serialized) override {
     try {
       IRBundle load;
+      if (!serialized.contains("irName")) {
+        return;
+      }
       const string name = serialized.at("irName");
       load.name.Set(name.c_str());
       const bool customIR = serialized.at("customIR");
@@ -255,7 +258,9 @@ public:
       }
       resampleAndLoadIR(load);
     }
-    catch (...) {}
+    catch (...) {
+      WDBGMSG("Failed to load Cab node data!\n");
+    }
   }
 
   void createBuffers() override {

@@ -95,7 +95,7 @@ namespace Serializer {
     }
 
     int expectedIndex = 0;
-
+    int paramBack = MAX_DAW_PARAMS - 1;
     // create all the nodes and setup the parameters in the first pass
     for (auto sNode : serialized["nodes"]) {
       const std::string className = sNode["type"];
@@ -110,11 +110,24 @@ namespace Serializer {
       nodes.Add(node);
       for (auto param : sNode["parameters"]) {
         string name = param["name"];
+        int found = 0;
         for (int i = 0; i < node->shared.parameterCount; i++) {
           ParameterCoupling* para = node->shared.parameters[i];
           if (para->name == name) {
+            found++;
             para->parameterIdx = param["idx"];
             *(para->value) = param["value"];
+          }
+        }
+        for (int i = 0; i < node->shared.parameterCount; i++) {
+          ParameterCoupling* para = node->shared.parameters[i];
+          if (para->parameterIdx == -1) {
+            /**
+             * Rare case that happens when a node has more parameters in the current version of the plugin
+             * In order to not steal a parameter from the following nodes we need to assign it from the back
+             */
+            para->parameterIdx = paramBack;
+            paramBack--;
           }
         }
       }
@@ -152,13 +165,12 @@ namespace Serializer {
         for (int i = 0; i < node->shared.parameterCount; i++) {
           ParameterCoupling* para = node->shared.parameters[i];
           if (para->name == name) {
-            int automationIndex = -1;
-            try {
-              automationIndex = param.at("automation");
-            }
-            catch (...) {}
-            if (automationIndex != -1) {
-              node->attachAutomation(nodes.Get(automationIndex), i);
+            // TODOG no need to check on up to date presets
+            if (param.contains("automation")) {
+              const int automationIndex = param.at("automation");
+              if (automationIndex != -1) {
+                node->attachAutomation(nodes.Get(automationIndex), i);
+              }
             }
           }
         }

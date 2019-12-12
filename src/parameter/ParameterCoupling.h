@@ -27,7 +27,7 @@ struct ParameterCoupling {
   // Param object for outside daw automation
   iplug::IParam* parameter = nullptr;
 
-  // Index of the Param
+  // Index of the IParam -1 means unassigned
   int parameterIdx = -1;
 
   // pointer to the value used in the dsp code

@@ -352,8 +352,8 @@ public:
       }
     }
     node->cleanupUi(mGraphics);
-    node->cleanUp();
     mParamManager.releaseNode(node);
+    node->cleanUp();
     mNodes.DeletePtr(node, true);
     mNodes.Compact();
   }
