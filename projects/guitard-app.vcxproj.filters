@@ -459,6 +459,9 @@
     <ClInclude Include="..\src\nodes\powersag\PowerSagNode.h">
       <Filter>src\nodes\distortion</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\reverse_delay\ReverseDelayNode.h">
+      <Filter>src\nodes\reverb</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

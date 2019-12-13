@@ -18,6 +18,7 @@
 #include "src/nodes/envelope/EnvelopeNode.h"
 #include "src/nodes/autogain/AutoGainNode.h"
 #include "src/nodes/powersag/PowerSagNode.h"
+#include "src/nodes/reverse_delay/ReverseDelayNode.h"
 
 
 namespace NodeList {
@@ -114,6 +115,14 @@ namespace NodeList {
       []() { return new SimpleReverbNode("SimpleReverbNode"); },
       "SimpleReverbNode",
       "Stereo Reverb",
+      "asd",
+      "Delays/Reverbs"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new ReverseDelayNode("ReverseDelayNode"); },
+      "ReverseDelayNode",
+      "Reverse Reverb",
       "asd",
       "Delays/Reverbs"
     });

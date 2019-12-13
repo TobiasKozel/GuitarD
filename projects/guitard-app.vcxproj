@@ -356,6 +356,7 @@
     <ClInclude Include="..\src\nodes\phasetool\PhaseToolNode.h" />
     <ClInclude Include="..\src\nodes\powersag\PowerSagNode.h" />
     <ClInclude Include="..\src\nodes\RegisterNodes.h" />
+    <ClInclude Include="..\src\nodes\reverse_delay\ReverseDelayNode.h" />
     <ClInclude Include="..\src\nodes\simple_cab\InternalIRs.h" />
     <ClInclude Include="..\src\nodes\simple_cab\SimpleCabNode.h" />
     <ClInclude Include="..\src\nodes\simple_compressor\SimpleComressorNode.h" />
