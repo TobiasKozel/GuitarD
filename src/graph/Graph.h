@@ -71,7 +71,7 @@ public:
 
     mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo info) {
       MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
-      this->addNode(info.constructor(), nullptr, 0, 300, 300);
+      this->addNode(info.constructor(), nullptr,300, 300);
     });
 
     // This might not even make sense
@@ -221,8 +221,12 @@ public:
     mGraphics->SetKeyHandlerFunc([&](const IKeyPress & key, const bool isUp) {
       // Gets the keystrokes in the standalone app
       // TODOG figure out why this doesn't work in vst3
-      if (key.C && (key.VK == kVK_Z) && !isUp) {
+      if (key.S && (key.VK == kVK_Z) && !isUp) {
         MessageBus::fireEvent<bool>(this->mBus, MessageBus::PopUndoState, false);
+        return true;
+      }
+      if ((key.VK == kVK_F) && !isUp) {
+        arrangeNodes();
         return true;
       }
       return false;
@@ -307,7 +311,7 @@ public:
   /**
    * Used to add nodes and pause the audio thread
    */
-  void addNode(Node* node, Node* pInput = nullptr, const int index = 0, const float x = 0, const float y = 0) {
+  void addNode(Node* node, Node* pInput = nullptr, const float x = 0, const float y = 0, const int outputIndex = 0, const int inputIndex = 0) {
     WDL_MutexLock lock(&mIsProcessing);
     node->shared.X = x;
     node->shared.Y = y;
@@ -315,7 +319,7 @@ public:
     mParamManager.claimNode(node);
     node->setupUi(mGraphics);
     if (pInput != nullptr) {
-      node->connectInput(pInput->shared.socketsOut[index]);
+      node->connectInput(pInput->shared.socketsOut[outputIndex], inputIndex);
     }
     mNodes.Add(node);
     sortRenderStack();
@@ -376,7 +380,7 @@ public:
 
   void deserialize(nlohmann::json& json) {
     removeAllNodes();
-    if (json.find("width") != json.end()) {
+    if (json.contains("width")) {
       mWindowScale = json["scale"];
       mWindowWidth = json["width"];
       mWindowHeight = json["height"];
@@ -407,6 +411,90 @@ private:
       mGraphics->RemoveControl(mNodeGallery);
       mGraphics->AttachControl(mNodeGallery);
     }
+  }
+
+  void arrangeNodes() {
+    resetBranchPos(mInputNode);
+    arrangeBranch(mInputNode, Coord2D{ mInputNode->shared.Y, mInputNode->shared.X });
+  }
+
+  static void resetBranchPos(Node* node) {
+    if (node == nullptr || node->shared.type == "FeedbackNode") { return; }
+    node->mUi->setTranslation(0, 0);
+    NodeSocket* socket = nullptr;
+    for (int i = 0; i < node->shared.outputCount; i++) {
+      socket = node->shared.socketsOut[i];
+      for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
+        if (socket->mConnectedTo[j] != nullptr) {
+          if (socket->mConnectedTo[j]->mIndex == 0) {
+            resetBranchPos(socket->mConnectedTo[j]->mParentNode);
+          }
+        }
+      }
+    }
+  }
+
+  Coord2D arrangeBranch(Node* node, Coord2D pos) {
+    if (node == nullptr || node->shared.type == "FeedbackNode") {
+      return pos;
+    }
+    const float halfWidth = node->shared.width * 0.5;
+    const float halfHeight = node->shared.height * 0.5;
+    const float padding = 50;
+    pos.x += halfWidth + padding;
+    node->mUi->setTranslation(pos.x, pos.y);
+    pos.x += halfWidth + padding;
+    float nextX = 0;
+    NodeSocket* socket = nullptr;
+    for (int i = 0; i < node->shared.outputCount; i++) {
+      socket = node->shared.socketsOut[i];
+      for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
+        if (socket->mConnectedTo[j] != nullptr) {
+          if (socket->mConnectedTo[j]->mIndex == 0) {
+            Coord2D branch = arrangeBranch(socket->mConnectedTo[j]->mParentNode, pos);
+            pos.y += node->shared.height + padding;
+            if (pos.y < branch.y) {
+              pos.y = branch.y;
+            }
+            if (branch.x > nextX) {
+              nextX = branch.x;
+            }
+          }
+        }
+      }
+    }
+    return Coord2D { nextX, pos.y };
+  }
+
+  /**
+   * Test Setups
+   */
+
+  void formatTest() {
+    /**
+     *                            ------------
+     *                --> test2 --|          |--> test5 --
+     *  in -> test1 --|           --> test4 --           |--> test7 --> out
+     *                |                                  |
+     *                --> test3 ----> test6 --------------
+     */
+    Node* test1 = NodeList::createNode("StereoToolNode");
+    addNode(test1, mInputNode, 200, 0);
+    Node* test2 = NodeList::createNode("StereoToolNode");
+    addNode(test2, test1, 400, -100);
+    Node* test3 = NodeList::createNode("StereoToolNode");
+    addNode(test3, test1, 400, +100);
+    Node* test4 = NodeList::createNode("StereoToolNode");
+    addNode(test4, test2, 600, 0);
+    Node* test5 = NodeList::createNode("CombineNode");
+    addNode(test5, test2, 800, +100);
+    test5->connectInput(test4->shared.socketsOut[0], 1);
+    Node* test6 = NodeList::createNode("StereoToolNode");
+    addNode(test6, test3, 400, +100);
+    Node* test7 = NodeList::createNode("CombineNode");
+    addNode(test7, test5, 1000, 0);
+    test7->connectInput(test6->shared.socketsOut[0], 1);
+    mOutputNode->connectInput(test7->shared.socketsOut[0]);
   }
 
 };
