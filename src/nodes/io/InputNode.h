@@ -36,11 +36,25 @@ public:
 
   void ProcessBlock(int) {}
 
+  void setInputChannels(int pInputChannels = 2) {
+    if (pInputChannels != mInputChannels) {
+      mInputChannels = pInputChannels;
+    }
+  }
+
   void CopyIn(iplug::sample** in, int nFrames) {
     mLastBlockSize = nFrames;
-    for (int c = 0; c < mChannelCount; c++) {
+    if (mInputChannels == 1) {
       for (int i = 0; i < nFrames; i++) {
-        mBuffersOut[0][c][i] = in[c][i];
+        mBuffersOut[0][0][i] = in[0][i];
+        mBuffersOut[0][1][i] = in[0][i];
+      }
+    }
+    else {
+      for (int c = 0; c < mChannelCount; c++) {
+        for (int i = 0; i < nFrames; i++) {
+          mBuffersOut[0][c][i] = in[c][i];
+        }
       }
     }
     mIsProcessed = true;
@@ -54,4 +68,6 @@ public:
     mUi->setUp();
     mUiReady = true;
   }
+private:
+  int mInputChannels = 2;
 };

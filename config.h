@@ -15,7 +15,7 @@
 
 #define SHARED_RESOURCES_SUBPATH "GuitarD"
 
-#define PLUG_CHANNEL_IO "2-2"
+#define PLUG_CHANNEL_IO "2-2 1-2"
 
 #define PLUG_LATENCY 0
 #define PLUG_TYPE 0

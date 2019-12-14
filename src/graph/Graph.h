@@ -32,6 +32,11 @@ class Graph {
   InputNode* mInputNode;
   OutputNode* mOutputNode;
 
+  /**
+   * This is the channel count to be used internally
+   * All nodes will allocate buffers to according to this
+   * Using anything besides stereo will cause problems with the faust DSP code
+   */
   int mChannelCount = 2;
   int mSampleRate = 44101;
 
@@ -125,16 +130,16 @@ public:
     // TODOG get rid of all the things
   }
 
-  void OnReset(const int pSampleRate, const int pChannels = 2) {
-    if (pSampleRate > 0 && pChannels > 0) {
+  void OnReset(const int pSampleRate, const int pOutputChannels = 2, const int pInputChannels = 2) {
+    if (pSampleRate > 0 && pOutputChannels > 0 && pInputChannels > 0) {
       WDL_MutexLock lock(&mIsProcessing);
       mSampleRate = pSampleRate;
-      resizeSliceBuffer(pChannels);
-      mChannelCount = pChannels;
-      mInputNode->OnReset(pSampleRate, pChannels);
-      mOutputNode->OnReset(pSampleRate, pChannels);
+      resizeSliceBuffer(pOutputChannels);
+      mChannelCount = pOutputChannels;
+      mInputNode->OnReset(pSampleRate, pOutputChannels);
+      mOutputNode->OnReset(pSampleRate, pOutputChannels);
       for (int i = 0; i < mNodes.GetSize(); i++) {
-        mNodes.Get(i)->OnReset(pSampleRate, pChannels);
+        mNodes.Get(i)->OnReset(pSampleRate, pOutputChannels);
       }
     }
   }
