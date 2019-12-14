@@ -215,6 +215,7 @@ public:
 
   /**
    * The graph needs to know about the graphics context to add and remove the controls for the nodes
+   * It also handles keystrokes globally
    */
   void setupUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
     if (pGraphics != nullptr && pGraphics != mGraphics) {
@@ -233,6 +234,18 @@ public:
       }
       if ((key.VK == kVK_F) && !isUp) {
         arrangeNodes();
+        return true;
+      }
+      if ((key.VK == kVK_C) && !isUp) {
+        centerGraph();
+        return true;
+      }
+      if ((key.VK == kVK_Q) && !isUp) {
+        centerNode(mInputNode);
+        return true;
+      }
+      if ((key.VK == kVK_E) && !isUp) {
+        centerNode(mOutputNode);
         return true;
       }
       return false;
@@ -301,6 +314,36 @@ public:
     mOutputNode->mUi->translate(dX, dY);
     mInputNode->mUi->translate(dX, dY);
     // WDBGMSG("x %f y %f s %f\n", x, y, scale);
+  }
+
+  /** Centers the viewport around a specific node */
+  void centerNode(Node* node) {
+    IRECT center = mGraphics->GetBounds().GetScaledAboutCentre(0);
+    center.L -= node->shared.X;
+    center.T -= node->shared.Y;
+    onViewPortChange(center.L, center.T);
+  }
+
+  /**
+   * Averages all node positions and moves the viewport to that point
+   * Bound to the C key
+   */
+  void centerGraph() {
+    Coord2D avg{ 0, 0 };
+    const int count = mNodes.GetSize();
+    for (int i = 0; i < count; i++) {
+      const Node* n = mNodes.Get(i);
+      avg.x += n->shared.X;
+      avg.y += n->shared.Y;
+    }
+    float countf = count + 2;
+    avg.x += mInputNode->shared.X + mOutputNode->shared.X;
+    avg.y += mInputNode->shared.Y + mOutputNode->shared.Y;
+    // We want that point to be in the center of the screen
+    IRECT center = mGraphics->GetBounds().GetScaledAboutCentre(0);
+    avg.x = center.L - avg.x / countf;
+    avg.y = center.T - avg.y / countf;
+    onViewPortChange(avg.x, avg.y);
   }
 
   void layoutUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
@@ -419,11 +462,18 @@ private:
     }
   }
 
+  /**
+   * Will try to tidy up the node graph, bound to the F key
+   */
   void arrangeNodes() {
     resetBranchPos(mInputNode);
     arrangeBranch(mInputNode, Coord2D{ mInputNode->shared.Y, mInputNode->shared.X });
+    centerGraph();
   }
 
+  /**
+   * Recursively resets all the positions of nodes to (0, 0)
+   */
   static void resetBranchPos(Node* node) {
     if (node == nullptr || node->shared.type == "FeedbackNode") { return; }
     node->mUi->setTranslation(0, 0);
@@ -440,6 +490,9 @@ private:
     }
   }
 
+  /**
+   * Recursively sorts nodes
+   */
   Coord2D arrangeBranch(Node* node, Coord2D pos) {
     if (node == nullptr || node->shared.type == "FeedbackNode") {
       return pos;
@@ -471,6 +524,7 @@ private:
     }
     return Coord2D { nextX, pos.y };
   }
+
 
   /**
    * Test Setups
