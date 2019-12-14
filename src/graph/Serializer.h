@@ -84,8 +84,8 @@ namespace Serializer {
 
     if (input->mUi != nullptr) {
       input->mUi->setTranslation(
-        input->shared.X = serialized["input"]["position"][0],
-        input->shared.Y = serialized["input"]["position"][1]
+        serialized["input"]["position"][0],
+        serialized["input"]["position"][1]
       );
     }
     else {

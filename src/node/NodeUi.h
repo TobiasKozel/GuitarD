@@ -345,7 +345,7 @@ public:
     mNoScale  = false;
   }
 
-  void setTranslation(float x, float y) {
+  void setTranslation(const float x, const float y) {
     const float dX = x - shared->X;
     const float dY = y - shared->Y;
     translate(dX, dY);
@@ -355,7 +355,7 @@ public:
 
 
 private:
-  static void moveControl(IControl* control, float x, float y) {
+  static void moveControl(IControl* control, const float x, const float y) {
     IRECT rect = control->GetTargetRECT();
     rect.T += y;
     rect.L += x;
