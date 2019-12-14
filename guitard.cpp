@@ -44,9 +44,10 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAX_DAW_PAR
 
 void GuitarD::OnReset() {
   if (graph != nullptr) {
-    int sr = static_cast<int>(GetSampleRate());
-    int ch = MaxNChannels(ERoute::kOutput);
-    graph->OnReset(sr, ch);
+    const int sr = static_cast<int>(GetSampleRate());
+    const int outputChannels = MaxNChannels(ERoute::kOutput);
+    const int inputChannels = MaxNChannels(ERoute::kInput);
+    graph->OnReset(sr, outputChannels, inputChannels);
   }
 }
 

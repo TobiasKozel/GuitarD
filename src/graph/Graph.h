@@ -136,6 +136,7 @@ public:
       mSampleRate = pSampleRate;
       resizeSliceBuffer(pOutputChannels);
       mChannelCount = pOutputChannels;
+      mInputNode->setInputChannels(pInputChannels);
       mInputNode->OnReset(pSampleRate, pOutputChannels);
       mOutputNode->OnReset(pSampleRate, pOutputChannels);
       for (int i = 0; i < mNodes.GetSize(); i++) {
