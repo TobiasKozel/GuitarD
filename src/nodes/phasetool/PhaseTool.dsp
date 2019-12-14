@@ -14,5 +14,9 @@ phaseOffset = (phaseOffsetFine + phaseOffsetRough, maxdelaySamples : min, 0 : ma
 phaseLOffset = scaleIn((phaseLROffset * -1, 0) : max) * samplerate;
 phaseROffset = scaleIn((phaseLROffset, 0) : max) * samplerate;
 scale(l, r) = l * scaleL, r * scaleR;
-phase(l, r) = de.fdelay(phaseOffset + phaseLOffset, maxdelaySamples * 2, l), de.fdelay(phaseOffset + phaseROffset, maxdelaySamples * 2, r);
+totalOffsetL = phaseOffset + phaseLOffset;
+totalOffsetR = phaseOffset + phaseROffset;
+phase(l, r) =
+(de.fdelay(totalOffsetL, maxdelaySamples * 2, l), l : select2(totalOffsetL < 0.3)),
+(de.fdelay(totalOffsetR, maxdelaySamples * 2, r), r : select2(totalOffsetR < 0.3));
 process = scale : phase;
