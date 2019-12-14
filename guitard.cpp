@@ -2,16 +2,21 @@
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
 #include "src/nodes/RegisterNodes.h"
+#include "src/misc/DefaultPreset.h"
 
 
 GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAX_DAW_PARAMS, kNumPrograms)) {
+  
   NodeList::registerNodes();
   graph = new Graph(&mBus);
-
   // Gather a good amount of parameters to expose to the daw based on what nodes are on the canvas
   for (int i = 0; i < MAX_DAW_PARAMS; i++) {
     graph->mParamManager.addParameter(GetParam(i));
   }
+
+  IByteChunk factoryPreset;
+  factoryPreset.PutBytes(DEFAULT_PRESET_STRING, strlen(DEFAULT_PRESET_STRING));
+  MakePresetFromChunk("Factory Preset", factoryPreset);
 
   mParamChanged.subscribe(&mBus, MessageBus::ParametersChanged, [&](bool) {
     this->InformHostOfParameterDetailsChange();

@@ -1,6 +1,6 @@
 #pragma once
 
-const int kNumPrograms = 1;
+const int kNumPrograms = 2;
 
 #include "thirdparty/json.hpp"
 #include "IPlug_include_in_plug_hdr.h"
