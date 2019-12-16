@@ -37,8 +37,11 @@ class Graph {
    * All nodes will allocate buffers to according to this
    * Using anything besides stereo will cause problems with the faust DSP code
    */
-  int mChannelCount = 2;
-  int mSampleRate = 44101;
+  int mChannelCount = 0;
+
+  int mInPutChannelCount = 0;
+
+  int mSampleRate = 0;
 
   /** Control elements */
   GraphBackground* mBackground = nullptr;
@@ -131,16 +134,27 @@ public:
   }
 
   void OnReset(const int pSampleRate, const int pOutputChannels = 2, const int pInputChannels = 2) {
-    if (pSampleRate > 0 && pOutputChannels > 0 && pInputChannels > 0) {
+    if (pSampleRate != mSampleRate || pOutputChannels != mChannelCount || pInputChannels != mInPutChannelCount) {
       WDL_MutexLock lock(&mIsProcessing);
       mSampleRate = pSampleRate;
       resizeSliceBuffer(pOutputChannels);
       mChannelCount = pOutputChannels;
+      mInPutChannelCount = pInputChannels;
       mInputNode->setInputChannels(pInputChannels);
       mInputNode->OnReset(pSampleRate, pOutputChannels);
       mOutputNode->OnReset(pSampleRate, pOutputChannels);
       for (int i = 0; i < mNodes.GetSize(); i++) {
         mNodes.Get(i)->OnReset(pSampleRate, pOutputChannels);
+      }
+    }
+    else {
+      /**
+       * If nothing has changed we'll assume a transport
+       */
+      mInputNode->OnTransport();
+      mOutputNode->OnTransport();
+      for (int i = 0; i < mNodes.GetSize(); i++) {
+        mNodes.Get(i)->OnTransport();
       }
     }
   }

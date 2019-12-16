@@ -16,7 +16,8 @@ class GuitarD : public Plugin
   MessageBus::Subscription<bool> mParamChanged;
   // Each instance of a plugin has to have its own MessageBus
   MessageBus::Bus mBus;
-  bool mActive = false;
+  /** Is true when the plugin is ready to process samples (Knows the samplerate and in out channel count) */
+  bool mReady = false;
 public:
   GuitarD(const InstanceInfo& info);
   Graph* graph;

@@ -241,7 +241,6 @@ public:
 
   /**
    * Called on DAW transport e.g. to clear dsp buffers and cut reverbs
-   * TODOG doesn't seem to work
    */
   virtual void OnTransport() { }
 
@@ -249,17 +248,11 @@ public:
    * Called from the graph to either signal a change in samplerate/channel count or transport
    */
   virtual void OnReset(const int pSampleRate, const int pChannels) {
-    bool isTransport = true;
     if (pSampleRate != mSampleRate) {
       OnSamplerateChanged(pSampleRate);
-      isTransport = false;
     }
     if (pChannels != mChannelCount) {
       OnChannelsChanged(pChannels);
-      isTransport = false;
-    }
-    if (isTransport) {
-      OnTransport();
     }
   }
 

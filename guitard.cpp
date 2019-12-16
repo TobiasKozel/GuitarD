@@ -50,18 +50,19 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAX_DAW_PAR
 void GuitarD::OnReset() {
   if (graph != nullptr) {
     const int sr = static_cast<int>(GetSampleRate());
-    const int outputChannels = NChannelsConnected(ERoute::kOutput);
-    const int inputChannels = NChannelsConnected(ERoute::kInput);
-    graph->OnReset(sr, outputChannels, inputChannels);
+    const int outputChannels = NOutChansConnected();
+    const int inputChannels = NInChansConnected();
+    if (sr > 0 && outputChannels > 0 && inputChannels > 0) {
+      // DAWs seem to
+      graph->OnReset(sr, outputChannels, inputChannels);
+      mReady = true;
+    }
   }
 }
 
 void GuitarD::OnActivate(bool active) {
-  if (active != mActive) {
-    mActive = active;
-    if (!active) {
-      OnReset();
-    }
+  if (!active && mReady) {
+    OnReset();
   }
 }
 
@@ -99,6 +100,19 @@ int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
 
 #if IPLUG_DSP
 void GuitarD::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
-  graph->ProcessBlock(inputs, outputs, nFrames);
+  // Some DAWs already call the process function without having provided a valid samplerate/channel configuration
+  if (mReady) {
+    graph->ProcessBlock(inputs, outputs, nFrames);
+  }
+  else {
+    OnReset();
+    // Fill the output buffer just in case it wasn't initialized with silence
+    const int nChans = NOutChansConnected();
+    for (int c = 0; c < nChans; c++) {
+      for (int i = 0; i < nFrames; i++) {
+        outputs[c][i] = 0;
+      }
+    }
+  }
 }
 #endif
