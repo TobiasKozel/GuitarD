@@ -533,7 +533,9 @@ private:
   void formatTest() {
     /**
      *                            ------------
+     *                            |          |
      *                --> test2 --|          |--> test5 --
+     *                |           |          |           |
      *  in -> test1 --|           --> test4 --           |--> test7 --> out
      *                |                                  |
      *                --> test3 ----> test6 --------------

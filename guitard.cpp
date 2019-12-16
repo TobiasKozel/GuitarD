@@ -50,9 +50,18 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAX_DAW_PAR
 void GuitarD::OnReset() {
   if (graph != nullptr) {
     const int sr = static_cast<int>(GetSampleRate());
-    const int outputChannels = MaxNChannels(ERoute::kOutput);
-    const int inputChannels = MaxNChannels(ERoute::kInput);
+    const int outputChannels = NChannelsConnected(ERoute::kOutput);
+    const int inputChannels = NChannelsConnected(ERoute::kInput);
     graph->OnReset(sr, outputChannels, inputChannels);
+  }
+}
+
+void GuitarD::OnActivate(bool active) {
+  if (active != mActive) {
+    mActive = active;
+    if (!active) {
+      OnReset();
+    }
   }
 }
 
@@ -81,7 +90,6 @@ int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
     nlohmann::json serialized = nlohmann::json::parse(json_string.Get());
     graph->deserialize(serialized);
     return pos;
-
   }
   catch (...) {
   }

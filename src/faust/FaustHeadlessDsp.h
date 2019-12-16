@@ -119,6 +119,7 @@ public:
 
   void OnSamplerateChanged(const int pSamplerate) override {
     instanceConstants(pSamplerate);
+    mSampleRate = pSamplerate;
   }
 
   void OnTransport() override {
