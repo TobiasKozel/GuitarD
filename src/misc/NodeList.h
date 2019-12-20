@@ -17,6 +17,13 @@ namespace NodeList {
     return nullptr;
   }
 
+  inline NodeInfo* getInfo(const std::string name) {
+    if (nodelist.find(name) != nodelist.end()) {
+      return &(nodelist.find(name)->second);
+    }
+    return nullptr;
+  }
+
   inline void registerNode(NodeInfo info) {
     if (nodelist.find(info.name) == nodelist.end()) {
       nodelist.insert(std::pair<std::string, NodeInfo>(info.name, info));

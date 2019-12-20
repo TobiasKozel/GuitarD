@@ -35,8 +35,9 @@ public:
    */
   bool claimNode(Node* node) {
     bool gotAllParams = true;
+    std::string prefix = NodeList::getInfo(node->shared.type)->displayName;
     for (int i = 0; i < node->shared.parameterCount; i++) {
-      if (!claimParameter(node->shared.parameters[i])) {
+      if (!claimParameter(node->shared.parameters[i], prefix.c_str())) {
         /**
          * this means the manager has no free parameters left and the control cannot be automated from the daw
          */
@@ -51,7 +52,17 @@ public:
   /**
    * This will provide one of the reserved daw parameters. If one is free, it will return true
    */
-  bool claimParameter(ParameterCoupling* couple) {
+  bool claimParameter(ParameterCoupling* couple, const char* prefix = nullptr) {
+    const char* name = couple->name;
+    std::string stringName;
+    if (prefix != nullptr) {
+      /**
+       * In case we get a node name as a prefix use that but keep the string object around until
+       * the init function has copied it into the daw land
+       */
+      stringName = std::string(prefix) + " " + std::string(name);
+      name = stringName.c_str();
+    }
     int i = couple->parameterIdx;
     if (i == iplug::kNoParameter && mParametersLeft > 0) {
       // if there's no parameter index set, go look for one
@@ -77,34 +88,30 @@ public:
     switch (couple->type)
     {
     case ParameterCoupling::Boolean:
-      couple->parameter->InitBool(couple->name, couple->defaultVal == 1.0);
+      couple->parameter->InitBool(name, couple->defaultVal == 1.0);
       break;
     case ParameterCoupling::Frequency:
       couple->parameter->InitFrequency(
-        couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+        name, couple->defaultVal, couple->min, couple->max, couple->stepSize
       );
       break;
     case ParameterCoupling::Gain:
       couple->parameter->InitGain(
-        couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+        name, couple->defaultVal, couple->min, couple->max, couple->stepSize
       );
       break;
     case ParameterCoupling::Percentage:
       couple->parameter->InitPercentage(
-        couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+        name, couple->defaultVal, couple->min, couple->max, couple->stepSize
       );
       break;
     case ParameterCoupling::Linear:
     default:
       couple->parameter->InitDouble(
-        couple->name, couple->defaultVal, couple->min, couple->max, couple->stepSize
+        name, couple->defaultVal, couple->min, couple->max, couple->stepSize
       );
       break;
     }
-    // TODOG These seem to be leaking and also don't force vsts to update the names
-    // works for AU though
-    //couple->parameter->SetLabel(couple->name);
-    //couple->parameter->SetDisplayText(1, couple->name);
     couple->parameterIdx = i;
     couple->parameter->Set(*(couple->value));
     WDBGMSG("Claimed param %i\n", i);
@@ -122,9 +129,10 @@ public:
     for (int i = 0; i < MAX_DAW_PARAMS; i++) {
       if (mParameters[i] == couple->parameter) {
         mParametersClaimed[i] = false;
-        mParameters[i]->SetLabel("Released");
-        mParameters[i]->SetDisplayText(1, "Released");
-        // memleak TODO check if the const char cause leaks
+        std::string paramprefix = "Uninitialized ";
+        mParameters[i]->InitDouble(
+          (paramprefix + std::to_string(mParametersLeft)).c_str(), 1, 0, 1.0, 0.01
+        );
         couple->parameter = nullptr;
         mParametersLeft++;
         WDBGMSG("Released param %i\n", i);
