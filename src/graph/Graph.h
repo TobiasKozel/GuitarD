@@ -17,6 +17,7 @@
 class Graph {
   MessageBus::Bus* mBus = nullptr;
   MessageBus::Subscription<Node*> mNodeDelSub;
+  MessageBus::Subscription<Node*> mNodeBypassEvent;
   MessageBus::Subscription<NodeList::NodeInfo> mNodeAddEvent;
   MessageBus::Subscription<bool> mAwaitAudioMutexEvent;
   MessageBus::Subscription<bool> mPushUndoState;
@@ -77,6 +78,11 @@ public:
       this->removeNode(param, true);
     });
 
+    mNodeBypassEvent.subscribe(mBus, MessageBus::BypassNodeConnection, [&](Node* param) {
+      MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
+      this->byPassConnection(param);
+    });
+
     mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo info) {
       MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
       this->addNode(info.constructor(), nullptr,300, 300);
@@ -105,6 +111,7 @@ public:
     });
 
     mAutomationRequest.subscribe(mBus, MessageBus::AttachAutomation, [&](AutomationAttachRequest r) {
+      MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
       WDL_PtrList<Node>& n = this->mNodes;
       for (int i = 0; i < n.GetSize(); i++) {
         Node* node = n.Get(i);
@@ -122,6 +129,7 @@ public:
   }
 
   void testadd() {
+    formatTest();
     return;
     Node* test = NodeList::createNode("ParametricEqNode");
     addNode(test, mInputNode, 0, 500, 300);
@@ -394,6 +402,23 @@ public:
     }
   }
 
+  void byPassConnection(Node* node) const {
+    if (node->shared.inputCount > 0 && node->shared.outputCount > 0) {
+      NodeSocket* prevSock = node->shared.socketsIn[0];
+      NodeSocket* nextSock = node->shared.socketsOut[0];
+      if (prevSock != nullptr && prevSock->mConnectedTo[0] != nullptr && nextSock != nullptr && nextSock->mConnectedTo[0] != nullptr) {
+        MessageBus::fireEvent<SocketConnectRequest>(mBus,
+          MessageBus::SocketRedirectConnection,
+          SocketConnectRequest{
+            prevSock->mConnectedTo[0],
+            nextSock->mConnectedTo[0]
+          }
+        );
+        MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDisconnectAll, node);
+      }
+    }
+  }
+
   /**
    * Removes the node and pauses the audio thread
    * Can also bridge the connection if possible
@@ -405,18 +430,8 @@ public:
      * connection is bridged, or else the bridged connection will be severed again
      */
     WDL_MutexLock lock(&mIsProcessing);
-    if (reconnect && node->shared.inputCount > 0 && node->shared.outputCount > 0) {
-      NodeSocket* prevSock = node->shared.socketsIn[0];
-      NodeSocket* nextSock = node->shared.socketsOut[0];
-      if (prevSock != nullptr && prevSock->mConnectedTo[0] != nullptr && nextSock != nullptr && nextSock->mConnectedTo[0] != nullptr) {
-        MessageBus::fireEvent<SocketConnectRequest>( mBus,
-          MessageBus::SocketRedirectConnection,
-          SocketConnectRequest {
-            prevSock->mConnectedTo[0],
-            nextSock->mConnectedTo[0]
-          }
-        );
-      }
+    if (reconnect) {
+      byPassConnection(node);
     }
     node->cleanupUi(mGraphics);
     mParamManager.releaseNode(node);

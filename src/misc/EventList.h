@@ -22,6 +22,7 @@ namespace MessageBus {
     AttachAutomation,
     VisualizeAutomationTargets,
     PickAutomationTarget,
-    TOTAL_MESSAGE_IDS
+    BypassNodeConnection,
+    TOTAL_MESSAGE_IDS // Keep this one at the bottom
   };
 }

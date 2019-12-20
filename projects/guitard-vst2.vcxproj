@@ -378,7 +378,9 @@
     <ClCompile Include="..\..\..\IPlug\IPlugProcessor.cpp" />
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp" />
     <ClCompile Include="..\..\..\IPlug\VST2\IPlugVST2.cpp" />
+    <ClCompile Include="..\..\..\WDL\filebrowse.cpp" />
     <ClCompile Include="..\..\..\WDL\resample.cpp" />
+    <ClCompile Include="..\..\..\WDL\win32_utf8.c" />
     <ClCompile Include="..\GuitarD.cpp" />
     <ClCompile Include="..\thirdparty\fftconvolver\AudioFFT.cpp" />
     <ClCompile Include="..\thirdparty\fftconvolver\FFTConvolver.cpp" />

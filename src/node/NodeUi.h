@@ -15,7 +15,6 @@ struct NodeUiHeader {
   bool hasByPass = false;
   bool hasRemove = true;
   IControl* bypass;
-  IControl* disconnect;
   IControl* remove;
 };
 
@@ -136,17 +135,6 @@ public:
       shared->graphics->AttachControl(mHeader.bypass);
     }
 
-
-    mHeader.disconnect = new IVButtonControl(IRECT(
-      m.R - Theme::Node::HEADER_DISCONNECT_RIGHT - Theme::Node::HEADER_DISCONNECT_SIZE,
-      m.T + Theme::Node::HEADER_DISCONNECT_TOP, m.R - Theme::Node::HEADER_DISCONNECT_RIGHT,
-      m.T + Theme::Node::HEADER_DISCONNECT_TOP + Theme::Node::HEADER_DISCONNECT_SIZE
-    ), [&](IControl* pCaller) {
-      MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDisconnectAll, this->shared->node);
-    });
-    mElements.Add(mHeader.disconnect);
-    shared->graphics->AttachControl(mHeader.disconnect);
-
     mHeader.remove = new IVButtonControl(IRECT(
       m.R - Theme::Node::HEADER_REMOVE_RIGHT - Theme::Node::HEADER_DISCONNECT_SIZE,
       m.T + Theme::Node::HEADER_DISCONNECT_TOP, m.R - Theme::Node::HEADER_REMOVE_RIGHT,
@@ -254,7 +242,6 @@ public:
     if (mHeader.hasByPass) {
       shared->graphics->RemoveControl(mHeader.bypass, true);
     }
-    shared->graphics->RemoveControl(mHeader.disconnect, true);
     shared->graphics->RemoveControl(mHeader.remove, true);
   }
 
@@ -311,6 +298,16 @@ public:
   }
 
   virtual void OnMouseDrag(const float x, const float y, const float dX, const float dY, const IMouseMod& mod) override {
+    if (mod.C && !mDragging) {
+      MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDisconnectAll, shared->node);
+      mDragging = true;
+      return;
+    }
+    if (mod.A && !mDragging) {
+      MessageBus::fireEvent<Node*>(shared->bus, MessageBus::BypassNodeConnection, shared->node);
+      mDragging = true;
+      return;
+    }
     mDragging = true;
     MessageBus::fireEvent<Coord2D>(shared->bus, MessageBus::NodeDragged, Coord2D {x, y});
     translate(dX, dY);
