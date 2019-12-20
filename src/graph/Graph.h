@@ -406,14 +406,18 @@ public:
     if (node->shared.inputCount > 0 && node->shared.outputCount > 0) {
       NodeSocket* prevSock = node->shared.socketsIn[0];
       NodeSocket* nextSock = node->shared.socketsOut[0];
-      if (prevSock != nullptr && prevSock->mConnectedTo[0] != nullptr && nextSock != nullptr && nextSock->mConnectedTo[0] != nullptr) {
-        MessageBus::fireEvent<SocketConnectRequest>(mBus,
-          MessageBus::SocketRedirectConnection,
-          SocketConnectRequest{
-            prevSock->mConnectedTo[0],
-            nextSock->mConnectedTo[0]
+      if (prevSock != nullptr && prevSock->mConnectedTo[0] != nullptr && nextSock != nullptr) {
+        for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+          if (nextSock->mConnectedTo[i] != nullptr) {
+            MessageBus::fireEvent<SocketConnectRequest>(mBus,
+              MessageBus::SocketRedirectConnection,
+              SocketConnectRequest{
+                prevSock->mConnectedTo[0],
+                nextSock->mConnectedTo[i]
+              }
+            );
           }
-        );
+        }
         MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDisconnectAll, node);
       }
     }
