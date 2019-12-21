@@ -24,6 +24,7 @@ namespace MessageBus {
     PickAutomationTarget,
     BypassNodeConnection,
     SeverNodeConnection,
+    CloneNode,
     TOTAL_MESSAGE_IDS // Keep this one at the bottom
   };
 }

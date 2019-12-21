@@ -334,6 +334,23 @@ public:
     shared.parameterCount++;
   }
 
+  /** Copies over the state of the given node if it's from the same type */
+  void copyState(Node* n) {
+    if (shared.type != n->shared.type) {
+      WDBGMSG("Trying to copy a state from a different node type!\n");
+      assert(false);
+      return;
+    }
+    for (int i = 0; i < shared.parameterCount; i++) {
+      // TODOG Don't use the dsp value here since it might have automation on it
+      n->shared.parameters[i]->update();
+      *(shared.parameters[i]->value) = *(n->shared.parameters[i]->value);
+    }
+    nlohmann::json temp;
+    n->serializeAdditional(temp);
+    deserializeAdditional(temp);
+  }
+
   /**
    * Allows attaching additional data at the end of the serialization
    */

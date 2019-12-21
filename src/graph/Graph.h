@@ -18,6 +18,7 @@ class Graph {
   MessageBus::Bus* mBus = nullptr;
   MessageBus::Subscription<Node*> mNodeDelSub;
   MessageBus::Subscription<Node*> mNodeBypassEvent;
+  MessageBus::Subscription<Node*> mNodeCloneEvent;
   MessageBus::Subscription<NodeList::NodeInfo> mNodeAddEvent;
   MessageBus::Subscription<bool> mAwaitAudioMutexEvent;
   MessageBus::Subscription<bool> mPushUndoState;
@@ -88,6 +89,15 @@ public:
     mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo info) {
       MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
       this->addNode(info.constructor(), nullptr,300, 300);
+    });
+
+    mNodeCloneEvent.subscribe(mBus, MessageBus::CloneNode, [&](Node* node) {
+      Node* clone = NodeList::createNode(node->shared.type);
+      if (clone != nullptr) {
+        this->addNode(clone, nullptr, node->shared.X, node->shared.Y, 0, 0, node);
+        clone->mUi->mDragging = true;
+        mGraphics->SetCapturedControl(clone->mUi);
+      }
     });
 
     // This might not even make sense
@@ -388,11 +398,14 @@ public:
   /**
    * Used to add nodes and pause the audio thread
    */
-  void addNode(Node* node, Node* pInput = nullptr, const float x = 0, const float y = 0, const int outputIndex = 0, const int inputIndex = 0) {
+  void addNode(Node* node, Node* pInput = nullptr, const float x = 0, const float y = 0, const int outputIndex = 0, const int inputIndex = 0, Node* clone = nullptr) {
     WDL_MutexLock lock(&mIsProcessing);
     node->shared.X = x;
     node->shared.Y = y;
     node->setup(mBus, mSampleRate);
+    if (clone != nullptr) {
+      node->copyState(clone);
+    }
     mParamManager.claimNode(node);
     node->setupUi(mGraphics);
     if (pInput != nullptr) {

@@ -40,7 +40,6 @@ protected:
   IBlend mBlend = { EBlend::Default, 1 };
   bool mNoScale = false;
 
-  bool mDragging;
   IColor mColor;
   ISVG mSvgBg = ISVG(nullptr);
   IText mIconFont;
@@ -48,13 +47,13 @@ protected:
 
   
 public:
+  bool mDragging = false;
 
   map<const char*, ParameterCoupling*> mParamsByName;
 
   explicit NodeUi(NodeShared* pShared) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
   {
-    mDragging = false;
     shared = pShared;
 
     NodeUi::setUpDimensions(shared->width, shared->height);
@@ -313,7 +312,7 @@ public:
       }
       if (mod.C) {
         // Duplicate the node
-        mDragging = true;
+        MessageBus::fireEvent<Node*>(shared->bus, MessageBus::CloneNode, shared->node);
         return;
       }
     }
