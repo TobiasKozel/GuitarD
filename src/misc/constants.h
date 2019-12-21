@@ -32,7 +32,7 @@
 // Nodes will allocated this much space for their buffers, larger chunks will be split up and processed normally
 #define MAX_BUFFER 512
 
-#define MIN_BLOCK_SIZE 16
+#define MIN_BLOCK_SIZE 64
 
 #define MAX_UNDOS 8
 

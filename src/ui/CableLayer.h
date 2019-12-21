@@ -28,6 +28,7 @@ class CableLayer : public IControl {
   MessageBus::Bus* mBus = nullptr;
   MessageBus::Subscription<Node*> mDisconnectAllEvent;
   MessageBus::Subscription<Coord2D> mNodeDraggedEvent;
+  MessageBus::Subscription<Coord2D> mNodeSeverEvent;
   MessageBus::Subscription<Node*> mNodeDraggedEndEvent;
   MessageBus::Subscription<NodeSocket*> mPreviewSocketEvent;
   MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
@@ -61,40 +62,15 @@ public:
     });
 
     mNodeDraggedEvent.subscribe(mBus, MessageBus::NodeDragged, [&](Coord2D pos) {
-      const float socketRadius = Theme::Sockets::DIAMETER / 2;
-      mHighlightSocket = nullptr;
-      for (int n = 0; n < mNodes->GetSize() + 1; n++) {
-        Node* curNode = mNodes->Get(n);
-        if (curNode == nullptr) {
-          // only happens for the last node
-          curNode = mOutNode;
-        }
-        for (int i = 0; i < curNode->shared.inputCount; i++) {
-          NodeSocket* curSock = curNode->shared.socketsIn[i];
-          NodeSocket* tarSock = curSock->mConnectedTo[0];
-          if (tarSock != nullptr) {
-            float x1 = tarSock->mX + socketRadius;
-            float x2 = curSock->mX + socketRadius;
-            float y1 = tarSock->mY + socketRadius;
-            float y2 = curSock->mY + socketRadius;
-            IRECT box;
-            box.L = min(x1, x2) - SPLICEIN_DISTANCE;
-            box.R = max(x1, x2) + SPLICEIN_DISTANCE;
-            box.T = min(y1, y2) - SPLICEIN_DISTANCE;
-            box.B = max(y1, y2) + SPLICEIN_DISTANCE;
-            if (box.Contains(IRECT{ pos.x, pos.y, pos.x, pos.y })) {
-              const float a = y1 - y2;
-              const float b = x2 - x1;
-              const float c = x1 * y2 - x2 * y1;
-              const float d = abs(a * pos.x + b * pos.y + c) / sqrt(a * a + b * b);
-              if (d < SPLICEIN_DISTANCE) {
-                mHighlightSocket = curSock;
-                break;
-              }
-            }
-          }
-        }
+      mHighlightSocket = getClosestToConnection(pos);
+    });
+
+    mNodeSeverEvent.subscribe(mBus, MessageBus::SeverNodeConnection, [&](Coord2D pos) {
+      NodeSocket* close = getClosestToConnection(pos);
+      if (close != nullptr) {
+        close->disconnectAll();
       }
+      mDirty = true;
     });
 
     mNodeDraggedEndEvent.subscribe(mBus, MessageBus::NodeDraggedEnd, [&](Node* node) {
@@ -316,4 +292,40 @@ public:
     mRECT.B = mGraphics->Height();
   }
 
+private:
+  NodeSocket* getClosestToConnection(Coord2D pos) {
+    const float socketRadius = Theme::Sockets::DIAMETER / 2;
+    for (int n = 0; n < mNodes->GetSize() + 1; n++) {
+      Node* curNode = mNodes->Get(n);
+      if (curNode == nullptr) {
+        // only happens for the last node
+        curNode = mOutNode;
+      }
+      for (int i = 0; i < curNode->shared.inputCount; i++) {
+        NodeSocket* curSock = curNode->shared.socketsIn[i];
+        NodeSocket* tarSock = curSock->mConnectedTo[0];
+        if (tarSock != nullptr) {
+          float x1 = tarSock->mX + socketRadius;
+          float x2 = curSock->mX + socketRadius;
+          float y1 = tarSock->mY + socketRadius;
+          float y2 = curSock->mY + socketRadius;
+          IRECT box;
+          box.L = min(x1, x2) - SPLICEIN_DISTANCE;
+          box.R = max(x1, x2) + SPLICEIN_DISTANCE;
+          box.T = min(y1, y2) - SPLICEIN_DISTANCE;
+          box.B = max(y1, y2) + SPLICEIN_DISTANCE;
+          if (box.Contains(IRECT{ pos.x, pos.y, pos.x, pos.y })) {
+            const float a = y1 - y2;
+            const float b = x2 - x1;
+            const float c = x1 * y2 - x2 * y1;
+            const float d = abs(a * pos.x + b * pos.y + c) / sqrt(a * a + b * b);
+            if (d < SPLICEIN_DISTANCE) {
+              return curSock;
+            }
+          }
+        }
+      }
+    }
+    return nullptr;
+  }
 };

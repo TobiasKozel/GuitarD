@@ -62,7 +62,12 @@ public:
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
-    if (mod.L || mod.C) {
+    if (mod.C) {
+      // Allow severing connections like in blender
+      MessageBus::fireEvent<Coord2D>(mBus, MessageBus::SeverNodeConnection, Coord2D{ x, y });
+      return;
+    }
+    if (mod.L) {
       translate(dX, dY);
       mGraphics->SetAllControlsDirty();
     }
