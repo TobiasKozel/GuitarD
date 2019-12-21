@@ -27,6 +27,7 @@ class NodeUi : public IControl {
 protected:
   NodeShared* shared;
   MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
+  MessageBus::Subscription<QuickConnectRequest> mNodeQuickConnectEvent;
 
   WDL_PtrList<NodeSocketUi> mInSocketsUi;
   WDL_PtrList<NodeSocketUi> mOutSocketsUi;
@@ -81,6 +82,15 @@ public:
         pair.socket->disconnect();
         in->connect(prev);
         out->connect(pair.socket);
+      }
+    });
+
+    mNodeQuickConnectEvent.subscribe(shared->bus, MessageBus::QuickConnectSocket, [&](QuickConnectRequest req) {
+      if (mTargetRECT.Contains(IRECT{req.pos.x, req.pos.y, req.pos.x, req.pos.y })) {
+        NodeSocket* socket = req.from->mIsInput ? shared->socketsOut[0] : shared->socketsIn[0];
+        if (socket != nullptr) {
+          socket->connect(req.from);
+        }
       }
     });
 
@@ -298,21 +308,31 @@ public:
 
   virtual void OnMouseDrag(const float x, const float y, const float dX, const float dY, const IMouseMod& mod) override {
     if (!mDragging) {
-      if (mod.A && mod.C) {
+      if (mod.A && mod.C && !mod.S) {
         // Disconnect all the connections of a node
         MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDisconnectAll, shared->node);
         mDragging = true;
         return;
       }
-      if (mod.A) {
+      if (mod.A && !mod.C && !mod.S) {
         // Bypass all connections of a node
         MessageBus::fireEvent<Node*>(shared->bus, MessageBus::BypassNodeConnection, shared->node);
         mDragging = true;
         return;
       }
-      if (mod.C) {
+      if (!mod.A && mod.C && !mod.S) {
         // Duplicate the node
         MessageBus::fireEvent<Node*>(shared->bus, MessageBus::CloneNode, shared->node);
+        return;
+      }
+      if (!mod.A && !mod.C && mod.S) {
+        // Get the fist output and drag it
+        NodeSocketUi* socket = mod.L ? mInSocketsUi.Get(0) : mOutSocketsUi.Get(0);
+        if (socket != nullptr) {
+          socket->OnMouseDown(x, y, mod);
+          // swap the captured control to be the outsocket now
+          shared->graphics->SetCapturedControl(socket);
+        }
         return;
       }
     }

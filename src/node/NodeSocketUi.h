@@ -118,6 +118,12 @@ public:
           }
         );
       }
+      else {
+        MessageBus::fireEvent(mBus, MessageBus::QuickConnectSocket, QuickConnectRequest{
+          Coord2D{x, y},
+          mSocket
+        });
+      }
     }
     mMouseDown = IMouseMod();
   }

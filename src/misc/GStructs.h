@@ -7,9 +7,13 @@ struct Coord2D {
   float y = 0;
 };
 
-
 class Node;
 struct NodeSocket;
+
+struct QuickConnectRequest {
+  Coord2D pos;
+  NodeSocket* from;
+};
 
 struct NodeSpliceInPair {
   Node* node = nullptr;

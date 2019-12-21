@@ -25,6 +25,7 @@ namespace MessageBus {
     BypassNodeConnection,
     SeverNodeConnection,
     CloneNode,
+    QuickConnectSocket, // Event fired from a NodeSocketUi and subscribed to by NodeUi to allow connecting without hitting the socket itself
     TOTAL_MESSAGE_IDS // Keep this one at the bottom
   };
 }
