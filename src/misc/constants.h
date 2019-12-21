@@ -17,6 +17,7 @@
 // 8 Should be enough for most nodes
 #define MAX_NODE_SOCKETS 8
 
+// Max amount of sockets a output socket can be connected to (not a hard limit, but weird things will happen)
 #define MAX_SOCKET_CONNECTIONS 32
 
 // Max amount of Parametercouplings for a node
@@ -28,7 +29,10 @@
 // This is the name of a node if it wasn't overridden anywhere
 #define DEFAULT_NODE_NAME "DEFAULTNODENAME"
 
+// Nodes will allocated this much space for their buffers, larger chunks will be split up and processed normally
 #define MAX_BUFFER 512
+
+#define MIN_BLOCK_SIZE 16
 
 #define MAX_UNDOS 8
 

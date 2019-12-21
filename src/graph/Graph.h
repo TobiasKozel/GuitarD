@@ -44,6 +44,8 @@ class Graph {
 
   int mSampleRate = 0;
 
+  int mMaxBlockSize = MAX_BUFFER;
+
   /** Control elements */
   GraphBackground* mBackground = nullptr;
   CableLayer* mCableLayer = nullptr;
@@ -181,18 +183,18 @@ public:
   }
 
   void ProcessBlock(iplug::sample** in, iplug::sample** out, const int nFrames) {
-    if (nFrames > MAX_BUFFER) {
+    if (nFrames > mMaxBlockSize) {
       /** Process the block in smaller bits since it's too large */
-      const int overhang = nFrames % MAX_BUFFER;
+      const int overhang = nFrames % mMaxBlockSize;
       int s = 0;
       while (true) {
         for (int c = 0; c < mChannelCount; c++) {
           mSliceBuffer[0][c] = &in[c][s];
           mSliceBuffer[1][c] = &out[c][s];
         }
-        s += MAX_BUFFER;
+        s += mMaxBlockSize;
         if (s <= nFrames) {
-          ProcessBlock(mSliceBuffer[0], mSliceBuffer[1], MAX_BUFFER);
+          ProcessBlock(mSliceBuffer[0], mSliceBuffer[1], mMaxBlockSize);
         }
         else {
           if (overhang > 0) {
@@ -225,7 +227,11 @@ public:
     }
     // HACK only used for the feedback node to get the latest data in the graph
     for (int n = 0; n < nodeCount; n++) {
-      mNodes.Get(n)->ProcessBlock(nFrames);
+      Node* node = mNodes.Get(n);
+      node->ProcessBlock(nFrames);
+      if (!node->mIsProcessed) {
+        WDBGMSG(node->shared.type.c_str());
+      }
     }
 
     mOutputNode->CopyOut(out, nFrames);
@@ -394,6 +400,7 @@ public:
     }
     mNodes.Add(node);
     sortRenderStack();
+    mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
   }
 
   void removeAllNodes() {
@@ -442,6 +449,7 @@ public:
     node->cleanUp();
     mNodes.DeletePtr(node, true);
     mNodes.Compact();
+    mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
   }
 
   void removeNode(const int index) {
@@ -558,6 +566,15 @@ private:
     return Coord2D { nextX, pos.y };
   }
 
+  bool hasFeedBackNode() {
+    for (int i = 0; i < mNodes.GetSize(); i++) {
+      if (mNodes.Get(i)->shared.type == "FeedbackNode") {
+        return true;
+      }
+    }
+    return false;
+  }
+
 
   /**
    * Test Setups
@@ -589,6 +606,7 @@ private:
     Node* test7 = NodeList::createNode("CombineNode");
     addNode(test7, test5, 1000, 0);
     test7->connectInput(test6->shared.socketsOut[0], 1);
+    mOutputNode->shared.socketsIn[0]->disconnectAll();
     mOutputNode->connectInput(test7->shared.socketsOut[0]);
   }
 
