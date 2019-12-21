@@ -226,21 +226,20 @@ public:
 
     mOutputNode->BlockStart();
 
-    // TODOG multiple passes to ensure all the nodes are computed is super dumb
+    // The List is pre sorted so the attempts are only needed to catch circular dependencies and other edge cases
+    const int maxAttempts = 10;
     int attempts = 0;
-    while (!mOutputNode->mIsProcessed && attempts < 10) {
+    while (!mOutputNode->mIsProcessed && attempts < maxAttempts) {
       for (int n = 0; n < nodeCount; n++) {
         mNodes.Get(n)->ProcessBlock(nFrames);
       }
       mOutputNode->ProcessBlock(nFrames);
       attempts++;
     }
-    // HACK only used for the feedback node to get the latest data in the graph
-    for (int n = 0; n < nodeCount; n++) {
-      Node* node = mNodes.Get(n);
-      node->ProcessBlock(nFrames);
-      if (!node->mIsProcessed) {
-        WDBGMSG(node->shared.type.c_str());
+    // This extra iteration makes sure the feedback loops get data from their previous nodes
+    if (attempts < maxAttempts) {
+      for (int n = 0; n < nodeCount; n++) {
+        mNodes.Get(n)->ProcessBlock(nFrames);
       }
     }
 
@@ -284,6 +283,10 @@ public:
       }
       if ((key.VK == kVK_E) && !isUp) {
         centerNode(mOutputNode);
+        return true;
+      }
+      if ((key.VK == kVK_S) && !isUp) {
+        sortGraph();
         return true;
       }
       return false;
@@ -412,6 +415,7 @@ public:
       node->connectInput(pInput->shared.socketsOut[outputIndex], inputIndex);
     }
     mNodes.Add(node);
+    sortGraph(false);
     sortRenderStack();
     mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
   }
@@ -461,7 +465,7 @@ public:
     mParamManager.releaseNode(node);
     node->cleanUp();
     mNodes.DeletePtr(node, true);
-    mNodes.Compact();
+    sortGraph(false);
     mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
   }
 
@@ -497,7 +501,6 @@ public:
       sortRenderStack();
       scaleUi();
     }
-
   }
 
 private:
@@ -588,6 +591,57 @@ private:
     return false;
   }
 
+  /**
+   * Does some sorting on the mNodes list so the graph can be computed with fewer attempts
+   */
+  void sortGraph(bool lock = true) {
+    WDL_PtrList<Node> sorted;
+    for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+      // Put in the nodes which directly follow the input node
+      NodeSocket* con = mInputNode->shared.socketsOut[0]->mConnectedTo[i];
+      if (con != nullptr) {
+        sorted.Add(con->mParentNode);
+      }
+    }
+
+    // Arbitrary depth
+    for (int tries = 0; tries < 100; tries++) {
+      for (int i = 0; i < sorted.GetSize(); i++) {
+        Node* node = sorted.Get(i);
+        for (int out = 0; out < node->shared.outputCount; out++) {
+          NodeSocket* outSocket = node->shared.socketsOut[out];
+          if (outSocket == nullptr) { continue; }
+          for (int next = 0; next < MAX_SOCKET_CONNECTIONS; next++) {
+            NodeSocket* nextSocket = outSocket->mConnectedTo[next];
+            if (nextSocket == nullptr) { continue; }
+            Node* nextNode = nextSocket->mParentNode;
+            // Don't want to add duplicates or the output node
+            if (sorted.Find(nextNode) != -1 || nextNode == mOutputNode) { continue; }
+            sorted.Add(nextNode);
+          }
+        }
+      }
+    }
+
+    // Add in all the nodes which might not be connected or were missed because of the depth limit
+    for (int i = 0; i < mNodes.GetSize(); i++) {
+      Node* nextNode = mNodes.Get(i);
+      if (sorted.Find(nextNode) != -1) { continue; }
+      sorted.Add(nextNode);
+    }
+
+    WDL_MutexLock* mutex;
+    if (lock) {
+      mutex = new WDL_MutexLock(&mIsProcessing);
+    }
+    mNodes.Empty(false);
+    for (int i = 0; i < sorted.GetSize(); i++) {
+      mNodes.Add(sorted.Get(i));
+    }
+    if (lock) {
+      delete mutex;
+    }
+  }
 
   /**
    * Test Setups

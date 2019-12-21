@@ -7,7 +7,7 @@ scaleL = vslider("Left", 1, -1, 1, 2) : si.smooth(0.999);
 scaleR = vslider("Right", 1, -1, 1, 2) : si.smooth(0.999);
 phaseOffsetFine =  vslider("Phase Fine", 0, 0, 0.010, 0.00001) * samplerate : si.smooth(0.999);
 phaseOffsetRough =  vslider("Phase Rough", 0, 0, maxdelay, 0.001) * samplerate : si.smooth(0.999);
-phaseLROffset = vslider("Left/Right Offset", 0, -1, 1, 1) : si.smooth(0.999);
+phaseLROffset = vslider("Left/Right Offset", 0, -1, 1, 0.001) : si.smooth(0.999);
 
 scaleIn(in) = (((in * 2) ^ 4) * 0.0625), 0 : max;
 phaseOffset = (phaseOffsetFine + phaseOffsetRough, maxdelaySamples : min, 0 : max);
