@@ -61,7 +61,6 @@ struct NodeSocketIn : public NodeSocket {
 
   void disconnectAll() override {
     disconnect(mConnectedTo[0], true);
-    mConnected = false;
   }
 
   void connect(NodeSocket* to, bool other) override {
@@ -84,13 +83,18 @@ struct NodeSocketOut : public NodeSocket {
   }
 
   void updatedConnected() {
+    int sortedIndex = 0;
+    mConnected = false;
     for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
       if (mConnectedTo[i] != nullptr) {
         mConnected = true;
-        return;
+        mConnectedTo[sortedIndex] = mConnectedTo[i];
+        if (sortedIndex != i) {
+          mConnectedTo[i] = nullptr;
+        }
+        sortedIndex++;
       }
     }
-    mConnected = false;
   }
 
   void disconnect(NodeSocket* to, bool other) override {
@@ -119,28 +123,29 @@ struct NodeSocketOut : public NodeSocket {
   void connect(NodeSocket* to, bool other) override {
     if (to->mIsInput == mIsInput) { return; }
     NodeSocketIn* toIn = dynamic_cast<NodeSocketIn*>(to);
-    if (toIn != nullptr) {
-      for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
-        if (mConnectedTo[i] == to) {
-          assert(true);
-        }
+    if (toIn == nullptr) { return; }
+
+    for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+      if (mConnectedTo[i] == to) {
+        // assert(false);
+        return;
       }
-      for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
-        if (mConnectedTo[i] == nullptr) {
-          mConnectedTo[i] = toIn;
-          if (toIn->mConnectedTo[0] != this) {
-            if (other) {
-              toIn->connect(this, false);
-            }
-          }
-          break;
-        }
-        if (i == MAX_SOCKET_CONNECTIONS - 1) {
-          // Couldn't find a free slot
-          assert(true);
-        }
-      }
-      updatedConnected();
     }
+    for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+      if (mConnectedTo[i] == nullptr) {
+        mConnectedTo[i] = toIn;
+        if (toIn->mConnectedTo[0] != this) {
+          if (other) {
+            toIn->connect(this, false);
+          }
+        }
+        break;
+      }
+      if (i == MAX_SOCKET_CONNECTIONS - 1) {
+        // Couldn't find a free slot
+        assert(false);
+      }
+    }
+    updatedConnected();
   }
 };

@@ -69,7 +69,7 @@ public:
   virtual void createBuffers() {
     if (mBuffersOut != nullptr) {
       WDBGMSG("Trying to create a new dsp buffer without cleanung up the old one");
-      assert(true);
+      assert(false);
     }
     mBuffersOut = new sample **[shared.outputCount];
     for (int i = 0; i < shared.outputCount; i++) {

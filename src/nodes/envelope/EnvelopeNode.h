@@ -158,7 +158,7 @@ public:
       mAutomationTargetCount++;
       if (c->automationDependency != nullptr) {
         WDBGMSG("Trying to attach automation to a Param with an automation!\n");
-        assert(true);
+        assert(false);
       }
       c->automationDependency = this;
     }

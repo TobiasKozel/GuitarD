@@ -298,15 +298,24 @@ public:
   }
 
   virtual void OnMouseDrag(const float x, const float y, const float dX, const float dY, const IMouseMod& mod) override {
-    if (mod.C && !mDragging) {
-      MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDisconnectAll, shared->node);
-      mDragging = true;
-      return;
-    }
-    if (mod.A && !mDragging) {
-      MessageBus::fireEvent<Node*>(shared->bus, MessageBus::BypassNodeConnection, shared->node);
-      mDragging = true;
-      return;
+    if (!mDragging) {
+      if (mod.A && mod.C) {
+        // Disconnect all the connections of a node
+        MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDisconnectAll, shared->node);
+        mDragging = true;
+        return;
+      }
+      if (mod.A) {
+        // Bypass all connections of a node
+        MessageBus::fireEvent<Node*>(shared->bus, MessageBus::BypassNodeConnection, shared->node);
+        mDragging = true;
+        return;
+      }
+      if (mod.C) {
+        // Duplicate the node
+        mDragging = true;
+        return;
+      }
     }
     mDragging = true;
     MessageBus::fireEvent<Coord2D>(shared->bus, MessageBus::NodeDragged, Coord2D {x, y});
