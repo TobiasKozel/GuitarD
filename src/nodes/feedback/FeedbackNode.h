@@ -11,7 +11,7 @@ public:
 };
 
 class FeedbackNode final : public Node {
-  double gain = 0.0;
+  sample gain = 0.0;
   WDL_TypedCircBuf<sample> mPrevL;
   WDL_TypedCircBuf<sample> mPrevR;
 

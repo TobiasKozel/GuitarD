@@ -3,11 +3,11 @@
 
 
 class CombineNode final : public Node {
-  const double smoothing = 0.999;
-  double smoothed[8] = { 0 };
-  double pan1 = 0;
-  double pan2 = 0;
-  double mix = 0.5;
+  const sample smoothing = 0.999;
+  sample smoothed[8] = { 0 };
+  sample pan1 = 0;
+  sample pan2 = 0;
+  sample mix = 0.5;
   sample** emptyBuffer;
 public:
   CombineNode(std::string pType) {

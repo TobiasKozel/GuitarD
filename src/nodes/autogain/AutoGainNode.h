@@ -3,10 +3,10 @@
 
 
 class AutoGainNode final : public Node {
-  const double detectTime = 2.0;
+  const iplug::sample detectTime = 2.0;
   bool detectMode = false;
-  double gain = 1;
-  double detectedLoudness = 0;
+  iplug::sample gain = 1;
+  iplug::sample detectedLoudness = 0;
   int samplesPassed = 0;
   int samplesTarget = 0;
 public:

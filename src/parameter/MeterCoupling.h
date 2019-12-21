@@ -1,8 +1,8 @@
 #pragma once
-
+#include "IPlugParameter.h"
 struct MeterCoupling {
-  double* value;
+  iplug::sample* value;
   const char* name;
-  double min;
-  double max;
+  iplug::sample min;
+  iplug::sample max;
 };

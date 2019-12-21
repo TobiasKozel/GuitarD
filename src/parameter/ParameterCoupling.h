@@ -31,22 +31,22 @@ struct ParameterCoupling {
   int parameterIdx = -1;
 
   // pointer to the value used in the dsp code
-  double* value = nullptr;
+  sample* value = nullptr;
 
   // this will be added on top of the actual value to allow internal automation eventually
-  double automation = 0;
+  sample automation = 0;
 
   // This value is only used for params which couldn't claim a DAW parameter to act as the one provided by the IParam
-  double baseValue = 0;
+  sample baseValue = 0;
 
-  double mAdd = 0;
-  double mMul = 0;
+  sample mAdd = 0;
+  sample mMul = 0;
 
   // Bounds and so on 
-  double min = 0;
-  double max = 1;
-  double defaultVal = 0;
-  double stepSize = 0.01;
+  sample min = 0;
+  sample max = 1;
+  sample defaultVal = 0;
+  sample stepSize = 0.01;
 
   // Control object which will draw the UI knob
   iplug::igraphics::IControl* control = nullptr;
@@ -66,9 +66,9 @@ struct ParameterCoupling {
   bool showLabel = true;
   bool showValue = true;
 
-  explicit ParameterCoupling(const char* pName = nullptr, double* pProperty = nullptr,
-                    const double pDefault = 0.5, const double pMin = 0, const double pMax = 1,
-                    const double pStepSize = 0.01, const Type pType = Auto) {
+  explicit ParameterCoupling(const char* pName = nullptr, sample* pProperty = nullptr,
+                    const sample pDefault = 0.5, const sample pMin = 0, const sample pMax = 1,
+                    const sample pStepSize = 0.01, const Type pType = Auto) {
     value = pProperty;
     defaultVal = pDefault;
     baseValue = pDefault;
@@ -120,7 +120,7 @@ struct ParameterCoupling {
   /**
    * Simply returns the value used in the DSP
    */
-  inline double getValue() const {
+  inline sample getValue() const {
     if (parameter != nullptr) {
       return parameter->Value();
     }
@@ -128,24 +128,24 @@ struct ParameterCoupling {
   }
 
 
-  inline double scaledToNormalized(const double v) const {
+  inline sample scaledToNormalized(const sample v) const {
     return ((v - min) / (max - min));
   }
 
-  inline double normalizedToScaled(const double v) const {
+  inline sample normalizedToScaled(const sample v) const {
     return min + v * (max - min);
   }
 
 
-  inline double normalizedToExp(const double v) const {
+  inline sample normalizedToExp(const sample v) const {
     return std::exp(mAdd + v * mMul);
   }
 
-  inline double expToNormalized(const double v) const {
+  inline sample expToNormalized(const sample v) const {
     return (std::log(v) - mAdd) / mMul;
   }
 
-  static inline double dbToLinear(const double v) {
+  static inline sample dbToLinear(const sample v) {
     return pow(10, v / 20.0);
   }
 
@@ -153,7 +153,7 @@ struct ParameterCoupling {
    * Usually called from the IControl callback with a linear
    * normalized value, this will scale it to the internal DSP value
    */
-  void setFromNormalized(const double v) {
+  void setFromNormalized(const sample v) {
     if (parameter != nullptr) {
       parameter->SetNormalized(v);
       return;
@@ -168,7 +168,7 @@ struct ParameterCoupling {
   /**
    * Return the normalized and shaped value to use for controls
    */
-  double getNormalized() const {
+  sample getNormalized() const {
     if (parameter != nullptr) {
       return parameter->GetNormalized();
     }

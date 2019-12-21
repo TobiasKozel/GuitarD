@@ -236,6 +236,7 @@ public:
       mOutputNode->ProcessBlock(nFrames);
       attempts++;
     }
+
     // This extra iteration makes sure the feedback loops get data from their previous nodes
     if (attempts < maxAttempts) {
       for (int n = 0; n < nodeCount; n++) {

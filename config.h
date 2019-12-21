@@ -17,6 +17,8 @@
 
 #define PLUG_CHANNEL_IO "1-2 2-2"
 
+// #define SAMPLE_TYPE_FLOAT
+
 #define PLUG_LATENCY 0
 #define PLUG_TYPE 0
 #define PLUG_DOES_MIDI_IN 0

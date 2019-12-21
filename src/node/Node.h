@@ -28,8 +28,8 @@ public:
   int mMaxBuffer = 0;
   int mLastBlockSize = 0;
 
-  double mByPassed = 0;
-  double mStereo = 1;
+  sample mByPassed = 0;
+  sample mStereo = 1;
 
   /**
    * This is basically a delayed constructor with the only disadvantage: derived methods have to have the same parameters

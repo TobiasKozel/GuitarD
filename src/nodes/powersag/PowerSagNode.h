@@ -24,8 +24,8 @@
 //SOFTWARE.
 
 class PowerSagNode final : public Node {
-  double mIntensity = 0;
-  double mDepth = 0.3;
+  sample mIntensity = 0;
+  sample mDepth = 0.3;
 
   long double fpNShapeL;
   long double fpNShapeR;

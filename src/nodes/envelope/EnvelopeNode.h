@@ -94,11 +94,11 @@ public:
 class EnvelopeNode final : public Node {
   WDL_PtrList<ParameterCoupling> mAutomationTargets;
   int mAutomationTargetCount = 0;
-  double gain = 0;
-  double filter = 0;
-  double offset = 0;
-  double avg = 0;
-  double current = 0;
+  sample gain = 0;
+  sample filter = 0;
+  sample offset = 0;
+  sample avg = 0;
+  sample current = 0;
 public:
   explicit EnvelopeNode(const std::string pType) {
     shared.type = pType;
