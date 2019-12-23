@@ -465,6 +465,9 @@
     <ClInclude Include="..\src\misc\DefaultPreset.h">
       <Filter>src\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\cab_lib\CabLibNode.h">
+      <Filter>src\nodes\cabs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

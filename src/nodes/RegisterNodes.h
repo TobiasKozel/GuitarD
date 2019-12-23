@@ -19,6 +19,7 @@
 #include "src/nodes/autogain/AutoGainNode.h"
 #include "src/nodes/powersag/PowerSagNode.h"
 #include "src/nodes/reverse_delay/ReverseDelayNode.h"
+#include "src/nodes/cab_lib/CabLibNode.h"
 
 
 namespace NodeList {
@@ -131,6 +132,14 @@ namespace NodeList {
       []() { return new SimpleCabNode("SimpleCabNode"); },
       "SimpleCabNode",
       "Simple Cabinet",
+      "asd",
+      "Cabinets"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new CabLibNode("CabLibNode"); },
+      "CabLibNode",
+      "Cabinet Library",
       "asd",
       "Cabinets"
     });

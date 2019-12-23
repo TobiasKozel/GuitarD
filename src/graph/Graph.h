@@ -583,7 +583,7 @@ private:
     return Coord2D { nextX, pos.y };
   }
 
-  bool hasFeedBackNode() {
+  bool hasFeedBackNode() const {
     for (int i = 0; i < mNodes.GetSize(); i++) {
       if (mNodes.Get(i)->shared.type == "FeedbackNode") {
         return true;
@@ -617,7 +617,7 @@ private:
             if (nextSocket == nullptr) { continue; }
             Node* nextNode = nextSocket->mParentNode;
             // Don't want to add duplicates or the output node
-            if (sorted.Find(nextNode) != -1 || nextNode == mOutputNode) { continue; }
+            if (sorted.Find(nextNode) != -1) { continue; }
             sorted.Add(nextNode);
           }
         }
@@ -637,7 +637,9 @@ private:
     }
     mNodes.Empty(false);
     for (int i = 0; i < sorted.GetSize(); i++) {
-      mNodes.Add(sorted.Get(i));
+      Node* n = sorted.Get(i);
+      if (n == mOutputNode) { continue; }
+      mNodes.Add(n);
     }
     if (lock) {
       delete mutex;
