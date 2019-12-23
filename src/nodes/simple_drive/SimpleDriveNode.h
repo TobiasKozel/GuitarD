@@ -9,7 +9,7 @@ public:
   }
 
   void Draw(IGraphics & g) override {
-    const double val = *(shared->meters[0]->value) * 10;
+    const double val = AmpToDB(*(shared->meters[0]->value)) + 255;
     last = val * speed + (1 - speed) * last;
     const int bright = std::min<int>(255, last);
     NodeUi::Draw(g);

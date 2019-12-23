@@ -5,7 +5,7 @@ postgain = vslider( "Post gain", 0, -80, 30, 0.1) : si.smooth(0.999);
 highf = vslider( "Bass", 0, -10, 10, 0.1) : si.smooth(0.999);
 
 // meter(r, l) = r, l : attach(_, abs : vbargraph("Level",0,1));
-meter(r, l) = r, l :> + : *(1000) : si.smooth(0.999) <: attach(_, vbargraph("Level",0,1));
+meter(r, l) = r, l :> + <: attach(_, vbargraph("Level",0,1));
 pregain = pow(10.0,2*drive);
 cubicnl = +(offset) : clip(-1,1) : cubic
 with {
