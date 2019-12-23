@@ -7,7 +7,7 @@
 class InputNodeUi final : public NodeUi {
   
   iplug::igraphics::IText mBlocksizeText;
-  string mInfo;
+  std::string mInfo;
 public:
   InputNodeUi(NodeShared* param) : NodeUi(param) {
     mInfo = "";
@@ -16,7 +16,7 @@ public:
 
   void Draw(IGraphics& g) override {
     NodeUi::Draw(g);
-    mInfo = "Blocksize: " + to_string(shared->node->mLastBlockSize) + " Sample-Rate: " + to_string(shared->node->mSampleRate);
+    mInfo = "Blocksize: " + std::to_string(shared->node->mLastBlockSize) + " Sample-Rate: " + std::to_string(shared->node->mSampleRate);
     g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
   }
 };

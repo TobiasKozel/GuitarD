@@ -87,7 +87,7 @@ public:
       GraphStats* stats;
       MessageBus::fireEvent<GraphStats**>(mBus, MessageBus::GetGraphStats, &stats);
       avgExecutiontime = static_cast<long long> ((59 * avgExecutiontime + stats->executionTime) / 60.0);
-      const string time = to_string(avgExecutiontime);
+      const std::string time = std::to_string(avgExecutiontime);
       g.DrawText(mStats, time.c_str(), mRECT);
       mDirty = true;
     }

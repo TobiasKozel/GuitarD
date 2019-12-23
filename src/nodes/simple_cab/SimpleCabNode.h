@@ -26,7 +26,7 @@
 #endif
 
 struct CabNodeSharedData {
-  function<void(IRBundle)> callback;
+  std::function<void(IRBundle)> callback;
   IRBundle loadedIr;
   bool embedIr = false;
 };
@@ -240,11 +240,11 @@ public:
       if (!serialized.contains("irName")) {
         return;
       }
-      const string name = serialized.at("irName");
+      const std::string name = serialized.at("irName");
       load.name.Set(name.c_str());
       const bool customIR = serialized.at("customIR");
       if (customIR) {
-        const string path = serialized.at("path");
+        const std::string path = serialized.at("path");
         load.path.Set(path.c_str());
       }
       else {

@@ -109,7 +109,7 @@ namespace Serializer {
       }
       nodes.Add(node);
       for (auto param : sNode["parameters"]) {
-        string name = param["name"];
+        std::string name = param["name"];
         int found = 0;
         for (int i = 0; i < node->shared.parameterCount; i++) {
           ParameterCoupling* para = node->shared.parameters[i];
@@ -161,7 +161,7 @@ namespace Serializer {
 
       // Link up the automation
       for (auto param : sNode["parameters"]) {
-        string name = param["name"];
+        std::string name = param["name"];
         for (int i = 0; i < node->shared.parameterCount; i++) {
           ParameterCoupling* para = node->shared.parameters[i];
           if (para->name == name) {

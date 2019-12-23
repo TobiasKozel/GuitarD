@@ -3,7 +3,6 @@
 #include "constants.h"
 #include "thirdparty/json.hpp"
 
-using namespace std;
 using namespace nlohmann;
 // TODOG make this instance specific so multiple plugins don't share the same undo stack
 class HistoryStack {

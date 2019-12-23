@@ -7,8 +7,6 @@
 #include "EventList.h"
 #include "GStructs.h"
 
-using namespace std;
-
 /**
  * This allows for easy communication between classes which don't know each other
  * A list of events can be found in EventList.h
@@ -70,11 +68,11 @@ namespace MessageBus {
     // The bus it is subscribed to
     Bus* mBus = nullptr;
   public:
-    function<void(T param)> mCallback;
+    std::function<void(T param)> mCallback;
 
     Subscription() {}
 
-    Subscription(Bus* pBus, const MESSAGE_ID pEventId, function<void(T param)> callback) {
+    Subscription(Bus* pBus, const MESSAGE_ID pEventId, std::function<void(T param)> callback) {
       subscribe(pBus, pEventId, callback);
     }
 
@@ -82,7 +80,7 @@ namespace MessageBus {
       mBus->removeSubscriber(this, mEventId);
     }
 
-    void subscribe(Bus* pBus, const MESSAGE_ID pEventId, function<void(T param)> callback) {
+    void subscribe(Bus* pBus, const MESSAGE_ID pEventId, std::function<void(T param)> callback) {
       if (subscribed) {
         WDBGMSG("Trying to subscribe twice on the same Subscription!\n");
         return;

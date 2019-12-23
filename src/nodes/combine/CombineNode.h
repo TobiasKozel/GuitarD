@@ -48,10 +48,10 @@ public:
     const double invMix = 1 - mix;
     const double pan1 = *(shared.parameters[0]->value);
     const double pan2 = *(shared.parameters[1]->value);
-    const double pan1l = min(1.0, max(-pan1 + 1.0, 0.0)) * invMix * (1.0 - smoothing);
-    const double pan1r = min(1.0, max(+pan1 + 1.0, 0.0)) * invMix * (1.0 - smoothing);
-    const double pan2l = min(1.0, max(-pan2 + 1.0, 0.0)) * mix * (1.0 - smoothing);
-    const double pan2r = min(1.0, max(+pan2 + 1.0, 0.0)) * mix * (1.0 - smoothing);
+    const double pan1l = std::min(1.0, std::max(-pan1 + 1.0, 0.0)) * invMix * (1.0 - smoothing);
+    const double pan1r = std::min(1.0, std::max(+pan1 + 1.0, 0.0)) * invMix * (1.0 - smoothing);
+    const double pan2l = std::min(1.0, std::max(-pan2 + 1.0, 0.0)) * mix * (1.0 - smoothing);
+    const double pan2r = std::min(1.0, std::max(+pan2 + 1.0, 0.0)) * mix * (1.0 - smoothing);
 
     // do the math
     for (int i = 0; i < nFrames; i++) {

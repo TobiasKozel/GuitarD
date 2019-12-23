@@ -54,7 +54,7 @@ public:
     if (mOpen) {
       // Calculate own height
       mTitleRect = mRECT;
-      const float columns = max(static_cast<int>(
+      const float columns = std::max(static_cast<int>(
         floor(mRECT.W() / (Theme::Gallery::ELEMENT_WIDTH
         + Theme::Gallery::ELEMENT_PADDING * 1.5))), 1
       );

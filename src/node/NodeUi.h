@@ -50,7 +50,7 @@ protected:
 public:
   bool mDragging = false;
 
-  map<const char*, ParameterCoupling*> mParamsByName;
+  std::map<const char*, ParameterCoupling*> mParamsByName;
 
   explicit NodeUi(NodeShared* pShared) :
     IControl(IRECT(0, 0, 0, 0), kNoParameter)
@@ -65,7 +65,7 @@ public:
        * Only do this in the UI though
        */
       ParameterCoupling* p = shared->parameters[i];
-      mParamsByName.insert(pair<const char*, ParameterCoupling*>(p->name, p));
+      mParamsByName.insert(std::pair<const char*, ParameterCoupling*>(p->name, p));
     }
 
     mNodeSpliceInEvent.subscribe(shared->bus, MessageBus::NodeSpliceIn, [&](NodeSpliceInPair pair) {

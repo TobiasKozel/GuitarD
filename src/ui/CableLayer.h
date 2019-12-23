@@ -310,10 +310,10 @@ private:
           float y1 = tarSock->mY + socketRadius;
           float y2 = curSock->mY + socketRadius;
           IRECT box;
-          box.L = min(x1, x2) - SPLICEIN_DISTANCE;
-          box.R = max(x1, x2) + SPLICEIN_DISTANCE;
-          box.T = min(y1, y2) - SPLICEIN_DISTANCE;
-          box.B = max(y1, y2) + SPLICEIN_DISTANCE;
+          box.L = std::min(x1, x2) - SPLICEIN_DISTANCE;
+          box.R = std::max(x1, x2) + SPLICEIN_DISTANCE;
+          box.T = std::min(y1, y2) - SPLICEIN_DISTANCE;
+          box.B = std::max(y1, y2) + SPLICEIN_DISTANCE;
           if (box.Contains(IRECT{ pos.x, pos.y, pos.x, pos.y })) {
             const float a = y1 - y2;
             const float b = x2 - x1;

@@ -3,13 +3,13 @@
 
 class SimpleDriveNodeUi final : public NodeUi {
   double last = 0;
-  const double speed = 0.4;
+  const double speed = 0.1;
 public:
   SimpleDriveNodeUi(NodeShared* param) : NodeUi(param) {
   }
 
   void Draw(IGraphics & g) override {
-    const double val = *(shared->meters[0]->value) * 600;
+    const double val = *(shared->meters[0]->value) * 10;
     last = val * speed + (1 - speed) * last;
     const int bright = std::min<int>(255, last);
     NodeUi::Draw(g);
