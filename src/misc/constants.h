@@ -39,6 +39,8 @@
 // Distance in pixels from the cable the cursor needs to be within for the splice in to happen
 #define SPLICEIN_DISTANCE 14
 
+#define PATH_DELIMITER "\\"
+
 
 #ifdef FLOATCONV
   #define FFTCONVOLVER_USE_SSE
