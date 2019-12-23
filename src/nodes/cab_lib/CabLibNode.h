@@ -2,7 +2,7 @@
 #include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
 // #include "resample.h"
 #include "src/node/Node.h"
-
+#include "src/ui/ScrollViewControl.h"
 #include <thirdparty/json.hpp>
 #include <cstring>
 
@@ -21,8 +21,6 @@
 #endif
 
 #include "dirscan.h"
-
-
 #include "IPlugPaths.h"
 
 struct MicPosition {
@@ -97,6 +95,7 @@ struct Cabinet {
 
 class CabLibNodeUi : public NodeUi {
   WDL_PtrList<Cabinet> mCabinets;
+  ScrollViewControl* test = nullptr;
 public:
   CabLibNodeUi(NodeShared* param) : NodeUi(param) {
     WDL_String iniFolder;
@@ -106,8 +105,30 @@ public:
     buildIrTree(iniFolder.Get());
   }
 
+  void setUpControls() override {
+    NodeUi::setUpControls();
+    test = new ScrollViewControl(mTargetRECT.GetPadded(-20));
+    mElements.Add(test);
+    PlaceHolder* t = new PlaceHolder(IRECT(0, 0, 100, 20), "Element 1");
+    test->appendChild(t);
+    t = new PlaceHolder(IRECT(0, 0, 130, 60), "Element 2");
+    test->appendChild(t);
+    t = new PlaceHolder(IRECT(0, 0, 130, 40), "Element 3");
+    test->appendChild(t);
+    t = new PlaceHolder(IRECT(0, 0, 110, 20), "Element 4");
+    test->appendChild(t);
+    shared->graphics->AttachControl(test);
+  }
+
+  void cleanUp() override {
+    NodeUi::cleanUp();
+    shared->graphics->RemoveControl(test, true);
+  }
+
+
   ~CabLibNodeUi() {
     mCabinets.Empty(true);
+    delete test;
   }
 
   void Draw(IGraphics& g) override {

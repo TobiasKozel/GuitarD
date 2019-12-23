@@ -388,6 +388,7 @@
     <ClInclude Include="..\src\ui\gallery\NodeGalleryCategory.h" />
     <ClInclude Include="..\src\ui\gallery\NodeGalleryElement.h" />
     <ClInclude Include="..\src\ui\GraphBackground.h" />
+    <ClInclude Include="..\src\ui\ScrollViewControl.h" />
     <ClInclude Include="..\src\ui\theme.h" />
     <ClInclude Include="..\thirdparty\fftconvolver\AudioFFT.h" />
     <ClInclude Include="..\thirdparty\fftconvolver\FFTConvolver.h" />

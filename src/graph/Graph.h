@@ -141,10 +141,9 @@ public:
   }
 
   void testadd() {
-    return;
-    formatTest();
-    Node* test = NodeList::createNode("ParametricEqNode");
-    addNode(test, mInputNode, 0, 500, 300);
+    // formatTest();
+    Node* test = NodeList::createNode("CabLibNode");
+    addNode(test, nullptr, 0, 500);
     // mOutputNode->connectInput(test->shared.socketsOut[0]);
   }
 

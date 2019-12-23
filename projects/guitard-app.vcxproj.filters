@@ -468,6 +468,9 @@
     <ClInclude Include="..\src\nodes\cab_lib\CabLibNode.h">
       <Filter>src\nodes\cabs</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\ui\ScrollViewControl.h">
+      <Filter>src\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

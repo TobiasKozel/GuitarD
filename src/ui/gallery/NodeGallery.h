@@ -127,7 +127,7 @@ public:
     mDistanceDragged += static_cast<int>(abs(dX) + abs(dY));
   }
 
-  void OnMouseUp(float x, float y, const IMouseMod& mod) {
+  void OnMouseUp(float x, float y, const IMouseMod& mod) override {
     if (mIsOpen && mDistanceDragged < 4) {
       GalleryCategory* cat;
       for (int i = 0; i < mCategories.GetSize(); i++) {

@@ -106,7 +106,7 @@ public:
 
       triggeredScale = true;
 
-      mGraphics->Resize(ceil(lastWidth), ceil(lastHeight), newScale);
+      mGraphics->Resize(ceil(lastWidth), ceil(lastHeight), newScale, true);
       translate(dX, dY);  
       mScale = newScale;
     }
