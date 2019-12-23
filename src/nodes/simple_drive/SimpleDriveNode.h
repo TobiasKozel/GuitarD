@@ -3,22 +3,26 @@
 
 class SimpleDriveNodeUi final : public NodeUi {
   double last = 0;
-  const double speed = 0.1;
+  const double speed = 0.2;
 public:
   SimpleDriveNodeUi(NodeShared* param) : NodeUi(param) {
   }
 
   void Draw(IGraphics & g) override {
-    const double val = AmpToDB(*(shared->meters[0]->value)) + 255;
-    last = val * speed + (1 - speed) * last;
-    const int bright = std::min<int>(255, last);
+    double val = AmpToDB(*(shared->meters[0]->value));
+    val = val * 10 + 255;
+    int bright = 0;
     NodeUi::Draw(g);
+    if (val > 0) {
+      last = val * speed + (1 - speed) * last;
+      bright = std::min<int>(255, last);
+    }
     const float x = mRECT.L + 125;
     const float y = mRECT.T + 80;
     const IRECT pos = { x, y, x + 30, y + 30 };
     g.FillRect(
       IColor(255, bright, 50, 50),
-      IRECT( x, y, x + 30, y + 30)
+      IRECT(x, y, x + 30, y + 30)
     );
     mDirty = true;
   }

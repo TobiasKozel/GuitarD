@@ -6,7 +6,6 @@
 
 // #define DR_WAV_IMPLEMENTATION
 // #include "thirdparty/dr_wav.h"
-#include <filesystem>
 #include <thirdparty/json.hpp>
 
 struct MicPosition {
