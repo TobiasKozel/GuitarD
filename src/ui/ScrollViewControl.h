@@ -7,17 +7,17 @@ using namespace igraphics;
 
 class ScrollViewControl : public IControl {
   WDL_PtrList<IControl> mChildren;
-  float mChildPaddingY = 10;
   float mScrollY = 0;
   float mContentHeight = 0;
   float mContentWidth = 0;
+  IControl* mMouseOver = nullptr;
+  float mChildPaddingY = 10;
 public:
-  ScrollViewControl(IRECT bounds) : IControl(bounds) {
-
-  }
+  ScrollViewControl(IRECT bounds) : IControl(bounds) {}
 
   void appendChild(IControl* child) {
     mChildren.Add(child);
+    mDirty = true;
   }
 
   void appendChild(IControl& child) {
@@ -28,6 +28,7 @@ public:
     int index = mChildren.Find(&child);
     if (index != -1) {
       mChildren.Delete(index, wantsDelete);
+      mDirty = true;
       return true;
     }
     return false;
@@ -36,6 +37,16 @@ public:
   static void shiftRectY(IRECT& r, const float y) {
     r.T += y;
     r.B += y;
+  }
+
+  void setPadding(float padding) {
+    mChildPaddingY = padding;
+    mDirty = true;
+  }
+
+  void scroll(float y) {
+    mScrollY += y;
+    mDirty = true;
   }
 
   void layout() {
@@ -57,7 +68,7 @@ public:
       mContentHeight += height + (isLast ? 0.f : mChildPaddingY);
       c->SetTargetRECT(r);
       if (isLast) {
-        const float scrollLimit = mRECT.H() * 0.7;
+        const float scrollLimit = mRECT.H();
         if (r.B - mScrollY < scrollLimit) {
           mScrollY = r.B - scrollLimit;
         }
@@ -80,7 +91,6 @@ public:
 
   void Draw(IGraphics& g) override {
     layout();
-    g.FillRect(COLOR_DARK_GRAY, mTargetRECT);
     for (int i = 0; i < mChildren.GetSize(); i++) {
       mChildren.Get(i)->Draw(g);
     }
@@ -97,21 +107,57 @@ public:
     mDirty = true;
   }
 
-#define RELAY_MOUSE_EVENT(function) IRECT click = { x, y, x, y };\
-  for (int i = 0; i < mChildren.GetSize(); i++) {\
-    IControl* c = mChildren.Get(i);\
-    if (c->GetTargetRECT().Contains(click)) {\
-      c->function(x, y, mod);\
-      mDirty = true;\
-      return;\
-    }\
-  }\
+  IControl* getChildAtCoord(const float x, const float y) const {
+    IRECT click = { x, y, x, y };
+    for (int i = 0; i < mChildren.GetSize(); i++) {
+      IControl* c = mChildren.Get(i);
+      if (c->GetTargetRECT().Contains(click)) {
+        return c;
+      }
+    }
+    return nullptr;
+  }
 
-  void OnMouseDblClick(float x, float y, const IMouseMod& mod) override { RELAY_MOUSE_EVENT(OnMouseDblClick) }
+  void OnMouseDblClick(float x, float y, const IMouseMod& mod) override {
+    IControl* target = getChildAtCoord(x, y);
+    if (target != nullptr) {
+      target->OnMouseDblClick(x, y, mod);
+      mDirty = true;
+    }
+  }
 
-  void OnMouseDown(float x, float y, const IMouseMod& mod) override { RELAY_MOUSE_EVENT(OnMouseDown) }
+  void OnMouseDown(float x, float y, const IMouseMod& mod) override {
+    IControl* target = getChildAtCoord(x, y);
+    if (target != nullptr) {
+      target->OnMouseDown(x, y, mod);
+      mDirty = true;
+    }
+  }
 
-  void OnMouseUp(float x, float y, const IMouseMod& mod) override { RELAY_MOUSE_EVENT(OnMouseUp) }
+  void OnMouseUp(float x, float y, const IMouseMod& mod) override {
+    IControl* target = getChildAtCoord(x, y);
+    if (target != nullptr) {
+      target->OnMouseUp(x, y, mod);
+      mDirty = true;
+    }
+  }
+
+  void OnMouseOver(float x, float y, const IMouseMod& mod) override {
+    IControl::OnMouseOver(x, y, mod);
+    IControl* target = getChildAtCoord(x, y);
+    if (mMouseOver != target && mMouseOver != nullptr) {
+      mMouseOver->OnMouseOut();
+    }
+    if (target != nullptr) {
+      target->OnMouseOver(x, y, mod);
+      mDirty = true;
+    }
+    mMouseOver = target;
+  }
+
+  //virtual bool OnKeyDown(float x, float y, const IKeyPress& key) { return false; }
+
+  //virtual bool OnKeyUp(float x, float y, const IKeyPress& key) { return false; }
 
   ~ScrollViewControl() {
     mChildren.Empty(true);
