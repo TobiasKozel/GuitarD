@@ -12,6 +12,7 @@ class ScrollViewControl : public IControl {
   bool mFullWidthChildren = false;
   bool mScrollBar = true;
   float mScrollBarWidth = 8;
+  bool mDoCleanUp = true;
 
   /** Internal States */
   WDL_PtrList<IControl> mChildren;
@@ -37,7 +38,7 @@ class ScrollViewControl : public IControl {
   IColor mScrollBarHoverColor = IColor(255, 255, 255, 255);
   IColor mScrollBarActiveColor = Theme::Colors::ACCENT;
 public:
-  ScrollViewControl(IRECT bounds) : IControl(bounds) {}
+  ScrollViewControl(const IRECT bounds) : IControl(bounds) {}
 
   ScrollViewControl() : IControl({}) {}
 
@@ -70,7 +71,7 @@ public:
     for (int i = 0; i < childCount; i++) {
       const bool isLast = i == childCount - 1;
       IControl* c = mChildren.Get(i);
-      IRECT r = c->GetTargetRECT();
+      IRECT r = c->GetRECT();
       const float height = r.H();
       const float width = mFullWidthChildren ? mRECT.W() : r.W();
       if (width > mContentWidth) { mContentWidth = width; }
@@ -79,16 +80,13 @@ public:
       r.B = height;
       shiftRectY(r, mContentHeight);
       mContentHeight += height + (isLast ? 0.f : mChildPaddingY);
-      c->SetTargetRECT(r);
+      c->SetTargetRECT(r); // This won't call OnResize() yet
       if (isLast) {
         const float scrollLimit = mRECT.H();
         if (r.B - mScrollY < scrollLimit) {
           mScrollY = r.B - scrollLimit;
         }
       }
-    }
-    if (mContentHeight > mChildPaddingY) {
-      mContentHeight -= mChildPaddingY;
     }
     if (mScrollY < 0) {
       mScrollY = 0;
@@ -97,15 +95,15 @@ public:
       IControl* c = mChildren.Get(i);
       IRECT r = c->GetTargetRECT();
       shiftRectY(r, -mScrollY);
-      r.Translate(mRECT.L, mRECT.T);
-      c->SetTargetAndDrawRECTs(r); // Will call OnResize on the child element
+      r.Translate(mRECT.L, mRECT.T); // Apply the absolute position of the view itself
+      c->SetTargetAndDrawRECTs(r); // Will call OnResize() on the child element
     }
-    // Once all the children now the dimensions
+    // Once all the children know the dimensions ask for a redraw
     mDirty = true;
   }
 
   bool removeChild(IControl& child, const bool wantsDelete = false) {
-    int index = mChildren.Find(&child);
+    const int index = mChildren.Find(&child);
     if (index != -1) {
       mChildren.Delete(index, wantsDelete);
       mDirty = true;
@@ -114,24 +112,28 @@ public:
     return false;
   }
 
-  void setChildPadding(float padding) {
+  void setChildPadding(const float padding) {
     mChildPaddingY = padding;
     OnResize();
   }
 
   /** Forces the children to be the same width as the ScrollView */
-  void setFullWidthChildren(bool full) {
+  void setFullWidthChildren(const bool full) {
     mFullWidthChildren = full;
     OnResize();
   }
 
-  void setScrollBarEnable(bool enable) {
+  void setScrollBarEnable(const bool enable) {
     mScrollBar = enable;
     OnResize();
   }
 
+  void setCleanUpEnabhled(const bool enable) {
+    mDoCleanUp = enable;
+  }
+
   /** Scrolls in the y direction */
-  void scroll(float y) {
+  void scroll(const float y) {
     mScrollY += y;
     OnResize();
   }
@@ -163,7 +165,17 @@ public:
 
 
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
-    scroll(d * -20);
+    if (mod.C) {
+      IControl* c = getChildAtCoord(x, y);
+      if (c != nullptr) {
+        c->OnMouseWheel(x, y, mod, d);
+        mDirty = true;
+      }
+    }
+    else {
+      scroll(d * -40);
+    }
+    
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
@@ -171,13 +183,23 @@ public:
       scroll(dY / mScrollBarRatio);
     }
     else {
-      scroll(-dY);
-      mDistanceDragged += abs(dX) + abs(dY);
+      if (mod.C) {
+        IControl* c = getChildAtCoord(x, y);
+        if (c != nullptr) {
+          /** TODO: figure out a way to allow controls to handle a drag */
+          c->OnMouseDrag(x, y, dX, dY, mod);
+          mDirty = true;
+        }
+      }
+      else {
+        scroll(-dY);
+        mDistanceDragged += abs(dX) + abs(dY);
+      }
     }
   }
 
   IControl* getChildAtCoord(const float x, const float y) const {
-    IRECT click = { x, y, x, y };
+    const IRECT click = { x, y, x, y };
     for (int i = 0; i < mChildren.GetSize(); i++) {
       IControl* c = mChildren.Get(i);
       IRECT r = c->GetTargetRECT();
@@ -238,7 +260,7 @@ public:
     }
     if (target != nullptr) {
       target->OnMouseOver(x, y, mod);
-      /** We'll just assume a control doesn't change dimensions when hovering */
+      /** We'll just assume a child control doesn't change dimensions when hovering */
       mDirty = true;
     }
     mMouseOver = target;
@@ -259,7 +281,9 @@ public:
   //virtual bool OnKeyUp(float x, float y, const IKeyPress& key) { return false; }
 
   ~ScrollViewControl() {
-    mChildren.Empty(true);
+    if (mDoCleanUp) {
+      mChildren.Empty(true);
+    }
   }
 
 private:

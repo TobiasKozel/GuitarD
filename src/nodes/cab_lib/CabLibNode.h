@@ -115,7 +115,13 @@ public:
     test->appendChild(t);
     t = new PlaceHolder(IRECT(0, 0, 130, 40), "Element 3");
     test->appendChild(t);
-    t = new PlaceHolder(IRECT(0, 0, 110, 20), "Element 4");
+    IVKnobControl* c = new IVKnobControl(
+      IRECT(0, 0, 120, 120), [](IControl* pCaller) {
+    }, "TEST", DEFAULT_STYLE, true, true);
+    test->appendChild(c);
+    t = new PlaceHolder(IRECT(0, 0, 80, 80), "Element 4");
+    test->appendChild(t);
+    t = new PlaceHolder(IRECT(0, 0, 400, 20), "Element 5");
     test->appendChild(t);
     shared->graphics->AttachControl(test);
   }

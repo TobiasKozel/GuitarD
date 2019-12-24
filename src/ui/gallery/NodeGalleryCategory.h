@@ -6,7 +6,6 @@
 using namespace iplug;
 using namespace igraphics;
 
-
 class GalleryCategory : public IControl {
   WDL_PtrList<GalleryElement> mElements;
   bool mOpen = false;
