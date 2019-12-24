@@ -128,7 +128,6 @@ public:
 
   ~CabLibNodeUi() {
     mCabinets.Empty(true);
-    delete test;
   }
 
   void Draw(IGraphics& g) override {

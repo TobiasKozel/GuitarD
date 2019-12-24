@@ -12,16 +12,31 @@ class ScrollViewControl : public IControl {
   float mContentWidth = 0;
   IControl* mMouseOver = nullptr;
   float mChildPaddingY = 10;
+  float mDistanceDragged = -1;
+  float mDragThreshold = 4;
+  bool mAttached = false;
 public:
   ScrollViewControl(IRECT bounds) : IControl(bounds) {}
 
   void appendChild(IControl* child) {
     mChildren.Add(child);
+    if (mAttached) {
+      child->SetDelegate(*GetDelegate());
+    }
     mDirty = true;
   }
 
   void appendChild(IControl& child) {
     appendChild(&child);
+  }
+
+  void OnInit() override {
+    IControl::OnInit();
+    mAttached = true;
+    for (int i = 0; i < mChildren.GetSize(); i++) {
+      IControl* c = mChildren.Get(i);
+      c->SetDelegate(*GetDelegate());
+    }
   }
 
   bool removeChild(IControl& child, const bool wantsDelete = false) {
@@ -104,6 +119,7 @@ public:
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     mScrollY -= dY;
+    mDistanceDragged += abs(dX) + abs(dY);
     mDirty = true;
   }
 
@@ -127,18 +143,22 @@ public:
   }
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
-    IControl* target = getChildAtCoord(x, y);
-    if (target != nullptr) {
-      target->OnMouseDown(x, y, mod);
-      mDirty = true;
+    if (mDistanceDragged < mDragThreshold) {
+      IControl* target = getChildAtCoord(x, y);
+      if (target != nullptr) {
+        target->OnMouseDown(x, y, mod);
+        mDirty = true;
+      }
     }
   }
 
   void OnMouseUp(float x, float y, const IMouseMod& mod) override {
-    IControl* target = getChildAtCoord(x, y);
-    if (target != nullptr) {
-      target->OnMouseUp(x, y, mod);
-      mDirty = true;
+    if (mDistanceDragged < mDragThreshold) {
+      IControl* target = getChildAtCoord(x, y);
+      if (target != nullptr) {
+        target->OnMouseUp(x, y, mod);
+        mDirty = true;
+      }
     }
   }
 
