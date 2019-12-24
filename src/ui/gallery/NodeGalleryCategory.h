@@ -1,54 +1,38 @@
 #pragma once
+#include "IControl.h"
+#include "src/misc/MessageBus.h"
 #include "NodeGalleryElement.h"
 
 using namespace iplug;
 using namespace igraphics;
 
 
-class GalleryCategory {
+class GalleryCategory : public IControl {
   WDL_PtrList<GalleryElement> mElements;
-public:
-  bool mOpen;
-  const char* mName;
-  // keep this one around so the c_str() of it stays valid
-  std::string mNameString;
-  IRECT* mViewport;
-  IRECT mRECT;
+  bool mOpen = false;
+  WDL_String mName;
+  MessageBus::Bus* mBus = nullptr;
   IRECT mTitleRect;
-  GalleryCategory* mPrev;
+public:
 
-  GalleryCategory(GalleryCategory* prev, IRECT* viewport) {
-    mPrev = prev;
-    mViewport = viewport;
-    mOpen = false;
-    mRECT = IRECT(0, 0, 400, Theme::Gallery::ELEMENT_TITLE_HEIGHT);
-    mTitleRect = mRECT;
+  GalleryCategory(MessageBus::Bus* bus) : IControl({}) {
+    mBus = bus;
   }
 
   ~GalleryCategory() {
     mElements.Empty(true);
   }
 
-  void OnResize() {
-  }
-
   void addNode(const NodeList::NodeInfo node) {
-    mNameString = node.categoryName;
-    mName = mNameString.c_str();
+    if (mName.GetLength() == 0) {
+      // Take the name of the first node, they'll all be the same
+      mName.Set(node.categoryName.c_str());
+    }
     mElements.Compact();
     mElements.Add(new GalleryElement(node));
   }
 
   void Draw(IGraphics& g) {
-    mRECT.L = mViewport->L;
-    mRECT.R = mViewport->R;
-    // See at which y the category starts
-    if (mPrev != nullptr) {
-      mRECT.T = mPrev->mRECT.B + Theme::Gallery::CATEGORY_PADDING;
-    }
-    else {
-      mRECT.T = mViewport->T;
-    }
     // Title is always visible
     mRECT.B = mRECT.T + Theme::Gallery::ELEMENT_TITLE_HEIGHT;
     if (mOpen) {
@@ -70,24 +54,22 @@ public:
     else {
       mTitleRect = mRECT;
     }
+    mTargetRECT = mRECT;
     g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG, mTitleRect);
-    g.DrawText(Theme::Gallery::CATEGORY_TITLE, mName, mTitleRect);
+    g.DrawText(Theme::Gallery::CATEGORY_TITLE, mName.Get(), mTitleRect);
   }
 
-  NodeList::NodeInfo* OnMouseDown(const float x, const float y, const IMouseMod& mod) {
+  void OnMouseUp(const float x, const float y, const IMouseMod& mod) override {
     IRECT p(x, y, x, y);
     if (mTitleRect.Contains(p)) {
       mOpen = !mOpen;
-      return nullptr;
+      return;
     }
     for (int i = 0; i < mElements.GetSize(); i++) {
       GalleryElement* elem = mElements.Get(i);
       if (elem->mRECT.Contains(p)) {
-        return &(elem->mInfo);
+        MessageBus::fireEvent<NodeList::NodeInfo>(mBus, MessageBus::NodeAdd, elem->mInfo);
       }
     }
-    return nullptr;
   }
-
-
 };

@@ -509,13 +509,10 @@ private:
    * keep them on top of the layer stack
    */
   void sortRenderStack() const {
-    if (mCableLayer != nullptr) {
-      mGraphics->RemoveControl(mCableLayer);
-      mGraphics->AttachControl(mCableLayer);
-    }
+    mGraphics->MoveOnTop(mCableLayer);
+    mGraphics->MoveOnTop(mNodeGallery);
     if (mNodeGallery != nullptr) {
-      mGraphics->RemoveControl(mNodeGallery);
-      mGraphics->AttachControl(mNodeGallery);
+      mGraphics->MoveOnTop(mNodeGallery->mScrollview);
     }
   }
 

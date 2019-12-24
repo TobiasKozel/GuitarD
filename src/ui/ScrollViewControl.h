@@ -15,8 +15,11 @@ class ScrollViewControl : public IControl {
   float mDistanceDragged = -1;
   float mDragThreshold = 4;
   bool mAttached = false;
+  bool mFullWidthChildren = false;
 public:
   ScrollViewControl(IRECT bounds) : IControl(bounds) {}
+
+  ScrollViewControl() : IControl({}) {}
 
   void appendChild(IControl* child) {
     mChildren.Add(child);
@@ -32,11 +35,11 @@ public:
 
   void OnInit() override {
     IControl::OnInit();
-    mAttached = true;
     for (int i = 0; i < mChildren.GetSize(); i++) {
       IControl* c = mChildren.Get(i);
       c->SetDelegate(*GetDelegate());
     }
+    mAttached = true;
   }
 
   bool removeChild(IControl& child, const bool wantsDelete = false) {
@@ -54,8 +57,13 @@ public:
     r.B += y;
   }
 
-  void setPadding(float padding) {
+  void setChildPadding(float padding) {
     mChildPaddingY = padding;
+    mDirty = true;
+  }
+
+  void setFullWidthChildren(bool full) {
+    mFullWidthChildren = full;
     mDirty = true;
   }
 
@@ -74,7 +82,7 @@ public:
       IControl* c = mChildren.Get(i);
       IRECT r = c->GetTargetRECT();
       const float height = r.H();
-      const float width = r.W();
+      const float width = mFullWidthChildren ? mRECT.W() : r.W();
       if (width > mContentWidth) { mContentWidth = width; }
       r.L = r.T = 0;
       r.R = width;
@@ -106,6 +114,7 @@ public:
 
   void Draw(IGraphics& g) override {
     layout();
+    g.FillRect(COLOR_DARK_GRAY, mRECT);
     for (int i = 0; i < mChildren.GetSize(); i++) {
       mChildren.Get(i)->Draw(g);
     }
@@ -127,7 +136,8 @@ public:
     IRECT click = { x, y, x, y };
     for (int i = 0; i < mChildren.GetSize(); i++) {
       IControl* c = mChildren.Get(i);
-      if (c->GetTargetRECT().Contains(click)) {
+      IRECT r = c->GetTargetRECT();
+      if (r.Contains(click)) {
         return c;
       }
     }
@@ -160,6 +170,7 @@ public:
         mDirty = true;
       }
     }
+    mDistanceDragged = 0;
   }
 
   void OnMouseOver(float x, float y, const IMouseMod& mod) override {
