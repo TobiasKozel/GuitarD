@@ -13,6 +13,9 @@ class GalleryCategory : public IControl {
   WDL_String mName;
   MessageBus::Bus* mBus = nullptr;
   IRECT mTitleRect;
+  float mColumns = 0;
+  /** Can't use mMouseIsOver since it will be cleared on setRECT */
+  bool mMouseHover = false;
 public:
 
   GalleryCategory(MessageBus::Bus* bus) : IControl({}) {
@@ -32,30 +35,49 @@ public:
     mElements.Add(new GalleryElement(node));
   }
 
-  void Draw(IGraphics& g) {
+  void OnResize() override {
     // Title is always visible
     mRECT.B = mRECT.T + Theme::Gallery::ELEMENT_TITLE_HEIGHT;
     if (mOpen) {
       // Calculate own height
       mTitleRect = mRECT;
-      const float columns = std::max(static_cast<int>(
+      mColumns = std::max(static_cast<int>(
         floor(mRECT.W() / (Theme::Gallery::ELEMENT_WIDTH
-        + Theme::Gallery::ELEMENT_PADDING * 1.5))), 1
+          + Theme::Gallery::ELEMENT_PADDING * 1.5))), 1
       );
-      int rows = ceilf(mElements.GetSize() / columns);
+      int rows = ceilf(mElements.GetSize() / mColumns);
       mRECT.B +=
         rows * Theme::Gallery::ELEMENT_HEIGHT + rows
         * Theme::Gallery::ELEMENT_PADDING + Theme::Gallery::ELEMENT_PADDING;
-      g.FillRect(Theme::Gallery::CATEGORY_BG, mRECT);
-      for (int i = 0; i < mElements.GetSize(); i++) {
-        mElements.Get(i)->Draw(g, &mRECT, i, columns);
-      }
     }
     else {
       mTitleRect = mRECT;
     }
     mTargetRECT = mRECT;
-    g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG, mTitleRect);
+  }
+
+  void Draw(IGraphics& g) {
+    if (mOpen) {
+      if (mMouseHover) {
+        g.FillRect(Theme::Gallery::CATEGORY_BG_HOVER, mRECT);
+      }
+      else {
+        g.FillRect(Theme::Gallery::CATEGORY_BG, mRECT);
+      }
+      for (int i = 0; i < mElements.GetSize(); i++) {
+        mElements.Get(i)->Draw(g, &mRECT, i, mColumns);
+      }
+    }
+
+    if (mOpen) {
+      g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG_OPEN, mTitleRect);
+    }
+    else if (mMouseHover) {
+      g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG_HOVER, mTitleRect);
+    }
+    else {
+      g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG, mTitleRect);
+    }
     g.DrawText(Theme::Gallery::CATEGORY_TITLE, mName.Get(), mTitleRect);
   }
 
@@ -63,6 +85,7 @@ public:
     IRECT p(x, y, x, y);
     if (mTitleRect.Contains(p)) {
       mOpen = !mOpen;
+      OnResize();
       return;
     }
     for (int i = 0; i < mElements.GetSize(); i++) {
@@ -71,5 +94,13 @@ public:
         MessageBus::fireEvent<NodeList::NodeInfo>(mBus, MessageBus::NodeAdd, elem->mInfo);
       }
     }
+  }
+
+  void OnMouseOver(float x, float y, const IMouseMod& mod) override {
+    mMouseHover = true;
+  }
+
+  void OnMouseOut() override {
+    mMouseHover = false;
   }
 };

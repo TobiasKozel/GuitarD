@@ -32,9 +32,12 @@ namespace Theme {
     const float ELEMENT_PADDING = 8;
 
     const IColor CATEGORY_TITLE_BG(255, 100, 100, 100);
+    const IColor CATEGORY_TITLE_BG_HOVER(255, 150, 150, 150);
+    const IColor CATEGORY_TITLE_BG_OPEN(255, 150, 100, 100);
     const IText CATEGORY_TITLE{ 24, COLOR_WHITE, "Roboto-Regular", EAlign::Center, EVAlign::Middle, 0 };
     const float CATEGORY_PADDING = 8;
     const IColor CATEGORY_BG(255, 30, 30, 30);
+    const IColor CATEGORY_BG_HOVER(255, 40, 40, 40);
   }
 
   namespace Categories {

@@ -15,14 +15,27 @@ class ScrollViewControl : public IControl {
 
   /** Internal States */
   WDL_PtrList<IControl> mChildren;
+  /** Scroll offset in Y */
   float mScrollY = 0;
+  /** Content dimensions */
   float mContentHeight = 0;
+  /** Content dimensions */
   float mContentWidth = 0;
+  /** Whether the scrollbar is being dragged */
   bool mScrollBarDragging = false;
+  bool mScrollBarHover = false;
+  /** The size ratio of the scrollbar ( 1.0 is mRECT.H() )*/
   float mScrollBarRatio = 1;
+  /** The child IControl the cursor is currently over */
   IControl* mMouseOver = nullptr;
+  /** Distance the cursor was dragged, to prevent click events if it's over mDragThreshold */
   float mDistanceDragged = -1;
+  /** Whether the control is already attached to IGraphics */
   bool mAttached = false;
+
+  IColor mScrollBarColor = IColor(200, 255, 255, 255);
+  IColor mScrollBarHoverColor = IColor(255, 255, 255, 255);
+  IColor mScrollBarActiveColor = Theme::Colors::ACCENT;
 public:
   ScrollViewControl(IRECT bounds) : IControl(bounds) {}
 
@@ -49,42 +62,7 @@ public:
     mAttached = true;
   }
 
-  bool removeChild(IControl& child, const bool wantsDelete = false) {
-    int index = mChildren.Find(&child);
-    if (index != -1) {
-      mChildren.Delete(index, wantsDelete);
-      mDirty = true;
-      return true;
-    }
-    return false;
-  }
-
-  static void shiftRectY(IRECT& r, const float y) {
-    r.T += y;
-    r.B += y;
-  }
-
-  void setChildPadding(float padding) {
-    mChildPaddingY = padding;
-    mDirty = true;
-  }
-
-  void setFullWidthChildren(bool full) {
-    mFullWidthChildren = full;
-    mDirty = true;
-  }
-
-  void setScrollBarEnable(bool enable) {
-    mScrollBar = enable;
-    mDirty = true;
-  }
-
-  void scroll(float y) {
-    mScrollY += y;
-    mDirty = true;
-  }
-
-  void layout() {
+  void OnResize() override {
     mContentHeight = 0;
     mContentWidth = 0;
     const int childCount = mChildren.GetSize();
@@ -120,12 +98,45 @@ public:
       IRECT r = c->GetTargetRECT();
       shiftRectY(r, -mScrollY);
       r.Translate(mRECT.L, mRECT.T);
-      c->SetTargetAndDrawRECTs(r);
+      c->SetTargetAndDrawRECTs(r); // Will call OnResize on the child element
     }
+    // Once all the children now the dimensions
+    mDirty = true;
+  }
+
+  bool removeChild(IControl& child, const bool wantsDelete = false) {
+    int index = mChildren.Find(&child);
+    if (index != -1) {
+      mChildren.Delete(index, wantsDelete);
+      mDirty = true;
+      return true;
+    }
+    return false;
+  }
+
+  void setChildPadding(float padding) {
+    mChildPaddingY = padding;
+    OnResize();
+  }
+
+  /** Forces the children to be the same width as the ScrollView */
+  void setFullWidthChildren(bool full) {
+    mFullWidthChildren = full;
+    OnResize();
+  }
+
+  void setScrollBarEnable(bool enable) {
+    mScrollBar = enable;
+    OnResize();
+  }
+
+  /** Scrolls in the y direction */
+  void scroll(float y) {
+    mScrollY += y;
+    OnResize();
   }
 
   void Draw(IGraphics& g) override {
-    layout();
     g.FillRect(COLOR_DARK_GRAY, mRECT);
     for (int i = 0; i < mChildren.GetSize(); i++) {
       mChildren.Get(i)->Draw(g);
@@ -133,28 +144,36 @@ public:
     if (mScrollBar) {
       IRECT scroll = mRECT.GetFromRight(mScrollBarWidth);
       const float height = mRECT.H();
-      mScrollBarRatio = height / (mContentHeight + 1.f);
-      scroll.T += mScrollY * mScrollBarRatio;
-      scroll.B = scroll.T + mScrollBarRatio * height;
-      g.FillRect(IColor(255, 255, 255, 255), scroll);
+      mScrollBarRatio = std::min(height / (mContentHeight + 1.f), 1.f);
+      if (mScrollBarRatio < 1.f) {
+        scroll.T += mScrollY * mScrollBarRatio;
+        scroll.B = scroll.T + mScrollBarRatio * height;
+        if (mScrollBarDragging) {
+          g.FillRect(mScrollBarActiveColor, scroll);
+        }
+        else if (mScrollBarHover) {
+          g.FillRect(mScrollBarHoverColor, scroll);
+        }
+        else {
+          g.FillRect(mScrollBarColor, scroll);
+        }
+      }
     }
   }
 
 
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
-    mScrollY -= d * 20;
-    mDirty = true;
+    scroll(d * -20);
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
     if (mScrollBarDragging) {
-      mScrollY += dY / mScrollBarRatio;
+      scroll(dY / mScrollBarRatio);
     }
     else {
-      mScrollY -= dY;
+      scroll(-dY);
       mDistanceDragged += abs(dX) + abs(dY);
     }
-    mDirty = true;
   }
 
   IControl* getChildAtCoord(const float x, const float y) const {
@@ -173,19 +192,20 @@ public:
     IControl* target = getChildAtCoord(x, y);
     if (target != nullptr) {
       target->OnMouseDblClick(x, y, mod);
-      mDirty = true;
+      OnResize();
     }
   }
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
     if (mScrollBar && mRECT.GetFromRight(mScrollBarWidth).Contains(IRECT(x, y, x, y))) {
       mScrollBarDragging = true;
+      mDirty = true;
     }
     else {
       IControl* target = getChildAtCoord(x, y);
       if (target != nullptr) {
         target->OnMouseDown(x, y, mod);
-        mDirty = true;
+        OnResize();
       }
     }
   }
@@ -195,24 +215,43 @@ public:
       IControl* target = getChildAtCoord(x, y);
       if (target != nullptr) {
         target->OnMouseUp(x, y, mod);
-        mDirty = true;
+        OnResize();
       }
     }
     mScrollBarDragging = false;
     mDistanceDragged = 0;
+    mDirty = true;
   }
 
   void OnMouseOver(float x, float y, const IMouseMod& mod) override {
     IControl::OnMouseOver(x, y, mod);
+    if (mScrollBar) {
+      const bool prevHover = mScrollBarHover;
+      mScrollBarHover = mRECT.GetFromRight(mScrollBarWidth).Contains(IRECT(x, y, x, y));
+      if (prevHover != mScrollBarHover) {
+        mDirty = true;
+      }
+    }
     IControl* target = getChildAtCoord(x, y);
     if (mMouseOver != target && mMouseOver != nullptr) {
       mMouseOver->OnMouseOut();
     }
     if (target != nullptr) {
       target->OnMouseOver(x, y, mod);
+      /** We'll just assume a control doesn't change dimensions when hovering */
       mDirty = true;
     }
     mMouseOver = target;
+  }
+
+  void OnMouseOut() override {
+    IControl::OnMouseOut();
+    mScrollBarHover = false;
+    if (mMouseOver != nullptr) {
+      mMouseOver->OnMouseOut();
+      mMouseOver = nullptr;
+    }
+    mDirty = true;
   }
 
   //virtual bool OnKeyDown(float x, float y, const IKeyPress& key) { return false; }
@@ -221,5 +260,11 @@ public:
 
   ~ScrollViewControl() {
     mChildren.Empty(true);
+  }
+
+private:
+  static void shiftRectY(IRECT& r, const float y) {
+    r.T += y;
+    r.B += y;
   }
 };
