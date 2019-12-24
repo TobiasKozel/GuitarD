@@ -6,16 +6,23 @@ using namespace iplug;
 using namespace igraphics;
 
 class ScrollViewControl : public IControl {
+  /** Settings */
+  float mChildPaddingY = 10;
+  float mDragThreshold = 4;
+  bool mFullWidthChildren = false;
+  bool mScrollBar = true;
+  float mScrollBarWidth = 8;
+
+  /** Internal States */
   WDL_PtrList<IControl> mChildren;
   float mScrollY = 0;
   float mContentHeight = 0;
   float mContentWidth = 0;
+  bool mScrollBarDragging = false;
+  float mScrollBarRatio = 1;
   IControl* mMouseOver = nullptr;
-  float mChildPaddingY = 10;
   float mDistanceDragged = -1;
-  float mDragThreshold = 4;
   bool mAttached = false;
-  bool mFullWidthChildren = false;
 public:
   ScrollViewControl(IRECT bounds) : IControl(bounds) {}
 
@@ -64,6 +71,11 @@ public:
 
   void setFullWidthChildren(bool full) {
     mFullWidthChildren = full;
+    mDirty = true;
+  }
+
+  void setScrollBarEnable(bool enable) {
+    mScrollBar = enable;
     mDirty = true;
   }
 
@@ -118,6 +130,14 @@ public:
     for (int i = 0; i < mChildren.GetSize(); i++) {
       mChildren.Get(i)->Draw(g);
     }
+    if (mScrollBar) {
+      IRECT scroll = mRECT.GetFromRight(mScrollBarWidth);
+      const float height = mRECT.H();
+      mScrollBarRatio = height / (mContentHeight + 1.f);
+      scroll.T += mScrollY * mScrollBarRatio;
+      scroll.B = scroll.T + mScrollBarRatio * height;
+      g.FillRect(IColor(255, 255, 255, 255), scroll);
+    }
   }
 
 
@@ -127,8 +147,13 @@ public:
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
-    mScrollY -= dY;
-    mDistanceDragged += abs(dX) + abs(dY);
+    if (mScrollBarDragging) {
+      mScrollY += dY / mScrollBarRatio;
+    }
+    else {
+      mScrollY -= dY;
+      mDistanceDragged += abs(dX) + abs(dY);
+    }
     mDirty = true;
   }
 
@@ -153,7 +178,10 @@ public:
   }
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
-    if (mDistanceDragged < mDragThreshold) {
+    if (mScrollBar && mRECT.GetFromRight(mScrollBarWidth).Contains(IRECT(x, y, x, y))) {
+      mScrollBarDragging = true;
+    }
+    else {
       IControl* target = getChildAtCoord(x, y);
       if (target != nullptr) {
         target->OnMouseDown(x, y, mod);
@@ -163,13 +191,14 @@ public:
   }
 
   void OnMouseUp(float x, float y, const IMouseMod& mod) override {
-    if (mDistanceDragged < mDragThreshold) {
+    if (mDistanceDragged < mDragThreshold && !mScrollBarDragging) {
       IControl* target = getChildAtCoord(x, y);
       if (target != nullptr) {
         target->OnMouseUp(x, y, mod);
         mDirty = true;
       }
     }
+    mScrollBarDragging = false;
     mDistanceDragged = 0;
   }
 
