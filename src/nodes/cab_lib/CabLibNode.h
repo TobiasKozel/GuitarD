@@ -1,114 +1,28 @@
 #pragma once
+#include <thirdparty/json.hpp>
 #include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
 // #include "resample.h"
 #include "src/node/Node.h"
 #include "src/ui/ScrollViewControl.h"
-#include <thirdparty/json.hpp>
-#include <cstring>
+#include "CabLibPopUp.h"
 
-// avoid some UNICODE issues with VST3 SDK and WDL dirscan
-#if defined VST3_API && defined OS_WIN
-  #ifdef FindFirstFile
-    #undef FindFirstFile
-    #undef FindNextFile
-    #undef WIN32_FIND_DATA
-    #undef PWIN32_FIND_DATA
-    #define FindFirstFile FindFirstFileA
-    #define FindNextFile FindNextFileA
-    #define WIN32_FIND_DATA WIN32_FIND_DATAA
-    #define LPWIN32_FIND_DATA LPWIN32_FIND_DATAA
-  #endif
-#endif
-
-#include "dirscan.h"
-#include "IPlugPaths.h"
-
-struct MicPosition {
-  WDL_String name;
-  WDL_String path;
-};
-
-struct Microphone {
-  WDL_String name;
-  WDL_String path;
-  WDL_PtrList<MicPosition> mPositions;
-  ~Microphone() {
-    mPositions.Empty(true);
-  }
-
-  void scanPositions() {
-    WDL_DirScan dir;
-    if (!dir.First(path.Get())) {
-      do {
-        const char* f = dir.GetCurrentFN();
-        // Skip hidden files and folders
-        if (f && f[0] != '.') {
-          if (!dir.GetCurrentIsDirectory()) {
-            // We're only interested in files, each corresponds to a IR
-            MicPosition* pos = new MicPosition();
-            pos->name.Append(f);
-            if (strncmp(".wav", pos->name.get_fileext(), 5) == 0,
-                strncmp(".WAV", pos->name.get_fileext(), 5) == 0)
-            {
-              dir.GetCurrentFullFN(&pos->path);
-              mPositions.Add(pos);
-            }
-            else {
-              delete pos;
-            }
-          }
-        }
-      } while (!dir.Next());
-    }
-  }
-};
-
-struct Cabinet {
-  WDL_String name;
-  WDL_String path;
-  WDL_PtrList<Microphone> mMics;
-
-  ~Cabinet() {
-    mMics.Empty(true);
-  }
-
-  void scanMics() {
-    WDL_DirScan dir;
-    if (!dir.First(path.Get())) {
-      do {
-        const char* f = dir.GetCurrentFN();
-        // Skip hidden files and folders
-        if (f && f[0] != '.') {
-          if (dir.GetCurrentIsDirectory()) {
-            // We're only interested in folders, each corresponds to a mic
-            Microphone* mic = new Microphone();
-            mMics.Add(mic);
-            mic->name.Append(f);
-            dir.GetCurrentFullFN(&mic->path);
-            mic->scanPositions();
-          }
-        }
-      } while (!dir.Next());
-    }
-  }
-};
 
 class CabLibNodeUi : public NodeUi {
-  WDL_PtrList<Cabinet> mCabinets;
   ScrollViewControl* test = nullptr;
 public:
   CabLibNodeUi(NodeShared* param) : NodeUi(param) {
-    WDL_String iniFolder;
-    INIPath(iniFolder, BUNDLE_NAME);
-    iniFolder.Append(PATH_DELIMITER);
-    iniFolder.Append("impulses");
-    buildIrTree(iniFolder.Get());
   }
 
   void setUpControls() override {
     NodeUi::setUpControls();
     test = new ScrollViewControl(mTargetRECT.GetPadded(-20));
+    test->setDoDragScroll(false);
     mElements.Add(test);
+    IVButtonControl* editButton = new IVButtonControl(IRECT(0, 0, 100, 30), [&](IControl* pCaller) {
+      SplashClickActionFunc(pCaller);
+      this->openSettings();
+    }, "EDIT", DEFAULT_STYLE, true, false);
+    test->appendChild(editButton);
     PlaceHolder* t = new PlaceHolder(IRECT(0, 0, 100, 20), "Element 1");
     test->appendChild(t);
     t = new PlaceHolder(IRECT(0, 0, 130, 60), "Element 2");
@@ -116,8 +30,8 @@ public:
     t = new PlaceHolder(IRECT(0, 0, 130, 40), "Element 3");
     test->appendChild(t);
     IVKnobControl* c = new IVKnobControl(
-      IRECT(0, 0, 120, 120), [](IControl* pCaller) {
-    }, "TEST", DEFAULT_STYLE, true, true);
+      IRECT(0, 0, 120, 120), 3
+    );
     test->appendChild(c);
     t = new PlaceHolder(IRECT(0, 0, 80, 80), "Element 4");
     test->appendChild(t);
@@ -126,14 +40,14 @@ public:
     shared->graphics->AttachControl(test);
   }
 
+  void openSettings() {
+    CabLibPopUp* cablib = new CabLibPopUp();
+    GetUI()->AttachControl(cablib);
+  }
+
   void cleanUp() override {
     NodeUi::cleanUp();
     shared->graphics->RemoveControl(test, true);
-  }
-
-
-  ~CabLibNodeUi() {
-    mCabinets.Empty(true);
   }
 
   void Draw(IGraphics& g) override {
@@ -143,30 +57,6 @@ public:
     //}
   }
 
-  void buildIrTree(const char* folder) {
-    WDL_DirScan dir;
-    WDBGMSG("Cabinets\n");
-    if (!dir.First(folder)) {
-      do {
-        const char* f = dir.GetCurrentFN();
-        // Skip hidden files and folders
-        if (f && f[0] != '.') {
-          if (dir.GetCurrentIsDirectory()) {
-            // We're only interested in folders, at the top level each corresponds to a cab
-            Cabinet* cab = new Cabinet();
-            mCabinets.Add(cab);
-            cab->name.Append(f);
-            dir.GetCurrentFullFN(&cab->path);
-            cab->scanMics();
-            WDBGMSG(cab->name.Get());
-          }
-        }
-      } while (!dir.Next());
-    }
-    else {
-      WDBGMSG("IR folder doesn't exist!\n");
-    }
-  }
 };
 
 

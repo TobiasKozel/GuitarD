@@ -477,6 +477,9 @@
     <ClInclude Include="..\src\graph\FormatGraph.h">
       <Filter>src\graph</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\cab_lib\CabLibPopUp.h">
+      <Filter>src\nodes\cabs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

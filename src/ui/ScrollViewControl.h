@@ -13,6 +13,7 @@ class ScrollViewControl : public IControl {
   bool mScrollBar = true;
   float mScrollBarWidth = 8;
   bool mDoCleanUp = true;
+  bool mDoDragScroll = true;
 
   /** Internal States */
   WDL_PtrList<IControl> mChildren;
@@ -33,6 +34,8 @@ class ScrollViewControl : public IControl {
   float mDistanceDragged = -1;
   /** Whether the control is already attached to IGraphics */
   bool mAttached = false;
+
+  IControl* mCapturedControl = nullptr;
 
   IColor mScrollBarColor = IColor(200, 255, 255, 255);
   IColor mScrollBarHoverColor = IColor(255, 255, 255, 255);
@@ -132,6 +135,10 @@ public:
     mDoCleanUp = enable;
   }
 
+  void setDoDragScroll(const bool enable) {
+    mDoDragScroll = enable;
+  }
+
   /** Scrolls in the y direction */
   void scroll(const float y) {
     mScrollY += y;
@@ -182,12 +189,18 @@ public:
       scroll(dY / mScrollBarRatio);
     }
     else {
-      if (mod.C) {
-        IControl* c = getChildAtCoord(x, y);
+      if (mod.C || !mDoDragScroll || mCapturedControl != nullptr) {
+        IControl* c = nullptr;
+        c = mCapturedControl != nullptr ? mCapturedControl : getChildAtCoord(x, y);
         if (c != nullptr) {
+          mCapturedControl = c;
           /** TODO: figure out a way to allow controls to handle a drag */
           c->OnMouseDrag(x, y, dX, dY, mod);
           mDirty = true;
+        }
+        else {
+          scroll(-dY);
+          mDistanceDragged += abs(dX) + abs(dY);
         }
       }
       else {
@@ -241,6 +254,7 @@ public:
     }
     mScrollBarDragging = false;
     mDistanceDragged = 0;
+    mCapturedControl = nullptr;
     mDirty = true;
   }
 

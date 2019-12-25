@@ -354,6 +354,7 @@
     <ClInclude Include="..\src\nodes\autogain\AutoGainNode.h" />
     <ClInclude Include="..\src\nodes\bitcrusher\BitCrusherNode.h" />
     <ClInclude Include="..\src\nodes\cab_lib\CabLibNode.h" />
+    <ClInclude Include="..\src\nodes\cab_lib\CabLibPopUp.h" />
     <ClInclude Include="..\src\nodes\combine\CombineNode.h" />
     <ClInclude Include="..\src\nodes\crybaby\CryBabyNode.h" />
     <ClInclude Include="..\src\nodes\envelope\EnvelopeNode.h" />

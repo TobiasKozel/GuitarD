@@ -74,7 +74,6 @@ class Graph {
   GraphBackground* mBackground = nullptr; // Always at the bottom
   CableLayer* mCableLayer = nullptr; // Always below the Gallery
   NodeGallery* mNodeGallery = nullptr; // Always top most
-  IControl* mPopUp = nullptr;
 
   HistoryStack mHistoryStack;
 
