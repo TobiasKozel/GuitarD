@@ -27,6 +27,7 @@ public:
     });
     avgExecutionTime = 0;
     mStats = DEBUG_FONT;
+    setRenderPriority(11);
   }
 
   void OnInit() override {
@@ -35,6 +36,7 @@ public:
      * no onDetach event to use for doing cleanup
      */
     mScrollview = new ScrollViewControl();
+    mScrollview->setRenderPriority(12);
     mScrollview->setFullWidthChildren(true);
     GetUI()->AttachControl(mScrollview);
     init();
@@ -49,11 +51,7 @@ public:
     mIsOpen = open;
     OnResize();
     mScrollview->Hide(!open);
-    if (mIsOpen) {
-      GetUI()->MoveOnTop(this);
-      GetUI()->MoveOnTop(mScrollview);
-    }
-    else {
+    if (!mIsOpen) {
       GetUI()->SetAllControlsDirty();
     }
   }

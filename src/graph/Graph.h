@@ -339,6 +339,7 @@ public:
     mOutputNode->setupUi(mGraphics);
 
     mCableLayer = new CableLayer(mBus, mGraphics, &mNodes, mOutputNode, mInputNode);
+    mCableLayer->setRenderPriority(10);
     mGraphics->AttachControl(mCableLayer);
 
     mNodeGallery = new NodeGallery(mBus, mGraphics);
@@ -454,7 +455,6 @@ public:
     }
     mNodes.Add(node);
     SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
-    sortRenderStack();
     mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
   }
 
@@ -540,23 +540,11 @@ public:
       for (int i = 0; i < mNodes.GetSize(); i++) {
         mNodes.Get(i)->setupUi(mGraphics);
       }
-      sortRenderStack();
       scaleUi();
     }
   }
 
 private:
-  /**
-   * This just removes the overlay IControls and adds them again to
-   * keep them on top of the layer stack
-   */
-  void sortRenderStack() const {
-    mGraphics->MoveOnTop(mCableLayer);
-    mGraphics->MoveOnTop(mNodeGallery);
-    if (mNodeGallery != nullptr) {
-      mGraphics->MoveOnTop(mNodeGallery->mScrollview);
-    }
-  }
 
   /**
    * Will try to tidy up the node graph, bound to the F key
