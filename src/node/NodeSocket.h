@@ -65,6 +65,7 @@ struct NodeSocketIn : public NodeSocket {
 
   void connect(NodeSocket* to, bool other) override {
     if (to->mIsInput == mIsInput) { return; }
+    if (to->mParentNode == mParentNode) { return; }
     if (other) {
       disconnect(to, false);
       to->connect(this, false);
@@ -124,7 +125,7 @@ struct NodeSocketOut : public NodeSocket {
     if (to->mIsInput == mIsInput) { return; }
     NodeSocketIn* toIn = dynamic_cast<NodeSocketIn*>(to);
     if (toIn == nullptr) { return; }
-
+    if (toIn->mParentNode == mParentNode) { return; }
     for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
       if (mConnectedTo[i] == to) {
         // assert(false);
