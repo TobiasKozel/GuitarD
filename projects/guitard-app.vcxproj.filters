@@ -471,6 +471,12 @@
     <ClInclude Include="..\src\ui\ScrollViewControl.h">
       <Filter>src\ui</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\graph\SortGraph.h">
+      <Filter>src\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\graph\FormatGraph.h">
+      <Filter>src\graph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

@@ -424,8 +424,4 @@ public:
       }
     }
   }
-
-  /** Called if the ui is resized TODOG move over to NodeUI */
-  virtual void layoutChanged() { }
 };
-

@@ -7,13 +7,19 @@
 #include "src/nodes/io/InputNode.h"
 #include "src/nodes/io/OutputNode.h"
 #include "src/ui/GraphBackground.h"
-#include "src/graph/Serializer.h"
+#include "Serializer.h"
+#include "SortGraph.h" 
 #include "src/parameter/ParameterManager.h"
 #include "src/ui/CableLayer.h"
 #include "src/ui/gallery/NodeGallery.h"
 #include "src/misc/HistoryStack.h"
-#include "src/nodes/envelope/EnvelopeNode.h"
+#include "FormatGraph.h"
 
+/**
+ * This is the "god object" which will handle all the nodes
+ * and interactions with the graph
+ * It's not a IControl itself but own a few which make up the GUI
+ */
 class Graph {
   MessageBus::Bus* mBus = nullptr;
   MessageBus::Subscription<Node*> mNodeDelSub;
@@ -26,11 +32,21 @@ class Graph {
   MessageBus::Subscription<GraphStats**> mReturnStats;
   MessageBus::Subscription<AutomationAttachRequest> mAutomationRequest;
 
-  iplug::igraphics::IGraphics* mGraphics = nullptr;
-  /** Holds all the nodes in the processing graph */
+  IGraphics* mGraphics = nullptr;
+
+  /**
+   * Holds all the nodes in the processing graph
+   */
   WDL_PtrList<Node> mNodes;
+
+  /**
+   * Mutex to keep changes to the graph like adding/removing or rerouting from crashing s
+   */
   WDL_Mutex mIsProcessing;
-  /** Dummy nodes to get the audio blocks in and out of the graph */
+
+  /**
+   * Dummy nodes to get the audio blocks in and out of the graph
+   */
   InputNode* mInputNode;
   OutputNode* mOutputNode;
 
@@ -41,27 +57,40 @@ class Graph {
    */
   int mChannelCount = 0;
 
+  /**
+   * This is the actual input channel count provided by the DAW
+   * The input channel count can be 1 if the plugin is on a mono track
+   * But internal processing will still happen in stereo
+   */
   int mInPutChannelCount = 0;
 
   int mSampleRate = 0;
 
   int mMaxBlockSize = MAX_BUFFER;
 
-  /** Control elements */
-  GraphBackground* mBackground = nullptr;
-  CableLayer* mCableLayer = nullptr;
-  NodeGallery* mNodeGallery = nullptr;
+  /**
+   * Control elements
+   */
+  GraphBackground* mBackground = nullptr; // Always at the bottom
+  CableLayer* mCableLayer = nullptr; // Always below the Gallery
+  NodeGallery* mNodeGallery = nullptr; // Always top most
+  IControl* mPopUp = nullptr;
 
   HistoryStack mHistoryStack;
 
   GraphStats mStats;
 
-  /** Editor window properties */
+  /**
+   * Editor window properties
+   * Kept around for the serialization
+   */
   int mWindowWidth = 0;
   int mWindowHeight = 0;
   float mWindowScale = 0;
 
-  /** Used to slice the dsp block in smaller slices */
+  /**
+   * Used to slice the dsp block in smaller slices
+   */
   sample** mSliceBuffer[2] = { nullptr };
 
 public:
@@ -75,7 +104,6 @@ public:
     mOutputNode = new OutputNode(mBus);
     mOutputNode->connectInput(mInputNode->shared.socketsOut[0]);
 
-    // output->connectInput(input->outSockets.Get(0));
     mNodeDelSub.subscribe(mBus, MessageBus::NodeDeleted, [&](Node* param) {
       MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
       this->removeNode(param, true);
@@ -141,7 +169,6 @@ public:
   }
 
   void testadd() {
-    return;
     // formatTest();
     Node* test = NodeList::createNode("CabLibNode");
     addNode(test, nullptr, 0, 500);
@@ -192,9 +219,15 @@ public:
     mSliceBuffer[1] = new sample*[channelCount];
   }
 
+  /**
+   * Main entry point for the DSP
+   */
   void ProcessBlock(iplug::sample** in, iplug::sample** out, const int nFrames) {
+    /**
+     * Process the block in smaller bits since it's too large
+     * Also abused to lower the delay a feedback node creates
+     */
     if (nFrames > mMaxBlockSize) {
-      /** Process the block in smaller bits since it's too large */
       const int overhang = nFrames % mMaxBlockSize;
       int s = 0;
       while (true) {
@@ -262,10 +295,11 @@ public:
     }
 
     pGraphics->HandleMouseOver(true);
+    pGraphics->AttachTextEntryControl();
+    pGraphics->AttachPopupMenuControl(DEFAULT_LABEL_TEXT);
     
     mGraphics->SetKeyHandlerFunc([&](const IKeyPress & key, const bool isUp) {
       // Gets the keystrokes in the standalone app
-      // TODOG figure out why this doesn't work in vst3
       if (key.S && (key.VK == kVK_Z) && !isUp) {
         MessageBus::fireEvent<bool>(this->mBus, MessageBus::PopUndoState, false);
         return true;
@@ -287,7 +321,7 @@ public:
         return true;
       }
       if ((key.VK == kVK_S) && !isUp) {
-        sortGraph();
+        SortGraph::sortGraph(mNodes, mInputNode, mOutputNode, &mIsProcessing);
         return true;
       }
       return false;
@@ -315,6 +349,10 @@ public:
     testadd();
   }
 
+  /**
+   * Updates the scale in the background layer and scales the UI according to
+   * mWindowWidth, mWindowHeight, mWindowScale
+   */
   void scaleUi() const {
     if (mWindowWidth != 0 && mWindowHeight != 0 && mWindowScale != 0 && mGraphics != nullptr) {
       mBackground->mScale = mWindowScale;
@@ -358,7 +396,9 @@ public:
     // WDBGMSG("x %f y %f s %f\n", x, y, scale);
   }
 
-  /** Centers the viewport around a specific node */
+  /**
+   * Centers the viewport around a specific node
+   */
   void centerNode(Node* node) {
     IRECT center = mGraphics->GetBounds().GetScaledAboutCentre(0);
     center.L -= node->shared.X;
@@ -394,9 +434,6 @@ public:
       mGraphics = pGraphics;
       // TODOG find out whether the context ever changes
     }
-    for (int n = 0; n < mNodes.GetSize(); n++) {
-      mNodes.Get(n)->layoutChanged();
-    }
   }
 
   /**
@@ -416,7 +453,7 @@ public:
       node->connectInput(pInput->shared.socketsOut[outputIndex], inputIndex);
     }
     mNodes.Add(node);
-    sortGraph(false);
+    SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
     sortRenderStack();
     mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
   }
@@ -427,6 +464,10 @@ public:
     }
   }
 
+  /**
+   * Will re route the connections the node provided
+   * Only takes care of the first input and first output
+   */
   void byPassConnection(Node* node) const {
     if (node->shared.inputCount > 0 && node->shared.outputCount > 0) {
       NodeSocket* prevSock = node->shared.socketsIn[0];
@@ -466,7 +507,7 @@ public:
     mParamManager.releaseNode(node);
     node->cleanUp();
     mNodes.DeletePtr(node, true);
-    sortGraph(false);
+    SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
     mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
   }
 
@@ -521,63 +562,9 @@ private:
    * Will try to tidy up the node graph, bound to the F key
    */
   void arrangeNodes() {
-    resetBranchPos(mInputNode);
-    arrangeBranch(mInputNode, Coord2D{ mInputNode->shared.Y, mInputNode->shared.X });
+    FormatGraph::resetBranchPos(mInputNode);
+    FormatGraph::arrangeBranch(mInputNode, Coord2D{ mInputNode->shared.Y, mInputNode->shared.X });
     centerGraph();
-  }
-
-  /**
-   * Recursively resets all the positions of nodes to (0, 0)
-   */
-  static void resetBranchPos(Node* node) {
-    if (node == nullptr || node->shared.type == "FeedbackNode") { return; }
-    node->mUi->setTranslation(0, 0);
-    NodeSocket* socket = nullptr;
-    for (int i = 0; i < node->shared.outputCount; i++) {
-      socket = node->shared.socketsOut[i];
-      for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
-        if (socket->mConnectedTo[j] != nullptr) {
-          if (socket->mConnectedTo[j]->mIndex == 0) {
-            resetBranchPos(socket->mConnectedTo[j]->mParentNode);
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Recursively sorts nodes
-   */
-  Coord2D arrangeBranch(Node* node, Coord2D pos) {
-    if (node == nullptr || node->shared.type == "FeedbackNode") {
-      return pos;
-    }
-    const float halfWidth = node->shared.width * 0.5;
-    const float halfHeight = node->shared.height * 0.5;
-    const float padding = 50;
-    pos.x += halfWidth + padding;
-    node->mUi->setTranslation(pos.x, pos.y);
-    pos.x += halfWidth + padding;
-    float nextX = 0;
-    NodeSocket* socket = nullptr;
-    for (int i = 0; i < node->shared.outputCount; i++) {
-      socket = node->shared.socketsOut[i];
-      for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
-        if (socket->mConnectedTo[j] != nullptr) {
-          if (socket->mConnectedTo[j]->mIndex == 0) {
-            Coord2D branch = arrangeBranch(socket->mConnectedTo[j]->mParentNode, pos);
-            pos.y += node->shared.height + padding;
-            if (pos.y < branch.y) {
-              pos.y = branch.y;
-            }
-            if (branch.x > nextX) {
-              nextX = branch.x;
-            }
-          }
-        }
-      }
-    }
-    return Coord2D { nextX, pos.y };
   }
 
   bool hasFeedBackNode() const {
@@ -589,59 +576,7 @@ private:
     return false;
   }
 
-  /**
-   * Does some sorting on the mNodes list so the graph can be computed with fewer attempts
-   */
-  void sortGraph(bool lock = true) {
-    WDL_PtrList<Node> sorted;
-    for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
-      // Put in the nodes which directly follow the input node
-      NodeSocket* con = mInputNode->shared.socketsOut[0]->mConnectedTo[i];
-      if (con != nullptr) {
-        sorted.Add(con->mParentNode);
-      }
-    }
 
-    // Arbitrary depth
-    for (int tries = 0; tries < 100; tries++) {
-      for (int i = 0; i < sorted.GetSize(); i++) {
-        Node* node = sorted.Get(i);
-        for (int out = 0; out < node->shared.outputCount; out++) {
-          NodeSocket* outSocket = node->shared.socketsOut[out];
-          if (outSocket == nullptr) { continue; }
-          for (int next = 0; next < MAX_SOCKET_CONNECTIONS; next++) {
-            NodeSocket* nextSocket = outSocket->mConnectedTo[next];
-            if (nextSocket == nullptr) { continue; }
-            Node* nextNode = nextSocket->mParentNode;
-            // Don't want to add duplicates or the output node
-            if (sorted.Find(nextNode) != -1) { continue; }
-            sorted.Add(nextNode);
-          }
-        }
-      }
-    }
-
-    // Add in all the nodes which might not be connected or were missed because of the depth limit
-    for (int i = 0; i < mNodes.GetSize(); i++) {
-      Node* nextNode = mNodes.Get(i);
-      if (sorted.Find(nextNode) != -1) { continue; }
-      sorted.Add(nextNode);
-    }
-
-    WDL_MutexLock* mutex;
-    if (lock) {
-      mutex = new WDL_MutexLock(&mIsProcessing);
-    }
-    mNodes.Empty(false);
-    for (int i = 0; i < sorted.GetSize(); i++) {
-      Node* n = sorted.Get(i);
-      if (n == mOutputNode) { continue; }
-      mNodes.Add(n);
-    }
-    if (lock) {
-      delete mutex;
-    }
-  }
 
   /**
    * Test Setups

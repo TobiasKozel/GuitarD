@@ -42,6 +42,10 @@ public:
     }
   }
 
+  /**
+   * Puts the given buffer into the node
+   * Basically used to inject outside audio into the graph
+   */
   void CopyIn(iplug::sample** in, int nFrames) {
     mLastBlockSize = nFrames;
     if (mInputChannels == 1) {

@@ -3,10 +3,9 @@
 #include "constants.h"
 #include "thirdparty/json.hpp"
 
-using namespace nlohmann;
 // TODOG make this instance specific so multiple plugins don't share the same undo stack
 class HistoryStack {
-  json* states[MAX_UNDOS] = { nullptr };
+  nlohmann::json* states[MAX_UNDOS] = { nullptr };
   int mIndex = 0;
   int mUndos = 0;
   int mRedos = 0;
@@ -21,12 +20,12 @@ public:
     mUndos = mRedos = mIndex = 0;
   }
 
-  json* pushState() {
-    json* state = states[mIndex];
+  nlohmann::json* pushState() {
+    nlohmann::json* state = states[mIndex];
     if (state != nullptr) {
       delete state;
     }
-    states[mIndex] = state = new json();
+    states[mIndex] = state = new nlohmann::json();
 
     mRedos = 0;
     mUndos++;
@@ -40,7 +39,7 @@ public:
     return state;
   }
 
-  json* popState(const bool redo = false) {
+  nlohmann::json* popState(const bool redo = false) {
     if (!redo) {
       // A PushState has to happen here for the redo to work
       // redos++;

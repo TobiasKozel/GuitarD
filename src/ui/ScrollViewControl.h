@@ -128,7 +128,7 @@ public:
     OnResize();
   }
 
-  void setCleanUpEnabhled(const bool enable) {
+  void setCleanUpEnabled(const bool enable) {
     mDoCleanUp = enable;
   }
 
@@ -175,7 +175,6 @@ public:
     else {
       scroll(d * -40);
     }
-    
   }
 
   void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {

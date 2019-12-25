@@ -148,7 +148,6 @@ public:
 
     mPickAutomationTargetEvent.subscribe(mBus, MessageBus::PickAutomationTarget, [&](Node* n) {
       this->mPickAutomationTarget = n;
-      // SetTargetRECT(IRECT(0, 0, 0, 0));
       SetTargetRECT(mGraphics->GetBounds());
       this->mDirty = true;
     });
