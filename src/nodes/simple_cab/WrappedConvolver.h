@@ -14,8 +14,11 @@
 #include "IPlugConstants.h"
 
 class WrappedConvolver {
+  const int CONV_BLOCK_SIZE = 128;
+  const int CONV_TAIL_BLOCK_SIZE = 1024 * 4;
   const int CHANNEL_COUNT = 2;
   int mMaxBuffer = 0;
+  int mLastBlockSize = 0;
 #ifdef useThreadPool
   ctpl::thread_pool tPool;
 #endif
@@ -32,6 +35,8 @@ class WrappedConvolver {
   bool mIRLoaded = false;
 
   IRBundle mLoadedIr;
+
+  bool mWarmUpLeft = CONV_BLOCK_SIZE;
 public:
 
   bool mStereo = false;
@@ -72,20 +77,20 @@ public:
 #endif
   }
 
-  void clearLoadedIR() const {
+  void clearLoadedIR() {
     if (mLoadedIr.path.GetLength() > 0 && mLoadedIr.samples != nullptr) {
       // Check if the previous IR is custom and clear out the allocated data
       for (int c = 0; c < mLoadedIr.channelCount; c++) {
         delete[] mLoadedIr.samples[c];
       }
       delete[] mLoadedIr.samples;
+      mLoadedIr.samples = nullptr;
     }
   }
 
   void resampleAndLoadIR(IRBundle& b) {
     mIRLoaded = false;
     clearLoadedIR();
-
     if (b.path.GetLength() > 0 && !loadWave(b)) {
       WDBGMSG("Failed to load IR!\n");
       return;
@@ -107,15 +112,16 @@ public:
       const int outSamples = resampler.ResampleOut(outBuffer, inSamples, b.sampleCount, 1);
       if (b.channelCount == 1) {
         for (int ch = 0; ch < CHANNEL_COUNT; ch++) {
-          mConvolvers[ch]->init(128, 1024 * 4, outBuffer, outSamples);
+          mConvolvers[ch]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, outBuffer, outSamples);
         }
       }
       else if (b.channelCount == CHANNEL_COUNT) {
-        mConvolvers[c]->init(128, 1024 * 4, outBuffer, outSamples);
+        mConvolvers[c]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, outBuffer, outSamples);
       }
       delete[] outBuffer;
     }
     mLoadedIr = b;
+    mWarmUpLeft = true;
     mIRLoaded = true;
   }
 
@@ -248,5 +254,17 @@ public:
       }
     }
 #endif
+    if (mWarmUpLeft) {
+      mWarmUpLeft = false;
+      iplug::sample scaling = 1.f / static_cast<iplug::sample>(nFrames);
+      for (int c = 0; c < CHANNEL_COUNT; c++) {
+        iplug::sample last = out[c][mLastBlockSize - 1];
+        for (int i = 0; i < nFrames; i++) {
+          const iplug::sample s = scaling * i;
+          out[c][i] = in[c][i] * s + last * (1 - s);
+        }
+      }
+    }
+    mLastBlockSize = nFrames;
   }
 };

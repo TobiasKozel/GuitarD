@@ -21,6 +21,11 @@
 #include "dirscan.h"
 #include "IPlugPaths.h"
 
+struct CabLibNodeSharedData {
+  std::function<void(IRBundle)> callback;
+  IRBundle loadedIr;
+};
+
 using namespace iplug;
 using namespace igraphics;
 
@@ -172,6 +177,7 @@ public:
 
 
 class CabLibPopUp : public IControl {
+  CabLibNodeSharedData* mCabShared = nullptr;
   IRECT mCloseButton;
   ScrollViewControl* mScrollView[3] = { nullptr };
   WDL_PtrList<Cabinet> mCabinets;
@@ -179,8 +185,9 @@ class CabLibPopUp : public IControl {
   Microphone* mSelectedMic = nullptr;
   MicPosition* mSelectedPosition = nullptr;
 public:
-  CabLibPopUp() : IControl({}) {
+  CabLibPopUp(CabLibNodeSharedData* shared) : IControl({}) {
     mRenderPriority = 15;
+    mCabShared = shared;
   }
 
   void OnInit() override {
@@ -218,6 +225,7 @@ public:
           }
         }
       } while (!dir.Next());
+      setFromIRBundle();
     }
     else {
       WDBGMSG("IR folder doesn't exist!\n");
@@ -282,8 +290,31 @@ public:
         mSelectedMic->mPositions.Get(i)->mSelected = false;
       }
       pos->mSelected = true;
+      IRBundle load;
+      load.path.Set(pos->path.Get());
+      load.name.Set(pos->name.Get());
+      mCabShared->callback(load);
     }
     mScrollView[2]->SetDirty(false);
+  }
+
+  void setFromIRBundle() {
+    for (int i = 0; i < mCabinets.GetSize(); i++) {
+      Cabinet* c = mCabinets.Get(i);
+      for (int j = 0; j < c->mMics.GetSize(); j++) {
+        Microphone* m = c->mMics.Get(j);
+        for (int k = 0; k < m->mPositions.GetSize(); k++) {
+          MicPosition* p = m->mPositions.Get(k);
+          WDL_String& path = mCabShared->loadedIr.path;
+          if (strncmp(p->path.Get(), path.Get(), path.GetLength()) == 0) {
+            onCabChanged(c);
+            onMicChanged(m);
+            onPositionChanged(p);
+            return;
+          }
+        }
+      }
+    }
   }
 
   void OnDetach() override {
