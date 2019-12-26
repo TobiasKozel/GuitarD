@@ -13,8 +13,6 @@ class GalleryCategory : public IControl {
   MessageBus::Bus* mBus = nullptr;
   IRECT mTitleRect;
   float mColumns = 0;
-  /** Can't use mMouseIsOver since it will be cleared on setRECT */
-  bool mMouseHover = false;
 public:
 
   GalleryCategory(MessageBus::Bus* bus) : IControl({}) {
@@ -57,7 +55,7 @@ public:
 
   void Draw(IGraphics& g) {
     if (mOpen) {
-      if (mMouseHover) {
+      if (mMouseIsOver) {
         g.FillRect(Theme::Gallery::CATEGORY_BG_HOVER, mRECT);
       }
       else {
@@ -71,7 +69,7 @@ public:
     if (mOpen) {
       g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG_OPEN, mTitleRect);
     }
-    else if (mMouseHover) {
+    else if (mMouseIsOver) {
       g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG_HOVER, mTitleRect);
     }
     else {
@@ -93,13 +91,5 @@ public:
         MessageBus::fireEvent<NodeList::NodeInfo>(mBus, MessageBus::NodeAdd, elem->mInfo);
       }
     }
-  }
-
-  void OnMouseOver(float x, float y, const IMouseMod& mod) override {
-    mMouseHover = true;
-  }
-
-  void OnMouseOut() override {
-    mMouseHover = false;
   }
 };

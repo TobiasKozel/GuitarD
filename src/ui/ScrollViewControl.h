@@ -50,11 +50,26 @@ public:
     if (mAttached) {
       child->SetDelegate(*GetDelegate());
     }
-    mDirty = true;
+    OnResize();
   }
 
   void appendChild(IControl& child) {
     appendChild(&child);
+  }
+
+  bool removeChild(IControl& child, const bool wantsDelete = false) {
+    const int index = mChildren.Find(&child);
+    if (index != -1) {
+      mChildren.Delete(index, wantsDelete);
+      OnResize();
+      return true;
+    }
+    return false;
+  }
+
+  void clearChildren() {
+    mChildren.Empty(false);
+    OnResize();
   }
 
   void OnInit() override {
@@ -67,6 +82,7 @@ public:
   }
 
   void OnResize() override {
+    if (!mAttached) { return; }
     mContentHeight = 0;
     mContentWidth = 0;
     const int childCount = mChildren.GetSize();
@@ -83,7 +99,9 @@ public:
       r.B = height;
       shiftRectY(r, mContentHeight);
       mContentHeight += height + (isLast ? 0.f : mChildPaddingY);
+      const bool mOver = c->GetMouseIsOver();
       c->SetTargetRECT(r); // This won't call OnResize() yet
+      c->SetMouseIsOver(mOver);
       if (isLast) {
         const float scrollLimit = mRECT.H();
         if (r.B - mScrollY < scrollLimit) {
@@ -99,20 +117,12 @@ public:
       IRECT r = c->GetTargetRECT();
       shiftRectY(r, -mScrollY);
       r.Translate(mRECT.L, mRECT.T); // Apply the absolute position of the view itself
+      const bool mOver = c->GetMouseIsOver();
       c->SetTargetAndDrawRECTs(r); // Will call OnResize() on the child element
+      c->SetMouseIsOver(mOver);
     }
     // Once all the children know the dimensions ask for a redraw
     mDirty = true;
-  }
-
-  bool removeChild(IControl& child, const bool wantsDelete = false) {
-    const int index = mChildren.Find(&child);
-    if (index != -1) {
-      mChildren.Delete(index, wantsDelete);
-      mDirty = true;
-      return true;
-    }
-    return false;
   }
 
   void setChildPadding(const float padding) {
