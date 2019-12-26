@@ -7,6 +7,11 @@
 #include "CabLibPopUp.h"
 
 
+struct CabLibNodeSharedData {
+  std::function<void(IRBundle)> callback;
+  IRBundle loadedIr;
+};
+
 class CabLibNodeUi : public NodeUi {
   ScrollViewControl* test = nullptr;
 public:
@@ -49,14 +54,6 @@ public:
     NodeUi::cleanUp();
     shared->graphics->RemoveControl(test, true);
   }
-
-  void Draw(IGraphics& g) override {
-    NodeUi::Draw(g);
-    //if (mCabShared != nullptr) {
-    //  g.DrawText(mBlocksizeText, mCabShared->loadedIr.name.Get(), mRECT.GetVShifted(20));
-    //}
-  }
-
 };
 
 

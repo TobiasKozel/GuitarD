@@ -370,6 +370,7 @@
     <ClInclude Include="..\src\nodes\reverse_delay\ReverseDelayNode.h" />
     <ClInclude Include="..\src\nodes\simple_cab\InternalIRs.h" />
     <ClInclude Include="..\src\nodes\simple_cab\SimpleCabNode.h" />
+    <ClInclude Include="..\src\nodes\simple_cab\WrappedConvolver.h" />
     <ClInclude Include="..\src\nodes\simple_compressor\SimpleComressorNode.h" />
     <ClInclude Include="..\src\nodes\simple_delay\SimpleDelayNode.h" />
     <ClInclude Include="..\src\nodes\simple_drive\SimpleDriveNode.h" />

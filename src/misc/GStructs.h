@@ -42,3 +42,18 @@ struct AutomationAttachRequest {
   Node* automationNode = nullptr;
   iplug::igraphics::IControl* targetControl = nullptr;
 };
+
+
+/**
+ * Bundles an impulse response with some meta data about it
+ */
+struct IRBundle {
+  WDL_String name;
+  int channelCount = 1;
+  int sampleRate = 48000;
+  // Samplecount for a single channel
+  size_t sampleCount = 0;
+  float** samples = nullptr;
+  // This is only set if it's a user IR
+  WDL_String path;
+};

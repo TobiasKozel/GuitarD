@@ -57,18 +57,27 @@ public:
     appendChild(&child);
   }
 
-  bool removeChild(IControl& child, const bool wantsDelete = false) {
-    const int index = mChildren.Find(&child);
+  bool removeChild(IControl* child, const bool wantsDelete = false, bool skipResize = false) {
+    const int index = mChildren.Find(child);
     if (index != -1) {
+      mChildren.Get(index)->OnDetach();
       mChildren.Delete(index, wantsDelete);
-      OnResize();
+      if (!skipResize) {
+        OnResize();
+      }
       return true;
     }
     return false;
   }
 
-  void clearChildren() {
-    mChildren.Empty(false);
+  bool removeChild(IControl& child, const bool wantsDelete = false) {
+    return removeChild(&child, wantsDelete);
+  }
+
+  void clearChildren(bool wantsDelete = false) {
+    while (mChildren.GetSize()) {
+      removeChild(mChildren.Get(0), wantsDelete, true);
+    }
     OnResize();
   }
 
