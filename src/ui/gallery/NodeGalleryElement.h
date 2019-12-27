@@ -13,6 +13,7 @@ struct GalleryElement {
   IBitmap* mBitmap;
   const char* mName;
   const char* mImage;
+  bool mMouseIsOver = false;
 
   GalleryElement(NodeList::NodeInfo node) {
     mInfo = node;
@@ -31,7 +32,12 @@ struct GalleryElement {
       (index % columns) * Theme::Gallery::ELEMENT_WIDTH +
       (index % columns + 1) * Theme::Gallery::ELEMENT_PADDING;
     mRECT.R = mRECT.L + Theme::Gallery::ELEMENT_WIDTH;
-    g.DrawRect(COLOR_WHITE, mRECT);
+    if (mMouseIsOver) {
+      g.DrawRect(COLOR_ORANGE, mRECT);
+    }
+    else {
+      g.DrawRect(COLOR_WHITE, mRECT);
+    }
     g.DrawText(Theme::Gallery::ELEMENT_TITLE, mName, mRECT);
   }
 };

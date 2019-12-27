@@ -53,7 +53,7 @@ public:
     mTargetRECT = mRECT;
   }
 
-  void Draw(IGraphics& g) {
+  void Draw(IGraphics& g) override {
     if (mOpen) {
       if (mMouseIsOver) {
         g.FillRect(Theme::Gallery::CATEGORY_BG_HOVER, mRECT);
@@ -76,6 +76,22 @@ public:
       g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG, mTitleRect);
     }
     g.DrawText(Theme::Gallery::CATEGORY_TITLE, mName.Get(), mTitleRect);
+  }
+
+  void OnMouseOver(float x, float y, const IMouseMod& mod) override {
+    IControl::OnMouseOver(x, y, mod);
+    const IRECT click = { x, y, x, y };
+    for (int i = 0; i < mElements.GetSize(); i++) {
+      GalleryElement* g = mElements.Get(i);
+      g->mMouseIsOver = g->mRECT.Contains(click);
+    }
+  }
+
+  void OnMouseOut() override {
+    IControl::OnMouseOut();
+    for (int i = 0; i < mElements.GetSize(); i++) {
+      mElements.Get(i)->mMouseIsOver = false;
+    }
   }
 
   void OnMouseUp(const float x, const float y, const IMouseMod& mod) override {

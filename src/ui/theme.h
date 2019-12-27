@@ -40,6 +40,16 @@ namespace Theme {
     const IColor CATEGORY_BG_HOVER(255, 40, 40, 40);
   }
 
+  namespace IRBrowser {
+    const IColor BACKGROUND(255, 40, 40, 40);
+    const IText PATH{ 24, {255, 220, 220, 220}, "Roboto-Regular", EAlign::Near, EVAlign::Middle, 0 };
+    const IText IR_TITLE{ 16, {255, 255, 255, 255}, "Roboto-Regular", EAlign::Near, EVAlign::Middle, 0 };
+    const IText IR_TITLE_ACTIVE{ 16, {255, 20, 20, 20}, "Roboto-Regular", EAlign::Near, EVAlign::Middle, 0 };
+    const IColor IR_TITLE_BG(255, 80, 80, 80);
+    const IColor IR_TITLE_BG_HOVER(255, 120, 80, 80);
+    const IColor IR_TITLE_BG_ACTIVE(255, 255, 127, 0);
+  }
+
   namespace Categories {
     const IColor TOOLS(255, 100, 100, 220);
     const IColor AUTOMATION(255, 140, 140, 250);

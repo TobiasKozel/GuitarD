@@ -34,18 +34,23 @@ public:
   typedef std::function<void(MicPosition * c)> MicPositionCallback;
   bool mSelected = false;
   MicPositionCallback mCallback;
-  MicPosition(MicPositionCallback callback) : IControl({ 0, 0, 0, 20 }) {
+  MicPosition(MicPositionCallback& callback) : IControl({ 0, 0, 0, 20 }) {
     mCallback = callback;
   }
 
   void Draw(IGraphics& g) override {
     if (mSelected) {
-      g.FillRect(COLOR_ORANGE, mRECT);
-      g.DrawText(DEFAULT_TEXT, name.Get(), mRECT);
+      g.FillRect(Theme::IRBrowser::IR_TITLE_BG_ACTIVE, mRECT);
+      g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.Get(), mRECT.GetHPadded(-8));
     }
     else {
-      g.FillRect(COLOR_WHITE, mRECT);
-      g.DrawText(DEFAULT_TEXT, name.Get(), mRECT);
+      if (mMouseIsOver) {
+        g.FillRect(Theme::IRBrowser::IR_TITLE_BG_HOVER, mRECT);
+      }
+      else {
+        g.FillRect(Theme::IRBrowser::IR_TITLE_BG, mRECT);
+      }
+      g.DrawText(Theme::IRBrowser::IR_TITLE, name.Get(), mRECT.GetHPadded(-8));
     }
   }
 
@@ -66,7 +71,7 @@ public:
   WDL_PtrList<MicPosition> mPositions;
   MicPosition::MicPositionCallback mPosCallback;
   bool mSelected = false;
-  Microphone(MicrophoneCallback mc, MicPosition::MicPositionCallback pc) : IControl({ 0, 0, 0, 20 }) {
+  Microphone(MicrophoneCallback& mc, MicPosition::MicPositionCallback& pc) : IControl({ 0, 0, 0, 20 }) {
     mCallback = mc;
     mPosCallback = pc;
   }
@@ -76,12 +81,17 @@ public:
 
   void Draw(IGraphics& g) override {
     if (mSelected) {
-      g.FillRect(COLOR_ORANGE, mRECT);
-      g.DrawText(DEFAULT_TEXT, name.Get(), mRECT);
+      g.FillRect(Theme::IRBrowser::IR_TITLE_BG_ACTIVE, mRECT);
+      g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.Get(), mRECT.GetHPadded(-8));
     }
     else {
-      g.FillRect(COLOR_WHITE, mRECT);
-      g.DrawText(DEFAULT_TEXT, name.Get(), mRECT);
+      if (mMouseIsOver) {
+        g.FillRect(Theme::IRBrowser::IR_TITLE_BG_HOVER, mRECT);
+      }
+      else {
+        g.FillRect(Theme::IRBrowser::IR_TITLE_BG, mRECT);
+      }
+      g.DrawText(Theme::IRBrowser::IR_TITLE, name.Get(), mRECT.GetHPadded(-8));
     }
   }
 
@@ -126,7 +136,7 @@ public:
   WDL_PtrList<Microphone> mMics;
   bool mSelected = false;
 
-  Cabinet(const CabinetCallback cc, const Microphone::MicrophoneCallback mc, MicPosition::MicPositionCallback pc)
+  Cabinet(const CabinetCallback cc, const Microphone::MicrophoneCallback mc, const MicPosition::MicPositionCallback pc)
     : IControl({ 0, 0, 0, 20 })
   {
     mCallback = cc;
@@ -140,12 +150,17 @@ public:
 
   void Draw(IGraphics& g) override {
     if (mSelected) {
-      g.FillRect(COLOR_ORANGE, mRECT);
-      g.DrawText(DEFAULT_TEXT, name.Get(), mRECT);
+      g.FillRect(Theme::IRBrowser::IR_TITLE_BG_ACTIVE, mRECT);
+      g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.Get(), mRECT.GetHPadded(-8));
     }
     else {
-      g.FillRect(COLOR_WHITE, mRECT);
-      g.DrawText(DEFAULT_TEXT, name.Get(), mRECT);
+      if (mMouseIsOver) {
+        g.FillRect(Theme::IRBrowser::IR_TITLE_BG_HOVER, mRECT);
+      }
+      else {
+        g.FillRect(Theme::IRBrowser::IR_TITLE_BG, mRECT);
+      }
+      g.DrawText(Theme::IRBrowser::IR_TITLE, name.Get(), mRECT.GetHPadded(-8));
     }
   }
 
@@ -179,11 +194,13 @@ public:
 class CabLibPopUp : public IControl {
   CabLibNodeSharedData* mCabShared = nullptr;
   IRECT mCloseButton;
+  IRECT mPathTitle;
   ScrollViewControl* mScrollView[3] = { nullptr };
   WDL_PtrList<Cabinet> mCabinets;
   Cabinet* mSelectedCab = nullptr;
   Microphone* mSelectedMic = nullptr;
   MicPosition* mSelectedPosition = nullptr;
+  WDL_String mPath;
 public:
   CabLibPopUp(CabLibNodeSharedData* shared) : IControl({}) {
     mRenderPriority = 15;
@@ -195,17 +212,16 @@ public:
       mScrollView[i] = new ScrollViewControl();
       mScrollView[i]->setRenderPriority(16);
       mScrollView[i]->setFullWidthChildren(true);
-      mScrollView[i]->setChildPadding(1);
+      mScrollView[i]->setChildPadding(2);
       mScrollView[i]->setCleanUpEnabled(false);
       GetUI()->AttachControl(mScrollView[i]);
     }
 
-    WDL_String iniFolder;
-    INIPath(iniFolder, BUNDLE_NAME);
-    iniFolder.Append(PATH_DELIMITER);
-    iniFolder.Append("impulses");
+    INIPath(mPath, BUNDLE_NAME);
+    mPath.Append(PATH_DELIMITER);
+    mPath.Append("impulses");
     WDL_DirScan dir;
-    if (!dir.First(iniFolder.Get())) {
+    if (!dir.First(mPath.Get())) {
       do {
         const char* f = dir.GetCurrentFN();
         // Skip hidden files and folders
@@ -324,17 +340,20 @@ public:
   void OnResize() override {
     const IRECT dimensions = GetUI()->GetBounds().GetPadded(-10);
     mRECT = mTargetRECT = dimensions;
-    mCloseButton = mRECT.GetFromRight(50).GetFromTop(50).GetTranslated(-20, 20);
+    mCloseButton = dimensions.GetFromRight(20).GetFromTop(20).GetTranslated(-20, 20);
+    mPathTitle = dimensions.GetFromTop(60);
+    mPathTitle.Pad(-20);
     IRECT list = dimensions.GetPadded(-10);
-    list.T += 60;
+    list.T += 30;
     for (int i = 0; i < 3; i++) {
       mScrollView[i]->SetTargetAndDrawRECTs(list.SubRectHorizontal(3, i).GetPadded(-10));
     }
   }
 
   void Draw(IGraphics& g) override {
-    g.FillRect(Theme::Gallery::CATEGORY_BG, mRECT);
+    g.FillRect(Theme::IRBrowser::BACKGROUND, mRECT);
     g.FillRect(Theme::Colors::ACCENT, mCloseButton);
+    g.DrawText(Theme::IRBrowser::PATH, mPath.Get(), mPathTitle);
   }
 
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {

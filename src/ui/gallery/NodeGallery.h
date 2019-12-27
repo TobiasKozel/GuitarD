@@ -1,6 +1,7 @@
 #pragma once
 #include "IControl.h"
 #include "src/ui/ScrollViewControl.h"
+#include "ITextEntryControl.h"
 #include "src/misc/MessageBus.h"
 #include "NodeGalleryCategory.h"
 #include "src/ui/theme.h"
@@ -12,7 +13,7 @@ using namespace igraphics;
 class NodeGallery : public IControl {
   MessageBus::Bus* mBus = nullptr;
 public:
-  ScrollViewControl* mScrollview;
+  ScrollViewControl* mScrollview = nullptr;
   bool mIsOpen = false;
   IText mStats;
   long long avgExecutionTime;
@@ -93,7 +94,9 @@ public:
       bounds.L = bounds.R * 0.5f;
       mRECT = bounds;
       mTargetRECT = bounds;
-      mScrollview->SetTargetAndDrawRECTs(bounds.GetPadded(-Theme::Gallery::PADDING));
+      const IRECT main = bounds.GetPadded(-Theme::Gallery::PADDING);
+      mScrollview->SetTargetAndDrawRECTs(main /** .GetVSliced(40) */);
+      // mSearch->SetTargetAndDrawRECTs(main.GetFromTop(30));
     }
     else {
       bounds.Pad(-Theme::Gallery::PADDING);
