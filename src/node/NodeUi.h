@@ -183,7 +183,8 @@ public:
       if (couple->parameterIdx != kNoParameter) {
         couple->parameter->Set(value);
         couple->control = new IVKnobControl(
-          controlPos, couple->parameterIdx
+          controlPos, couple->parameterIdx, "", DEFAULT_STYLE, true, false,
+          couple->lowAngle, couple->highAngle, couple->centerAngle
         );
       }
       else {
@@ -192,7 +193,8 @@ public:
           controlPos, [couple](IControl* pCaller) {
           // TODOG Add a label with the current value
           couple->setFromNormalized(pCaller->GetValue());
-        }, couple->name, DEFAULT_STYLE, true, true
+        }, couple->name, DEFAULT_STYLE, true, false,
+          couple->lowAngle, couple->highAngle, couple->centerAngle
         );
       }
       

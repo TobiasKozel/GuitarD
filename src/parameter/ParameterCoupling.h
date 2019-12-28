@@ -55,6 +55,9 @@ struct ParameterCoupling {
   float y = 0;
   float w = 60;
   float h = 60;
+  float centerAngle = -135.f;
+  float lowAngle = -135.f;
+  float highAngle = 135.f;
 
   Node* automationDependency = nullptr;
 
@@ -68,12 +71,16 @@ struct ParameterCoupling {
 
   explicit ParameterCoupling(const char* pName = nullptr, sample* pProperty = nullptr,
                     const sample pDefault = 0.5, const sample pMin = 0, const sample pMax = 1,
-                    const sample pStepSize = 0.01, const Type pType = Auto) {
+                    const sample pStepSize = 0.01, const Type pType = Auto)
+  {
     value = pProperty;
     defaultVal = pDefault;
     baseValue = pDefault;
     min = pMin;
     max = pMax;
+    if (abs((max + min) * 0.5 - defaultVal) < 0.001) {
+      centerAngle = 0;
+    }
     stepSize = pStepSize;
     name = pName;
 
