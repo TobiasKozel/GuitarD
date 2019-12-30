@@ -39,8 +39,8 @@ public:
 
   void createBuffers() override {
     Node::createBuffers();
-    mPrevL.SetSize(MIN_BLOCK_SIZE);
-    mPrevR.SetSize(MIN_BLOCK_SIZE);
+    mPrevL.SetSize(MAX_BUFFER);
+    mPrevR.SetSize(MAX_BUFFER);
   }
 
   void deleteBuffers() override {

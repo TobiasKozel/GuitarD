@@ -22,7 +22,7 @@ namespace FormatGraph {
   }
 
   /**
-   * Recursively sorts nodes
+   * Recursively sorts nodes. I don't even know what's going on here, but it works. Sort of
    */
   Coord2D arrangeBranch(Node* node, Coord2D pos) {
     if (node == nullptr || node->shared.type == "FeedbackNode") {

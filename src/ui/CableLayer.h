@@ -29,7 +29,7 @@ class CableLayer : public IControl {
   MessageBus::Subscription<Node*> mDisconnectAllEvent;
   MessageBus::Subscription<Coord2D> mNodeDraggedEvent;
   MessageBus::Subscription<Coord2D> mNodeSeverEvent;
-  MessageBus::Subscription<Node*> mNodeDraggedEndEvent;
+  MessageBus::Subscription<NodeDragEndData> mNodeDraggedEndEvent;
   MessageBus::Subscription<NodeSocket*> mPreviewSocketEvent;
   MessageBus::Subscription<SocketConnectRequest> onConnectionEvent;
   MessageBus::Subscription<Node*> mNodeDeleteEvent;
@@ -73,7 +73,8 @@ public:
       mDirty = true;
     });
 
-    mNodeDraggedEndEvent.subscribe(mBus, MessageBus::NodeDraggedEnd, [&](Node* node) {
+    mNodeDraggedEndEvent.subscribe(mBus, MessageBus::NodeDraggedEnd, [&](NodeDragEndData data) {
+      Node* node = data.node;
       NodeSocket* target = mHighlightSocket;
       mHighlightSocket = nullptr;
       mDirty = true;
@@ -90,7 +91,10 @@ public:
           }
         }
         MessageBus::fireEvent<NodeSpliceInPair>(this->mBus, MessageBus::NodeSpliceIn, NodeSpliceInPair{ node, target });
-        // targetNode->moveAlong(300);
+        const float distance = abs(node->shared.X - targetNode->shared.X);
+        if (distance < (node->shared.width + 80)) {
+          targetNode->moveAlong(node->shared.width - distance + 200);
+        }
       }
     });
 

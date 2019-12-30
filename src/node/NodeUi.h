@@ -87,9 +87,19 @@ public:
 
     mNodeQuickConnectEvent.subscribe(shared->bus, MessageBus::QuickConnectSocket, [&](QuickConnectRequest req) {
       if (mTargetRECT.Contains(IRECT{req.pos.x, req.pos.y, req.pos.x, req.pos.y })) {
-        NodeSocket* socket = req.from->mIsInput ? shared->socketsOut[0] : shared->socketsIn[0];
-        if (socket != nullptr) {
-          socket->connect(req.from);
+        bool force = false;
+        for (int i = 0; i < MAX_NODE_SOCKETS; i++) {
+          NodeSocket* socket = req.from->mIsInput ? shared->socketsOut[i] : shared->socketsIn[i];
+          if (socket != nullptr && (force || !socket->mConnected)) {
+            // Look for the first unconnected socket
+            socket->connect(req.from);
+            return;
+          }
+          if (!force && i == MAX_NODE_SOCKETS - 1) {
+            // none found means we'll use the first one anyways
+            i = -1;
+            force = true;
+          }
         }
       }
     });
@@ -303,7 +313,7 @@ public:
   virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
     if (mDragging) {
       mDragging = false;
-      MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDraggedEnd, shared->node);
+      MessageBus::fireEvent<NodeDragEndData>(shared->bus, MessageBus::NodeDraggedEnd, { shared->node, !mod.A && mod.C && mod.S });
       return;
     }
   }
@@ -311,23 +321,27 @@ public:
   virtual void OnMouseDrag(const float x, const float y, const float dX, const float dY, const IMouseMod& mod) override {
     if (!mDragging) {
       if (mod.A && mod.C && !mod.S) {
+        // Alt and Control
         // Disconnect all the connections of a node
         MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDisconnectAll, shared->node);
         mDragging = true;
         return;
       }
       if (mod.A && !mod.C && !mod.S) {
+        // Alt
         // Bypass all connections of a node
         MessageBus::fireEvent<Node*>(shared->bus, MessageBus::BypassNodeConnection, shared->node);
         mDragging = true;
         return;
       }
       if (!mod.A && mod.C && !mod.S) {
+        // Control
         // Duplicate the node
         MessageBus::fireEvent<Node*>(shared->bus, MessageBus::CloneNode, shared->node);
         return;
       }
       if (!mod.A && !mod.C && mod.S) {
+        // Shift
         // Get the fist output and drag it
         NodeSocketUi* socket = mod.L ? mInSocketsUi.Get(0) : mOutSocketsUi.Get(0);
         if (socket != nullptr) {

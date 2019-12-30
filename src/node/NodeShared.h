@@ -18,13 +18,13 @@ struct NodeShared {
   float rotation = 0;
 
   int parameterCount = 0;
-  ParameterCoupling* parameters[MAX_NODE_PARAMETERS];
+  ParameterCoupling* parameters[MAX_NODE_PARAMETERS] = { nullptr };
   int meterCount = 0; 
-  MeterCoupling* meters[MAX_NODE_METERS];
+  MeterCoupling* meters[MAX_NODE_METERS] = { nullptr };
 
   int inputCount = 0;
-  NodeSocket* socketsIn [MAX_NODE_SOCKETS];
+  NodeSocket* socketsIn [MAX_NODE_SOCKETS] = { nullptr };
   int outputCount = 0;
-  NodeSocket* socketsOut[MAX_NODE_SOCKETS];
+  NodeSocket* socketsOut[MAX_NODE_SOCKETS] = { nullptr };
   Node* node = nullptr;
 };

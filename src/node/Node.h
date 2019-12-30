@@ -394,7 +394,7 @@ public:
   /**
    * Cleans up the IControls for all the parameters
    */
-  virtual void cleanupUi(IGraphics* pGrahics) {
+  virtual void cleanupUi(IGraphics* pGraphics) {
     /**
      * The param value gets only synced to the dsp value when the node is processed
      * If the node is not connected this won't happen, so always do the update when the
@@ -405,17 +405,17 @@ public:
     }
     if (mUi != nullptr) {
       mUi->cleanUp();
-      pGrahics->RemoveControl(mUi, true);
+      pGraphics->RemoveControl(mUi, true);
       mUi = nullptr;
     }
     mUiReady = false;
   }
 
-  void moveAlong(float x) {
+  void moveAlong(const float x) {
+    if (mUi != nullptr) {
+      mUi->translate(x, 0);
+    }
     for (int i = 0; i < shared.outputCount; i++) {
-      if (mUi != nullptr) {
-        mUi->translate(x, 0);
-      }
       NodeSocket* socket = shared.socketsOut[i];
       for (int s = 0; s < MAX_SOCKET_CONNECTIONS; s++) {
         if (socket->mConnectedTo[s] != nullptr) {

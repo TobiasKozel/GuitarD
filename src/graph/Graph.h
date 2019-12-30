@@ -169,6 +169,7 @@ public:
 
   void testadd() {
     // formatTest();
+    return;
     Node* test = NodeList::createNode("CabLibNode");
     addNode(test, nullptr, 0, 500);
     // mOutputNode->connectInput(test->shared.socketsOut[0]);
@@ -454,7 +455,7 @@ public:
     }
     mNodes.Add(node);
     SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
-    mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
+    // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
   }
 
   void removeAllNodes() {
@@ -507,7 +508,7 @@ public:
     node->cleanUp();
     mNodes.DeletePtr(node, true);
     SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
-    mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
+    // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
   }
 
   void removeNode(const int index) {

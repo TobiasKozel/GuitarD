@@ -43,6 +43,11 @@ struct AutomationAttachRequest {
   iplug::igraphics::IControl* targetControl = nullptr;
 };
 
+struct NodeDragEndData {
+  Node* node;
+  bool addCombineNode;
+};
+
 
 /**
  * Bundles an impulse response with some meta data about it
