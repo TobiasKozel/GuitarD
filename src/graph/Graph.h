@@ -248,10 +248,23 @@ public:
       }
     }
 
+    if (mIsProcessing.getLockCount() > 0) {
+      /**
+       * Don't even try locking if the lock is in use already
+       * Output silence instead
+       */
+      for (int c = 0; c < mChannelCount; c++) {
+        for (int i = 0; i < nFrames; i++) {
+          out[c][i] = 0;
+        }
+      }
+      return;
+    }
+
     const auto start = std::chrono::high_resolution_clock::now();
+
     WDL_MutexLock lock(&mIsProcessing);
     mInputNode->CopyIn(in, nFrames);
-
     const int nodeCount = mNodes.GetSize();
     for (int n = 0; n < nodeCount; n++) {
       mNodes.Get(n)->BlockStart();
@@ -380,7 +393,7 @@ public:
 
     mInputNode->cleanupUi(mGraphics);
     mOutputNode->cleanupUi(mGraphics);
-
+    mGraphics->RemoveAllControls();
     mGraphics = nullptr;
   }
 
@@ -441,7 +454,6 @@ public:
    * Used to add nodes and pause the audio thread
    */
   void addNode(Node* node, Node* pInput = nullptr, const float x = 0, const float y = 0, const int outputIndex = 0, const int inputIndex = 0, Node* clone = nullptr) {
-    WDL_MutexLock lock(&mIsProcessing);
     node->shared.X = x;
     node->shared.Y = y;
     node->setup(mBus, mSampleRate);
@@ -453,6 +465,8 @@ public:
     if (pInput != nullptr) {
       node->connectInput(pInput->shared.socketsOut[outputIndex], inputIndex);
     }
+    // Allocating the node is thread safe, but not the node list itself
+    WDL_MutexLock lock(&mIsProcessing);
     mNodes.Add(node);
     SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
     // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
@@ -495,12 +509,12 @@ public:
    */
   void removeNode(Node* node, const bool reconnect = false) {
     if (node == mInputNode || node == mOutputNode) { return; }
-    /**
-     * Since the cleanup will sever all connections to a node, it will have to be done before the
-     * connection is bridged, or else the bridged connection will be severed again
-     */
     WDL_MutexLock lock(&mIsProcessing);
     if (reconnect) {
+      /**
+       * Since the cleanup will sever all connections to a node, it will have to be done before the
+       * connection is bridged, or else the bridged connection will be severed again
+       */
       byPassConnection(node);
     }
     node->cleanupUi(mGraphics);
@@ -529,6 +543,11 @@ public:
 
   void deserialize(nlohmann::json& json) {
     removeAllNodes();
+    if (mGraphics != nullptr) {
+      IGraphics* g = mGraphics;
+      cleanupUi();
+      setupUi(g);
+    }
     if (json.contains("width")) {
       mWindowScale = json["scale"];
       mWindowWidth = json["width"];
