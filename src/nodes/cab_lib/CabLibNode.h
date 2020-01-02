@@ -1,54 +1,62 @@
 #pragma once
 #include <thirdparty/json.hpp>
-#include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
-// #include "resample.h"
 #include "src/node/Node.h"
-#include "src/ui/ScrollViewControl.h"
 #include "CabLibPopUp.h"
 
 
 class CabLibNodeUi : public NodeUi {
-  ScrollViewControl* test = nullptr;
+  // ScrollViewControl* test = nullptr;
   CabLibNodeSharedData* mCabShared = nullptr;
+  CabLibPopUp* mPopUp = nullptr;
+  IVButtonControl* mEditButton = nullptr;
 public:
   CabLibNodeUi(NodeShared* param) : NodeUi(param) {
   }
 
   void setUpControls() override {
     NodeUi::setUpControls();
-    test = new ScrollViewControl(mTargetRECT.GetPadded(-20));
-    test->setDoDragScroll(false);
-    mElements.Add(test);
-    IVButtonControl* editButton = new IVButtonControl(IRECT(0, 0, 100, 30), [&](IControl* pCaller) {
-      SplashClickActionFunc(pCaller);
-      this->openSettings();
-    }, "EDIT", DEFAULT_STYLE, true, false);
-    test->appendChild(editButton);
-    PlaceHolder* t = new PlaceHolder(IRECT(0, 0, 100, 20), "Element 1");
-    test->appendChild(t);
-    t = new PlaceHolder(IRECT(0, 0, 130, 60), "Element 2");
-    test->appendChild(t);
-    t = new PlaceHolder(IRECT(0, 0, 130, 40), "Element 3");
-    test->appendChild(t);
-    IVKnobControl* c = new IVKnobControl(
-      IRECT(0, 0, 120, 120), 3
+    mEditButton = new IVButtonControl({ mTargetRECT.L + 50, mTargetRECT.T + 130, mTargetRECT.R - 50, mTargetRECT.B - 20 },
+      [&](IControl* pCaller) {
+        SplashClickActionFunc(pCaller);
+        this->openSettings();
+      }, "Browse", DEFAULT_STYLE, true, false
     );
-    test->appendChild(c);
-    t = new PlaceHolder(IRECT(0, 0, 80, 80), "Element 4");
-    test->appendChild(t);
-    t = new PlaceHolder(IRECT(0, 0, 400, 20), "Element 5");
-    test->appendChild(t);
-    shared->graphics->AttachControl(test);
+    mElements.Add(mEditButton);
+    GetUI()->AttachControl(mEditButton);
+    //test = new ScrollViewControl(mTargetRECT.GetPadded(-20));
+    //test->setDoDragScroll(false);
+    //mElements.Add(test);
+    //IVButtonControl* editButton = new IVButtonControl(IRECT(0, 0, 100, 30), [&](IControl* pCaller) {
+    //  SplashClickActionFunc(pCaller);
+    //  this->openSettings();
+    //}, "EDIT", DEFAULT_STYLE, true, false);
+    //test->appendChild(editButton);
+    //PlaceHolder* t = new PlaceHolder(IRECT(0, 0, 100, 20), "Element 1");
+    //test->appendChild(t);
+    //t = new PlaceHolder(IRECT(0, 0, 130, 60), "Element 2");
+    //test->appendChild(t);
+    //t = new PlaceHolder(IRECT(0, 0, 130, 40), "Element 3");
+    //test->appendChild(t);
+    //IVKnobControl* c = new IVKnobControl(
+    //  IRECT(0, 0, 120, 120), 3
+    //);
+    //test->appendChild(c);
+    //t = new PlaceHolder(IRECT(0, 0, 80, 80), "Element 4");
+    //test->appendChild(t);
+    //t = new PlaceHolder(IRECT(0, 0, 400, 20), "Element 5");
+    //test->appendChild(t);
+    //shared->graphics->AttachControl(test);
   }
 
   void openSettings() {
-    CabLibPopUp* cablib = new CabLibPopUp(mCabShared);
-    GetUI()->AttachControl(cablib);
+    mPopUp = new CabLibPopUp(mCabShared);
+    GetUI()->AttachControl(mPopUp);
   }
 
   void cleanUp() override {
+    GetUI()->RemoveControl(mEditButton, true);
+    GetUI()->RemoveControl(mPopUp, true);
     NodeUi::cleanUp();
-    shared->graphics->RemoveControl(test, true);
   }
 
   void registerSharedData(CabLibNodeSharedData* data) {
@@ -61,8 +69,12 @@ class CabLibNode final : public Node {
   WrappedConvolver* mConvolver = nullptr;
 
   CabLibNodeSharedData mCabShared = { [&](IRBundle ir) {
-  this->mCabShared.loadedIr = ir;
-  this->mConvolver->resampleAndLoadIR(ir);
+    const int len = std::max(mCabShared.loadedIr.path.GetLength(), ir.path.GetLength());
+    if (strncmp(mCabShared.loadedIr.path.Get(), ir.path.Get(), len) != 0) {
+      // don't load if the Ir is the same;
+      this->mCabShared.loadedIr = ir;
+      this->mConvolver->resampleAndLoadIR(ir);
+    }
 }, IRBundle() };
 public:
   CabLibNode(const std::string pType) {

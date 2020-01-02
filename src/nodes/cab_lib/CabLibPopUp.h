@@ -334,7 +334,10 @@ public:
   }
 
   void OnDetach() override {
-
+    for (int i = 0; i < 3; i++) {
+      GetUI()->RemoveControl(mScrollView[i], true);
+    }
+    mCabinets.Empty(true);
   }
 
   void OnResize() override {
@@ -359,10 +362,6 @@ public:
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
     const IRECT click(x, y, x, y);
     if (mCloseButton.Contains(click)) {
-      for (int i = 0; i < 3; i++) {
-        GetUI()->RemoveControl(mScrollView[i], true);
-      }
-      mCabinets.Empty(true);
       GetUI()->RemoveControl(this, true);
     }
   }

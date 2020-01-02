@@ -31,17 +31,18 @@ public:
     }
   }
 
-  void CopyOut(iplug::sample** out, int nFrames) {
+  void CopyOut(sample** out, int nFrames) {
     NodeSocket* in = shared.socketsIn[0]->mConnectedTo[0];
     if (mMaxBuffer < nFrames || in == nullptr || !in->mParentNode->mIsProcessed) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
+          // output silence
           out[c][i] = 0;
         }
       }
     }
     else {
-      iplug::sample** buf = in->mParentBuffer;
+      sample** buf = in->mParentBuffer;
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
           out[c][i] = buf[c][i];
@@ -55,7 +56,7 @@ public:
     mChannelCount = p_channels;
   }
 
-  void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+  void setupUi(IGraphics* pGrahics) override {
     shared.graphics = pGrahics;
     mUi = new OutputNodeUi(&shared);
     mUi->setColor(IColor(255, 100, 150, 100));
