@@ -53,13 +53,14 @@ public:
   void ProcessBlock(int nFrames) {
     if (byPass()) { return; }
     if (mIsProcessed == false) {
-      gain = ParameterCoupling::dbToLinear(shared.parameters[1]->getValue());
+      shared.parameters[1]->update();
+      sample val = ParameterCoupling::dbToLinear(gain);
       if (mPrevL.NbInBuf() > nFrames) {
         mPrevL.Get(mBuffersOut[0][0], nFrames);
         mPrevR.Get(mBuffersOut[0][1], nFrames);
         for (int i = 0; i < nFrames; i++) {
-          mBuffersOut[0][0][i] *= gain;
-          mBuffersOut[0][1][i] *= gain;
+          mBuffersOut[0][0][i] *= val;
+          mBuffersOut[0][1][i] *= val;
         }
         mIsProcessed = true;
       }

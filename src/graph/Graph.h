@@ -306,7 +306,7 @@ public:
       WDBGMSG("Graphics context changed");
       mGraphics = pGraphics;
     }
-
+    pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);
     pGraphics->HandleMouseOver(true);
     pGraphics->AttachTextEntryControl();
     pGraphics->AttachPopupMenuControl(DEFAULT_LABEL_TEXT);

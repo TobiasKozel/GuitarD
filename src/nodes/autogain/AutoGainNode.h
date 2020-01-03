@@ -30,7 +30,7 @@ public:
     detectMode = true;
   }
 
-  virtual void OnSamplerateChanged(int pSampleRate) {
+  virtual void OnSamplerateChanged(int pSampleRate) override {
     samplesTarget = pSampleRate * detectTime;
     mSampleRate = pSampleRate;
   }
@@ -64,10 +64,10 @@ public:
     }
 
     shared.parameters[1]->update();
-    gain = ParameterCoupling::dbToLinear(shared.parameters[1]->getValue());
+    sample val = ParameterCoupling::dbToLinear(gain);
     for (int c = 0; c < mChannelCount; c++) {
       for (int i = 0; i < nFrames; i++) {
-        mBuffersOut[0][c][i] = buffer[c][i] * gain;
+        mBuffersOut[0][c][i] = buffer[c][i] * val;
       }
     }
     mIsProcessed = true;

@@ -40,8 +40,6 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAX_DAW_PAR
     pGraphics->SetSizeConstraints(PLUG_MIN_WIDTH, PLUG_MAX_WIDTH, PLUG_MIN_HEIGHT, PLUG_MAX_HEIGHT);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     pGraphics->LoadFont("ForkAwesome", ICON_FN);
-    pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);
-
     this->graph->setupUi(pGraphics);
   };
 #endif
