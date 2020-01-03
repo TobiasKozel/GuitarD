@@ -193,35 +193,37 @@ public:
       if (couple->parameterIdx != kNoParameter) {
         couple->parameter->Set(value);
         couple->control = new IVKnobControl(
-          controlPos, couple->parameterIdx, "", DEFAULT_STYLE, true, false,
+          controlPos, couple->parameterIdx, couple->name, DEFAULT_STYLE, true, false,
           couple->lowAngle, couple->highAngle, couple->centerAngle
         );
+        couple->control->SetValue(couple->getNormalized());
       }
       else {
         // use the callback to get the value to the dsp, won't allow automation though
         couple->control = new IVKnobControl(
           controlPos, [couple](IControl* pCaller) {
-          // TODOG Add a label with the current value
-          couple->setFromNormalized(pCaller->GetValue());
-        }, couple->name, DEFAULT_STYLE, true, false,
+            // TODOG Add a label with the current value
+            couple->setFromNormalized(pCaller->GetValue());
+            WDL_String val;
+            val.SetFormatted(MAX_PARAM_DISPLAY_LEN, "%.*f", 2, couple->getValue());
+            IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);
+            vcontrol->SetValueStr(val.Get());
+          }, couple->name, DEFAULT_STYLE, true, false,
           couple->lowAngle, couple->highAngle, couple->centerAngle
         );
+        couple->control->SetValue(couple->getNormalized());
+        couple->control->SetDirty();
       }
-      
-      couple->control->SetValue(couple->getNormalized());
       shared->graphics->AttachControl(couple->control);
       mElements.Add(couple->control);
       if (i == 0 && mHeader.hasByPass) { couple->control->Hide(true); }
 
       // optionally hide the lables etc
-      if (!couple->showLabel || !couple->showValue) {
-        IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);
-        if (vcontrol != nullptr) {
-          vcontrol->SetShowLabel(couple->showLabel);
-          vcontrol->SetShowValue(couple->showValue);
-        }
+      IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);
+      if (vcontrol != nullptr) {
+        vcontrol->SetShowLabel(couple->showLabel);
+        vcontrol->SetShowValue(couple->showValue);
       }
-
     }
   }
 
