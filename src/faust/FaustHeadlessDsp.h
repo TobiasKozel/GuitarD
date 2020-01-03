@@ -66,6 +66,7 @@ struct UI {
  * The faust DSP code will derive from this
  */
 class FaustHeadlessDsp: public Node {
+  sample** mBuffersOutAlligned = nullptr;
 public:
   // These three will be overridden by the generated faust code
   virtual void init(int samplingFreq) = 0;
@@ -126,16 +127,31 @@ public:
     instanceClear();
   }
 
+  void deleteBuffers() override {
+    Node::deleteBuffers();
+    delete[] mBuffersOutAlligned;
+  }
+
+  void createBuffers() override {
+    Node::createBuffers();
+    mBuffersOutAlligned = new sample*[shared.outputCount * mChannelCount];
+    for (int i = 0; i < shared.outputCount; i++) {
+      for (int c = 0; c < mChannelCount; c++) {
+        mBuffersOutAlligned[i * mChannelCount + c] = mBuffersOut[i][c];
+      }
+    }
+  }
+
   /**
    * The faust uses a fairly similar way of processing blocks, however
    * A node might have multiple inputs so the right ones have to be forwarded
    */
-  virtual void ProcessBlock(const int nFrames) {
+  virtual void ProcessBlock(const int nFrames) override {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
     for (int i = 1; i < shared.parameterCount; i++) {
       shared.parameters[i]->update();
     }
-    compute(nFrames, shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0]);
+    compute(nFrames, shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOutAlligned);
     mIsProcessed = true;
   }
 };

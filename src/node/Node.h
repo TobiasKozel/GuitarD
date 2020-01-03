@@ -412,6 +412,7 @@ public:
   }
 
   void moveAlong(const float x) {
+    if (shared.type == "FeedbackNode") { return; }
     if (mUi != nullptr) {
       mUi->translate(x, 0);
     }

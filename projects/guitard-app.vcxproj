@@ -376,6 +376,7 @@
     <ClInclude Include="..\src\nodes\simple_drive\SimpleDriveNode.h" />
     <ClInclude Include="..\src\nodes\simple_gate\SimpleGateNode.h" />
     <ClInclude Include="..\src\nodes\simple_reverb\SimpleReverbNode.h" />
+    <ClInclude Include="..\src\nodes\split\SplitNode.h" />
     <ClInclude Include="..\src\nodes\stereo_tool\StereoToolNode.h" />
     <ClInclude Include="..\src\nodes\tuner\TunerNode.h" />
     <ClInclude Include="..\src\node\Node.h" />
@@ -388,6 +389,7 @@
     <ClInclude Include="..\src\parameter\ParameterCoupling.h" />
     <ClInclude Include="..\src\parameter\ParameterManager.h" />
     <ClInclude Include="..\src\ui\CableLayer.h" />
+    <ClInclude Include="..\src\ui\CustomKnob.h" />
     <ClInclude Include="..\src\ui\gallery\NodeGallery.h" />
     <ClInclude Include="..\src\ui\gallery\NodeGalleryCategory.h" />
     <ClInclude Include="..\src\ui\gallery\NodeGalleryElement.h" />

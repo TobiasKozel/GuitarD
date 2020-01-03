@@ -330,9 +330,6 @@
     <ClInclude Include="..\src\nodes\bitcrusher\BitCrusherNode.h">
       <Filter>src\nodes\distortion</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\nodes\combine\CombineNode.h">
-      <Filter>src\nodes\tools</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\nodes\crybaby\CryBabyNode.h">
       <Filter>src\nodes\filters</Filter>
     </ClInclude>
@@ -483,6 +480,15 @@
     <ClInclude Include="..\src\nodes\simple_cab\WrappedConvolver.h">
       <Filter>src\nodes\cabs</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\ui\CustomKnob.h">
+      <Filter>src\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nodes\split\SplitNode.h">
+      <Filter>src\nodes\flow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nodes\combine\CombineNode.h">
+      <Filter>src\nodes\flow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -574,6 +580,9 @@
     </Filter>
     <Filter Include="src\nodes\automation">
       <UniqueIdentifier>{c02e5d84-eb19-47f8-904e-6c84655bf14f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\nodes\flow">
+      <UniqueIdentifier>{bf2b412b-1221-40f0-8f06-29671b0e5ce9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

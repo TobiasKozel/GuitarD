@@ -20,22 +20,31 @@
 #include "src/nodes/powersag/PowerSagNode.h"
 #include "src/nodes/reverse_delay/ReverseDelayNode.h"
 #include "src/nodes/cab_lib/CabLibNode.h"
+#include "src/nodes/split/SplitNode.h"
 
 
 namespace NodeList {
   void registerNodes() {
+    NodeList::registerNode(NodeList::NodeInfo{
+    []() { return new CombineNode("CombineNode"); },
+    "CombineNode",
+    "Combine",
+    "asd",
+    "Signal Flow"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new SplitNode("SplitNode"); },
+      "SplitNode",
+      "Split L/R",
+      "asd",
+      "Signal Flow"
+    });
+
     NodeList::registerNode(NodeList::NodeInfo {
       []() { return new StereoToolNode("StereoToolNode"); },
       "StereoToolNode",
       "Stereo Tool",
-      "asd",
-      "Tools"
-    });
-
-    NodeList::registerNode(NodeList::NodeInfo{
-      []() { return new CombineNode("CombineNode"); },
-      "CombineNode",
-      "Combine",
       "asd",
       "Tools"
     });
