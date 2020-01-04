@@ -44,7 +44,7 @@ namespace Serializer {
       for (int p = 0; p < node->shared.parameterCount; p++) {
         ParameterCoupling* para = node->shared.parameters[p];
         const char* name = para->name;
-        double val = para->parameter != nullptr ? para->parameter->Value() : para->baseValue;
+        double val = para->getValue();
         int idx = para->parameterIdx;
         int automation = nodes.Find(para->automationDependency);
         serialized["nodes"][i]["parameters"][p] = {

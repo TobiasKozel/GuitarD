@@ -25,7 +25,7 @@ struct ParameterCoupling {
   Type type = Auto;
 
   // Param object for outside daw automation
-  iplug::IParam* parameter = nullptr;
+  IParam* parameter = nullptr;
 
   // Index of the IParam -1 means unassigned
   int parameterIdx = -1;
@@ -49,7 +49,7 @@ struct ParameterCoupling {
   sample stepSize = 0.01;
 
   // Control object which will draw the UI knob
-  iplug::igraphics::IControl* control = nullptr;
+  IControl* control = nullptr;
   // UI position and size
   float x = 0;
   float y = 0;
@@ -117,15 +117,17 @@ struct ParameterCoupling {
    */
   void update() const {
     if (automationDependency == nullptr) {
+      // No automation will just use the plain value
       *value = getValue();
     }
     else {
+      // Will add the automation and clip the value
       *value = std::min(std::max(getValue() + automation, min), max);
     }
   }
 
   /**
-   * Simply returns the value used in the DSP
+   * Simply returns the base Value. This is not the value used in the dsp code, since it never has automation applied
    */
   inline sample getValue() const {
     if (parameter != nullptr) {

@@ -140,6 +140,7 @@ public:
         mBuffersOutAlligned[i * mChannelCount + c] = mBuffersOut[i][c];
       }
     }
+    instanceClear();
   }
 
   /**
