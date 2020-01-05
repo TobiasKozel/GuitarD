@@ -21,16 +21,26 @@
 #include "src/nodes/reverse_delay/ReverseDelayNode.h"
 #include "src/nodes/cab_lib/CabLibNode.h"
 #include "src/nodes/split/SplitNode.h"
+#include "src/nodes/band_split/BandSplitNode.h"
+#include "src/nodes/add/AddNode.h"
 
 
 namespace NodeList {
   void registerNodes() {
     NodeList::registerNode(NodeList::NodeInfo{
-    []() { return new CombineNode("CombineNode"); },
-    "CombineNode",
-    "Combine",
-    "asd",
-    "Signal Flow"
+      []() { return new CombineNode("CombineNode"); },
+      "CombineNode",
+      "Combine",
+      "asd",
+      "Signal Flow"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new AddNode("AddNode"); },
+      "AddNode",
+      "Add",
+      "asd",
+      "Signal Flow"
     });
 
     NodeList::registerNode(NodeList::NodeInfo{
@@ -40,6 +50,15 @@ namespace NodeList {
       "asd",
       "Signal Flow"
     });
+
+    NodeList::registerNode(NodeList::NodeInfo{
+      []() { return new BandSplitNode("BandSplitNode"); },
+      "BandSplitNode",
+      "Band Split",
+      "asd",
+      "Signal Flow"
+    });
+
 
     NodeList::registerNode(NodeList::NodeInfo {
       []() { return new StereoToolNode("StereoToolNode"); },

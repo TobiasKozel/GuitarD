@@ -351,7 +351,9 @@
     <ClInclude Include="..\src\misc\HistoryStack.h" />
     <ClInclude Include="..\src\misc\MessageBus.h" />
     <ClInclude Include="..\src\misc\NodeList.h" />
+    <ClInclude Include="..\src\nodes\add\AddNode.h" />
     <ClInclude Include="..\src\nodes\autogain\AutoGainNode.h" />
+    <ClInclude Include="..\src\nodes\band_split\BandSplitNode.h" />
     <ClInclude Include="..\src\nodes\bitcrusher\BitCrusherNode.h" />
     <ClInclude Include="..\src\nodes\cab_lib\CabLibNode.h" />
     <ClInclude Include="..\src\nodes\cab_lib\CabLibPopUp.h" />
