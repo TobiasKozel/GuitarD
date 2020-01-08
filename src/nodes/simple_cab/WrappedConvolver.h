@@ -17,7 +17,6 @@ class WrappedConvolver {
   const int CONV_TAIL_BLOCK_SIZE = 1024 * 4;
   const int CHANNEL_COUNT = 2;
   int mMaxBuffer = 0;
-  int mLastBlockSize = 0;
 #ifdef useThreadPool
   ctpl::thread_pool tPool;
 #endif
@@ -34,8 +33,6 @@ class WrappedConvolver {
   bool mIRLoaded = false;
 
   IRBundle mLoadedIr;
-
-  bool mWarmUpLeft = CONV_BLOCK_SIZE;
 public:
 
   bool mStereo = false;
@@ -120,7 +117,6 @@ public:
       delete[] outBuffer;
     }
     mLoadedIr = b;
-    mWarmUpLeft = true;
     mIRLoaded = true;
   }
 
@@ -253,20 +249,5 @@ public:
       }
     }
 #endif
-    if (mWarmUpLeft) {
-      /**
-       * fade in the processed input over the block
-       * TODOG doesn't prevent clicking thought
-       */
-      mWarmUpLeft = false;
-      iplug::sample scaling = 1.f / static_cast<iplug::sample>(nFrames);
-      for (int c = 0; c < CHANNEL_COUNT; c++) {
-        for (int i = 0; i < nFrames; i++) {
-          const iplug::sample s = scaling * i;
-          out[c][i] = in[c][i] * s + out[c][i] * (1 - s);
-        }
-      }
-    }
-    mLastBlockSize = nFrames;
   }
 };

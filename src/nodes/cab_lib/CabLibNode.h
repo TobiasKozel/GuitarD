@@ -66,14 +66,24 @@ public:
 
 
 class CabLibNode final : public Node {
+  sample mBlendStep = 0;
+  sample mBlendPos = 0;
+  sample** mBlendBuffer = nullptr;
+  /** Primary convolver */
   WrappedConvolver* mConvolver = nullptr;
+  /** Secondary convolver only used for blending */
+  WrappedConvolver* mConvolver2 = nullptr;
+
+  bool mIsBlending = false;
 
   CabLibNodeSharedData mCabShared = { [&](IRBundle ir) {
     const int len = std::max(mCabShared.loadedIr.path.GetLength(), ir.path.GetLength());
     if (strncmp(mCabShared.loadedIr.path.Get(), ir.path.Get(), len) != 0) {
       // don't load if the Ir is the same;
       this->mCabShared.loadedIr = ir;
-      this->mConvolver->resampleAndLoadIR(ir);
+      this->mConvolver2->resampleAndLoadIR(ir);
+      this->mBlendPos = 0;
+      this->mIsBlending = true;
     }
 }, IRBundle() };
 public:
@@ -109,18 +119,30 @@ public:
   void createBuffers() override {
     Node::createBuffers();
     mConvolver = new WrappedConvolver(mSampleRate, mMaxBuffer);
+    mConvolver2 = new WrappedConvolver(mSampleRate, mMaxBuffer);
+    mBlendBuffer = new sample * [mChannelCount];
+    for (int c = 0; c < mChannelCount; c++) {
+      mBlendBuffer[c] = new sample[mMaxBuffer];
+    }
     mConvolver->resampleAndLoadIR(mCabShared.loadedIr);
   }
 
   void deleteBuffers() override {
     Node::deleteBuffers();
     delete mConvolver;
+    delete mConvolver2;
     mConvolver = nullptr;
+    mConvolver2 = nullptr;
+    for (int c = 0; c < mChannelCount; c++) {
+      delete[] mBlendBuffer[c];
+    }
+    delete[] mBlendBuffer;
   }
 
-  virtual void OnSamplerateChanged(const int pSampleRate) {
+  virtual void OnSamplerateChanged(const int pSampleRate) override {
     deleteBuffers();
     mSampleRate = pSampleRate;
+    mBlendStep = 1.0f / (pSampleRate * 0.1);
     createBuffers();
   }
 
@@ -132,18 +154,44 @@ public:
       return;
     }
     mConvolver->mStereo = mStereo > 0.5 ? true : false;
-    mConvolver->ProcessBlock(
-      shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0], nFrames
-    );
+
+    if (mIsBlending) {
+      mConvolver2->mStereo = mConvolver->mStereo;
+      mConvolver->ProcessBlock(
+        shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0], nFrames
+      );
+      mConvolver2->ProcessBlock(
+        shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBlendBuffer, nFrames
+      );
+      for (int i = 0; i < nFrames; i++) {
+        mBlendPos += mBlendStep;
+        for (int c = 0; c < mChannelCount; c++) {
+          mBuffersOut[0][c][i] = mBuffersOut[0][c][i] * (1 - mBlendPos) + mBlendBuffer[c][i] * mBlendPos;
+        }
+        if (mBlendPos >= 1.0) {
+          mIsBlending = false;
+          WrappedConvolver* swap = mConvolver;
+          mConvolver = mConvolver2;
+          mConvolver2 = swap;
+          mIsProcessed = true;
+          return;
+        }
+      }
+    }
+    else {
+      mConvolver->ProcessBlock(
+        shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0], nFrames
+      );
+    }
     mIsProcessed = true;
   }
 
-  void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    shared.graphics = pGrahics;
+  void setupUi(IGraphics* pGraphics) override {
+    shared.graphics = pGraphics;
     CabLibNodeUi* ui = new CabLibNodeUi(&shared);
     ui->registerSharedData(&mCabShared);
     mUi = ui;
-    pGrahics->AttachControl(mUi);
+    pGraphics->AttachControl(mUi);
     mUi->setColor(IColor(255, 150, 100, 100));
     mUi->setUp();
     mUiReady = true;
