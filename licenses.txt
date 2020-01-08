@@ -10,7 +10,7 @@ json (De-/Serialisation for presets)
 MIT
 https://github.com/nlohmann/json
 
-dr_wav (Loading IRs in hte CabLib Node and SimpleCab Node)
+dr_wav (Loading IRs in the CabLib Node and SimpleCab Node)
 Public domain
 https://github.com/mackron/dr_libs
 
@@ -23,7 +23,10 @@ MIT
 https://github.com/airwindows/airwindows/blob/master/plugins/WinVST/PowerSag
 
 Grame FAUST (Using the Faust standard library and the compiler to generate C++ code)
-Licenses from Faust compiled code vary (LGPL, MIT-style STK-4.3)
+Licenses from Faust compiled code may vary (LGPL, MIT-style STK-4.3)
 https://github.com/grame-cncm/faust
 https://github.com/grame-cncm/faustlibraries
 
+Impulse Responses
+Public Domain
+https://soundwoofer.com/

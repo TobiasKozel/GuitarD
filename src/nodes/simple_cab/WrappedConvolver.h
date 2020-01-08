@@ -254,13 +254,16 @@ public:
     }
 #endif
     if (mWarmUpLeft) {
+      /**
+       * fade in the processed input over the block
+       * TODOG doesn't prevent clicking thought
+       */
       mWarmUpLeft = false;
       iplug::sample scaling = 1.f / static_cast<iplug::sample>(nFrames);
       for (int c = 0; c < CHANNEL_COUNT; c++) {
-        iplug::sample last = out[c][mLastBlockSize - 1];
         for (int i = 0; i < nFrames; i++) {
           const iplug::sample s = scaling * i;
-          out[c][i] = in[c][i] * s + last * (1 - s);
+          out[c][i] = in[c][i] * s + out[c][i] * (1 - s);
         }
       }
     }
