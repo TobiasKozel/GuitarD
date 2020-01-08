@@ -18,7 +18,7 @@
 /**
  * This is the "god object" which will handle all the nodes
  * and interactions with the graph
- * It's not a IControl itself but own a few which make up the GUI
+ * It's not a IControl itself but owns a few which make up the GUI
  */
 class Graph {
   MessageBus::Bus* mBus = nullptr;
@@ -40,9 +40,10 @@ class Graph {
   WDL_PtrList<Node> mNodes;
 
   /**
-   * Mutex to keep changes to the graph like adding/removing or rerouting from crashing s
+   * Mutex to keep changes to the graph like adding/removing or rerouting from crashing
    */
-  WDL_Mutex mIsProcessing;
+  WDL_Mutex mAudioMutex;
+  int mPauseAudio = 0;
 
   /**
    * Dummy nodes to get the audio blocks in and out of the graph
@@ -127,9 +128,13 @@ public:
       }
     });
 
-    // This might not even make sense
-    mAwaitAudioMutexEvent.subscribe(mBus, MessageBus::AwaitAudioMutex, [&](bool) {
-      //WDL_MutexLock lock(&isProcessing);
+    mAwaitAudioMutexEvent.subscribe(mBus, MessageBus::AwaitAudioMutex, [&](const bool doPause) {
+      if (doPause) {
+        this->lockAudioThread();
+      }
+      else {
+        this->unlockAudioThread();
+      }
     });
 
     mPushUndoState.subscribe(mBus, MessageBus::PushUndoState, [&](bool) {
@@ -182,7 +187,7 @@ public:
 
   void OnReset(const int pSampleRate, const int pOutputChannels = 2, const int pInputChannels = 2) {
     if (pSampleRate != mSampleRate || pOutputChannels != mChannelCount || pInputChannels != mInPutChannelCount) {
-      WDL_MutexLock lock(&mIsProcessing);
+      lockAudioThread();
       mSampleRate = pSampleRate;
       resizeSliceBuffer(pOutputChannels);
       mChannelCount = pOutputChannels;
@@ -193,6 +198,7 @@ public:
       for (int i = 0; i < mNodes.GetSize(); i++) {
         mNodes.Get(i)->OnReset(pSampleRate, pOutputChannels);
       }
+      unlockAudioThread();
     }
     else {
       /**
@@ -248,11 +254,7 @@ public:
       }
     }
 
-    if (mIsProcessing.getLockCount() > 0) {
-      /**
-       * Don't even try locking if the lock is in use already
-       * Output silence instead
-       */
+    if (mPauseAudio > 0) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
           out[c][i] = 0;
@@ -263,7 +265,7 @@ public:
 
     const auto start = std::chrono::high_resolution_clock::now();
 
-    WDL_MutexLock lock(&mIsProcessing);
+    WDL_MutexLock lock(&mAudioMutex);
     mInputNode->CopyIn(in, nFrames);
     const int nodeCount = mNodes.GetSize();
     for (int n = 0; n < nodeCount; n++) {
@@ -334,7 +336,9 @@ public:
         return true;
       }
       if ((key.VK == kVK_S) && !isUp) {
-        SortGraph::sortGraph(mNodes, mInputNode, mOutputNode, &mIsProcessing);
+        this->lockAudioThread();
+        SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
+        this->unlockAudioThread();
         return true;
       }
       return false;
@@ -466,10 +470,11 @@ public:
       node->connectInput(pInput->shared.socketsOut[outputIndex], inputIndex);
     }
     // Allocating the node is thread safe, but not the node list itself
-    WDL_MutexLock lock(&mIsProcessing);
+    lockAudioThread();
     mNodes.Add(node);
     SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
     // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
+    unlockAudioThread();
   }
 
   void removeAllNodes() {
@@ -509,7 +514,7 @@ public:
    */
   void removeNode(Node* node, const bool reconnect = false) {
     if (node == mInputNode || node == mOutputNode) { return; }
-    WDL_MutexLock lock(&mIsProcessing);
+    lockAudioThread();
     if (reconnect) {
       /**
        * Since the cleanup will sever all connections to a node, it will have to be done before the
@@ -523,6 +528,7 @@ public:
     mNodes.DeletePtr(node, true);
     SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
     // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
+    unlockAudioThread();
   }
 
   void removeNode(const int index) {
@@ -553,7 +559,7 @@ public:
       mWindowWidth = json["width"];
       mWindowHeight = json["height"];
     }
-    WDL_MutexLock lock(&mIsProcessing);
+    lockAudioThread();
     Serializer::deserialize(json, mNodes, mOutputNode, mInputNode, mSampleRate, &mParamManager, mBus);
     if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
       for (int i = 0; i < mNodes.GetSize(); i++) {
@@ -561,16 +567,31 @@ public:
       }
       scaleUi();
     }
+    unlockAudioThread();
   }
 
 private:
+
+  void lockAudioThread() {
+    if (mPauseAudio == 0) {
+      mAudioMutex.Enter();
+    }
+    mPauseAudio++;
+  }
+
+  void unlockAudioThread() {
+    if (mPauseAudio == 1) {
+      mAudioMutex.Leave();
+    }
+    mPauseAudio--;
+  }
 
   /**
    * Will try to tidy up the node graph, bound to the F key
    */
   void arrangeNodes() {
     FormatGraph::resetBranchPos(mInputNode);
-    FormatGraph::arrangeBranch(mInputNode, Coord2D{ mInputNode->shared.Y, mInputNode->shared.X });
+    FormatGraph::arrangeBranch(mInputNode, Coord2D { mInputNode->shared.Y, mInputNode->shared.X });
     centerGraph();
   }
 

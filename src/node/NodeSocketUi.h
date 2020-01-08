@@ -41,6 +41,10 @@ public:
     SetTargetAndDrawRECTs(mRECT);
     mBlend = EBlend::Clobber;
 
+    socket->callback = [&](bool doLock) {
+      MessageBus::fireEvent(this->mBus, MessageBus::AwaitAudioMutex, doLock);
+    };
+
     mOnConnectionEvent.subscribe(mBus, MessageBus::SocketConnect, [&](const SocketConnectRequest req) {
       if (req.to == this->mSocket) {
         this->mSocket->connect(req.from);
@@ -61,8 +65,8 @@ public:
 
   }
 
-  ~NodeSocketUi() {
-    
+  virtual ~NodeSocketUi() {
+    mSocket->callback = nullptr;
   }
 
   void Draw(IGraphics& g) override {

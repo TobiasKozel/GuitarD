@@ -16,10 +16,18 @@ struct NodeSocket {
   NodeSocket* mConnectedTo[MAX_SOCKET_CONNECTIONS] = { nullptr };
   // Buffer is only relevant for a output node
   iplug::sample** mParentBuffer = nullptr;
-
+  std::function<void(bool)> callback;
   virtual void disconnect(NodeSocket* to = nullptr, bool other = true) = 0;
   virtual void disconnectAll() = 0;
   virtual void connect(NodeSocket* to, bool other = true) = 0;
+
+  void lock(bool other) {
+    if (callback && other) callback(true);
+  }
+
+  void unlock(bool other) {
+    if (callback && other) callback(false);
+  }
 
   Node* getConnectedNode(int index = 0) const {
     if (mConnectedTo[index] != nullptr) {
@@ -50,6 +58,7 @@ struct NodeSocketIn : public NodeSocket {
    * Disconnects any socket if to is a nullptr, checks and only disconnects if the sockets match otherwise
    */
   void disconnect(NodeSocket* to, bool other) override {
+    lock(other);
     if (mConnectedTo[0] != nullptr && (to == mConnectedTo[0] || to == nullptr)) {
       if (other) {
         mConnectedTo[0]->disconnect(this, false);
@@ -57,6 +66,7 @@ struct NodeSocketIn : public NodeSocket {
       mConnected = false;
       mConnectedTo[0] = nullptr;
     }
+    unlock(other);
   }
 
   void disconnectAll() override {
@@ -66,12 +76,14 @@ struct NodeSocketIn : public NodeSocket {
   void connect(NodeSocket* to, bool other) override {
     if (to->mIsInput == mIsInput) { return; }
     if (to->mParentNode == mParentNode) { return; }
+    lock(other);
     if (other) {
       disconnect(to, false);
       to->connect(this, false);
     }
     mConnected = true;
     mConnectedTo[0] = to;
+    unlock(other);
   }
 };
 
@@ -99,6 +111,7 @@ struct NodeSocketOut : public NodeSocket {
   }
 
   void disconnect(NodeSocket* to, bool other) override {
+    lock(other);
     for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
       if (mConnectedTo[i] != nullptr && mConnectedTo[i] == to) {
         mConnectedTo[i] = nullptr;
@@ -109,6 +122,7 @@ struct NodeSocketOut : public NodeSocket {
       }
     }
     updatedConnected();
+    unlock(other);
   }
 
   void disconnectAll() override {
@@ -132,6 +146,7 @@ struct NodeSocketOut : public NodeSocket {
         return;
       }
     }
+    lock(other);
     for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
       if (mConnectedTo[i] == nullptr) {
         mConnectedTo[i] = toIn;
@@ -148,5 +163,6 @@ struct NodeSocketOut : public NodeSocket {
       }
     }
     updatedConnected();
+    unlock(other);
   }
 };
