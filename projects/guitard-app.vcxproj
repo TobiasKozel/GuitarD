@@ -361,6 +361,7 @@
     <ClInclude Include="..\src\nodes\crybaby\CryBabyNode.h" />
     <ClInclude Include="..\src\nodes\envelope\EnvelopeNode.h" />
     <ClInclude Include="..\src\nodes\feedback\FeedbackNode.h" />
+    <ClInclude Include="..\src\nodes\flanger\FlangerNode.h" />
     <ClInclude Include="..\src\nodes\fuzz\FuzzNode.h" />
     <ClInclude Include="..\src\nodes\io\InputNode.h" />
     <ClInclude Include="..\src\nodes\io\OutputNode.h" />

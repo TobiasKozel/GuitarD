@@ -23,11 +23,12 @@
 #include "src/nodes/split/SplitNode.h"
 #include "src/nodes/band_split/BandSplitNode.h"
 #include "src/nodes/add/AddNode.h"
+#include "src/nodes/flanger/FlangerNode.h"
 
 
 namespace NodeList {
   void registerNodes() {
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new CombineNode("CombineNode"); },
       "CombineNode",
       "Combine",
@@ -35,7 +36,7 @@ namespace NodeList {
       "Signal Flow"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new AddNode("AddNode"); },
       "AddNode",
       "Add",
@@ -43,7 +44,7 @@ namespace NodeList {
       "Signal Flow"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new SplitNode("SplitNode"); },
       "SplitNode",
       "Split L/R",
@@ -51,7 +52,7 @@ namespace NodeList {
       "Signal Flow"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new BandSplitNode("BandSplitNode"); },
       "BandSplitNode",
       "Band Split",
@@ -68,7 +69,7 @@ namespace NodeList {
       "Tools"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new FeedbackNode("FeedbackNode"); },
       "FeedbackNode",
       "Feedback",
@@ -76,7 +77,7 @@ namespace NodeList {
       "Tools"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new PhaseToolNode("PhaseToolNode"); },
       "PhaseToolNode",
       "Phase Tool",
@@ -84,7 +85,7 @@ namespace NodeList {
       "Tools"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new EnvelopeNode("EnvelopeNode"); },
       "EnvelopeNode",
       "Envelope Automation Tool",
@@ -92,7 +93,7 @@ namespace NodeList {
       "Automation"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new SimpleDriveNode("SimpleDriveNode"); },
       "SimpleDriveNode",
       "Simple Drive",
@@ -100,7 +101,7 @@ namespace NodeList {
       "Distortion"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new OverDriveNode("OverDriveNode"); },
         "OverDriveNode",
         "Overdrive",
@@ -108,7 +109,7 @@ namespace NodeList {
         "Distortion"
       });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new FuzzNode("FuzzNode"); },
       "FuzzNode",
       "Fuzz",
@@ -116,7 +117,7 @@ namespace NodeList {
       "Distortion"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new BitCrusherNode("BitCrusherNode"); },
       "BitCrusherNode",
       "Bitcrusher",
@@ -124,7 +125,7 @@ namespace NodeList {
       "Distortion"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new PowerSagNode("PowerSagNode"); },
       "PowerSagNode",
       "Power Sag",
@@ -132,7 +133,7 @@ namespace NodeList {
       "Distortion"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new SimpleDelayNode("SimpleDelayNode"); },
       "SimpleDelayNode",
       "Mono Delay",
@@ -140,7 +141,7 @@ namespace NodeList {
       "Delays/Reverbs"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new SimpleReverbNode("SimpleReverbNode"); },
       "SimpleReverbNode",
       "Stereo Reverb",
@@ -148,7 +149,7 @@ namespace NodeList {
       "Delays/Reverbs"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new ReverseDelayNode("ReverseDelayNode"); },
       "ReverseDelayNode",
       "Reverse Reverb",
@@ -156,7 +157,7 @@ namespace NodeList {
       "Delays/Reverbs"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new SimpleCabNode("SimpleCabNode"); },
       "SimpleCabNode",
       "Simple Cabinet",
@@ -164,7 +165,7 @@ namespace NodeList {
       "Cabinets"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new CabLibNode("CabLibNode"); },
       "CabLibNode",
       "Cabinet Library",
@@ -172,7 +173,7 @@ namespace NodeList {
       "Cabinets"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new CryBabyNode("CryBabyNode"); },
       "CryBabyNode",
       "Crybaby",
@@ -180,7 +181,16 @@ namespace NodeList {
       "Filters"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+
+    NodeList::registerNode(NodeList::NodeInfo {
+      []() { return new FlangerNode("FlangerNode"); },
+      "FlangerNode",
+      "Flanger",
+      "asd",
+      "Filters"
+    });
+
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new ParametricEqNode("ParametricEqNode"); },
       "ParametricEqNode",
       "Parametric Equalizer",
@@ -188,7 +198,7 @@ namespace NodeList {
       "Filters"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new SimpleComressorNode("SimpleComressorNode"); },
       "SimpleComressorNode",
       "Simple Compressor",
@@ -196,7 +206,7 @@ namespace NodeList {
       "Dynamics"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new SimpleGateNode("SimpleGateNode"); },
       "SimpleGateNode",
       "Simple Gate",
@@ -204,12 +214,12 @@ namespace NodeList {
       "Dynamics"
     });
 
-    NodeList::registerNode(NodeList::NodeInfo{
+    NodeList::registerNode(NodeList::NodeInfo {
       []() { return new AutoGainNode("AutoGainNode"); },
       "AutoGainNode",
       "Auto Linear Gain",
       "asd",
       "Dynamics"
-      });
+    });
   }
 }

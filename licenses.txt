@@ -26,3 +26,4 @@ Grame FAUST (Using the Faust standard library and the compiler to generate C++ c
 Licenses from Faust compiled code vary (LGPL, MIT-style STK-4.3)
 https://github.com/grame-cncm/faust
 https://github.com/grame-cncm/faustlibraries
+

@@ -2,8 +2,6 @@ import("stdfaust.lib");
 import("reverbs.lib");
 import("misceffects.lib");
 
-
-linear2db(x) = 20*log10(x);
 maxDelay = 1; // Max delay in seconds
 time = vslider( "Time", 0.3, 0, maxDelay, 0.001) * ma.SR, 1 : max : si.smooth(0.999);
 dry = ba.db2linear(vslider("Dry", 0, -60, 0, 0.1));
