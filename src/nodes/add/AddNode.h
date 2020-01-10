@@ -28,7 +28,7 @@ public:
       return;
     }
 
-    if ((has1 && !s1->getConnectedNode()->mIsProcessed) || has2 && !s2->getConnectedNode()->mIsProcessed) {
+    if ((has1 && !s1->getConnectedNode()->mIsProcessed) || (has2 && !s2->getConnectedNode()->mIsProcessed)) {
       // skip until inputs are ready
       return;
     }
@@ -66,7 +66,7 @@ public:
     mIsProcessed = true;
   }
 
-  void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, const int pMaxBuffer = 512, int pChannles = 2, int pInputs = 1, int pOutputs = 1) {
+  void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, const int pMaxBuffer = 512, int pChannles = 2, int pInputs = 1, int pOutputs = 1) override {
     Node::setup(pBus, pSamplerate, pMaxBuffer, 2, 2, 1);
     ParameterCoupling* p = new ParameterCoupling(
       "PAN 1", &pan1, 0.0, -1.0, 1.0, 0.01

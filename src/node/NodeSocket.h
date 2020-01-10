@@ -42,6 +42,8 @@ struct NodeSocket {
     }
     return -1;
   }
+    
+  virtual ~NodeSocket() { }
 };
 
 /**

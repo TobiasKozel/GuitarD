@@ -180,7 +180,7 @@ public:
     mConvolver = nullptr;
   }
 
-  virtual void OnSamplerateChanged(const int pSampleRate) {
+  virtual void OnSamplerateChanged(const int pSampleRate) override {
     deleteBuffers();
     mSampleRate = pSampleRate;
     createBuffers();

@@ -20,7 +20,7 @@ public:
     shared.type = pType;
   }
 
-  void setup(MessageBus::Bus* pBus, int pSamplerate = 48000, int pMaxBuffer = MAX_BUFFER, int pChannels = 2, int pInputs = 1, int pOutputs = 1) {
+  void setup(MessageBus::Bus* pBus, int pSamplerate = 48000, int pMaxBuffer = MAX_BUFFER, int pChannels = 2, int pInputs = 1, int pOutputs = 1) override {
     Node::setup(pBus, pSamplerate, pMaxBuffer, pChannels, pInputs, pOutputs);
     addByPassParam();
     ParameterCoupling* p = new ParameterCoupling(
@@ -50,7 +50,7 @@ public:
   }
 
 
-  void ProcessBlock(int nFrames) {
+  void ProcessBlock(int nFrames) override {
     if (byPass()) { return; }
     if (mIsProcessed == false) {
       shared.parameters[1]->update();

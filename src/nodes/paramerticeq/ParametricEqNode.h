@@ -39,7 +39,7 @@ public:
     float y = mTargetRECT.T + mTargetRECT.H() / 2.f;
     float w = mTargetRECT.W();
     DrawDebug(g, x, y, w);
-    float logW = w / 3.f;
+    // float logW = w / 3.f;
 
     while (x < mTargetRECT.R) {
       const float offset = 0;

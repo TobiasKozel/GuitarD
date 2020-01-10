@@ -21,7 +21,7 @@ public:
     setup(pBus, 0, MAX_BUFFER, 2, 1, 0);
   }
 
-  void ProcessBlock(int) {
+  void ProcessBlock(int) override {
     NodeSocket* in = shared.socketsIn[0]->mConnectedTo[0];
     if (in == nullptr) {
       mIsProcessed = true;

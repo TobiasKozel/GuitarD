@@ -57,7 +57,7 @@ struct UI {
   };
 
   void addHorizontalBargraph(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT min, FAUSTFLOAT max) const {
-    addHorizontalBargraph(name, prop, min, max);
+    addVerticalBargraph(name, prop, min, max);
   };
 };
 
@@ -95,7 +95,7 @@ public:
     }
 
     const int perColumn = 2;
-    const int columns = ceil(shared.parameterCount / static_cast<float>(perColumn));
+    // const int columns = ceil(shared.parameterCount / static_cast<float>(perColumn));
 
     for (int i = 0, pos = 0; i < shared.parameterCount; i++) {
       const int column = pos / perColumn;

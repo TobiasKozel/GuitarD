@@ -43,7 +43,7 @@ public:
     const float size = 60;
     const float left1 = shared.width * 0.26 - shared.width / 2.f;
     const float left2 = shared.width * 0.75 - shared.width / 2.f;
-    const float center = (left1 + left2) / 2.f;
+    // const float center = (left1 + left2) / 2.f;
     const float top1 = -35;
     const float top2 = 40;
     mUi->mParamsByName.at("Drive")->setPos(left1, top1, size);

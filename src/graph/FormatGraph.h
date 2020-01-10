@@ -29,7 +29,7 @@ namespace FormatGraph {
       return pos;
     }
     const float halfWidth = node->shared.width * 0.5;
-    const float halfHeight = node->shared.height * 0.5;
+    // const float halfHeight = node->shared.height * 0.5;
     const float padding = 50;
     pos.x += halfWidth + padding;
     node->mUi->setTranslation(pos.x, pos.y);

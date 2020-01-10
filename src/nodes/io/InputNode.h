@@ -34,7 +34,7 @@ public:
     setup(pBus, 48000, MAX_BUFFER, 2, 0, 1);
   }
 
-  void ProcessBlock(int) {}
+  void ProcessBlock(int) override {}
 
   void setInputChannels(int pInputChannels = 2) {
     if (pInputChannels != mInputChannels) {
