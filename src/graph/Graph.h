@@ -105,6 +105,10 @@ public:
     mOutputNode = new OutputNode(mBus);
     mOutputNode->connectInput(mInputNode->shared.socketsOut[0]);
 
+    /**
+     * All the events the Graph is subscribed to
+     */
+
     mNodeDelSub.subscribe(mBus, MessageBus::NodeDeleted, [&](Node* param) {
       MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
       this->removeNode(param, true);
@@ -215,19 +219,6 @@ public:
         mNodes.Get(i)->OnTransport();
       }
     }
-  }
-
-  void resizeSliceBuffer(const int channelCount) {
-    if (mSliceBuffer[0] != nullptr) {
-      for (int c = 0; c < channelCount; c++) {
-        delete mSliceBuffer[0];
-        mSliceBuffer[0] = nullptr;
-        delete mSliceBuffer[1];
-        mSliceBuffer[1] = nullptr;
-      }
-    }
-    mSliceBuffer[0] = new sample*[channelCount];
-    mSliceBuffer[1] = new sample*[channelCount];
   }
 
   /**
@@ -600,6 +591,18 @@ public:
   }
 
 private:
+  void resizeSliceBuffer(const int channelCount) {
+    if (mSliceBuffer[0] != nullptr) {
+      for (int c = 0; c < channelCount; c++) {
+        delete mSliceBuffer[0];
+        mSliceBuffer[0] = nullptr;
+        delete mSliceBuffer[1];
+        mSliceBuffer[1] = nullptr;
+      }
+    }
+    mSliceBuffer[0] = new sample * [channelCount];
+    mSliceBuffer[1] = new sample * [channelCount];
+  }
 
   void lockAudioThread() {
     if (mPauseAudio == 0) {

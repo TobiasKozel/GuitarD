@@ -75,7 +75,7 @@ public:
        * Since there's no way to choose from multiple ones, the first ones will
        * always be used
        */
-      NodeSocket* in = shared->socketsIn[0];
+      NodeSocket* in = getQuickConnectSocket(false);
       NodeSocket* out = shared->socketsOut[0];
       NodeSocket* prev = pair.socket->mConnectedTo[0];
       if (in != nullptr && out != nullptr) {
@@ -87,19 +87,9 @@ public:
 
     mNodeQuickConnectEvent.subscribe(shared->bus, MessageBus::QuickConnectSocket, [&](QuickConnectRequest req) {
       if (mTargetRECT.Contains(IRECT{req.pos.x, req.pos.y, req.pos.x, req.pos.y })) {
-        bool force = false;
-        for (int i = 0; i < MAX_NODE_SOCKETS; i++) {
-          NodeSocket* socket = req.from->mIsInput ? shared->socketsOut[i] : shared->socketsIn[i];
-          if (socket != nullptr && (force || !socket->mConnected)) {
-            // Look for the first unconnected socket
-            socket->connect(req.from);
-            return;
-          }
-          if (!force && i == MAX_NODE_SOCKETS - 1) {
-            // none found means we'll use the first one anyways
-            i = -1;
-            force = true;
-          }
+        NodeSocket* socket = getQuickConnectSocket(req.from->mIsInput);
+        if (socket != nullptr) {
+          socket->connect(req.from);
         }
       }
     });
@@ -108,6 +98,28 @@ public:
   }
 
   virtual ~NodeUi() {
+  }
+
+  /**
+   * Tries to return a unconnected input or output socket
+   * Will return a connected one if no unconnected one is found
+   */
+  virtual NodeSocket* getQuickConnectSocket(const bool output = false) {
+    for (int i = 0; i < MAX_NODE_SOCKETS; i++) {
+      NodeSocket* socket = output ? shared->socketsOut[i] : shared->socketsIn[i];
+      if (socket != nullptr && !socket->mConnected) {
+        // Look for the first unconnected socket
+        return socket;
+      }
+    }
+    for (int i = 0; i < MAX_NODE_SOCKETS; i++) {
+      NodeSocket* socket = output ? shared->socketsOut[i] : shared->socketsIn[i];
+      if (socket != nullptr) {
+        // Use a socket even if it is connected
+        return socket;
+      }
+    }
+    return nullptr;
   }
 
   virtual void setUpDimensions(float w, float h) {
