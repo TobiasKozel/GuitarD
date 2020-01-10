@@ -55,7 +55,7 @@ struct NodeSocketIn : public NodeSocket {
     mIsInput = true;
   }
   /**
-   * Disconnects any socket if to is a nullptr, checks and only disconnects if the sockets match otherwise
+   * Disconnects any socket if "to" is a nullptr, checks and only disconnects if the sockets match otherwise
    */
   void disconnect(NodeSocket* to, bool other) override {
     lock(other);
@@ -76,9 +76,13 @@ struct NodeSocketIn : public NodeSocket {
   void connect(NodeSocket* to, bool other) override {
     if (to->mIsInput == mIsInput) { return; }
     if (to->mParentNode == mParentNode) { return; }
+    /**
+     * Input sockets can only hold one connection, so disconnect it in case
+     * there was already a socket connected
+     */
+    disconnect(nullptr, true);
     lock(other);
     if (other) {
-      disconnect(to, false);
       to->connect(this, false);
     }
     mConnected = true;
