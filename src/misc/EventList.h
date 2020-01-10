@@ -28,6 +28,7 @@ namespace MessageBus {
     QuickConnectSocket, // Event fired from a NodeSocketUi and subscribed to by NodeUi to allow connecting without hitting the socket itself
     OpenPopUp, // Takes an IControl and pushes it on top of the render stack
     NodeSpliceInCombine, // Adds a combine node after the node passed with this event
+    GraphStatsChanged, // Fired from the audio thread once a graph did not finish processing fot the first time
     TOTAL_MESSAGE_IDS // Keep this one at the bottom to count all events
   };
 }

@@ -23,6 +23,7 @@ struct NodeSpliceInPair {
 struct GraphStats {
   long long executionTime = 0;
   int nodeCount = 0;
+  bool valid = true;
 };
 
 struct SocketConnectRequest {

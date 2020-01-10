@@ -140,6 +140,7 @@ public:
       else {
         this->unlockAudioThread();
       }
+      
     });
 
     mPushUndoState.subscribe(mBus, MessageBus::PushUndoState, [&](bool) {
@@ -286,6 +287,17 @@ public:
       for (int n = 0; n < nodeCount; n++) {
         mNodes.Get(n)->ProcessBlock(nFrames);
       }
+      if (!mStats.valid) {
+        mStats.valid = true;
+        MessageBus::fireEvent(mBus, MessageBus::GraphStatsChanged, &mStats);
+      }
+    }
+    else {
+      // failed processing
+      if (mStats.valid) {
+        mStats.valid = false;
+        MessageBus::fireEvent(mBus, MessageBus::GraphStatsChanged, &mStats);
+      }
     }
 
     mOutputNode->CopyOut(out, nFrames);
@@ -359,8 +371,9 @@ public:
     mGraphics->AttachControl(mNodeGallery);
 
     scaleUi();
-
+#ifndef NDEBUG
     testadd();
+#endif
   }
 
   /**

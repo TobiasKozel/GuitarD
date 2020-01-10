@@ -72,8 +72,6 @@ public:
       if (shared->node != pair.node) { return; }
       /**
        * Splice in only works on nodes with at least one in and output
-       * Since there's no way to choose from multiple ones, the first ones will
-       * always be used
        */
       NodeSocket* in = getQuickConnectSocket(false);
       NodeSocket* out = shared->socketsOut[0];

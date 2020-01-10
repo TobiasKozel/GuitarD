@@ -36,6 +36,7 @@ class CableLayer : public IControl {
   MessageBus::Subscription<ConnectionDragData*> mConnectionDragEvent;
   MessageBus::Subscription<Node*> mVisualizeAutomationTargetsEvent;
   MessageBus::Subscription<Node*> mPickAutomationTargetEvent;
+  MessageBus::Subscription<GraphStats*> mGraphInvalidEvent;
 
   // Used to highlight the connection just before a splice in
   NodeSocket* mHighlightSocket = nullptr;
@@ -45,6 +46,8 @@ class CableLayer : public IControl {
   NodeSocket* mPreviewSocket = nullptr;
 
   ConnectionDragData* mConnectionDragData = nullptr;
+
+  GraphStats* mStats = nullptr;
 public:
   CableLayer(MessageBus::Bus* pBus, IGraphics* g, WDL_PtrList<Node>* pNodes, Node* pOutNode, Node* pInNode) :
     IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
@@ -61,11 +64,11 @@ public:
       this->mDirty = true;
     });
 
-    mNodeDraggedEvent.subscribe(mBus, MessageBus::NodeDragged, [&](Coord2D pos) {
+    mNodeDraggedEvent.subscribe(mBus, MessageBus::NodeDragged, [&](const Coord2D pos) {
       mHighlightSocket = getClosestToConnection(pos);
     });
 
-    mNodeSeverEvent.subscribe(mBus, MessageBus::SeverNodeConnection, [&](Coord2D pos) {
+    mNodeSeverEvent.subscribe(mBus, MessageBus::SeverNodeConnection, [&](const Coord2D pos) {
       NodeSocket* close = getClosestToConnection(pos);
       if (close != nullptr) {
         close->disconnectAll();
@@ -73,7 +76,7 @@ public:
       mDirty = true;
     });
 
-    mNodeDraggedEndEvent.subscribe(mBus, MessageBus::NodeDraggedEnd, [&](NodeDragEndData data) {
+    mNodeDraggedEndEvent.subscribe(mBus, MessageBus::NodeDraggedEnd, [&](const NodeDragEndData data) {
       Node* node = data.node;
       NodeSocket* target = mHighlightSocket;
       mHighlightSocket = nullptr;
@@ -153,6 +156,11 @@ public:
     mPickAutomationTargetEvent.subscribe(mBus, MessageBus::PickAutomationTarget, [&](Node* n) {
       this->mPickAutomationTarget = n;
       SetTargetRECT(mGraphics->GetBounds());
+      this->mDirty = true;
+    });
+
+    mGraphInvalidEvent.subscribe(mBus, MessageBus::GraphStatsChanged, [&](GraphStats* stats) {
+      this->mStats = stats;
       this->mDirty = true;
     });
   }
@@ -290,8 +298,15 @@ public:
     if (mPickAutomationTarget != nullptr) {
       g.FillRect(Theme::Cables::PICK_AUTOMATION, mRECT);
     }
-
+#ifndef NDEBUG
     reverseDraw(g);
+#endif
+
+    if (mStats != nullptr && !mStats->valid) {
+      const IRECT box = mRECT.GetPadded(-20).GetFromBottom(40);
+      g.FillRect(Theme::Colors::ACCENT, box);
+      g.DrawText(Theme::Gallery::CATEGORY_TITLE, "Graph cannot be computed (maybe it includes a cycle?)", box);
+    }
   }
 
   void OnMouseDown(const float x, const float y, const IMouseMod& mod) override {
@@ -323,7 +338,7 @@ public:
   }
 
 private:
-  NodeSocket* getClosestToConnection(Coord2D pos) {
+  NodeSocket* getClosestToConnection(const Coord2D pos) const {
     const float socketRadius = Theme::Sockets::DIAMETER / 2;
     for (int n = 0; n < mNodes->GetSize() + 1; n++) {
       Node* curNode = mNodes->Get(n);
