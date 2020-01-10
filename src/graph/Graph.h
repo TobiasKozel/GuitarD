@@ -25,6 +25,7 @@ class Graph {
   MessageBus::Subscription<Node*> mNodeDelSub;
   MessageBus::Subscription<Node*> mNodeBypassEvent;
   MessageBus::Subscription<Node*> mNodeCloneEvent;
+  MessageBus::Subscription<Node*> mNodeSpliceCombineEvent;
   MessageBus::Subscription<NodeList::NodeInfo> mNodeAddEvent;
   MessageBus::Subscription<bool> mAwaitAudioMutexEvent;
   MessageBus::Subscription<bool> mPushUndoState;
@@ -152,6 +153,10 @@ public:
 
     mReturnStats.subscribe(mBus, MessageBus::GetGraphStats, [&](GraphStats** stats) {
       *stats = &mStats;
+    });
+
+    mNodeSpliceCombineEvent.subscribe(mBus, MessageBus::NodeSpliceInCombine, [&](Node* node) {
+      this->spliceInCombine(node);
     });
 
     mAutomationRequest.subscribe(mBus, MessageBus::AttachAutomation, [&](AutomationAttachRequest r) {
@@ -505,6 +510,30 @@ public:
         }
         MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDisconnectAll, node);
       }
+    }
+  }
+
+  void spliceInCombine(Node* node) {
+    if (node->shared.inputCount > 0 && node->shared.outputCount > 0) {
+      NodeSocket* inSock = node->shared.socketsIn[0];
+      NodeSocket* outSock = node->shared.socketsOut[0];
+      NodeSocket* source = inSock->mConnectedTo[0];
+      NodeSocket* target = outSock->mConnectedTo[0];
+      if (target == nullptr || source == nullptr) {
+        return;
+      }
+      Node* combine = NodeList::createNode("CombineNode");
+      addNode(combine, nullptr, node->shared.X, node->shared.Y);
+
+      for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+        if (outSock->mConnectedTo[i] != nullptr) {
+          combine->shared.socketsOut[0]->connect(outSock->mConnectedTo[i]);
+        }
+      }
+      combine->shared.socketsIn[0]->connect(outSock);
+      combine->shared.socketsIn[1]->connect(source);
+      combine->mUi->mDragging = true;
+      mGraphics->SetCapturedControl(combine->mUi);
     }
   }
 

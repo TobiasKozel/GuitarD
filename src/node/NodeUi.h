@@ -320,31 +320,39 @@ public:
     }
   }
 
-  virtual void OnMouseDrag(const float x, const float y, const float dX, const float dY, const IMouseMod& mod) override {
+  void OnMouseDrag(const float x, const float y, const float dX, const float dY, const IMouseMod& mod) override {
     if (!mDragging) {
       if (mod.A && mod.C && !mod.S) {
-        // Alt and Control
-        // Disconnect all the connections of a node
+        /**
+         * Alt and Control
+         * Disconnect all the connections of a node
+         */
         MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDisconnectAll, shared->node);
         mDragging = true;
         return;
       }
       if (mod.A && !mod.C && !mod.S) {
-        // Alt
-        // Bypass all connections of a node
+        /**
+         * Alt drag
+         * Bypass all connections of a node
+         */
         MessageBus::fireEvent<Node*>(shared->bus, MessageBus::BypassNodeConnection, shared->node);
         mDragging = true;
         return;
       }
       if (!mod.A && mod.C && !mod.S) {
-        // Control
-        // Duplicate the node
+        /**
+         * Control crag
+         * Duplicate the node
+         */
         MessageBus::fireEvent<Node*>(shared->bus, MessageBus::CloneNode, shared->node);
         return;
       }
-      if (!mod.A && !mod.C && mod.S) {
-        // Shift
-        // Get the fist output and drag it
+      if (!mod.A && !mod.C && !mod.S && mod.R) {
+        /**
+         * right click drag
+         * Get the fist output and drag it
+         */
         NodeSocketUi* socket = mod.L ? mInSocketsUi.Get(0) : mOutSocketsUi.Get(0);
         if (socket != nullptr) {
           socket->OnMouseDown(x, y, mod);
@@ -353,7 +361,25 @@ public:
         }
         return;
       }
+      if (!mod.A && !mod.C && mod.S) {
+        /**
+         * Shift drag
+         * Combine the original signal with output of the node
+         */
+        MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeSpliceInCombine, shared->node);
+        return;
+      }
+      if (!mod.A && mod.C && mod.S) {
+        /**
+         * Shift + control drag
+         * Combine it with duplicate of this node
+         */
+        return;
+      }
     }
+    /**
+     * Default case is simple drag
+     */
     mDragging = true;
     MessageBus::fireEvent<Coord2D>(shared->bus, MessageBus::NodeDragged, Coord2D {x, y});
     translate(dX, dY);

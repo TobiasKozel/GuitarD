@@ -27,6 +27,7 @@ namespace MessageBus {
     CloneNode,
     QuickConnectSocket, // Event fired from a NodeSocketUi and subscribed to by NodeUi to allow connecting without hitting the socket itself
     OpenPopUp, // Takes an IControl and pushes it on top of the render stack
+    NodeSpliceInCombine, // Adds a combine node after the node passed with this event
     TOTAL_MESSAGE_IDS // Keep this one at the bottom to count all events
   };
 }
