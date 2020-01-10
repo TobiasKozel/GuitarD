@@ -66,6 +66,8 @@ public:
 
 
 class CabLibNode final : public Node {
+  /** Time in seconds to use for blending between convolvers */
+  const sample mTransitionTime = 0.1;
   sample mBlendStep = 0;
   sample mBlendPos = 0;
   sample** mBlendBuffer = nullptr;
@@ -139,10 +141,10 @@ public:
     delete[] mBlendBuffer;
   }
 
-  virtual void OnSamplerateChanged(const int pSampleRate) override {
+  void OnSamplerateChanged(const int pSampleRate) override {
     deleteBuffers();
     mSampleRate = pSampleRate;
-    mBlendStep = 1.0f / (pSampleRate * 0.1);
+    mBlendStep = 1.0f / (pSampleRate * mTransitionTime);
     createBuffers();
   }
 
@@ -164,9 +166,11 @@ public:
         shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBlendBuffer, nFrames
       );
       for (int i = 0; i < nFrames; i++) {
-        mBlendPos += mBlendStep;
-        if (mBlendPos >= 1.0) {
-          mBlendPos = 1;
+        if (mBlendPos < 1.0) {
+          mBlendPos += mBlendStep;
+        }
+        else {
+          mBlendPos = 1.0;
         }
         for (int c = 0; c < mChannelCount; c++) {
           mBuffersOut[0][c][i] = mBuffersOut[0][c][i] * (1 - mBlendPos) + mBlendBuffer[c][i] * mBlendPos;
@@ -177,8 +181,6 @@ public:
         WrappedConvolver* swap = mConvolver;
         mConvolver = mConvolver2;
         mConvolver2 = swap;
-        mIsProcessed = true;
-        return;
       }
     }
     else {

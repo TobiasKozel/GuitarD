@@ -170,6 +170,31 @@ public:
     );
   }
 
+  void reverseDraw(IGraphics& g) {
+    const float socketRadius = Theme::Sockets::DIAMETER / 2;
+    for (int n = 0; n < mNodes->GetSize() + 1; n++) {
+      Node* curNode = mNodes->Get(n);
+      if (curNode == nullptr) {
+        // only happens for the last node
+        curNode = mInNode;
+      }
+      for (int i = 0; i < curNode->shared.outputCount; i++) {
+        NodeSocket* curSock = curNode->shared.socketsOut[i];
+        for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
+          if (curSock->mConnectedTo[j] != nullptr) {
+            NodeSocket* tarSock = curSock->mConnectedTo[j];
+            g.DrawLine(COLOR_RED,
+              curSock->mX + socketRadius, curSock->mY + socketRadius,
+              tarSock->mX + socketRadius, tarSock->mY + socketRadius,
+              &mBlend, 2
+            );
+          }
+        }
+      }
+    }
+
+  }
+
   void Draw(IGraphics& g) override {
     const float socketRadius = Theme::Sockets::DIAMETER / 2;
     // Draw all the connections between nodes
@@ -265,6 +290,8 @@ public:
     if (mPickAutomationTarget != nullptr) {
       g.FillRect(Theme::Cables::PICK_AUTOMATION, mRECT);
     }
+
+    reverseDraw(g);
   }
 
   void OnMouseDown(const float x, const float y, const IMouseMod& mod) override {

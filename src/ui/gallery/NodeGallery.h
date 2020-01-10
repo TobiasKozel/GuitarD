@@ -39,6 +39,7 @@ public:
     mScrollview = new ScrollViewControl();
     mScrollview->setRenderPriority(12);
     mScrollview->setFullWidthChildren(true);
+    // mScrollview->setDoDragScroll(false);
     GetUI()->AttachControl(mScrollview);
     init();
     OnResize();
