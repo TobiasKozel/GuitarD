@@ -9,7 +9,13 @@
  * A ParameterCoupling can also exist without a IParam which basically allows an unlimited
  * amount of IControls
  */
-struct ParameterCoupling {
+class ParameterCoupling {
+  sample mAdd = 0;
+  sample mMul = 0;
+  sample* value = nullptr; // pointer to the value used in the dsp code
+  sample baseValue = 0; // This value is only used for params which couldn't claim a DAW parameter to act as the one provided by the IParam
+  IParam* parameter = nullptr; // Param object for outside daw automation
+public:
   enum Type {
     Auto,
     Linear,
@@ -24,23 +30,9 @@ struct ParameterCoupling {
 
   Type type = Auto;
 
-  // Param object for outside daw automation
-  IParam* parameter = nullptr;
 
   // Index of the IParam -1 means unassigned
   int parameterIdx = kNoParameter;
-
-  // pointer to the value used in the dsp code
-  sample* value = nullptr;
-
-  // this will be added on top of the actual value to allow internal automation eventually
-  sample automation = 0;
-
-  // This value is only used for params which couldn't claim a DAW parameter to act as the one provided by the IParam
-  sample baseValue = 0;
-
-  sample mAdd = 0;
-  sample mMul = 0;
 
   // Bounds and so on 
   sample min = 0;
@@ -59,6 +51,8 @@ struct ParameterCoupling {
   float lowAngle = -135.f;
   float highAngle = 135.f;
 
+  sample automation = 0; // this will be added on top of the actual value to allow internal automation eventually
+
   Node* automationDependency = nullptr;
 
   // name which may be used in the UI
@@ -72,8 +66,8 @@ struct ParameterCoupling {
   bool wantsDawParameter = true;
 
   explicit ParameterCoupling(const char* pName = nullptr, sample* pProperty = nullptr,
-                    const sample pDefault = 0.5, const sample pMin = 0, const sample pMax = 1,
-                    const sample pStepSize = 0.01, const Type pType = Auto)
+    const sample pDefault = 0.5, const sample pMin = 0, const sample pMax = 1,
+    const sample pStepSize = 0.01, const Type pType = Auto)
   {
     value = pProperty;
     defaultVal = pDefault;
@@ -88,29 +82,33 @@ struct ParameterCoupling {
 
     // Do some assumptions for the correct type
     if (pType == Auto) {
-      if (max == 20000) {
-        type = Frequency;
-        if (min <= 0.) {
-          min = 0.00000001;
-        }
-        mAdd = std::log(min);
-        mMul = std::log(max / min);
-      }
-      else if (min == 0 && max == 1 && stepSize == 1) {
-        type = Boolean;
-      }
-      else if (max >= 0 && min > -130 && min < -40) {
-        type = Gain;
-      }
-      else if (min == 0 && max == 100) {
-        type = Percentage;
-      }
-      else {
-        type = Linear;
-      }
+      guessType();
     }
     else {
       type = pType;
+    }
+  }
+
+  void guessType() {
+    if (max == 20000) {
+      type = Frequency;
+      if (min <= 0.) {
+        min = 0.00000001;
+      }
+      mAdd = std::log(min);
+      mMul = std::log(max / min);
+    }
+    else if (min == 0 && max == 1 && stepSize == 1) {
+      type = Boolean;
+    }
+    else if (max >= 0 && min > -130 && min < -40) {
+      type = Gain;
+    }
+    else if (min == 0 && max == 100) {
+      type = Percentage;
+    }
+    else {
+      type = Linear;
     }
   }
 
@@ -131,13 +129,50 @@ struct ParameterCoupling {
   /**
    * Simply returns the base Value. This is not the value used in the dsp code, since it never has automation applied
    */
-  inline sample getValue() const {
+  sample getValue() const {
     if (parameter != nullptr) {
       return parameter->Value();
     }
     return baseValue;
   }
 
+  void setValue(const sample v) {
+    if (parameter != nullptr) {
+      parameter->Set(v);
+    }
+    else {
+      baseValue = v;
+    }
+  }
+
+  void setParam(IParam* p) {
+    parameter = p;
+    if (p != nullptr) {
+      switch (type) {
+      case Boolean:
+        parameter->InitBool(name, defaultVal > 0.5);
+        break;
+      case Frequency:
+        parameter->InitFrequency(name, defaultVal, min, max, stepSize);
+        break;
+      case Gain:
+        parameter->InitGain(name, defaultVal, min, max, stepSize);
+        break;
+      case Percentage:
+        parameter->InitPercentage(name, defaultVal, min, max, stepSize);
+        break;
+      case Linear:
+      default:
+        parameter->InitDouble(name, defaultVal, min, max, stepSize);
+        break;
+      }
+      p->Set(baseValue);
+    }
+  }
+
+  IParam* getParam() {
+    return parameter;
+  }
 
   inline sample scaledToNormalized(const sample v) const {
     return ((v - min) / (max - min));
@@ -167,13 +202,13 @@ struct ParameterCoupling {
   void setFromNormalized(const sample v) {
     if (parameter != nullptr) {
       parameter->SetNormalized(v);
-      return;
     }
-    if (type == Frequency) {
+    else if (type == Frequency) {
       baseValue = normalizedToExp(v);
-      return;
     }
-    baseValue = normalizedToScaled(v);
+    else {
+      baseValue = normalizedToScaled(v);
+    }
   }
 
   /**
@@ -183,6 +218,9 @@ struct ParameterCoupling {
     if (parameter != nullptr) {
       return parameter->GetNormalized();
     }
+    /**
+     * TODOG other types of scaling
+     */
     if (type == Frequency) {
       return expToNormalized(baseValue);
     }

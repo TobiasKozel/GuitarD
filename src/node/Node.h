@@ -327,7 +327,7 @@ public:
   void addStereoParam(ParameterCoupling* p = nullptr) {
     if (p == nullptr) {
       p = new ParameterCoupling(
-        "Stereo", &mStereo, 1.0, 0.0, 1.0, 1
+        "Stereo", &mStereo, 0.0, 0.0, 1.0, 1
       );
     }
     shared.parameters[shared.parameterCount] = p;
@@ -342,9 +342,7 @@ public:
       return;
     }
     for (int i = 0; i < shared.parameterCount; i++) {
-      // TODOG Don't use the dsp value here since it might have automation on it
-      n->shared.parameters[i]->update();
-      *(shared.parameters[i]->value) = *(n->shared.parameters[i]->value);
+      shared.parameters[i]->setValue(n->shared.parameters[i]->getValue());
     }
     nlohmann::json temp;
     n->serializeAdditional(temp);

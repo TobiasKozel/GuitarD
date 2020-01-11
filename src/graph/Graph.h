@@ -119,7 +119,7 @@ public:
       this->byPassConnection(param);
     });
 
-    mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo info) {
+    mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo &info) {
       MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
       this->addNode(info.constructor(), nullptr,300, 300);
     });
@@ -183,6 +183,7 @@ public:
   }
 
   void testadd() {
+    return;
     // formatTest();
     Node* test = NodeList::createNode("CabLibNode");
     addNode(test, nullptr, 0, 500);
@@ -250,60 +251,97 @@ public:
       }
     }
 
-    if (mPauseAudio > 0) {
-      for (int c = 0; c < mChannelCount; c++) {
-        for (int i = 0; i < nFrames; i++) {
-          out[c][i] = 0;
+
+    const int nodeCount = mNodes.GetSize();
+    const int maxAttempts = 10;
+
+    /**
+     * Do a version without mutex and stats if there's no gui
+     * since there is no need for locking if the graph can't be altered
+     */
+    if (mGraphics == nullptr) {
+
+      mInputNode->CopyIn(in, nFrames);
+      for (int n = 0; n < nodeCount; n++) {
+        mNodes.Get(n)->BlockStart();
+      }
+      mOutputNode->BlockStart();
+
+      // The List is pre sorted so the attempts are only needed to catch circular dependencies and other edge cases
+      
+      int attempts = 0;
+      while (!mOutputNode->mIsProcessed && attempts < maxAttempts) {
+        for (int n = 0; n < nodeCount; n++) {
+          mNodes.Get(n)->ProcessBlock(nFrames);
+        }
+        mOutputNode->ProcessBlock(nFrames);
+        attempts++;
+      }
+
+      if (attempts < maxAttempts) {
+        for (int n = 0; n < nodeCount; n++) {
+          mNodes.Get(n)->ProcessBlock(nFrames);
         }
       }
-      return;
-    }
-
-    const auto start = std::chrono::high_resolution_clock::now();
-
-    WDL_MutexLock lock(&mAudioMutex);
-    mInputNode->CopyIn(in, nFrames);
-    const int nodeCount = mNodes.GetSize();
-    for (int n = 0; n < nodeCount; n++) {
-      mNodes.Get(n)->BlockStart();
-    }
-
-    mOutputNode->BlockStart();
-
-    // The List is pre sorted so the attempts are only needed to catch circular dependencies and other edge cases
-    const int maxAttempts = 10;
-    int attempts = 0;
-    while (!mOutputNode->mIsProcessed && attempts < maxAttempts) {
-      for (int n = 0; n < nodeCount; n++) {
-        mNodes.Get(n)->ProcessBlock(nFrames);
-      }
-      mOutputNode->ProcessBlock(nFrames);
-      attempts++;
-    }
-
-    // This extra iteration makes sure the feedback loops get data from their previous nodes
-    if (attempts < maxAttempts) {
-      for (int n = 0; n < nodeCount; n++) {
-        mNodes.Get(n)->ProcessBlock(nFrames);
-      }
-      if (!mStats.valid) {
-        mStats.valid = true;
-        MessageBus::fireEvent(mBus, MessageBus::GraphStatsChanged, &mStats);
-      }
+      mOutputNode->CopyOut(out, nFrames);
     }
     else {
-      // failed processing
-      if (mStats.valid) {
-        mStats.valid = false;
-        MessageBus::fireEvent(mBus, MessageBus::GraphStatsChanged, &mStats);
+      /**
+       * The version with mutex locking
+       */
+      if (mPauseAudio > 0) {
+        /**
+         * Skip the block if the mutex is locked, waiting will most likely result in an under-run anyways
+         */
+        for (int c = 0; c < mChannelCount; c++) {
+          for (int i = 0; i < nFrames; i++) {
+            out[c][i] = 0;
+          }
+        }
+        return;
       }
-    }
 
-    mOutputNode->CopyOut(out, nFrames);
-    const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
-      std::chrono::high_resolution_clock::now() - start
-    );
-    mStats.executionTime = duration.count();
+      const auto start = std::chrono::high_resolution_clock::now();
+      WDL_MutexLock lock(&mAudioMutex);
+      mInputNode->CopyIn(in, nFrames);
+      for (int n = 0; n < nodeCount; n++) {
+        mNodes.Get(n)->BlockStart();
+      }
+      mOutputNode->BlockStart();
+      // The List is pre sorted so the attempts are only needed to catch circular dependencies and other edge cases
+      int attempts = 0;
+      while (!mOutputNode->mIsProcessed && attempts < maxAttempts) {
+        for (int n = 0; n < nodeCount; n++) {
+          mNodes.Get(n)->ProcessBlock(nFrames);
+        }
+        mOutputNode->ProcessBlock(nFrames);
+        attempts++;
+      }
+
+      // This extra iteration makes sure the feedback loops get data from their previous nodes
+      if (attempts < maxAttempts) {
+        for (int n = 0; n < nodeCount; n++) {
+          mNodes.Get(n)->ProcessBlock(nFrames);
+        }
+        if (!mStats.valid) {
+          mStats.valid = true;
+          MessageBus::fireEvent(mBus, MessageBus::GraphStatsChanged, &mStats);
+        }
+      }
+      else {
+        // failed processing
+        if (mStats.valid) {
+          mStats.valid = false;
+          MessageBus::fireEvent(mBus, MessageBus::GraphStatsChanged, &mStats);
+        }
+      }
+
+      mOutputNode->CopyOut(out, nFrames);
+      const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now() - start
+        );
+      mStats.executionTime = duration.count();
+    }
   }
 
   /**

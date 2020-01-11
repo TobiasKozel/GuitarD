@@ -195,13 +195,11 @@ public:
   virtual void setUpControls() {
     for (int i = 0; i < shared->parameterCount; i++) {
       ParameterCoupling* couple = shared->parameters[i];
-      const double value = *(couple->value);
       const float px = shared->X + couple->x - (couple->w * 0.5f);
       const float py = shared->Y + couple->y - (couple->h * 0.5f);
       IRECT controlPos(px, py, px + couple->w, py + couple->h);
       // use the daw parameter to sync the values if possible
       if (couple->parameterIdx != kNoParameter) {
-        couple->parameter->Set(value);
         couple->control = new IVKnobControl(
           controlPos, couple->parameterIdx, couple->name, DEFAULT_STYLE, true, false,
           couple->lowAngle, couple->highAngle, couple->centerAngle

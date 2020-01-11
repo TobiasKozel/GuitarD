@@ -75,12 +75,10 @@ public:
     }
     if (MAX_DAW_PARAMS <= i || mParametersClaimed[i] || i == kNoParameter || !couple->wantsDawParameter) {
       // This is bad and means a preset will not load correctly
-      couple->parameter = nullptr;
+      couple->setParam(nullptr);
       couple->parameterIdx = kNoParameter;
-      // Set the base value to the one from the preset
-      couple->baseValue = *(couple->value);
       if (couple->wantsDawParameter) {
-        // Counldn't get a param but wanted one
+        // Couldn't get a param but wanted one
         WDBGMSG("Could not claim a prefered DAW parameter!\n");
         return false;
       }
@@ -88,36 +86,8 @@ public:
     }
     mParametersLeft--;
     mParametersClaimed[i] = true;
-    couple->parameter = mParameters[i];
-    switch (couple->type)
-    {
-    case ParameterCoupling::Boolean:
-      couple->parameter->InitBool(name, couple->defaultVal == 1.0);
-      break;
-    case ParameterCoupling::Frequency:
-      couple->parameter->InitFrequency(
-        name, couple->defaultVal, couple->min, couple->max, couple->stepSize
-      );
-      break;
-    case ParameterCoupling::Gain:
-      couple->parameter->InitGain(
-        name, couple->defaultVal, couple->min, couple->max, couple->stepSize
-      );
-      break;
-    case ParameterCoupling::Percentage:
-      couple->parameter->InitPercentage(
-        name, couple->defaultVal, couple->min, couple->max, couple->stepSize
-      );
-      break;
-    case ParameterCoupling::Linear:
-    default:
-      couple->parameter->InitDouble(
-        name, couple->defaultVal, couple->min, couple->max, couple->stepSize
-      );
-      break;
-    }
+    couple->setParam(mParameters[i]);
     couple->parameterIdx = i;
-    couple->parameter->Set(*(couple->value));
     WDBGMSG("Claimed param %i\n", i);
     return true;
   }
@@ -131,13 +101,13 @@ public:
 
   void releaseParameter(ParameterCoupling* couple) {
     for (int i = 0; i < MAX_DAW_PARAMS; i++) {
-      if (mParameters[i] == couple->parameter) {
+      if (mParameters[i] == couple->getParam()) {
         mParametersClaimed[i] = false;
         std::string paramprefix = "Uninitialized ";
         mParameters[i]->InitDouble(
           (paramprefix + std::to_string(mParametersLeft)).c_str(), 1, 0, 1.0, 0.01
         );
-        couple->parameter = nullptr;
+        couple->setParam(nullptr);
         mParametersLeft++;
         WDBGMSG("Released param %i\n", i);
         return;

@@ -116,7 +116,8 @@ namespace Serializer {
           if (para->name == name) {
             found++;
             para->parameterIdx = param["idx"];
-            *(para->value) = param["value"];
+            sample val = param["value"];
+            para->setValue(val);
           }
         }
         for (int i = 0; i < node->shared.parameterCount; i++) {
