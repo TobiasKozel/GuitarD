@@ -110,32 +110,29 @@ public:
     Node::setup(pBus, pSamplerate, pMaxBuffer, 2, 1, 0);
     addByPassParam();
 
-    ParameterCoupling* p = new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = ParameterCoupling(
       "Gain", &gain, 0.0, 0.0, 50.0, 0.01
     );
 
     shared.height = 300;
     const int top = -100;
-    p->x = -80;
-    p->y = top;
-    shared.parameters[shared.parameterCount] = p;
+    shared.parameters[shared.parameterCount].x = -80;
+    shared.parameters[shared.parameterCount].y = top;
     shared.parameterCount++;
 
-    p = new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = ParameterCoupling(
       "Filter", &filter, 0, 0, 1, 0.01
     );
-    p->type = ParameterCoupling::Frequency;
-    p->x = 0;
-    p->y = top;
-    shared.parameters[shared.parameterCount] = p;
+    shared.parameters[shared.parameterCount].type = ParameterCoupling::Frequency;
+    shared.parameters[shared.parameterCount].x = 0;
+    shared.parameters[shared.parameterCount].y = top;
     shared.parameterCount++;
 
-    p = new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = ParameterCoupling(
       "Offset", &offset, 0, -1, 1, 0.01
     );
-    p->x = 80;
-    p->y = top;
-    shared.parameters[shared.parameterCount] = p;
+    shared.parameters[shared.parameterCount].x = 80;
+    shared.parameters[shared.parameterCount].y = top;
     shared.parameterCount++;
 
   }
@@ -181,9 +178,9 @@ public:
   void ProcessBlock(const int nFrames) override {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
     sample** buffer = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
-    shared.parameters[1]->update();
-    shared.parameters[2]->update();
-    shared.parameters[3]->update();
+    shared.parameters[1].update();
+    shared.parameters[2].update();
+    shared.parameters[3].update();
     double value = 0;
     for (int i = 0; i < nFrames; i++) {
       value += abs(buffer[0][i]);

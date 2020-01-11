@@ -42,7 +42,7 @@ namespace Serializer {
       }
       serialized["nodes"][i]["parameters"] = nlohmann::json::array();
       for (int p = 0; p < node->shared.parameterCount; p++) {
-        ParameterCoupling* para = node->shared.parameters[p];
+        ParameterCoupling* para = &node->shared.parameters[p];
         const char* name = para->name;
         double val = para->getValue();
         int idx = para->parameterIdx;
@@ -112,7 +112,7 @@ namespace Serializer {
         std::string name = param["name"];
         int found = 0;
         for (int i = 0; i < node->shared.parameterCount; i++) {
-          ParameterCoupling* para = node->shared.parameters[i];
+          ParameterCoupling* para = &node->shared.parameters[i];
           if (para->name == name) {
             found++;
             para->parameterIdx = param["idx"];
@@ -121,7 +121,7 @@ namespace Serializer {
           }
         }
         for (int i = 0; i < node->shared.parameterCount; i++) {
-          ParameterCoupling* para = node->shared.parameters[i];
+          ParameterCoupling* para = &node->shared.parameters[i];
           if (para->parameterIdx == -1) {
             /**
              * Rare case that happens when a node has more parameters in the current version of the plugin
@@ -164,7 +164,7 @@ namespace Serializer {
       for (auto param : sNode["parameters"]) {
         std::string name = param["name"];
         for (int i = 0; i < node->shared.parameterCount; i++) {
-          ParameterCoupling* para = node->shared.parameters[i];
+          ParameterCoupling* para = &node->shared.parameters[i];
           if (para->name == name) {
             // TODOG no need to check on up to date presets
             if (param.contains("automation")) {

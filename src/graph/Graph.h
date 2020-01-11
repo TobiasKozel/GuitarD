@@ -171,7 +171,7 @@ public:
         Node* node = n.Get(i);
         if (node == nullptr) { continue; }
         for (int p = 0; p < node->shared.parameterCount; p++) {
-          if (node->shared.parameters[p]->control == r.targetControl) {
+          if (node->shared.parameters[p].control == r.targetControl) {
             if (node != r.automationNode) {
               // Don't allow automation on self
               node->attachAutomation(r.automationNode, p);

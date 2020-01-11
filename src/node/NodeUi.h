@@ -64,7 +64,7 @@ public:
        * Keep them around in a map for convenient use
        * Only do this in the UI though
        */
-      ParameterCoupling* p = shared->parameters[i];
+      ParameterCoupling* p = &shared->parameters[i];
       mParamsByName.insert(std::pair<const char*, ParameterCoupling*>(p->name, p));
     }
 
@@ -156,7 +156,7 @@ public:
         m.L + Theme::Node::HEADER_BYPASS_LEFT + Theme::Node::HEADER_BYPASS_SIZE,
         m.T + Theme::Node::HEADER_BYPASS_TOP + Theme::Node::HEADER_BYPASS_SIZE
       ), [&](IControl* pCaller) {
-        auto p = this->shared->parameters[0];
+        ParameterCoupling* p = &this->shared->parameters[0];
         const bool bypassed = static_cast<bool>(p->control->GetValue());
         p->control->SetValueFromUserInput(bypassed ? 0.0 : 1.0);
       }, u8"\uf056", u8"\uf011", mIconFont);
@@ -194,7 +194,7 @@ public:
 
   virtual void setUpControls() {
     for (int i = 0; i < shared->parameterCount; i++) {
-      ParameterCoupling* couple = shared->parameters[i];
+      ParameterCoupling* couple = &shared->parameters[i];
       const float px = shared->X + couple->x - (couple->w * 0.5f);
       const float py = shared->Y + couple->y - (couple->h * 0.5f);
       IRECT controlPos(px, py, px + couple->w, py + couple->h);
@@ -237,7 +237,7 @@ public:
 
   virtual void setUp() {
     for (int i = 0; i < shared->parameterCount; i++) {
-      ParameterCoupling* p = shared->parameters[i];
+      ParameterCoupling* p = &shared->parameters[i];
       if (strncmp(p->name, "Bypass", 10) == 0) {
         mHeader.hasByPass = true;
         break;
@@ -254,7 +254,7 @@ public:
     mDirty = false;
     mDoRender = false;
     for (int i = 0; i < shared->parameterCount; i++) {
-      ParameterCoupling* param = shared->parameters[i];
+      ParameterCoupling* param = &shared->parameters[i];
       if (param->control != nullptr) {
         // this also destroys the object
         shared->graphics->RemoveControl(param->control, true);

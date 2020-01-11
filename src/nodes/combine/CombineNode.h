@@ -39,10 +39,10 @@ public:
     sample** buffer2 = has2 ? s2->mConnectedTo[0]->mParentBuffer : emptyBuffer;
 
     // Update the params
-    shared.parameters[0]->update();
-    shared.parameters[1]->update();
-    shared.parameters[2]->update();
-    shared.parameters[3]->update();
+    shared.parameters[0].update();
+    shared.parameters[1].update();
+    shared.parameters[2].update();
+    shared.parameters[3].update();
 
     // prepare the values
     double baseMix;
@@ -80,37 +80,33 @@ public:
 
   void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, const int pMaxBuffer = 512, int pChannles = 2, int pInputs = 1, int pOutputs = 1) override {
     Node::setup(pBus, pSamplerate, pMaxBuffer, 2, 2, 1);
-    ParameterCoupling* p = new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = ParameterCoupling(
       "PAN 1", &pan1, 0.0, -1.0, 1.0, 0.01
     );
-    p->x = -40;
-    p->y = -20;
-    shared.parameters[shared.parameterCount] = p;
+    shared.parameters[shared.parameterCount].x = -40;
+    shared.parameters[shared.parameterCount].y = -20;
     shared.parameterCount++;
 
-    p = new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = ParameterCoupling(
       "PAN 2", &pan2, 0.0, -1.0, 1.0, 0.01
     );
-    p->x = -40;
-    p->y = 40;
-    shared.parameters[shared.parameterCount] = p;
+    shared.parameters[shared.parameterCount].x = -40;
+    shared.parameters[shared.parameterCount].y = 40;
     shared.parameterCount++;
 
-    p = new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = ParameterCoupling(
       "MIX", &mix, 0.5, 0.0, 1.0, 0.01
     );
-    p->x = 40;
-    p->y = -20;
-    shared.parameters[shared.parameterCount] = p;
+    shared.parameters[shared.parameterCount].x = 40;
+    shared.parameters[shared.parameterCount].y = -20;
     shared.parameterCount++;
 
-    p = new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = ParameterCoupling(
       "Add mode", &mAddMode, 0, 0.0, 1.0, 1.0
     );
-    p->x = 40;
-    p->y = 20;
-    p->wantsDawParameter = false;
-    shared.parameters[shared.parameterCount] = p;
+    shared.parameters[shared.parameterCount].x = 40;
+    shared.parameters[shared.parameterCount].y = 20;
+    shared.parameters[shared.parameterCount].wantsDawParameter = false;
     shared.parameterCount++;
 
     shared.socketsIn[0]->mY += -35;

@@ -23,11 +23,10 @@ public:
   void setup(MessageBus::Bus* pBus, int pSamplerate = 48000, int pMaxBuffer = MAX_BUFFER, int pChannels = 2, int pInputs = 1, int pOutputs = 1) override {
     Node::setup(pBus, pSamplerate, pMaxBuffer, pChannels, pInputs, pOutputs);
     addByPassParam();
-    ParameterCoupling* p = new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = ParameterCoupling(
       "Gain", &gain, -40, -130.0, 40.0, 0.1
     );
-    p->type = ParameterCoupling::Gain;
-    shared.parameters[shared.parameterCount] = p;
+    shared.parameters[shared.parameterCount].type = ParameterCoupling::Gain;
     shared.parameterCount++;
 
     shared.socketsIn[0]->mX += shared.width - 30;
@@ -53,7 +52,7 @@ public:
   void ProcessBlock(int nFrames) override {
     if (byPass()) { return; }
     if (mIsProcessed == false) {
-      shared.parameters[1]->update();
+      shared.parameters[1].update();
       sample val = ParameterCoupling::dbToLinear(gain);
       if (mPrevL.NbInBuf() > nFrames) {
         mPrevL.Get(mBuffersOut[0][0], nFrames);

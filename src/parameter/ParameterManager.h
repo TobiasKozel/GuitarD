@@ -37,7 +37,7 @@ public:
     bool gotAllParams = true;
     std::string prefix = NodeList::getInfo(node->shared.type)->displayName;
     for (int i = 0; i < node->shared.parameterCount; i++) {
-      if (!claimParameter(node->shared.parameters[i], prefix.c_str())) {
+      if (!claimParameter(&node->shared.parameters[i], prefix.c_str())) {
         /**
          * this means the manager has no free parameters left and the control cannot be automated from the daw
          */
@@ -94,7 +94,7 @@ public:
 
   void releaseNode(Node* node) {
     for (int i = 0; i < node->shared.parameterCount; i++) {
-      releaseParameter(node->shared.parameters[i]);
+      releaseParameter(&node->shared.parameters[i]);
     }
     MessageBus::fireEvent<bool>(mBus, MessageBus::ParametersChanged, false);
   }

@@ -18,7 +18,7 @@ struct NodeShared {
   float rotation = 0;
 
   int parameterCount = 0;
-  ParameterCoupling* parameters[MAX_NODE_PARAMETERS] = { nullptr };
+  ParameterCoupling parameters[MAX_NODE_PARAMETERS];
   int meterCount = 0; 
   MeterCoupling* meters[MAX_NODE_METERS] = { nullptr };
 

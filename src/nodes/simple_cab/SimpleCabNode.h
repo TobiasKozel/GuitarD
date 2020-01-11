@@ -127,7 +127,7 @@ public:
     mStereo = 0;
     addByPassParam();
     addStereoParam();
-    shared.parameters[1]->y = -30;
+    shared.parameters[1].y = -30;
 
   }
 
@@ -188,7 +188,7 @@ public:
 
   void ProcessBlock(const int nFrames) override {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
-    shared.parameters[1]->update();
+    shared.parameters[1].update();
     if (mConvolver == nullptr) {
       outputSilence();
       return;

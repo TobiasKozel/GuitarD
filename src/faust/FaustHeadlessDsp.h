@@ -37,7 +37,7 @@ struct UI {
   static void declare(FAUSTFLOAT*, const char*, const char*) {};
 
   void addHorizontalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT pDefault, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) const {
-    shared->parameters[shared->parameterCount] = new ParameterCoupling(name, prop, pDefault, min, max, stepSize);
+    shared->parameters[shared->parameterCount] = ParameterCoupling(name, prop, pDefault, min, max, stepSize);
     shared->parameterCount++;
   }
 
@@ -99,7 +99,7 @@ public:
 
     for (int i = 0, pos = 0; i < shared.parameterCount; i++) {
       const int column = pos / perColumn;
-      ParameterCoupling* p = shared.parameters[i];
+      ParameterCoupling* p = &shared.parameters[i];
       if (strncmp(p->name, "Bypass", 32) == 0) {
         continue;
       }
@@ -150,7 +150,7 @@ public:
   virtual void ProcessBlock(const int nFrames) override {
     if (!inputsReady() || mIsProcessed || byPass()) { return; }
     for (int i = 1; i < shared.parameterCount; i++) {
-      shared.parameters[i]->update();
+      shared.parameters[i].update();
     }
     compute(nFrames, shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOutAlligned);
     mIsProcessed = true;

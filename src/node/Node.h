@@ -112,8 +112,7 @@ public:
     }
 
     for (int i = 0; i < shared.parameterCount; i++) {
-      detachAutomation(shared.parameters[i]);
-      delete shared.parameters[i];
+      detachAutomation(&shared.parameters[i]);
     }
 
     for (int i = 0; i < shared.meterCount; i++) {
@@ -150,7 +149,7 @@ public:
    */
   bool byPass() {
     // The first param will always be bypass
-    shared.parameters[0]->update();
+    shared.parameters[0].update();
     if (mByPassed < 0.5) { return false; }
     sample** in = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
     for (int o = 0; o < shared.outputCount; o++) {
@@ -196,7 +195,7 @@ public:
      */
     if (mIsAutomated) {
       for (int i = 0; i < shared.parameterCount; i++) {
-        Node* n = shared.parameters[i]->automationDependency;
+        Node* n = shared.parameters[i].automationDependency;
         if (n != nullptr && !n->mIsProcessed) {
           return false;
         }
@@ -208,7 +207,7 @@ public:
 
   void checkIsAutomated() {
     for (int i = 0; i < shared.parameterCount; i++) {
-      if (shared.parameters[i]->automationDependency != nullptr) {
+      if (shared.parameters[i].automationDependency != nullptr) {
         mIsAutomated = true;
         return;
       }
@@ -278,7 +277,7 @@ public:
    * The requested ParameterCoupling is returned to be used in the automation node
    */
   virtual void attachAutomation(Node* n, const int index) {
-    ParameterCoupling* p = shared.parameters[index];
+    ParameterCoupling* p = &shared.parameters[index];
     if (p != nullptr) {
       n->addAutomationTarget(p);
     }
@@ -317,7 +316,7 @@ public:
    * Generic function to call when the node can be bypassed
    */
   void addByPassParam() {
-    shared.parameters[shared.parameterCount] = new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = ParameterCoupling(
       "Bypass", &mByPassed, 0.0, 0.0, 1.0, 1
     );
     shared.parameterCount++;
@@ -326,11 +325,14 @@ public:
   /** Generic function to call when the node can switch between mono/stereo */
   void addStereoParam(ParameterCoupling* p = nullptr) {
     if (p == nullptr) {
-      p = new ParameterCoupling(
+      shared.parameters[shared.parameterCount] = ParameterCoupling(
         "Stereo", &mStereo, 0.0, 0.0, 1.0, 1
       );
     }
-    shared.parameters[shared.parameterCount] = p;
+    else {
+      shared.parameters[shared.parameterCount] = *p;
+    }
+    
     shared.parameterCount++;
   }
 
@@ -342,7 +344,7 @@ public:
       return;
     }
     for (int i = 0; i < shared.parameterCount; i++) {
-      shared.parameters[i]->setValue(n->shared.parameters[i]->getValue());
+      shared.parameters[i].setValue(n->shared.parameters[i].getValue());
     }
     nlohmann::json temp;
     n->serializeAdditional(temp);
@@ -393,14 +395,6 @@ public:
    * Cleans up the IControls for all the parameters
    */
   virtual void cleanupUi(IGraphics* pGraphics) {
-    /**
-     * The param value gets only synced to the dsp value when the node is processed
-     * If the node is not connected this won't happen, so always do the update when the
-     * Gui window is closed just in case
-     */
-    for (int i = 0; i < shared.parameterCount; i++) {
-      shared.parameters[i]->update();
-    }
     if (mUi != nullptr) {
       mUi->cleanUp();
       pGraphics->RemoveControl(mUi, true);

@@ -16,12 +16,10 @@ public:
     shared.height = 100;
     addByPassParam();
 
-    ParameterCoupling* p = new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = ParameterCoupling(
       "Gain", &gain, 0.0, -90.0, 40.0, 0.1
     );
-    p->type = ParameterCoupling::Gain;
-
-    shared.parameters[shared.parameterCount] = p;
+    shared.parameters[shared.parameterCount].type = ParameterCoupling::Gain;
     shared.parameterCount++;
   }
 
@@ -51,7 +49,7 @@ public:
         detectedLoudness += avg;
       }
       else {
-        if (shared.parameters[1]->control != nullptr) {
+        if (shared.parameters[1].control != nullptr) {
           
         }
         else {
@@ -63,7 +61,7 @@ public:
       }
     }
 
-    shared.parameters[1]->update();
+    shared.parameters[1].update();
     sample val = ParameterCoupling::dbToLinear(gain);
     for (int c = 0; c < mChannelCount; c++) {
       for (int i = 0; i < nFrames; i++) {

@@ -48,18 +48,16 @@ public:
     shared.height = 100;
     addByPassParam();
 
-    ParameterCoupling* p = new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = ParameterCoupling(
       "Depth", &mIntensity, 0.0, 0, 1.0, 0.01
     );
-    p->x = -50;
-    shared.parameters[shared.parameterCount] = p;
+    shared.parameters[shared.parameterCount].x = -50;
     shared.parameterCount++;
 
-    p = new ParameterCoupling(
+    shared.parameters[shared.parameterCount] = ParameterCoupling(
       "Speed", &mDepth, 0.3, 0.0, 1.0, 0.01
     );
-    p->x = 50;
-    shared.parameters[shared.parameterCount] = p;
+    shared.parameters[shared.parameterCount].x = 50;
     shared.parameterCount++;
   }
 
@@ -71,8 +69,8 @@ public:
     sample* out1 = mBuffersOut[0][0];
     sample* out2 = mBuffersOut[0][1];
 
-    shared.parameters[1]->update();
-    shared.parameters[2]->update();
+    shared.parameters[1].update();
+    shared.parameters[2].update();
 
     const double intensity = pow(mIntensity, 5) * 80.0;
     const double depthA = pow(mDepth, 2);
