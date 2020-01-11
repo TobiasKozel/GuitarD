@@ -22,7 +22,6 @@
 #include "src/nodes/cab_lib/CabLibNode.h"
 #include "src/nodes/split/SplitNode.h"
 #include "src/nodes/band_split/BandSplitNode.h"
-#include "src/nodes/add/AddNode.h"
 #include "src/nodes/flanger/FlangerNode.h"
 
 
@@ -32,14 +31,6 @@ namespace NodeList {
       []() { return new CombineNode("CombineNode"); },
       "CombineNode",
       "Combine",
-      "asd",
-      "Signal Flow"
-    });
-
-    NodeList::registerNode(NodeList::NodeInfo {
-      []() { return new AddNode("AddNode"); },
-      "AddNode",
-      "Add",
       "asd",
       "Signal Flow"
     });

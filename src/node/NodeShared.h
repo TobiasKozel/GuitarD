@@ -10,7 +10,7 @@
 struct NodeShared {
   std::string type;
   MessageBus::Bus* bus = nullptr;
-  iplug::igraphics::IGraphics* graphics = nullptr;
+  IGraphics* graphics = nullptr;
   float width = 250;
   float height = 180;
   float X;

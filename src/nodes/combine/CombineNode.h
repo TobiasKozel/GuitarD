@@ -1,16 +1,16 @@
 #pragma once
 #include "src/node/Node.h"
 
-
 class CombineNode final : public Node {
   const sample smoothing = 0.999;
   sample smoothed[8] = { 0 };
   sample pan1 = 0;
   sample pan2 = 0;
   sample mix = 0.5;
+  sample mAddMode = 0;
   sample** emptyBuffer;
 public:
-  CombineNode(std::string pType) {
+  CombineNode(const std::string pType) {
     shared.type = pType;
     shared.width = 200;
     shared.height = 150;
@@ -42,10 +42,20 @@ public:
     shared.parameters[0]->update();
     shared.parameters[1]->update();
     shared.parameters[2]->update();
+    shared.parameters[3]->update();
 
     // prepare the values
-    const double mix = *(shared.parameters[2]->value);
-    const double invMix = 1 - mix;
+    double mix;
+    double invMix;
+    if (mAddMode > 0.5) {
+      mix = 1;
+      invMix = 1;
+    }
+    else {
+      mix = *(shared.parameters[2]->value);
+      invMix = 1 - mix;
+    }
+
     const double pan1 = *(shared.parameters[0]->value);
     const double pan2 = *(shared.parameters[1]->value);
     const double pan1l = std::min(1.0, std::max(-pan1 + 1.0, 0.0)) * invMix * (1.0 - smoothing);
@@ -92,7 +102,16 @@ public:
       "MIX", &mix, 0.5, 0.0, 1.0, 0.01
     );
     p->x = 40;
-    p->y = 5;
+    p->y = -20;
+    shared.parameters[shared.parameterCount] = p;
+    shared.parameterCount++;
+
+    p = new ParameterCoupling(
+      "Add mode", &mAddMode, 0, 0.0, 1.0, 1.0
+    );
+    p->x = 40;
+    p->y = 20;
+    p->wantsDawParameter = false;
     shared.parameters[shared.parameterCount] = p;
     shared.parameterCount++;
 

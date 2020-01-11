@@ -492,9 +492,6 @@
     <ClInclude Include="..\src\nodes\band_split\BandSplitNode.h">
       <Filter>src\nodes\flow</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\nodes\add\AddNode.h">
-      <Filter>src\nodes\flow</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\nodes\flanger\FlangerNode.h">
       <Filter>src\nodes\filters</Filter>
     </ClInclude>

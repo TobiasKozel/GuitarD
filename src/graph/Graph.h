@@ -184,7 +184,6 @@ public:
 
   void testadd() {
     // formatTest();
-    return;
     Node* test = NodeList::createNode("CabLibNode");
     addNode(test, nullptr, 0, 500);
     // mOutputNode->connectInput(test->shared.socketsOut[0]);
@@ -426,7 +425,7 @@ public:
   /**
    * Centers the viewport around a specific node
    */
-  void centerNode(Node* node) {
+  void centerNode(Node* node) const {
     IRECT center = mGraphics->GetBounds().GetScaledAboutCentre(0);
     center.L -= node->shared.X;
     center.T -= node->shared.Y;
@@ -437,7 +436,7 @@ public:
    * Averages all node positions and moves the viewport to that point
    * Bound to the C key
    */
-  void centerGraph() {
+  void centerGraph() const {
     Coord2D avg{ 0, 0 };
     const int count = mNodes.GetSize();
     for (int i = 0; i < count; i++) {
@@ -449,7 +448,7 @@ public:
     avg.x += mInputNode->shared.X + mOutputNode->shared.X;
     avg.y += mInputNode->shared.Y + mOutputNode->shared.Y;
     // We want that point to be in the center of the screen
-    IRECT center = mGraphics->GetBounds().GetScaledAboutCentre(0);
+    const IRECT center = mGraphics->GetBounds().GetScaledAboutCentre(0);
     avg.x = center.L - avg.x / countf;
     avg.y = center.T - avg.y / countf;
     onViewPortChange(avg.x, avg.y);
@@ -634,7 +633,7 @@ private:
   /**
    * Will try to tidy up the node graph, bound to the F key
    */
-  void arrangeNodes() {
+  void arrangeNodes() const {
     FormatGraph::resetBranchPos(mInputNode);
     FormatGraph::arrangeBranch(mInputNode, Coord2D { mInputNode->shared.Y, mInputNode->shared.X });
     centerGraph();

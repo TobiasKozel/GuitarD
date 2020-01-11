@@ -64,7 +64,7 @@ public:
       name = stringName.c_str();
     }
     int i = couple->parameterIdx;
-    if (i == iplug::kNoParameter && mParametersLeft > 0) {
+    if (i == kNoParameter && mParametersLeft > 0) {
       // if there's no parameter index set, go look for one
       for (i = 0; i < MAX_DAW_PARAMS; i++) {
         if (!mParametersClaimed[i]) {
@@ -73,14 +73,18 @@ public:
         }
       }
     }
-    if (MAX_DAW_PARAMS <= i || mParametersClaimed[i] || i == iplug::kNoParameter) {
-      WDBGMSG("Could not claim a prefered DAW parameter!\n");
+    if (MAX_DAW_PARAMS <= i || mParametersClaimed[i] || i == kNoParameter || !couple->wantsDawParameter) {
       // This is bad and means a preset will not load correctly
       couple->parameter = nullptr;
-      couple->parameterIdx = iplug::kNoParameter;
+      couple->parameterIdx = kNoParameter;
       // Set the base value to the one from the preset
       couple->baseValue = *(couple->value);
-      return false;
+      if (couple->wantsDawParameter) {
+        // Counldn't get a param but wanted one
+        WDBGMSG("Could not claim a prefered DAW parameter!\n");
+        return false;
+      }
+      return true;
     }
     mParametersLeft--;
     mParametersClaimed[i] = true;

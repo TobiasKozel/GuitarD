@@ -21,15 +21,15 @@ struct NodeSocket {
   virtual void disconnectAll() = 0;
   virtual void connect(NodeSocket* to, bool other = true) = 0;
 
-  void lock(bool other) {
+  void lock(const bool other) const {
     if (callback && other) callback(true);
   }
 
-  void unlock(bool other) {
+  void unlock(const bool other) const {
     if (callback && other) callback(false);
   }
 
-  Node* getConnectedNode(int index = 0) const {
+  Node* getConnectedNode(const int index = 0) const {
     if (mConnectedTo[index] != nullptr) {
       return mConnectedTo[index]->mParentNode;
     }
@@ -51,7 +51,7 @@ struct NodeSocket {
  * Will only write in the first index of mConnectedTo
  */
 struct NodeSocketIn : public NodeSocket {
-  NodeSocketIn(Node* parent, int index) {
+  NodeSocketIn(Node* parent, const int index) {
     mParentNode = parent;
     mIndex = index;
     mIsInput = true;
@@ -59,7 +59,7 @@ struct NodeSocketIn : public NodeSocket {
   /**
    * Disconnects any socket if "to" is a nullptr, checks and only disconnects if the sockets match otherwise
    */
-  void disconnect(NodeSocket* to, bool other) override {
+  void disconnect(NodeSocket* to, const bool other) override {
     lock(other);
     if (mConnectedTo[0] != nullptr && (to == mConnectedTo[0] || to == nullptr)) {
       if (other) {
@@ -75,7 +75,7 @@ struct NodeSocketIn : public NodeSocket {
     disconnect(mConnectedTo[0], true);
   }
 
-  void connect(NodeSocket* to, bool other) override {
+  void connect(NodeSocket* to, const bool other) override {
     if (to->mIsInput == mIsInput) { return; }
     if (to->mParentNode == mParentNode) { return; }
     /**
@@ -116,7 +116,7 @@ struct NodeSocketOut : public NodeSocket {
     }
   }
 
-  void disconnect(NodeSocket* to, bool other) override {
+  void disconnect(NodeSocket* to, const bool other) override {
     lock(other);
     for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
       if (mConnectedTo[i] != nullptr && mConnectedTo[i] == to) {
@@ -141,7 +141,7 @@ struct NodeSocketOut : public NodeSocket {
     mConnected = false;
   }
 
-  void connect(NodeSocket* to, bool other) override {
+  void connect(NodeSocket* to, const bool other) override {
     if (to->mIsInput == mIsInput) { return; }
     NodeSocketIn* toIn = dynamic_cast<NodeSocketIn*>(to);
     if (toIn == nullptr) { return; }

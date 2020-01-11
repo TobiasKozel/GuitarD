@@ -28,7 +28,7 @@ struct ParameterCoupling {
   IParam* parameter = nullptr;
 
   // Index of the IParam -1 means unassigned
-  int parameterIdx = -1;
+  int parameterIdx = kNoParameter;
 
   // pointer to the value used in the dsp code
   sample* value = nullptr;
@@ -68,6 +68,8 @@ struct ParameterCoupling {
 
   bool showLabel = true;
   bool showValue = true;
+
+  bool wantsDawParameter = true;
 
   explicit ParameterCoupling(const char* pName = nullptr, sample* pProperty = nullptr,
                     const sample pDefault = 0.5, const sample pMin = 0, const sample pMax = 1,
