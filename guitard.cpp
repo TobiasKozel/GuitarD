@@ -93,7 +93,6 @@ int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
   catch (...) {
   }
   return pos;
-  return IPluginBase::UnserializeParams(chunk, startPos);
 }
 
 #if IPLUG_DSP
@@ -108,7 +107,7 @@ void GuitarD::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
     const int nChans = NOutChansConnected();
     for (int c = 0; c < nChans; c++) {
       for (int i = 0; i < nFrames; i++) {
-        outputs[c][i] = 0;
+        outputs[c][i] = inputs[c][i];
       }
     }
   }

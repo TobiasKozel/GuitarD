@@ -495,6 +495,9 @@
     <ClInclude Include="..\src\nodes\flanger\FlangerNode.h">
       <Filter>src\nodes\filters</Filter>
     </ClInclude>
+    <ClInclude Include="..\thirdparty\soundwoofer.h">
+      <Filter>thirdparty</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

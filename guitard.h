@@ -1,8 +1,8 @@
 #pragma once
 
 const int kNumPrograms = 2;
-
 #include "thirdparty/json.hpp"
+#include "thirdparty/soundwoofer.h" // since winsocks does some weird stuff when being included after windows.h it needs to be included here though it's not used here
 #include "IPlug_include_in_plug_hdr.h"
 #include "IControls.h"
 #include "src/misc/constants.h"

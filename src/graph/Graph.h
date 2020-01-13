@@ -14,6 +14,7 @@
 #include "src/ui/gallery/NodeGallery.h"
 #include "src/misc/HistoryStack.h"
 #include "FormatGraph.h"
+#include "thirdparty/soundwoofer.h"
 
 /**
  * This is the "god object" which will handle all the nodes
@@ -99,6 +100,11 @@ public:
 
 
   explicit Graph(MessageBus::Bus* pBus) : mParamManager(pBus) {
+    //SoundWoofer::instance().fetchIRs([](bool res) {
+    //  int i = 0;
+    //});
+
+    SoundWoofer::instance().fetchIRs();
     mBus = pBus;
     
     mInputNode = new InputNode(mBus);
