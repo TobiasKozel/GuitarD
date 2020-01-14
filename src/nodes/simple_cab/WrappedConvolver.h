@@ -8,8 +8,8 @@
 #include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
 #include "resample.h"
 #include "thirdparty/threadpool.h"
-#define DR_WAV_IMPLEMENTATION
-#include "thirdparty/dr_wav.h"
+//#define DR_WAV_IMPLEMENTATION
+//#include "thirdparty/dr_wav.h"
 #include "IPlugConstants.h"
 
 class WrappedConvolver {
@@ -123,22 +123,26 @@ public:
   static bool loadWave(IRBundle& b) {
     if (b.samples != nullptr) { return true; } // Already loaded samples
     drwav wav;
+    // load the file
     if (!drwav_init_file(&wav, b.path.Get(), nullptr)) {
       return false;
     }
 
+    // get space for the samples
     float* pSampleData = static_cast<float*>(malloc(
       static_cast<size_t>(wav.totalPCMFrameCount)* wav.channels * sizeof(float)
     ));
     const size_t samplesRead = drwav_read_pcm_frames_f32(&wav, wav.totalPCMFrameCount, pSampleData);
     const float length = samplesRead / static_cast<float>(wav.sampleRate);
     if (length > 10.f || samplesRead < 1) {
+      // don't load anything longer than 10 seconds or without samples
       assert(false);
     }
     b.sampleRate = wav.sampleRate;
     b.channelCount = wav.channels;
     b.sampleCount = samplesRead;
     b.samples = new float* [b.channelCount];
+    // do some deinterleaving 
     for (int c = 0; c < b.channelCount; c++) {
       b.samples[c] = new float[b.sampleCount];
     }

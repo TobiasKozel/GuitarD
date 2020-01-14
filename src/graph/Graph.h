@@ -104,7 +104,10 @@ public:
     //  int i = 0;
     //});
 
-    SoundWoofer::instance().fetchIRs();
+    auto &sw = SoundWoofer::instance();
+    sw.fetchIRs();
+    sw.downloadIR(sw.getIRs().at(0));
+
     mBus = pBus;
     
     mInputNode = new InputNode(mBus);
