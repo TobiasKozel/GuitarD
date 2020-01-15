@@ -11,7 +11,7 @@
 #include "SortGraph.h" 
 #include "src/parameter/ParameterManager.h"
 #include "src/ui/CableLayer.h"
-#include "src/ui/gallery/NodeGallery.h"
+#include "src/ui/SideBar.h"
 #include "src/misc/HistoryStack.h"
 #include "FormatGraph.h"
 #include "thirdparty/soundwoofer.h"
@@ -76,7 +76,7 @@ class Graph {
    */
   GraphBackground* mBackground = nullptr; // Always at the bottom
   CableLayer* mCableLayer = nullptr; // Always below the Gallery
-  NodeGallery* mNodeGallery = nullptr; // Always top most
+  SideBar* mSideBar = nullptr; // Always top most
 
   HistoryStack mHistoryStack;
 
@@ -100,13 +100,10 @@ public:
 
 
   explicit Graph(MessageBus::Bus* pBus) : mParamManager(pBus) {
-    //SoundWoofer::instance().fetchIRs([](bool res) {
-    //  int i = 0;
-    //});
-
-    auto &sw = SoundWoofer::instance();
-    sw.setPluginName("testplugin");
-    sw.sendPreset("presetname", "somedata", 8);
+    //auto &sw = SoundWoofer::instance();
+    //sw.setPluginName("Plugin1");
+    //sw.sendPreset("presetname", "somedata2", 9);
+    //sw.fetchPresets();
     //sw.fetchIRs();
     //sw.downloadIR(sw.getIRs().at(0));
 
@@ -415,8 +412,8 @@ public:
     mCableLayer->setRenderPriority(10);
     mGraphics->AttachControl(mCableLayer);
 
-    mNodeGallery = new NodeGallery(mBus, mGraphics);
-    mGraphics->AttachControl(mNodeGallery);
+    mSideBar = new SideBar(mBus, mGraphics);
+    mGraphics->AttachControl(mSideBar);
 
     scaleUi();
 #ifndef NDEBUG
@@ -443,8 +440,8 @@ public:
       mNodes.Get(n)->cleanupUi(mGraphics);
     }
 
-    mGraphics->RemoveControl(mNodeGallery, true);
-    mNodeGallery = nullptr;
+    mGraphics->RemoveControl(mSideBar, true);
+    mSideBar = nullptr;
 
     mGraphics->RemoveControl(mBackground, true);
     mBackground = nullptr;

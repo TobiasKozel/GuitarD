@@ -14,6 +14,7 @@ class ScrollViewControl : public IControl {
   float mScrollBarWidth = 8;
   bool mDoCleanUp = true;
   bool mDoDragScroll = true;
+  bool mDoScroll = true;
 
   /** Internal States */
   WDL_PtrList<IControl> mChildren;
@@ -158,6 +159,10 @@ public:
     mDoDragScroll = enable;
   }
 
+  void setDoDrag(const bool enable) {
+    mDoScroll = enable;
+  }
+
   /** Scrolls in the y direction */
   void scroll(const float y) {
     mScrollY += y;
@@ -191,7 +196,7 @@ public:
 
 
   void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
-    if (mod.C) {
+    if (mod.C || !mDoScroll) {
       IControl* c = getChildAtCoord(x, y);
       if (c != nullptr) {
         c->OnMouseWheel(x, y, mod, d);

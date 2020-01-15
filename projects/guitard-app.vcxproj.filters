@@ -498,6 +498,9 @@
     <ClInclude Include="..\thirdparty\soundwoofer.h">
       <Filter>thirdparty</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\ui\SideBar.h">
+      <Filter>src\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
