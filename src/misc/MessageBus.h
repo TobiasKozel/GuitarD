@@ -70,13 +70,19 @@ namespace MessageBus {
   public:
     std::function<void(T param)> mCallback;
 
-    Subscription() {}
+    Subscription() {
+    }
 
     Subscription(Bus* pBus, const MESSAGE_ID pEventId, std::function<void(T param)> callback) {
       subscribe(pBus, pEventId, callback);
     }
 
     ~Subscription() {
+      if (mBus == nullptr || mEventId >= TOTAL_MESSAGE_IDS || mEventId < 0) {
+        // This shouldn't happen
+        return;
+        assert(false);
+      }
       mBus->removeSubscriber(this, mEventId);
     }
 
@@ -85,11 +91,14 @@ namespace MessageBus {
         WDBGMSG("Trying to subscribe twice on the same Subscription!\n");
         return;
       }
+      if (pBus == nullptr || pEventId >= TOTAL_MESSAGE_IDS || pEventId < 0) {
+        assert(false);
+      }
       mBus = pBus;
-      mBus->addSubscriber(this, pEventId);
-      subscribed = true;
       mEventId = pEventId;
       mCallback = callback;
+      mBus->addSubscriber(this, pEventId);
+      subscribed = true;
     }
   };
 

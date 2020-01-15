@@ -2,7 +2,7 @@
 
 namespace MessageBus {
   enum MESSAGE_ID {
-    NodeAdd,
+    NodeAdd = 0,
     NodeDeleted,
     NodeDisconnectAll,
     NodeSpliceIn,
