@@ -105,8 +105,10 @@ public:
     //});
 
     auto &sw = SoundWoofer::instance();
-    sw.fetchIRs();
-    sw.downloadIR(sw.getIRs().at(0));
+    sw.setPluginName("testplugin");
+    sw.sendPreset("presetname", "somedata", 8);
+    //sw.fetchIRs();
+    //sw.downloadIR(sw.getIRs().at(0));
 
     mBus = pBus;
     
