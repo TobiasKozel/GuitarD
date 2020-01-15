@@ -58,7 +58,8 @@ public:
   typedef std::vector<SWPreset> SWPresets;
 
 private:
-  const std::string BACKEND_URL = "svenssj.tech";
+  // const std::string BACKEND_URL = "svenssj.tech";
+  const std::string BACKEND_URL = "localhost";
   const int BACKEND_PORT = 5000;
   std::string mPluginName = "";
 
@@ -88,7 +89,6 @@ public:
     if (mPluginName.empty()) { return; }
     std::string data = httpGet("/Preset");
     mPresetList = parsePresets(data);
-    int i = 0;
   }
 
   void sendPreset(const std::string name, const char* data, const size_t length) {
@@ -185,11 +185,12 @@ private:
       catch (...) {
         // TODO some of these values are null which will fail
         int test = 0;
-        //assert(false, "Error parsing IR");
+        // assert(false, "Error parsing IR");
       }
     }
 #else
-    assert(false, "You need to override this function if you want to use a different json parser!");
+    // You need to override this function if you want to use a different json parser!
+    assert(false);
 #endif
     return ret;
   }
@@ -207,11 +208,12 @@ private:
         });
       }
       catch (...) {
-        assert(false, "Error parsing Cab");
+        assert(false);
       }
     }
 #else
-    assert(false, "You need to override this function if you want to use a different json parser!");
+    // You need to override this function if you want to use a different json parser!
+    assert(false);
 #endif
     return ret;
   }
@@ -234,11 +236,12 @@ private:
         }
       }
       catch (...) {
-        assert(false, "Error parsing Preset");
+        assert(false);
       }
     }
 #else
-    assert(false, "You need to override this function if you want to use a different json parser!");
+    // You need to override this function if you want to use a different json parser!
+    assert(false);
 #endif
     return ret;
   }
@@ -253,7 +256,8 @@ private:
     json["plugin"] = preset.plugin;
     ret = json.dump();
 #else
-    assert(false, "You need to override this function if you want to use a different json parser!");
+    // You need to override this function if you want to use a different json parser!
+    assert(false);
 #endif
     return ret;
   }
@@ -270,7 +274,8 @@ private:
       return res->body;
     }
 #else
-    assert(false, "You need to override this function if you want to use a different http lib!");
+    // You need to override this function if you want to use a different http lib!
+    assert(false);
 #endif
     return "";
   }
