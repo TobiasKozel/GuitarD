@@ -13,8 +13,6 @@
 #include "dr_wav.h"
 #endif
 
-#include <future>
-
 class SoundWoofer {
 public:
   /**
@@ -81,18 +79,20 @@ public:
   void fetchIRs() {
     std::string data = httpGet("/Impulse");
     mIRlist = parseIRs(data);
-    //data = httpGet("/Rig");
-    //mCabList = parseRigs(data);
+    data = httpGet("/Rig");
+    mCabList = parseRigs(data);
     // TODO assign them to the cabs an mics
   }
 
   void fetchPresets() {
-    if (mPluginName.size() == 0) { return; }
-
+    if (mPluginName.empty()) { return; }
+    std::string data = httpGet("/Preset");
+    mPresetList = parsePresets(data);
+    int i = 0;
   }
 
-  void sendPreset(std::string name, const char* data, const size_t length) {
-    if (mPluginName.size() == 0) { return; }
+  void sendPreset(const std::string name, const char* data, const size_t length) {
+    if (mPluginName.empty()) { return; }
     SWPreset preset = {
       name,
       generateUUID(),
@@ -103,7 +103,7 @@ public:
   }
 
   void sendPreset(SWPreset &preset) {
-    if (mPluginName.size() == 0) { return; }
+    if (mPluginName.empty()) { return; }
     const std::string serialized = encodePreset(preset);
     httpPost("/Preset", serialized.c_str(), serialized.size());
   }
@@ -180,7 +180,7 @@ private:
           i["micPosition"],
           i["userName"],
           i["element"]
-          });
+        });
       }
       catch (...) {
         // TODO some of these values are null which will fail
@@ -204,7 +204,7 @@ private:
         ret.push_back({
           i["id"],
           i["name"]
-          });
+        });
       }
       catch (...) {
         assert(false, "Error parsing Cab");
@@ -225,9 +225,9 @@ private:
       try {
         SWPreset preset = {
           i["name"],
-          i["data"],
           i["id"],
-          i["plugin"]
+          i["plugin"],
+          i["data"]
         };
         if (preset.plugin == mPluginName) {
           ret.push_back(preset);
@@ -280,7 +280,7 @@ private:
     httplib::Client cli(BACKEND_URL, BACKEND_PORT);
     std::string body;
     body.append(data, length);
-    body += "\0"; // make sure it's null terminated
+    // body += "\0"; // make sure it's null terminated
     auto res = cli.Post(endpoint.c_str(), body, mime.c_str());
     if (res && res->status == 200) {
       return true;
@@ -321,7 +321,24 @@ private:
 #endif
   }
 
-  std::string generateUUID() {
-    return "3fa85f64-5717-4562-b3fc-2c963f66afa7";
+  /**
+   * Not really up to spec but this should happen on the backend anyways
+   */
+  static std::string generateUUID() {
+    srand(time(nullptr));
+    const int charLength = 10 + 26;
+    const char chars[] = "abcdefghijklmnopqrstuvwxyz0123456789";
+    const int UUIDLength = 36;
+    char out[UUIDLength];
+    for (int i = 0; i < UUIDLength; i++) {
+      out[i] = chars[rand() % charLength];
+    }
+    out[9] = '-';
+    out[14] = '-';
+    out[19] = '-';
+    out[24] = '-';
+    std::string ret;
+    ret.append(out, UUIDLength);
+    return ret;
   }
 };
