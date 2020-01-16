@@ -2,11 +2,16 @@ iPlug2
 https://github.com/iPlug2/iPlug2/blob/master/LICENSE.txt
 https://github.com/iPlug2/iPlug2
 
+Grame FAUST (Using the Faust standard library and the compiler to generate C++ code)
+Licenses from Faust compiled code may vary (LGPL, MIT-style STK-4.3)
+https://github.com/grame-cncm/faust
+https://github.com/grame-cncm/faustlibraries
+
 FFTConvolver
 MIT
 https://github.com/HiFi-LoFi/FFTConvolver
 
-json (De-/Serialisation for presets)
+json (De-/Serialisation for presets and web API requests)
 MIT
 https://github.com/nlohmann/json
 
@@ -22,10 +27,9 @@ PowerSag (DSP in the PowerSag Node)
 MIT
 https://github.com/airwindows/airwindows/blob/master/plugins/WinVST/PowerSag
 
-Grame FAUST (Using the Faust standard library and the compiler to generate C++ code)
-Licenses from Faust compiled code may vary (LGPL, MIT-style STK-4.3)
-https://github.com/grame-cncm/faust
-https://github.com/grame-cncm/faustlibraries
+httplib (Used for the http requests to the soundwoofer.com API)
+MIT
+https://github.com/yhirose/cpp-httplib
 
 Impulse Responses
 Public Domain

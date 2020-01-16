@@ -15,6 +15,16 @@
 
 class SoundWoofer {
 public:
+
+  enum Status {
+    SUCCESS = 0,
+    SERVER_ERROR,
+    PLUGIN_NAME_NOT_SET,
+    WAV_ERROR,
+    NOT_IMPLEMENTED,
+    JSON_ENCODE_ERROR
+  };
+
   /**
    * Soundwoofer structs
    */
@@ -70,58 +80,64 @@ private:
   SoundWoofer() { }
 public:
 
-  void setPluginName(const std::string name) {
+  void setPluginName(const std::string &name) {
     mPluginName = name;
   }
 
   /**
    * Gets a list of all the Impulse responses from the server
    */
-  void fetchIRs() {
+  Status fetchIRs() {
     std::string data = httpGet("/Impulse");
+    if (data.empty()) { return SERVER_ERROR; }
     mIRlist = parseIRs(data);
     data = httpGet("/Rig");
+    if (data.empty()) { return SERVER_ERROR; }
     mCabList = parseRigs(data);
+    return SUCCESS;
     // TODO assign them to the cabs an mics
   }
 
-  void fetchPresets() {
-    if (mPluginName.empty()) { return; }
+  Status fetchPresets() {
+    if (mPluginName.empty()) { return PLUGIN_NAME_NOT_SET; }
     std::string data = httpGet("/Preset");
+    if (data.empty()) { return SERVER_ERROR; }
     mPresetList = parsePresets(data);
+    return SUCCESS;
   }
 
-  void sendPreset(const std::string name, const char* data, const size_t length) {
-    if (mPluginName.empty()) { return; }
+  Status sendPreset(const std::string name, const char* data, const size_t length) {
+    if (mPluginName.empty()) { return PLUGIN_NAME_NOT_SET; }
     SWPreset preset = {
       name,
       generateUUID(),
       mPluginName
     };
     preset.data.append(data, length);
-    sendPreset(preset);
+    return sendPreset(preset);
   }
 
-  void sendPreset(SWPreset &preset) {
-    if (mPluginName.empty()) { return; }
+  /**
+   * Sends the preset to the server
+   * Doesn't update the cached preset list
+   */
+  Status sendPreset(SWPreset &preset) {
+    if (mPluginName.empty()) { return PLUGIN_NAME_NOT_SET; }
     const std::string serialized = encodePreset(preset);
-    httpPost("/Preset", serialized.c_str(), serialized.size());
+    if (serialized.empty()) { return JSON_ENCODE_ERROR; }
+    return httpPost("/Preset", serialized.c_str(), serialized.size());
   }
 
   /**
    * Download and decode a specific IR
    */
-  void downloadIR(SWImpulse& ir) {
-    if (ir.samples != nullptr) {
-      return;
-    }
+  Status downloadIR(SWImpulse& ir) {
+    if (ir.samples != nullptr) { return SUCCESS; }
     std::string result = httpGet("/File/Download/" + ir.file);
-    loadWave(ir, result.c_str(), result.size());
+    if (result.empty()) { return SERVER_ERROR; }
+    return loadWave(ir, result.c_str(), result.size());
   }
 
-  /**
-   * Gets a reference to the vector containing all IRs
-   */
   SWImpulses& getIRs() {
     return mIRlist;
   }
@@ -189,8 +205,7 @@ private:
       }
     }
 #else
-    // You need to override this function if you want to use a different json parser!
-    assert(false);
+    assert(false); // You need to override this function if you want to use a different json parser!
 #endif
     return ret;
   }
@@ -212,8 +227,7 @@ private:
       }
     }
 #else
-    // You need to override this function if you want to use a different json parser!
-    assert(false);
+    assert(false); // You need to override this function if you want to use a different json parser!
 #endif
     return ret;
   }
@@ -240,14 +254,13 @@ private:
       }
     }
 #else
-    // You need to override this function if you want to use a different json parser!
-    assert(false);
+    assert(false); // You need to override this function if you want to use a different json parser!
 #endif
     return ret;
   }
 
   virtual std::string encodePreset(SWPreset &preset) {
-    std::string ret = "";
+    std::string ret;
 #ifndef SOUNDWOOFER_CUSTOM_JSON
     nlohmann::json json;
     json["name"] = preset.name;
@@ -256,8 +269,7 @@ private:
     json["plugin"] = preset.plugin;
     ret = json.dump();
 #else
-    // You need to override this function if you want to use a different json parser!
-    assert(false);
+    assert(false); // You need to override this function if you want to use a different json parser!
 #endif
     return ret;
   }
@@ -274,13 +286,12 @@ private:
       return res->body;
     }
 #else
-    // You need to override this function if you want to use a different http lib!
-    assert(false);
+    assert(false); // You need to override this function if you want to use a different http lib!
 #endif
-    return "";
+    return std::string();
   }
 
-  virtual bool httpPost(const std::string endpoint, const char* data, const size_t length, const std::string mime = "application/json") {
+  virtual Status httpPost(const std::string endpoint, const char* data, const size_t length, const std::string mime = "application/json") {
 #ifndef SOUNDWOOFER_CUSTOM_HTTP
     httplib::Client cli(BACKEND_URL, BACKEND_PORT);
     std::string body;
@@ -288,20 +299,21 @@ private:
     // body += "\0"; // make sure it's null terminated
     auto res = cli.Post(endpoint.c_str(), body, mime.c_str());
     if (res && res->status == 200) {
-      return true;
+      return SUCCESS;
     }
+    return SERVER_ERROR;
 #endif
-    return false;
+    return NOT_IMPLEMENTED;
   }
 
   /**
    * Will load the wav file to a float buffer in the SWImpulse struct
    */
-  virtual void loadWave(SWImpulse &ir, const char* waveData, const size_t length) {
+  virtual Status loadWave(SWImpulse &ir, const char* waveData, const size_t length) {
 #ifndef SOUNDWOOFER_CUSTOM_WAVE
     drwav wav;
     if (!drwav_init_memory(&wav, waveData, length, nullptr)) {
-      return;
+      return WAV_ERROR;
     }
 
     // interleaved buffer
@@ -310,6 +322,7 @@ private:
     ));
 
     ir.length = drwav_read_pcm_frames_f32(&wav, wav.totalPCMFrameCount, pSampleData);
+    if (ir.length == 0) { return WAV_ERROR; }
     ir.channels = wav.channels;
     ir.samples = new float* [ir.channels];
     for (int c = 0; c < ir.channels; c++) {
@@ -323,11 +336,13 @@ private:
     }
     free(pSampleData);
     drwav_uninit(&wav);
+    return SUCCESS;
 #endif
+    return NOT_IMPLEMENTED;
   }
 
   /**
-   * Not really up to spec but this should happen on the backend anyways
+   * Not really up to spec, but this should happen on the backend anyways
    */
   static std::string generateUUID() {
     srand(time(nullptr));
@@ -338,10 +353,7 @@ private:
     for (int i = 0; i < UUIDLength; i++) {
       out[i] = chars[rand() % charLength];
     }
-    out[9] = '-';
-    out[14] = '-';
-    out[19] = '-';
-    out[24] = '-';
+    out[9] = out[14] = out[19] = out[24] = '-';
     std::string ret;
     ret.append(out, UUIDLength);
     return ret;
