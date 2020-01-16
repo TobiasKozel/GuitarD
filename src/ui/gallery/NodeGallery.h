@@ -1,10 +1,7 @@
 #pragma once
-#include "IControl.h"
 #include "src/ui/ScrollViewControl.h"
-#include "ITextEntryControl.h"
 #include "src/misc/MessageBus.h"
 #include "NodeGalleryCategory.h"
-#include "src/ui/theme.h"
 
 using namespace iplug;
 using namespace igraphics;

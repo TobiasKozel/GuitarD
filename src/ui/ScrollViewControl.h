@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IControl.h"
+#include "ScrollViewChild.h"
 
 using namespace iplug;
 using namespace igraphics;
@@ -47,6 +48,7 @@ public:
   ScrollViewControl() : IControl({}) {}
 
   void appendChild(IControl* child) {
+    if (mChildren.Find(child) != -1) { return; } // No duplicates
     mChildren.Add(child);
     if (mAttached) {
       child->SetDelegate(*GetDelegate());
@@ -97,6 +99,9 @@ public:
     mContentWidth = 0;
     const int childCount = mChildren.GetSize();
     if (childCount == 0) { return; }
+    /**
+     * First align all the children vertically
+     */
     for (int i = 0; i < childCount; i++) {
       const bool isLast = i == childCount - 1;
       IControl* c = mChildren.Get(i);
@@ -122,13 +127,20 @@ public:
     if (mScrollY < 0) {
       mScrollY = 0;
     }
+    /**
+     * Then scroll them according to their scroll position
+     */
     for (int i = 0; i < mChildren.GetSize(); i++) {
       IControl* c = mChildren.Get(i);
+      ScrollViewChild* sc = dynamic_cast<ScrollViewChild*>(c);
       IRECT r = c->GetTargetRECT();
       shiftRectY(r, -mScrollY);
       r.Translate(mRECT.L, mRECT.T); // Apply the absolute position of the view itself
       const bool mOver = c->GetMouseIsOver();
       c->SetTargetAndDrawRECTs(r); // Will call OnResize() on the child element
+      if (sc != nullptr) {
+        sc->onScroll(mRECT.Intersects(r));
+      }
       c->SetMouseIsOver(mOver);
     }
     // Once all the children know the dimensions ask for a redraw
@@ -159,7 +171,7 @@ public:
     mDoDragScroll = enable;
   }
 
-  void setDoDrag(const bool enable) {
+  void setDoScroll(const bool enable) {
     mDoScroll = enable;
   }
 
@@ -167,6 +179,14 @@ public:
   void scroll(const float y) {
     mScrollY += y;
     OnResize();
+  }
+
+  void scrollTo(int index) {
+    IControl* c = mChildren.Get(index);
+    if (c != nullptr) {
+      mScrollY = c->GetRECT().T - mRECT.T;
+      OnResize();
+    }
   }
 
   void Draw(IGraphics& g) override {

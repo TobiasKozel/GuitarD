@@ -100,11 +100,12 @@ public:
 
 
   explicit Graph(MessageBus::Bus* pBus) : mParamManager(pBus) {
-    //auto &sw = SoundWoofer::instance();
-    //sw.setPluginName("Plugin1");
-    //sw.sendPreset("presetname", "somedata2", 9);
-    //sw.fetchPresets();
-    //sw.fetchIRs();
+    auto &sw = SoundWoofer::instance();
+    SoundWoofer::Status status;
+    sw.setPluginName(PLUG_NAME);
+    //status = sw.sendPreset("presetname", "somedata2", 9);
+    //status = sw.fetchPresets();
+    //status = sw.fetchIRs();
     //sw.downloadIR(sw.getIRs().at(0));
 
     mBus = pBus;

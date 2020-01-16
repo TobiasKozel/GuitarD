@@ -351,9 +351,6 @@
     <ClInclude Include="..\src\nodes\paramerticeq\ParametricEqNode.h">
       <Filter>src\nodes\filters</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\nodes\simple_cab\SimpleCabNode.h">
-      <Filter>src\nodes\cabs</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\nodes\simple_compressor\SimpleComressorNode.h">
       <Filter>src\nodes\dynamics</Filter>
     </ClInclude>
@@ -444,9 +441,6 @@
     <ClInclude Include="..\src\node\NodeShared.h">
       <Filter>src\node</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\nodes\simple_cab\InternalIRs.h">
-      <Filter>src\nodes\cabs</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\nodes\tuner\TunerNode.h">
       <Filter>src\nodes\tools</Filter>
     </ClInclude>
@@ -462,23 +456,11 @@
     <ClInclude Include="..\src\misc\DefaultPreset.h">
       <Filter>src\misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\nodes\cab_lib\CabLibNode.h">
-      <Filter>src\nodes\cabs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\ui\ScrollViewControl.h">
-      <Filter>src\ui</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\graph\SortGraph.h">
       <Filter>src\graph</Filter>
     </ClInclude>
     <ClInclude Include="..\src\graph\FormatGraph.h">
       <Filter>src\graph</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\nodes\cab_lib\CabLibPopUp.h">
-      <Filter>src\nodes\cabs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\nodes\simple_cab\WrappedConvolver.h">
-      <Filter>src\nodes\cabs</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ui\CustomKnob.h">
       <Filter>src\ui</Filter>
@@ -500,6 +482,33 @@
     </ClInclude>
     <ClInclude Include="..\src\ui\SideBar.h">
       <Filter>src\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nodes\simple_cab\SimpleCabNode.h">
+      <Filter>src\nodes\cabs\basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nodes\cab_lib\CabLibPopUp.h">
+      <Filter>src\nodes\cabs\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nodes\cab_lib\CabLibNode.h">
+      <Filter>src\nodes\cabs\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nodes\simple_cab\WrappedConvolver.h">
+      <Filter>src\nodes\cabs\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nodes\simple_cab\InternalIRs.h">
+      <Filter>src\nodes\cabs\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\preset\PresetBrowser.h">
+      <Filter>src\ui\preset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\ScrollViewControl.h">
+      <Filter>src\ui\scroll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\ScrollViewChild.h">
+      <Filter>src\ui\scroll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\preset\PresetEntryControl.h">
+      <Filter>src\ui\preset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -595,6 +604,21 @@
     </Filter>
     <Filter Include="src\nodes\flow">
       <UniqueIdentifier>{bf2b412b-1221-40f0-8f06-29671b0e5ce9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ui\preset">
+      <UniqueIdentifier>{58ae2281-a086-479e-985f-3940717b27de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\nodes\cabs\basic">
+      <UniqueIdentifier>{1d643f12-671c-4493-9e67-c4a9a46f54d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\nodes\cabs\lib">
+      <UniqueIdentifier>{491ddcb5-9c10-4892-abae-75ad70505786}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\nodes\cabs\misc">
+      <UniqueIdentifier>{6a270705-3c5c-49a9-a2ea-5b72e2a6e46d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ui\scroll">
+      <UniqueIdentifier>{21631177-7fba-431e-96bc-5cec04805732}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -6,6 +6,7 @@
 #include "src/misc/MessageBus.h"
 #include "src/ui/theme.h"
 #include "gallery/NodeGallery.h"
+#include "preset/PresetBrowser.h"
 
 class SideBar : public IControl {
   MessageBus::Bus* mBus = nullptr;
@@ -16,12 +17,13 @@ public:
   long long avgExecutionTime;
   MessageBus::Subscription<bool> mOpenGalleryEvent;
   NodeGallery mNodeGallery;
+  PresetBrowser mPresetBrowser;
   int mOpenTab = 0;
-  static const int mTabCount = 1;
+  static const int mTabCount = 2;
   IControl* mTabs[mTabCount] = { nullptr };
 
   SideBar(MessageBus::Bus* pBus, IGraphics* g) :
-    IControl(IRECT(), kNoParameter), mNodeGallery(pBus, g)
+    IControl(IRECT(), kNoParameter), mNodeGallery(pBus, g), mPresetBrowser(pBus, g)
   {
     mBus = pBus;
     mOpenGalleryEvent.subscribe(mBus, MessageBus::OpenGallery, [&](bool open) {
@@ -31,16 +33,18 @@ public:
     mStats = DEBUG_FONT;
     setRenderPriority(11);
     mTabs[0] = &mNodeGallery;
+    mTabs[1] = &mPresetBrowser;
   }
 
   void OnInit() override {
     mScrollview.setRenderPriority(12);
     mScrollview.setFullWidthChildren(true);
     mScrollview.setDoDragScroll(false);
-    mScrollview.setDoDrag(false);
+    // mScrollview.setDoScroll(false);
     mScrollview.setScrollBarEnable(false);
     mScrollview.setCleanUpEnabled(false); // All the children of the scrollview are on the stack of this object
     GetUI()->AttachControl(&mScrollview);
+    mScrollview.appendChild(&mPresetBrowser);
     mScrollview.appendChild(&mNodeGallery);
     OnResize();
   }
@@ -97,9 +101,14 @@ public:
       bounds.L = bounds.R * 0.5f;
       mRECT = bounds;
       mTargetRECT = bounds;
-      const IRECT main = bounds.GetPadded(-Theme::Gallery::PADDING);
+      IRECT main = bounds.GetPadded(-Theme::Gallery::PADDING);
+      main.R -= 20;
+      //for (int i = 0; i < mTabCount; i++) {
+      //  mTabs[i]->SetTargetAndDrawRECTs(main);
+      //}
+      mTabs[0]->SetTargetAndDrawRECTs(main);
       mScrollview.SetTargetAndDrawRECTs(main /** .GetVSliced(40) */);
-      mTabs[mOpenTab]->SetTargetAndDrawRECTs(main);
+      // mScrollview.scrollTo(mOpenTab);
       // mSearch->SetTargetAndDrawRECTs(main.GetFromTop(30));
     }
     else {
@@ -114,6 +123,15 @@ public:
   void OnMouseUp(float x, float y, const IMouseMod& mod) override {
     if (!mIsOpen) {
       openGallery();
+    }
+    else {
+      if (mod.R || true) {
+        mOpenTab++;
+        if (mOpenTab > mTabCount) {
+          mOpenTab = 0;
+        }
+        OnResize();
+      }
     }
   }
 

@@ -86,6 +86,7 @@ public:
 
   /**
    * Gets a list of all the Impulse responses from the server
+   * Will also call clearCachedIRs()
    */
   Status fetchIRs() {
     std::string data = httpGet("/Impulse");
@@ -93,6 +94,7 @@ public:
     mIRlist = parseIRs(data);
     data = httpGet("/Rig");
     if (data.empty()) { return SERVER_ERROR; }
+    clearCachedIRs();
     mCabList = parseRigs(data);
     return SUCCESS;
     // TODO assign them to the cabs an mics
@@ -160,7 +162,6 @@ public:
       }
     }
   }
-
 
   /**
    * Singleton stuff
