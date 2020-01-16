@@ -1,7 +1,7 @@
 #pragma once
 #include <chrono>
 #include "mutex.h"
-#include "thirdparty/json.hpp"
+#include "json.hpp"
 #include "IPlugConstants.h"
 #include "src/misc/MessageBus.h"
 #include "src/nodes/io/InputNode.h"
@@ -14,7 +14,7 @@
 #include "src/ui/SideBar.h"
 #include "src/misc/HistoryStack.h"
 #include "FormatGraph.h"
-#include "thirdparty/soundwoofer.h"
+#include "soundwoofer/soundwoofer.h"
 
 /**
  * This is the "god object" which will handle all the nodes

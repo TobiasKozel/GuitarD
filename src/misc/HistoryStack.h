@@ -1,7 +1,7 @@
 #pragma once
 
 #include "constants.h"
-#include "thirdparty/json.hpp"
+#include "json.hpp"
 
 // TODOG make this instance specific so multiple plugins don't share the same undo stack
 class HistoryStack {

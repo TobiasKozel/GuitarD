@@ -5,11 +5,11 @@
 #ifdef useOpenMP
 #include <omp.h>
 #endif
-#include "thirdparty/fftconvolver/TwoStageFFTConvolver.h"
+#include "fftconvolver/TwoStageFFTConvolver.h"
 #include "resample.h"
-#include "thirdparty/threadpool.h"
+#include "threadpool.h"
 //#define DR_WAV_IMPLEMENTATION
-//#include "thirdparty/dr_wav.h"
+//#include "dr_wav.h"
 #include "IPlugConstants.h"
 
 class WrappedConvolver {

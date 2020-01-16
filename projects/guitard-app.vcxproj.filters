@@ -477,9 +477,6 @@
     <ClInclude Include="..\src\nodes\flanger\FlangerNode.h">
       <Filter>src\nodes\filters</Filter>
     </ClInclude>
-    <ClInclude Include="..\thirdparty\soundwoofer.h">
-      <Filter>thirdparty</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\ui\SideBar.h">
       <Filter>src\ui</Filter>
     </ClInclude>
@@ -509,6 +506,9 @@
     </ClInclude>
     <ClInclude Include="..\src\ui\preset\PresetEntryControl.h">
       <Filter>src\ui\preset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwoofer.h">
+      <Filter>thirdparty</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

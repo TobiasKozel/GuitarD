@@ -1,5 +1,5 @@
 #pragma once
-#include <thirdparty/json.hpp>
+#include <json.hpp>
 #include "src/node/Node.h"
 #include "CabLibPopUp.h"
 

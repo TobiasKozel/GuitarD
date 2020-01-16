@@ -2,7 +2,7 @@
 #include "IControl.h"
 #include "src/misc/MessageBus.h"
 #include "src/ui/theme.h"
-#include "thirdparty/soundwoofer.h"
+#include "soundwoofer/soundwoofer.h"
 
 using namespace iplug;
 using namespace igraphics;

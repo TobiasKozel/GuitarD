@@ -1,5 +1,5 @@
 #pragma once
-#include "thirdparty/json.hpp"
+#include "json.hpp"
 #include "src/node/Node.h"
 #include "src/misc/NodeList.h"
 #include "src/parameter/ParameterManager.h"

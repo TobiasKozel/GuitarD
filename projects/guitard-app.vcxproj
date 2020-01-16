@@ -407,7 +407,7 @@
     <ClInclude Include="..\thirdparty\fftconvolver\FFTConvolver.h" />
     <ClInclude Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.h" />
     <ClInclude Include="..\thirdparty\fftconvolver\Utilities.h" />
-    <ClInclude Include="..\thirdparty\soundwoofer.h" />
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwoofer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Dependencies\IPlug\RTAudio\include\asio.cpp" />

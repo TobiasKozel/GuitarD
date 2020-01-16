@@ -2,7 +2,7 @@
 #include "src/ui/ScrollViewControl.h"
 #include "src/misc/MessageBus.h"
 #include "src/ui/ScrollViewChild.h"
-#include "thirdparty/soundwoofer.h"
+#include "soundwoofer/soundwoofer.h"
 #include "PresetEntryControl.h"
 
 using namespace iplug;
