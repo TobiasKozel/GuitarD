@@ -644,7 +644,7 @@ public:
     nlohmann::json json;
     serialize(json);
     try {
-      serialized.Set(json.dump(4).c_str());
+      serialized.Set(json.dump().c_str());
     }
     catch (...) {
       assert(false); // Failed to dump json
@@ -677,6 +677,7 @@ public:
       json = nlohmann::json::parse(data);
     }
     catch (...) {
+      return;
       // assert(false); // Failed to parse JSON
     }
     deserialize(json);
@@ -685,13 +686,14 @@ public:
   void deserialize(nlohmann::json &json) {
     try {
       removeAllNodes();
+      mHistoryStack.ClearStack();
       if (mGraphics != nullptr) {
-        IGraphics* g = mGraphics;
-        cleanupUi();
-        setupUi(g);
+        //IGraphics* g = mGraphics;
+        //cleanupUi();
+        //setupUi(g);
       }
       if (json.contains("scale")) {
-        mWindowScale = json["scale"];
+        // mWindowScale = json["scale"];
         // mWindowWidth = json["width"]; // Probably no point in changing the window size since it's confusing
         // mWindowHeight = json["height"];
       }

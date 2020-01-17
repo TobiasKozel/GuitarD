@@ -35,7 +35,7 @@ public:
   }
 
   void OnMouseUp(const float x, const float y, const IMouseMod& mod) override {
-    if (mod.L) {
+    if (true) {
       MessageBus::fireEvent<const char*>(mBus, MessageBus::LoadPresetFromString, mPreset->data.c_str());
     }
   }
