@@ -14,22 +14,29 @@ public:
   PresetEntryControl(MessageBus::Bus* bus, SoundWoofer::SWPreset* preset) : IControl({}) {
     mBus = bus;
     mPreset = preset;
-  }
-
-  void OnResize() override {
     mRECT.T = 0;
-    mRECT.B = 128;
+    mRECT.B = 24;
     mTargetRECT = mRECT;
   }
 
+  void OnResize() override {
+
+  }
+
   void Draw(IGraphics& g) override {
-    g.FillRect(Theme::Colors::ACCENT, mRECT);
+    if (mMouseIsOver) {
+      g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG_HOVER, mRECT);
+    }
+    else {
+      g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG, mRECT);
+    }
+    
     g.DrawText(Theme::Gallery::CATEGORY_TITLE, mPreset->name.c_str(), mRECT);
   }
 
   void OnMouseUp(const float x, const float y, const IMouseMod& mod) override {
     if (mod.L) {
-      // MessageBus::fireEvent<NodeList::NodeInfo>(mBus, MessageBus::NodeAdd, elem->mInfo);
+      MessageBus::fireEvent<const char*>(mBus, MessageBus::LoadPresetFromString, mPreset->data.c_str());
     }
   }
 };

@@ -60,7 +60,7 @@ public:
     appendChild(&child);
   }
 
-  bool removeChild(IControl* child, const bool wantsDelete = false, bool skipResize = false) {
+  void removeChild(IControl* child, const bool wantsDelete = false, bool skipResize = false) {
     const int index = mChildren.Find(child);
     if (index != -1) {
       mChildren.Get(index)->OnDetach();
@@ -68,13 +68,12 @@ public:
       if (!skipResize) {
         OnResize();
       }
-      return true;
+      return;
     }
-    return false;
   }
 
-  bool removeChild(IControl& child, const bool wantsDelete = false) {
-    return removeChild(&child, wantsDelete);
+  void removeChild(IControl& child, const bool wantsDelete = false) {
+    removeChild(&child, wantsDelete);
   }
 
   void clearChildren(bool wantsDelete = false) {
@@ -130,7 +129,7 @@ public:
     /**
      * Then scroll them according to their scroll position
      */
-    for (int i = 0; i < mChildren.GetSize(); i++) {
+    for (int i = 0; i < childCount; i++) {
       IControl* c = mChildren.Get(i);
       ScrollViewChild* sc = dynamic_cast<ScrollViewChild*>(c);
       IRECT r = c->GetTargetRECT();

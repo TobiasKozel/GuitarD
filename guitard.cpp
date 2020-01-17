@@ -74,24 +74,19 @@ void GuitarD::OnUIClose() {
 }
 
 bool GuitarD::SerializeState(IByteChunk& chunk) const {
-  nlohmann::json serialized = {
-    {"version", PLUG_VERSION_STR},
-  };
+  WDL_String serialized;
   graph->serialize(serialized);
-  chunk.PutStr(serialized.dump(4).c_str());
+  if (serialized.GetLength() < 1) {
+    return false;
+  }
+  chunk.PutStr(serialized.Get());
   return true;
 }
 
 int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
   WDL_String json_string;
-  int pos = chunk.GetStr(json_string, startPos);
-  try {
-    nlohmann::json serialized = nlohmann::json::parse(json_string.Get());
-    graph->deserialize(serialized);
-    return pos;
-  }
-  catch (...) {
-  }
+  const int pos = chunk.GetStr(json_string, startPos);
+  graph->deserialize(json_string.Get());
   return pos;
 }
 

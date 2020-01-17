@@ -38,14 +38,15 @@ public:
 
   void OnInit() override {
     mScrollview.setRenderPriority(12);
+    mScrollview.setChildPadding(1.f); // Should be 0 but this makes sure there's no trace of the other tabs
     mScrollview.setFullWidthChildren(true);
     mScrollview.setDoDragScroll(false);
-    // mScrollview.setDoScroll(false);
+    mScrollview.setDoScroll(false);
     mScrollview.setScrollBarEnable(false);
     mScrollview.setCleanUpEnabled(false); // All the children of the scrollview are on the stack of this object
     GetUI()->AttachControl(&mScrollview);
-    mScrollview.appendChild(&mPresetBrowser);
     mScrollview.appendChild(&mNodeGallery);
+    mScrollview.appendChild(&mPresetBrowser);
     OnResize();
   }
 
@@ -103,12 +104,12 @@ public:
       mTargetRECT = bounds;
       IRECT main = bounds.GetPadded(-Theme::Gallery::PADDING);
       main.R -= 20;
-      //for (int i = 0; i < mTabCount; i++) {
-      //  mTabs[i]->SetTargetAndDrawRECTs(main);
-      //}
-      mTabs[0]->SetTargetAndDrawRECTs(main);
+      for (int i = 0; i < mTabCount; i++) {
+        mTabs[i]->SetTargetAndDrawRECTs(main);
+      }
+      // mTabs[0]->SetTargetAndDrawRECTs(main);
       mScrollview.SetTargetAndDrawRECTs(main /** .GetVSliced(40) */);
-      // mScrollview.scrollTo(mOpenTab);
+      mScrollview.scrollTo(mOpenTab);
       // mSearch->SetTargetAndDrawRECTs(main.GetFromTop(30));
     }
     else {
@@ -127,7 +128,7 @@ public:
     else {
       if (mod.R || true) {
         mOpenTab++;
-        if (mOpenTab > mTabCount) {
+        if (mOpenTab >= mTabCount) {
           mOpenTab = 0;
         }
         OnResize();

@@ -29,7 +29,8 @@ namespace MessageBus {
     OpenPopUp, // Takes an IControl and pushes it on top of the render stack
     NodeSpliceInCombine, // Adds a combine node after the node passed with this event
     GraphStatsChanged, // Fired from the audio thread once a graph did not finish processing fot the first time
-    LoadPresetFromBrowser,
+    LoadPresetFromString, // Takes a const char*
+    SavePresetToSring, // Takes a WDL_String* were the result will be in
     TOTAL_MESSAGE_IDS // Keep this one at the bottom to count all events
   };
 }

@@ -28,7 +28,7 @@ public:
   }
 
   void onScrollInView() override {
-    refresh();
+    // refresh();
   }
 
   void refresh() {

@@ -33,6 +33,8 @@ class Graph {
   MessageBus::Subscription<bool> mPopUndoState;
   MessageBus::Subscription<GraphStats**> mReturnStats;
   MessageBus::Subscription<AutomationAttachRequest> mAutomationRequest;
+  MessageBus::Subscription<const char*> mLoadPresetEvent;
+  MessageBus::Subscription<WDL_String*> mSavePresetEvent;
 
   IGraphics* mGraphics = nullptr;
 
@@ -188,6 +190,14 @@ public:
           }
         }
       }
+    });
+
+    mLoadPresetEvent.subscribe(mBus, MessageBus::LoadPresetFromString, [&](const char* data) {
+      this->deserialize(data);
+    });
+
+    mSavePresetEvent.subscribe(mBus, MessageBus::SavePresetToSring, [&](WDL_String* data) {
+      this->serialize(*data);
     });
   }
 
@@ -369,31 +379,47 @@ public:
     
     mGraphics->SetKeyHandlerFunc([&](const IKeyPress & key, const bool isUp) {
       // Gets the keystrokes in the standalone app
-      if (key.S && (key.VK == kVK_Z) && !isUp) {
-        MessageBus::fireEvent<bool>(this->mBus, MessageBus::PopUndoState, false);
-        return true;
-      }
-      if ((key.VK == kVK_F) && !isUp) {
-        arrangeNodes();
-        return true;
-      }
-      if ((key.VK == kVK_C) && !isUp) {
-        centerGraph();
-        return true;
-      }
-      if ((key.VK == kVK_Q) && !isUp) {
-        centerNode(mInputNode);
-        return true;
-      }
-      if ((key.VK == kVK_E) && !isUp) {
-        centerNode(mOutputNode);
-        return true;
-      }
-      if ((key.VK == kVK_S) && !isUp) {
-        this->lockAudioThread();
-        SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
-        this->unlockAudioThread();
-        return true;
+      if (!isUp) { // Only handle key down
+        if (key.S) { // Check modifiers like shift first
+          if (key.VK == kVK_Z) {
+            MessageBus::fireEvent<bool>(this->mBus, MessageBus::PopUndoState, false);
+            return true;
+          }
+          if (key.VK == kVK_C) {
+            WDL_String data;
+            this->serialize(data);
+            this->mGraphics->SetTextInClipboard(data);
+            return true;
+          }
+          if (key.VK == kVK_V) {
+            WDL_String data;
+            this->mGraphics->GetTextFromClipboard(data);
+            this->deserialize(data.Get());
+            return true;
+          }
+        }
+        if (key.VK == kVK_F) {
+          this->arrangeNodes();
+          return true;
+        }
+        if (key.VK == kVK_C) {
+          this->centerGraph();
+          return true;
+        }
+        if (key.VK == kVK_Q) {
+          this->centerNode(mInputNode);
+          return true;
+        }
+        if (key.VK == kVK_E) {
+          this->centerNode(mOutputNode);
+          return true;
+        }
+        if (key.VK == kVK_S) {
+          this->lockAudioThread();
+          SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
+          this->unlockAudioThread();
+          return true;
+        }
       }
       return false;
     });
@@ -501,7 +527,7 @@ public:
     onViewPortChange(avg.x, avg.y);
   }
 
-  void layoutUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
+  void layoutUi(IGraphics* pGraphics = nullptr) {
     if (pGraphics != nullptr && pGraphics != mGraphics) {
       WDBGMSG("Graphics context changed");
       mGraphics = pGraphics;
@@ -614,39 +640,74 @@ public:
     removeNode(mNodes.Get(index));
   }
 
-  void serialize(nlohmann::json& json) {
-    if (mGraphics != nullptr) {
-      mWindowWidth = mGraphics->Width();
-      mWindowHeight = mGraphics->Height();
-      mWindowScale = mGraphics->GetDrawScale();
+  void serialize(WDL_String &serialized) {
+    nlohmann::json json;
+    serialize(json);
+    try {
+      serialized.Set(json.dump(4).c_str());
     }
-    json["scale"] = mWindowScale;
-    json["width"] = mWindowWidth;
-    json["height"] = mWindowHeight;
-    Serializer::serialize(json, mNodes, mInputNode, mOutputNode);
+    catch (...) {
+      assert(false); // Failed to dump json
+    }
   }
 
-  void deserialize(nlohmann::json& json) {
-    removeAllNodes();
-    if (mGraphics != nullptr) {
-      IGraphics* g = mGraphics;
-      cleanupUi();
-      setupUi(g);
-    }
-    if (json.contains("width")) {
-      mWindowScale = json["scale"];
-      mWindowWidth = json["width"];
-      mWindowHeight = json["height"];
-    }
-    lockAudioThread();
-    Serializer::deserialize(json, mNodes, mOutputNode, mInputNode, mSampleRate, &mParamManager, mBus);
-    if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
-      for (int i = 0; i < mNodes.GetSize(); i++) {
-        mNodes.Get(i)->setupUi(mGraphics);
+  void serialize(nlohmann::json &json) {
+    try {
+      json = {
+        { "version", PLUG_VERSION_HEX },
+      };
+      if (mGraphics != nullptr) {
+        mWindowWidth = mGraphics->Width();
+        mWindowHeight = mGraphics->Height();
+        mWindowScale = mGraphics->GetDrawScale();
       }
-      scaleUi();
+      json["scale"] = mWindowScale;
+      json["width"] = mWindowWidth;
+      json["height"] = mWindowHeight;
+      Serializer::serialize(json, mNodes, mInputNode, mOutputNode);
     }
-    unlockAudioThread();
+    catch (...) {
+      assert(false); // Failed to serialize json
+    }
+  }
+
+  void deserialize(const char* data) {
+    nlohmann::json json;
+    try {
+      json = nlohmann::json::parse(data);
+    }
+    catch (...) {
+      // assert(false); // Failed to parse JSON
+    }
+    deserialize(json);
+  }
+
+  void deserialize(nlohmann::json &json) {
+    try {
+      removeAllNodes();
+      if (mGraphics != nullptr) {
+        IGraphics* g = mGraphics;
+        cleanupUi();
+        setupUi(g);
+      }
+      if (json.contains("scale")) {
+        mWindowScale = json["scale"];
+        // mWindowWidth = json["width"]; // Probably no point in changing the window size since it's confusing
+        // mWindowHeight = json["height"];
+      }
+      lockAudioThread();
+      Serializer::deserialize(json, mNodes, mOutputNode, mInputNode, mSampleRate, &mParamManager, mBus);
+      if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
+        for (int i = 0; i < mNodes.GetSize(); i++) {
+          mNodes.Get(i)->setupUi(mGraphics);
+        }
+        scaleUi();
+      }
+      unlockAudioThread();
+    }
+    catch (...) {
+      // assert(false); // To load graph with json
+    }
   }
 
 private:
