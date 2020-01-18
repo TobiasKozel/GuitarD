@@ -15,6 +15,7 @@ public:
     for (int i = 0; i < MAX_UNDOS; i++) {
       if (states[i] != nullptr) {
         delete states[i];
+        states[i] = nullptr;
       }
     }
     mUndos = mRedos = mIndex = 0;

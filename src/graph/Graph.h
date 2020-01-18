@@ -671,15 +671,14 @@ public:
   }
 
   void deserialize(const char* data) {
-    nlohmann::json json;
     try {
-      json = nlohmann::json::parse(data);
+      nlohmann::json json = nlohmann::json::parse(data);
+      deserialize(json);
     }
     catch (...) {
       return;
       // assert(false); // Failed to parse JSON
     }
-    deserialize(json);
   }
 
   void deserialize(nlohmann::json &json) {
