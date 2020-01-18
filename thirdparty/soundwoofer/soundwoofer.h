@@ -15,7 +15,6 @@
 
 class SoundWoofer {
 public:
-
   enum Status {
     SUCCESS = 0,
     ASYNC,
@@ -287,13 +286,17 @@ private:
       this->mThreadRunning = true;
       mMutex.unlock();
       mThread = std::thread([&]() {
-        while(mQueue.empty()) {
-          mMutex.lock();
+        while(!mQueue.empty()) {
+          mMutex.lock(); // Mutex to make sure the queue doesn't get corrupted
           TaskBundle t = *mQueue.begin();
           mQueue.erase(mQueue.begin());
           mMutex.unlock();
           t.callback(t.task());
         }
+        /**
+         * There might be a small chance the thread stops running
+         * if another thread checks mThreadRunning just before it's set to false
+         */
         mThreadRunning = false;
       });
     }

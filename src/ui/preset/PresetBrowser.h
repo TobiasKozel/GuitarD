@@ -42,16 +42,8 @@ public:
         }
       }
       OnResize();
+      GetUI()->SetAllControlsDirty(); // Needed since nothing else triggers a new frame to be rendered
     });
-    //if (api.fetchPresets() == SoundWoofer::SUCCESS) {
-    //  mPresets = api.getPresets();
-    //  clearChildren(true);
-    //  for (auto& i : mPresets) {
-    //    PresetEntryControl* p = new PresetEntryControl(mBus, &i);
-    //    appendChild(p);
-    //  }
-    //}
-    //OnResize();
   }
 
   void onScrollOutView() override {

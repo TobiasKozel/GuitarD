@@ -32,6 +32,8 @@ http.createServer((req, res) => {
     if (req.method == "GET") {
         var body = "";
         if (req.url.search("/Preset") === 0) {
+            var waitTill = new Date(new Date().getTime() + 4 * 1000);
+            while(waitTill > new Date()){}
             body = JSON.stringify(presets);
         }
 
