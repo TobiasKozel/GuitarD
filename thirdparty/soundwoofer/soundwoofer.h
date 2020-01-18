@@ -81,7 +81,7 @@ public:
 
 
 private:
-  // const std::string BACKEND_URL = "svenssj.tech";
+  // const std::string BACKEND_URL = "http://svenssj.tech";
   const std::string BACKEND_URL = "localhost";
   const int BACKEND_PORT = 5000;
   std::string mPluginName = ""; // Plugin name used to label and filter presets by
@@ -132,11 +132,11 @@ public:
   Status fetchIRs() {
     std::string data = httpGet("/Impulse");
     if (data.empty()) { return SERVER_ERROR; }
-    mIRlist = parseIRs(data);
-    data = httpGet("/Rig");
-    if (data.empty()) { return SERVER_ERROR; }
     clearCachedIRs();
-    mCabList = parseRigs(data);
+    mIRlist = parseIRs(data);
+    //data = httpGet("/Rig");
+    //if (data.empty()) { return SERVER_ERROR; }
+    //mCabList = parseRigs(data);
     return SUCCESS;
     // TODO assign them to the cabs an mics
   }
@@ -208,6 +208,15 @@ public:
     return ASYNC;
   }
 
+  Status downloadIR(std::string id) {
+    for (auto &i : mIRlist) {
+      if (id == i.id) {
+        return downloadIR(i);
+      }
+    }
+    return SERVER_ERROR;
+  }
+
   /**
    * Download and decode a specific IR
    * The decoded IR will be in SWImpulse::samples
@@ -219,6 +228,15 @@ public:
     return loadWave(ir, result.c_str(), result.size());
   }
 
+  Status downloadIR(std::string id, Callback callback) {
+    for (auto& i : mIRlist) {
+      if (id == i.id) {
+        return downloadIR(i, callback);
+      }
+    }
+    return SERVER_ERROR;
+  }
+
   /**
    * Async version of downloadIR
    */
@@ -227,6 +245,15 @@ public:
       return downloadIR(ir);
     }, callback);
     return ASYNC;
+  }
+
+  SWImpulse* getIR(std::string id) {
+    for (auto& i : mIRlist) {
+      if (id == i.id) {
+        return &i;
+      }
+    }
+    return nullptr;
   }
 
   SWImpulses& getIRs() {
@@ -257,9 +284,12 @@ public:
    * Call this if for example the UI gets destroyed to be sure there are no callbacks
    * lingering which might be attached to destroyed UI elements
    */
-  void clearAsyncQueue() {
+  void clearAsyncQueue(bool doJoin = false) {
     mThreadRunning = false;
     mQueue.clear();
+    if (mThread.joinable() && doJoin) {
+      mThread.join();
+    }
   }
 
   /**
