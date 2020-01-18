@@ -102,9 +102,7 @@ public:
 
 
   explicit Graph(MessageBus::Bus* pBus) : mParamManager(pBus) {
-    auto &sw = SoundWoofer::instance();
-    SoundWoofer::Status status;
-    sw.setPluginName(PLUG_NAME);
+    SoundWoofer::instance().setPluginName(PLUG_NAME);
     //status = sw.sendPreset("presetname", "somedata2", 9);
     //status = sw.fetchPresets();
     //status = sw.fetchIRs();
@@ -460,6 +458,7 @@ public:
   }
 
   void cleanupUi() {
+    SoundWoofer::instance().clearAsyncQueue();
     mWindowWidth = mGraphics->Width();
     mWindowHeight = mGraphics->Height();
     mWindowScale = mGraphics->GetDrawScale();

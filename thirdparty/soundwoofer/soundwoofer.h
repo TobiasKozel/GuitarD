@@ -84,7 +84,7 @@ private:
   // const std::string BACKEND_URL = "svenssj.tech";
   const std::string BACKEND_URL = "localhost";
   const int BACKEND_PORT = 5000;
-  std::string mPluginName = ""; // Plugin name used to lable and filter presets by
+  std::string mPluginName = ""; // Plugin name used to label and filter presets by
 
   SWImpulses mIRlist;
   SWRigs mCabList;
@@ -253,6 +253,16 @@ public:
   }
 
   /**
+   * Clears the async queue, but doesn't terminate a running task
+   * Call this if for example the UI gets destroyed to be sure there are no callbacks
+   * lingering which might be attached to destroyed UI elements
+   */
+  void clearAsyncQueue() {
+    mThreadRunning = false;
+    mQueue.clear();
+  }
+
+  /**
    * Singleton stuff
    */
   SoundWoofer(const SoundWoofer&) {};
@@ -286,18 +296,20 @@ private:
       this->mThreadRunning = true;
       mMutex.unlock();
       mThread = std::thread([&]() {
-        while(!mQueue.empty()) {
+        while(mThreadRunning) {
           mMutex.lock(); // Mutex to make sure the queue doesn't get corrupted
           TaskBundle t = *mQueue.begin();
           mQueue.erase(mQueue.begin());
           mMutex.unlock();
-          t.callback(t.task());
+          const Status status = t.task();
+          if (mThreadRunning) {
+            // We might want to terminate here
+            t.callback(status);
+            mMutex.lock();
+            mThreadRunning = !mQueue.empty();
+            mMutex.unlock();
+          }
         }
-        /**
-         * There might be a small chance the thread stops running
-         * if another thread checks mThreadRunning just before it's set to false
-         */
-        mThreadRunning = false;
       });
     }
     else {
