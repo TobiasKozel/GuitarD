@@ -38,12 +38,12 @@ http.createServer((req, res) => {
         }
 
         if (req.url.search("/Impulse") === 0) {
-            let data = JSON.parse(fs.readFileSync("Impulse.json"));
+            let data = JSON.parse(fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/Impulse.json"));
             body = JSON.stringify(data);
         }
 
         if (req.url.search("/Rig") === 0) {
-            let data = JSON.parse(fs.readFileSync("Rig.json"));
+            let data = JSON.parse(fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/Rig.json"));
             body = JSON.stringify(data);
         }
         res.writeHead(200, {"Content-Type": "application/json"});
