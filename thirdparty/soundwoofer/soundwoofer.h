@@ -18,6 +18,7 @@ public:
 
   enum Status {
     SUCCESS = 0,
+    ASYNC,
     SERVER_ERROR,
     PLUGIN_NAME_NOT_SET,
     WAV_ERROR,
@@ -27,6 +28,10 @@ public:
 
   /**
    * Soundwoofer structs
+   */
+
+  /**
+   * Struct based on an Impulse Response from the soundwoofer API
    */
   struct SWImpulse {
     std::string id;
@@ -56,6 +61,9 @@ public:
     std::string name;
   };
 
+  /**
+   * Preset Struct Based on the soundwoofer API
+   */
   struct SWPreset {
     std::string name;
     std::string id;
@@ -67,17 +75,51 @@ public:
   typedef std::vector<SWRig> SWRigs;
   typedef std::vector<SWPreset> SWPresets;
 
+  /**
+   * Callback for async operations which provides a status code
+   */
+  typedef std::function<void(Status)> Callback;
+
+
 private:
   // const std::string BACKEND_URL = "svenssj.tech";
   const std::string BACKEND_URL = "localhost";
   const int BACKEND_PORT = 5000;
-  std::string mPluginName = "";
+  std::string mPluginName = ""; // Plugin name used to lable and filter presets by
 
   SWImpulses mIRlist;
   SWRigs mCabList;
   SWPresets mPresetList;
 
-  SoundWoofer() { }
+  /**
+   * A function to generalize most tasks used in here
+   * Will provide a status code
+   */
+  typedef std::function<Status()> Task;
+
+  /**
+   * Bundles together a task and a callback to call after a task has been finished
+   */
+  struct TaskBundle {
+    Callback callback;
+    Task task;
+  };
+
+  /**
+   * Tasks will be queued up here and processed from back to front by mThread
+   */
+  std::vector<TaskBundle> mQueue;
+
+  /**
+   * This will mutex the mQueue
+   */
+  std::mutex mMutex;
+  std::thread mThread;
+  bool mThreadRunning = false;
+
+  SoundWoofer() {
+    int i = 0;
+  }
 public:
 
   void setPluginName(const std::string &name) {
@@ -100,6 +142,19 @@ public:
     // TODO assign them to the cabs an mics
   }
 
+  /**
+   * Async version fetchIRs
+   */
+  Status fetchIRs(Callback callback) {
+    startAsync([&]() {
+      return this->fetchIRs();
+    }, callback);
+    return ASYNC;
+  }
+
+  /**
+   * Fetches presets from the server
+   */
   Status fetchPresets() {
     if (mPluginName.empty()) { return PLUGIN_NAME_NOT_SET; }
     std::string data = httpGet("/Preset");
@@ -108,6 +163,20 @@ public:
     return SUCCESS;
   }
 
+  /**
+   * Async version of fetchpresets
+   */
+  Status fetchPresets(Callback callback) {
+    startAsync([&]() {
+      return this->fetchPresets();
+    }, callback);
+    return ASYNC;
+  }
+
+  /**
+   * Assembles a SWPreset and sends it to the server
+   * Doesn't update the cached presets
+   */
   Status sendPreset(const std::string name, const char* data, const size_t length) {
     if (mPluginName.empty()) { return PLUGIN_NAME_NOT_SET; }
     SWPreset preset = {
@@ -131,13 +200,34 @@ public:
   }
 
   /**
+   * Async version of sendPreset
+   */
+  Status sendPreset(SWPreset& preset, Callback callback) {
+    startAsync([&]() {
+      return sendPreset(preset);
+    }, callback);
+    return ASYNC;
+  }
+
+  /**
    * Download and decode a specific IR
+   * The decoded IR will be in SWImpulse::samples
    */
   Status downloadIR(SWImpulse& ir) {
     if (ir.samples != nullptr) { return SUCCESS; }
     std::string result = httpGet("/File/Download/" + ir.file);
     if (result.empty()) { return SERVER_ERROR; }
     return loadWave(ir, result.c_str(), result.size());
+  }
+
+  /**
+   * Async version of downloadIR
+   */
+  Status downloadIR(SWImpulse& ir, Callback callback) {
+    startAsync([&]() {
+      return downloadIR(ir);
+    }, callback);
+    return ASYNC;
   }
 
   SWImpulses& getIRs() {
@@ -166,8 +256,8 @@ public:
   /**
    * Singleton stuff
    */
-  SoundWoofer(const SoundWoofer&) = delete;
-  SoundWoofer& operator = (const SoundWoofer&) = delete;
+  SoundWoofer(const SoundWoofer&) {};
+  SoundWoofer& operator = (const SoundWoofer&) {};
 
   static SoundWoofer& instance() {
     static SoundWoofer instance;
@@ -176,8 +266,41 @@ public:
 
   virtual ~SoundWoofer() {
     clearCachedIRs();
+    if (mThread.joinable()) {
+      mThread.join();
+    }
   }
 private:
+  /**
+   * This will add a TaskBundle to the queue and set off
+   * the thread to work on the queue if it's not already running
+   */
+  void startAsync(Task task, Callback callback) {
+    mMutex.lock();
+    mQueue.push_back({
+      callback, task
+    });
+    if (!mThreadRunning) {
+      if (mThread.joinable()) {
+        mThread.join();
+      }
+      this->mThreadRunning = true;
+      mMutex.unlock();
+      mThread = std::thread([&]() {
+        while(mQueue.empty()) {
+          mMutex.lock();
+          TaskBundle t = *mQueue.begin();
+          mQueue.erase(mQueue.begin());
+          mMutex.unlock();
+          t.callback(t.task());
+        }
+        mThreadRunning = false;
+      });
+    }
+    else {
+      mMutex.unlock();
+    }
+  }
 
   virtual SWImpulses parseIRs(std::string& data) {
     auto ret = SWImpulses();

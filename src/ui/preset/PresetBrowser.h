@@ -24,23 +24,34 @@ public:
   void OnInit() override {
     ScrollViewControl::OnInit();
     setFullWidthChildren(true);
-    refresh();
-  }
-
-  void onScrollInView() override {
     // refresh();
   }
 
+  void onScrollInView() override {
+    refresh();
+  }
+
   void refresh() {
-    if (api.fetchPresets() == SoundWoofer::SUCCESS) {
-      mPresets = api.getPresets();
-      clearChildren(true);
-      for (auto& i : mPresets) {
-        PresetEntryControl* p = new PresetEntryControl(mBus, &i);
-        appendChild(p);
+    api.fetchPresets([&](SoundWoofer::Status status) {
+      if (status == SoundWoofer::SUCCESS) {
+        mPresets = api.getPresets();
+        clearChildren(true);
+        for (auto& i : mPresets) {
+          PresetEntryControl* p = new PresetEntryControl(mBus, &i);
+          appendChild(p);
+        }
       }
-    }
-    OnResize();
+      OnResize();
+    });
+    //if (api.fetchPresets() == SoundWoofer::SUCCESS) {
+    //  mPresets = api.getPresets();
+    //  clearChildren(true);
+    //  for (auto& i : mPresets) {
+    //    PresetEntryControl* p = new PresetEntryControl(mBus, &i);
+    //    appendChild(p);
+    //  }
+    //}
+    //OnResize();
   }
 
   void onScrollOutView() override {
