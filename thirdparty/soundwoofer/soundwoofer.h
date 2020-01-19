@@ -5,6 +5,7 @@
 #endif
 
 #ifndef SOUNDWOOFER_CUSTOM_HTTP
+#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "httplib.h"
 #endif
 
@@ -81,7 +82,7 @@ public:
 
 
 private:
-  // const std::string BACKEND_URL = "http://svenssj.tech";
+  //const std::string BACKEND_URL = "svenssj.tech";
   const std::string BACKEND_URL = "localhost";
   const int BACKEND_PORT = 5000;
   std::string mPluginName = ""; // Plugin name used to label and filter presets by
