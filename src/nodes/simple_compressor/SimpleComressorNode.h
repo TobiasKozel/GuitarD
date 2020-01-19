@@ -1,7 +1,7 @@
 #pragma once
 #include "SimpleComressor.h"
 
-class SimpleComressorNode final : public SimpleComressor {
+class SimpleComressorNode final : public FaustGenerated::SimpleComressor {
 public:
   SimpleComressorNode(const std::string pType) {
     shared.type = pType;

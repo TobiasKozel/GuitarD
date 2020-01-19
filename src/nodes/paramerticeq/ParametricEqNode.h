@@ -56,7 +56,7 @@ public:
   }
 };
 
-class ParametricEqNode final : public ParametricEq {
+class ParametricEqNode final : public FaustGenerated::ParametricEq {
 public:
   ParametricEqNode(const std::string pType) {
     shared.type = pType;

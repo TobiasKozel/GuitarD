@@ -1,7 +1,7 @@
 #pragma once
 #include "OverDrive.h"
 
-class OverDriveNode final : public OverDrive {
+class OverDriveNode final : public FaustGenerated::OverDrive {
 public:
   OverDriveNode(const std::string pType) {
     shared.type = pType;

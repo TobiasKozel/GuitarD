@@ -1,7 +1,7 @@
 #pragma once
 #include "CryBaby.h"
 
-class CryBabyNode final : public CryBaby {
+class CryBabyNode final : public FaustGenerated::CryBaby {
 public:
   CryBabyNode(const std::string pType) {
     shared.type = pType;

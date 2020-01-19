@@ -29,7 +29,7 @@ public:
  
 };
 
-class SimpleDriveNode final : public SimpleDrive {
+class SimpleDriveNode final : public FaustGenerated::SimpleDrive {
 public:
   SimpleDriveNode(const std::string pType) {
     shared.type = pType;

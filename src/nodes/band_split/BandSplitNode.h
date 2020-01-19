@@ -1,7 +1,7 @@
 #pragma once
 #include "BandSplit.h"
 
-class BandSplitNode final : public BandSplit {
+class BandSplitNode final : public FaustGenerated::BandSplit {
 public:
   BandSplitNode(const std::string pType) {
     shared.type = pType;

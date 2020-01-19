@@ -1,7 +1,7 @@
 #pragma once
 #include "SimpleReverb.h"
 
-class SimpleReverbNode final : public SimpleReverb {
+class SimpleReverbNode final : public FaustGenerated::SimpleReverb {
 public:
   SimpleReverbNode(const std::string pType) {
     shared.type = pType;

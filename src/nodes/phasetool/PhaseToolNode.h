@@ -1,7 +1,7 @@
 #pragma once
 #include "PhaseTool.h"
 
-class PhaseToolNode final : public PhaseTool {
+class PhaseToolNode final : public FaustGenerated::PhaseTool {
  public:
   PhaseToolNode(const std::string pType) {
     shared.type = pType;

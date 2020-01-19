@@ -1,7 +1,7 @@
 #pragma once
 #include "StereoTool.h"
 
-class StereoToolNode final : public StereoTool {
+class StereoToolNode final : public FaustGenerated::StereoTool {
  public:
   StereoToolNode(const std::string pType) {
     shared.type = pType;

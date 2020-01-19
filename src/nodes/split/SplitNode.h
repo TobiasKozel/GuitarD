@@ -1,7 +1,7 @@
 #pragma once
 #include "Split.h"
 
-class SplitNode final : public Split {
+class SplitNode final : public FaustGenerated::Split {
 public:
   SplitNode(const std::string pType) {
     shared.type = pType;

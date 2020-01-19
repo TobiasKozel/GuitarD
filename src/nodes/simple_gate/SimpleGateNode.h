@@ -1,7 +1,7 @@
 #pragma once
 #include "SimpleGate.h"
 
-class SimpleGateNode final : public SimpleGate {
+class SimpleGateNode final : public FaustGenerated::SimpleGate {
 public:
   SimpleGateNode(const std::string pType) {
     shared.type = pType;

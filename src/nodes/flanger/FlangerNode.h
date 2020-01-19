@@ -1,7 +1,7 @@
 #pragma once
 #include "Flanger.h"
 
-class FlangerNode final : public Flanger {
+class FlangerNode final : public FaustGenerated::Flanger {
 public:
   FlangerNode(const std::string pType) {
     shared.type = pType;

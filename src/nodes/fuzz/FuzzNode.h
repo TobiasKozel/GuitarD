@@ -1,7 +1,7 @@
 #pragma once
 #include "Fuzz.h"
 
-class FuzzNode final : public Fuzz {
+class FuzzNode final : public FaustGenerated::Fuzz {
 public:
   FuzzNode(const std::string pType) {
     shared.type = pType;

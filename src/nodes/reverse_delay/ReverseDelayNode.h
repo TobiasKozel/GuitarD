@@ -1,7 +1,7 @@
 #pragma once
 #include "ReverseDelay.h"
 
-class ReverseDelayNode final : public ReverseDelay {
+class ReverseDelayNode final : public FaustGenerated::ReverseDelay {
 public:
   ReverseDelayNode(const std::string pType) {
     shared.type = pType;

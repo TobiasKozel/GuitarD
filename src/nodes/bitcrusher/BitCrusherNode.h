@@ -1,6 +1,6 @@
 #pragma once
 #include "BitCrusher.h"
-class BitCrusherNode final : public BitCrusher {
+class BitCrusherNode final : public FaustGenerated::BitCrusher {
 public:
   explicit BitCrusherNode(const std::string pType) {
     shared.width = 250;
