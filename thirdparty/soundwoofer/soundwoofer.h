@@ -98,8 +98,9 @@ private:
 #else
     "/";
 #endif
-  const std::string BACKEND_URL = "svenssj.tech";
-  // const std::string BACKEND_URL = "localhost";
+  // const std::string BACKEND_URL = "svenssj.tech";
+  const std::string API_VERSION = "0.1";
+  const std::string BACKEND_URL = "localhost";
   const int BACKEND_PORT = 5000;
   bool mUseIrCache = true;
   std::string mPluginName = ""; // Plugin name used to label and filter presets by
@@ -138,7 +139,7 @@ private:
   bool mThreadRunning = false;
 
   SoundWoofer() {
-    int i = 0;
+    // TODO seems like the object will be destroyed once even though it's a singleton
   }
 public:
 
@@ -150,6 +151,7 @@ public:
    * Sets the location for data like caches etc
    */
   Status setHomeDirectory(std::string path) {
+    if (mPluginName.empty()) { return PLUGIN_NAME_NOT_SET; }
     path += PATH_SEPERATOR + mPluginName + PATH_SEPERATOR;
     mHomeDirectory = path;
     mPresetCacheDirectory = path + "presets" + PATH_SEPERATOR;
@@ -168,7 +170,7 @@ public:
   Status fetchIRs() {
     std::string data = httpGet("/Impulse");
     if (data.empty()) { return SERVER_ERROR; }
-    clearCachedIRs();
+    flushIRs();
     mIRlist = parseIRs(data);
     //data = httpGet("/Rig");
     //if (data.empty()) { return SERVER_ERROR; }
@@ -177,9 +179,6 @@ public:
     // TODO assign them to the cabs an mics
   }
 
-  /**
-   * Async version fetchIRs
-   */
   Status fetchIRs(Callback callback) {
     startAsync([&]() {
       return this->fetchIRs();
@@ -198,9 +197,6 @@ public:
     return SUCCESS;
   }
 
-  /**
-   * Async version of fetchpresets
-   */
   Status fetchPresets(Callback callback) {
     startAsync([&]() {
       return this->fetchPresets();
@@ -234,9 +230,6 @@ public:
     return httpPost("/Preset", serialized.c_str(), serialized.size());
   }
 
-  /**
-   * Async version of sendPreset
-   */
   Status sendPreset(SWPreset& preset, Callback callback) {
     startAsync([&]() {
       return sendPreset(preset);
@@ -312,9 +305,9 @@ public:
   }
 
   /**
-   * Clears all the float buffers containing the IRs
+   * Will clear out all IRs currently in ram
    */
-  void clearCachedIRs() {
+  void flushIRs() {
     for (auto& i : mIRlist) {
       if (i.samples != nullptr) {
         for (int c = 0; c < i.channels; c++) {
@@ -324,6 +317,13 @@ public:
         i.samples = nullptr;
       }
     }
+  }
+
+  /**
+   * Will clear out the disk cached IRs
+   */
+  void clearIRCache() {
+    // TODO
   }
 
   /**
@@ -351,7 +351,7 @@ public:
   }
 
   virtual ~SoundWoofer() {
-    clearCachedIRs();
+    flushIRs();
     if (mThread.joinable()) {
       mThread.join();
     }
