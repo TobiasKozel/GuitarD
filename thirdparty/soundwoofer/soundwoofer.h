@@ -1,24 +1,32 @@
 #pragma once
 
 #ifndef SOUNDWOOFER_CUSTOM_JSON
-#include "json.hpp"
+  #include "json.hpp"
 #endif
 
-#ifndef SOUNDWOOFER_CUSTOM_HTTP
-#define CPPHTTPLIB_OPENSSL_SUPPORT
-#include "httplib.h"
+#ifndef SOUNDWOOFER_NO_API
+  #ifndef SOUNDWOOFER_CUSTOM_HTTP
+    // #define CPPHTTPLIB_OPENSSL_SUPPORT
+    #include "httplib.h"
+  #endif
 #endif
-
 #ifndef SOUNDWOOFER_CUSTOM_WAVE
-#define DR_WAV_IMPLEMENTATION
-#include "dr_wav.h"
+  #define DR_WAV_IMPLEMENTATION
+  #include "dr_wav.h"
 #endif
+
+#ifdef _WIN32
+#include <sys/stat.h>
+#endif
+#include <fstream>
 
 class SoundWoofer {
 public:
   enum Status {
     SUCCESS = 0,
-    ASYNC,
+    ASYNC, // Not an error, just signals the function will run in another thread
+    NOT_CACHED,
+    GENERIC_ERROR,
     SERVER_ERROR,
     PLUGIN_NAME_NOT_SET,
     WAV_ERROR,
@@ -69,6 +77,8 @@ public:
     std::string id;
     std::string plugin;
     std::string data;
+    std::string version;
+    bool local = true;
   };
 
   typedef std::vector<SWImpulse> SWImpulses;
@@ -82,10 +92,20 @@ public:
 
 
 private:
-  //const std::string BACKEND_URL = "svenssj.tech";
-  const std::string BACKEND_URL = "localhost";
+  const std::string PATH_SEPERATOR =
+#ifdef _WIN32
+    "\\";
+#else
+    "/";
+#endif
+  const std::string BACKEND_URL = "svenssj.tech";
+  // const std::string BACKEND_URL = "localhost";
   const int BACKEND_PORT = 5000;
+  bool mUseIrCache = true;
   std::string mPluginName = ""; // Plugin name used to label and filter presets by
+  std::string mHomeDirectory; // Directory for this plugin
+  std::string mIrCacheDirectory; // Directory for caching online IRs
+  std::string mPresetCacheDirectory; // Directory for caching online IRs
 
   SWImpulses mIRlist;
   SWRigs mCabList;
@@ -124,6 +144,21 @@ public:
 
   void setPluginName(const std::string &name) {
     mPluginName = name;
+  }
+
+  /**
+   * Sets the location for data like caches etc
+   */
+  Status setHomeDirectory(std::string path) {
+    path += PATH_SEPERATOR + mPluginName + PATH_SEPERATOR;
+    mHomeDirectory = path;
+    mPresetCacheDirectory = path + "presets" + PATH_SEPERATOR;
+    mIrCacheDirectory = path + "ir_cache" + PATH_SEPERATOR;
+    bool ok = true;
+    ok = createFolder(path.c_str()) != SUCCESS ? false : ok;
+    ok = createFolder(mPresetCacheDirectory.c_str()) != SUCCESS ? false : ok;
+    ok = createFolder(mIrCacheDirectory.c_str()) != SUCCESS ? false : ok;
+    return ok ? SUCCESS : GENERIC_ERROR;
   }
 
   /**
@@ -209,41 +244,52 @@ public:
     return ASYNC;
   }
 
-  Status downloadIR(std::string id) {
+  Status loadIR(std::string id) {
     for (auto &i : mIRlist) {
       if (id == i.id) {
-        return downloadIR(i);
+        return loadIR(i);
       }
     }
-    return SERVER_ERROR;
+    return GENERIC_ERROR;
   }
 
   /**
    * Download and decode a specific IR
+   * If it's local IR or cached, it will skip the download
    * The decoded IR will be in SWImpulse::samples
+   * Will block, use a lambda as a callback for async
    */
-  Status downloadIR(SWImpulse& ir) {
-    if (ir.samples != nullptr) { return SUCCESS; }
-    std::string result = httpGet("/File/Download/" + ir.file);
+  Status loadIR(SWImpulse& ir) {
+    if (ir.samples != nullptr) { return SUCCESS; } // already in ram
+    Status load = GENERIC_ERROR;
+    if (mUseIrCache) { // Hit the cache first
+      load = loadWave(ir);
+      if (load == SUCCESS) { return SUCCESS; }
+    }
+    const std::string result = httpGet("/File/Download/" + ir.file); // fetch it from the server
     if (result.empty()) { return SERVER_ERROR; }
-    return loadWave(ir, result.c_str(), result.size());
+    load = loadWave(ir, result.c_str(), result.size());
+    if (load == SUCCESS && mUseIrCache) {
+      writeFile((mIrCacheDirectory + ir.id).c_str(), result.c_str(), result.size());
+    }
+    return load;
   }
 
-  Status downloadIR(std::string id, Callback callback) {
+  Status loadIR(std::string id, Callback callback) {
     for (auto& i : mIRlist) {
       if (id == i.id) {
-        return downloadIR(i, callback);
+        return loadIR(i, callback);
       }
     }
-    return SERVER_ERROR;
+    return GENERIC_ERROR;
   }
 
   /**
    * Async version of downloadIR
    */
-  Status downloadIR(SWImpulse& ir, Callback callback) {
+  Status loadIR(SWImpulse& ir, Callback callback) {
     startAsync([&]() {
-      return downloadIR(ir);
+      return loadIR(ir);
     }, callback);
     return ASYNC;
   }
@@ -479,11 +525,19 @@ private:
   /**
    * Will load the wav file to a float buffer in the SWImpulse struct
    */
-  virtual Status loadWave(SWImpulse &ir, const char* waveData, const size_t length) {
+  virtual Status loadWave(SWImpulse &ir, const char* waveData = nullptr, const size_t length = 0) {
 #ifndef SOUNDWOOFER_CUSTOM_WAVE
     drwav wav;
-    if (!drwav_init_memory(&wav, waveData, length, nullptr)) {
-      return WAV_ERROR;
+    if (waveData != nullptr) {
+      if (!drwav_init_memory(&wav, waveData, length, nullptr)) {
+        return WAV_ERROR;
+      }
+    }
+    else {
+      const std::string cachedPath = mIrCacheDirectory + ir.id;
+      if (!drwav_init_file(&wav, cachedPath.c_str(), nullptr)) {
+        return NOT_CACHED;
+      }
     }
 
     // interleaved buffer
@@ -527,5 +581,38 @@ private:
     std::string ret;
     ret.append(out, UUIDLength);
     return ret;
+  }
+
+  /**
+   * Creates a directory
+   * Returns success if the folder was created or already existing
+   */
+  static Status createFolder(const char* path) {
+#ifdef _WIN32
+    const bool ok = CreateDirectory(path, nullptr);
+    if (!ok) {
+      if (GetLastError() != ERROR_ALREADY_EXISTS) {
+        return GENERIC_ERROR; // Probably permission, locked file etc
+      }
+    }
+    return SUCCESS;
+#else 
+    mode_t process_mask = umask(0);
+    int result_code = mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO);
+    umask(process_mask);
+    return !result_code ? SUCCESS : GENERIC_ERROR;
+#endif
+  }
+
+  static Status writeFile(const char* path, const char* data, size_t length) {
+    try {
+      auto file = std::fstream(path, std::ios::out | std::ios::binary);
+      file.write(data, length);
+      file.close();
+      return SUCCESS;
+    }
+    catch (...) {
+      return GENERIC_ERROR;
+    }
   }
 };
