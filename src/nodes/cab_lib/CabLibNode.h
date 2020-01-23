@@ -120,11 +120,11 @@ public:
 
   void createBuffers() override {
     Node::createBuffers();
-    mConvolver = new WrappedConvolver(mSampleRate, mMaxBuffer);
-    mConvolver2 = new WrappedConvolver(mSampleRate, mMaxBuffer);
+    mConvolver = new WrappedConvolver(mSampleRate, shared.maxBlockSize);
+    mConvolver2 = new WrappedConvolver(mSampleRate, shared.maxBlockSize);
     mBlendBuffer = new sample * [mChannelCount];
     for (int c = 0; c < mChannelCount; c++) {
-      mBlendBuffer[c] = new sample[mMaxBuffer];
+      mBlendBuffer[c] = new sample[shared.maxBlockSize];
     }
     mConvolver->resampleAndLoadIR(mCabShared.loadedIr);
   }

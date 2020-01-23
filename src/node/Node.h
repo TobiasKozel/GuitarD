@@ -25,7 +25,6 @@ public:
   
   int mSampleRate = 0;
   int mChannelCount = 0;
-  int mMaxBuffer = 0;
   int mLastBlockSize = 0;
 
   sample mByPassed = 0;
@@ -35,15 +34,15 @@ public:
    * This is basically a delayed constructor with the only disadvantage: derived methods have to have the same parameters
    * The derived class will call this with the desired parameters, except for the samplerate
    */
-  virtual void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000,
-                     const int pMaxBuffer = MAX_BUFFER, const int pChannles = 2,
+  virtual void setup(MessageBus::Bus* pBus, const int pSamplerate,
+                     const int pMaxBuffer, const int pChannles = 2,
                      const int pInputs = 1, const int pOutputs = 1)
   {
     shared.bus = pBus;
     shared.node = this;
     mSampleRate = 0;
     mChannelCount = 0;
-    mMaxBuffer = pMaxBuffer;
+    shared.maxBlockSize = pMaxBuffer;
     shared.inputCount = pInputs;
     shared.outputCount = pOutputs;
     mIsProcessed = false;
@@ -75,7 +74,7 @@ public:
     for (int i = 0; i < shared.outputCount; i++) {
       mBuffersOut[i] = new sample * [mChannelCount];
       for (int c = 0; c < mChannelCount; c++) {
-        mBuffersOut[i][c] = new sample[mMaxBuffer];
+        mBuffersOut[i][c] = new sample[shared.maxBlockSize];
       }
     }
   }
@@ -136,7 +135,7 @@ public:
   void outputSilence() {
     for (int o = 0; o < shared.outputCount; o++) {
       for (int c = 0; c < mChannelCount; c++) {
-        for (int i = 0; i < mMaxBuffer; i++) {
+        for (int i = 0; i < shared.maxBlockSize; i++) {
           mBuffersOut[o][c][i] = 0;
         }
       }
@@ -154,7 +153,7 @@ public:
     sample** in = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
     for (int o = 0; o < shared.outputCount; o++) {
       for (int c = 0; c < mChannelCount; c++) {
-        for (int i = 0; i < mMaxBuffer; i++) {
+        for (int i = 0; i < shared.maxBlockSize; i++) {
           mBuffersOut[o][c][i] = in[c][i];
         }
       }
@@ -246,11 +245,11 @@ public:
   /**
    * Called from the graph to either signal a change in samplerate/channel count or transport
    */
-  virtual void OnReset(const int pSampleRate, const int pChannels) {
-    if (pSampleRate != mSampleRate) {
+  virtual void OnReset(const int pSampleRate, const int pChannels, const bool force = false) {
+    if (pSampleRate != mSampleRate || force) {
       OnSamplerateChanged(pSampleRate);
     }
-    if (pChannels != mChannelCount) {
+    if (pChannels != mChannelCount || force) {
       OnChannelsChanged(pChannels);
     }
   }

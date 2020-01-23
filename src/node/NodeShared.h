@@ -16,6 +16,7 @@ struct NodeShared {
   float X;
   float Y;
   float rotation = 0;
+  int maxBlockSize = 0;
 
   int parameterCount = 0;
   ParameterCoupling parameters[MAX_NODE_PARAMETERS];

@@ -76,7 +76,7 @@ namespace Serializer {
   }
 
   inline void deserialize(
-    nlohmann::json& serialized, WDL_PtrList<Node>& nodes, Node* output, Node* input, int sampleRate,
+    nlohmann::json& serialized, WDL_PtrList<Node>& nodes, Node* output, Node* input, int sampleRate, int maxBuffer,
     ParameterManager* paramManager, MessageBus::Bus* pBus
   ) {
     
@@ -103,7 +103,7 @@ namespace Serializer {
       if (node == nullptr) { continue; }
       node->shared.X = sNode["position"][0];
       node->shared.Y = sNode["position"][1];
-      node->setup(pBus, sampleRate);
+      node->setup(pBus, sampleRate, maxBuffer);
       if (expectedIndex != sNode["idx"]) {
         WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
       }

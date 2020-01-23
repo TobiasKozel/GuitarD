@@ -31,6 +31,7 @@ namespace MessageBus {
     GraphStatsChanged, // Fired from the audio thread once a graph did not finish processing fot the first time
     LoadPresetFromString, // Takes a const char*
     SavePresetToSring, // Takes a WDL_String* were the result will be in
+    MaxBlockSizeEvent, // Handles both setting and getting the maxBufferSize
     TOTAL_MESSAGE_IDS // Keep this one at the bottom to count all events
   };
 }

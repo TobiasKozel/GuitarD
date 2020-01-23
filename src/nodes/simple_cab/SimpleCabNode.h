@@ -170,7 +170,7 @@ public:
 
   void createBuffers() override {
     Node::createBuffers();
-    mConvolver = new WrappedConvolver(mSampleRate, mMaxBuffer);
+    mConvolver = new WrappedConvolver(mSampleRate, shared.maxBlockSize);
     mConvolver->resampleAndLoadIR(mCabShared.loadedIr);
   }
 

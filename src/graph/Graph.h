@@ -35,6 +35,7 @@ class Graph {
   MessageBus::Subscription<AutomationAttachRequest> mAutomationRequest;
   MessageBus::Subscription<const char*> mLoadPresetEvent;
   MessageBus::Subscription<WDL_String*> mSavePresetEvent;
+  MessageBus::Subscription<BlockSizeEvent*> mMaxBlockSizeEvent;
 
   IGraphics* mGraphics = nullptr;
 
@@ -47,6 +48,9 @@ class Graph {
    * Mutex to keep changes to the graph like adding/removing or rerouting from crashing
    */
   WDL_Mutex mAudioMutex;
+  /**
+   * Acts as a semaphore since the mAudioMutex only needs to be locked once to stop the audio thread
+   */
   int mPauseAudio = 0;
 
   /**
@@ -71,6 +75,9 @@ class Graph {
 
   int mSampleRate = 0;
 
+  /**
+   * The max blockSize which can be used to minimize round trip delay when having cycles in the graph
+   */
   int mMaxBlockSize = MAX_BUFFER;
 
   /**
@@ -107,11 +114,11 @@ public:
     WDL_String path;
     UserHomePath(path);
     sw.setHomeDirectory(path.Get());
-    SoundWoofer::Status status;
-    status = sw.fetchIRs();
-    status = sw.loadIR(sw.getIRs().at(0));
-    sw.flushIRs();
-    status = sw.loadIR(sw.getIRs().at(0));
+    //SoundWoofer::Status status;
+    //status = sw.fetchIRs();
+    //status = sw.loadIR(sw.getIRs().at(0));
+    //sw.flushIRs();
+    //status = sw.loadIR(sw.getIRs().at(0));
     //status = sw.sendPreset("presetname", "somedata2", 9);
     //status = sw.fetchPresets();
 
@@ -204,6 +211,15 @@ public:
     mSavePresetEvent.subscribe(mBus, MessageBus::SavePresetToSring, [&](WDL_String* data) {
       this->serialize(*data);
     });
+
+    mMaxBlockSizeEvent.subscribe(mBus, MessageBus::MaxBlockSizeEvent, [&](BlockSizeEvent* e) {
+      if (e->set) {
+        this->setBlockSize(e->blockSize);
+      }
+      else {
+        e->blockSize = this->mMaxBlockSize;
+      }
+    });
   }
 
   void testadd() {
@@ -244,6 +260,18 @@ public:
         mNodes.Get(i)->OnTransport();
       }
     }
+  }
+
+  void setBlockSize(const int size) {
+    if (size == mMaxBlockSize || size > MAX_BUFFER) { return; }
+    lockAudioThread();
+    mMaxBlockSize = size;
+    for (int i = 0; i < mNodes.GetSize(); i++) {
+      Node* n = mNodes.Get(i);
+      n->shared.maxBlockSize = size;
+      n->OnReset(mSampleRate, mChannelCount, true);
+    }
+    unlockAudioThread();
   }
 
   /**
@@ -547,7 +575,7 @@ public:
   void addNode(Node* node, Node* pInput = nullptr, const float x = 0, const float y = 0, const int outputIndex = 0, const int inputIndex = 0, Node* clone = nullptr) {
     node->shared.X = x;
     node->shared.Y = y;
-    node->setup(mBus, mSampleRate);
+    node->setup(mBus, mSampleRate, mMaxBlockSize);
     if (clone != nullptr) {
       node->copyState(clone);
     }
@@ -670,6 +698,7 @@ public:
       json["scale"] = mWindowScale;
       json["width"] = mWindowWidth;
       json["height"] = mWindowHeight;
+      json["maxBlockSize"] = mMaxBlockSize;
       Serializer::serialize(json, mNodes, mInputNode, mOutputNode);
     }
     catch (...) {
@@ -703,7 +732,10 @@ public:
         // mWindowHeight = json["height"];
       }
       lockAudioThread();
-      Serializer::deserialize(json, mNodes, mOutputNode, mInputNode, mSampleRate, &mParamManager, mBus);
+      if (json.contains("maxBlockSize")) {
+        mMaxBlockSize = json["maxBlockSize"];
+      }
+      Serializer::deserialize(json, mNodes, mOutputNode, mInputNode, mSampleRate, mMaxBlockSize, &mParamManager, mBus);
       if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
         for (int i = 0; i < mNodes.GetSize(); i++) {
           mNodes.Get(i)->setupUi(mGraphics);
@@ -727,8 +759,12 @@ private:
         mSliceBuffer[1] = nullptr;
       }
     }
-    mSliceBuffer[0] = new sample * [channelCount];
-    mSliceBuffer[1] = new sample * [channelCount];
+    mSliceBuffer[0] = new sample *[channelCount];
+    mSliceBuffer[1] = new sample *[channelCount];
+    /**
+     * There's no need to create a buffer inside since it will use the pointer from the
+     * scratch buffer offset by the sub-block position
+     */
   }
 
   void lockAudioThread() {
@@ -753,17 +789,6 @@ private:
     FormatGraph::arrangeBranch(mInputNode, Coord2D { mInputNode->shared.Y, mInputNode->shared.X });
     centerGraph();
   }
-
-  bool hasFeedBackNode() const {
-    for (int i = 0; i < mNodes.GetSize(); i++) {
-      if (mNodes.Get(i)->shared.type == "FeedbackNode") {
-        return true;
-      }
-    }
-    return false;
-  }
-
-
 
   /**
    * Test Setups

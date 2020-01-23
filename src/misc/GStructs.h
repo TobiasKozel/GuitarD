@@ -63,3 +63,8 @@ struct IRBundle {
   // This is only set if it's a user IR
   WDL_String path;
 };
+
+struct BlockSizeEvent {
+  int blockSize;
+  bool set = false;
+};

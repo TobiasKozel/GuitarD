@@ -129,8 +129,8 @@ public:
     // this will be used to do processing on a disconnected node
     emptyBuffer = new sample * [mChannelCount];
     for (int c = 0; c < mChannelCount; c++) {
-      emptyBuffer[c] = new sample[mMaxBuffer];
-      for (int i = 0; i < mMaxBuffer; i++) {
+      emptyBuffer[c] = new sample[shared.maxBlockSize];
+      for (int i = 0; i < shared.maxBlockSize; i++) {
         emptyBuffer[c][i] = 0;
       }
     }

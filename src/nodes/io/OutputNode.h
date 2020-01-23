@@ -33,7 +33,7 @@ public:
 
   void CopyOut(sample** out, int nFrames) {
     NodeSocket* in = shared.socketsIn[0]->mConnectedTo[0];
-    if (mMaxBuffer < nFrames || in == nullptr || !in->mParentNode->mIsProcessed) {
+    if (shared.maxBlockSize < nFrames || in == nullptr || !in->mParentNode->mIsProcessed) {
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
           // output silence
@@ -52,7 +52,7 @@ public:
     mIsProcessed = true;
   }
 
-  void OnReset(int p_sampleRate, int p_channels) override {
+  void OnReset(int p_sampleRate, int p_channels, bool force = false) override {
     mChannelCount = p_channels;
   }
 
