@@ -32,7 +32,7 @@ class WrappedConvolver {
 
   bool mIRLoaded = false;
 
-  IRBundle mLoadedIr;
+  // IRBundle* mLoadedIr = nullptr;
 public:
 
   bool mStereo = false;
@@ -57,7 +57,6 @@ public:
   }
 
   ~WrappedConvolver() {
-    clearLoadedIR();
     for (int c = 0; c < CHANNEL_COUNT; c++) {
       delete mConvolvers[c];
     }
@@ -73,58 +72,52 @@ public:
 #endif
   }
 
-  void clearLoadedIR() {
-    if (mLoadedIr.path.GetLength() > 0 && mLoadedIr.samples != nullptr) {
-      // Check if the previous IR is custom and clear out the allocated data
-      for (int c = 0; c < mLoadedIr.channelCount; c++) {
-        delete[] mLoadedIr.samples[c];
-      }
-      delete[] mLoadedIr.samples;
-      mLoadedIr.samples = nullptr;
-    }
-  }
-
-  void resampleAndLoadIR(IRBundle& b) {
+  void resampleAndLoadIR(IRBundle* b) {
     mIRLoaded = false;
-    clearLoadedIR();
-    if (b.path.GetLength() > 0 && !loadWave(b)) {
+    unloadWave(b);
+    // clearLoadedIR();
+    if (b->path.GetLength() > 0 && !loadWave(b)) {
       WDBGMSG("Failed to load IR!\n");
       return;
     }
-    for (int c = 0; c < b.channelCount; c++) {
+    for (int c = 0; c < b->channelCount; c++) {
       WDL_Resampler resampler;
       resampler.SetMode(true, 0, true);
       resampler.SetFilterParms();
       resampler.SetFeedMode(true);
-      resampler.SetRates(b.sampleRate, mSampleRate);
+      resampler.SetRates(b->sampleRate, mSampleRate);
       WDL_RESAMPLE_TYPE* inBuffer;
-      const int inSamples = resampler.ResamplePrepare(b.sampleCount, 1, &inBuffer);
-      for (int i = 0; i < b.sampleCount; i++) {
+      const int inSamples = resampler.ResamplePrepare(b->sampleCount, 1, &inBuffer);
+      for (int i = 0; i < b->sampleCount; i++) {
         // Adjust the volume, since higher samplerates result in louder outputs
-        inBuffer[i] = b.samples[c][i] * (b.sampleRate / static_cast<float>(mSampleRate)) * 0.2f;
+        inBuffer[i] = b->samples[c][i] * (b->sampleRate / static_cast<float>(mSampleRate)) * 0.2f;
       }
-      const int newSize = ceil(b.sampleCount * ((mSampleRate / static_cast<float>(b.sampleRate))));
+      const int newSize = ceil(b->sampleCount * ((mSampleRate / static_cast<float>(b->sampleRate))));
       WDL_RESAMPLE_TYPE* outBuffer = new WDL_RESAMPLE_TYPE[newSize];
-      const int outSamples = resampler.ResampleOut(outBuffer, inSamples, b.sampleCount, 1);
-      if (b.channelCount == 1) {
+      const int outSamples = resampler.ResampleOut(outBuffer, inSamples, b->sampleCount, 1);
+      if (b->channelCount == 1) {
         for (int ch = 0; ch < CHANNEL_COUNT; ch++) {
           mConvolvers[ch]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, outBuffer, outSamples);
         }
       }
-      else if (b.channelCount == CHANNEL_COUNT) {
+      else if (b->channelCount == CHANNEL_COUNT) {
         mConvolvers[c]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, outBuffer, outSamples);
       }
       delete[] outBuffer;
     }
-    mLoadedIr = b;
     mIRLoaded = true;
   }
 
-  static bool loadWave(IRBundle& b) {
-    if (b.samples != nullptr) { return true; } // Already loaded samples
+  /**
+   * Only takes a pointer to the ir object to load since it won't really be needed for dsp
+   * It will put the loaded wave in the samples buffer of the ir bundle provided
+   * Call unloadWave to get rid of the allocated buffer
+   */
+  static bool loadWave(IRBundle* b) {
+    if (b->samples != nullptr) { return true; } // Already loaded samples
     drwav wav;
     // load the file
-    if (!drwav_init_file(&wav, b.path.Get(), nullptr)) {
+    if (!drwav_init_file(&wav, b->path.Get(), nullptr)) {
       return false;
     }
 
@@ -138,22 +131,36 @@ public:
       // don't load anything longer than 10 seconds or without samples
       assert(false);
     }
-    b.sampleRate = wav.sampleRate;
-    b.channelCount = wav.channels;
-    b.sampleCount = samplesRead;
-    b.samples = new float* [b.channelCount];
+    b->sampleRate = wav.sampleRate;
+    b->channelCount = wav.channels;
+    b->sampleCount = samplesRead;
+    b->samples = new float* [b->channelCount];
     // do some deinterleaving 
-    for (int c = 0; c < b.channelCount; c++) {
-      b.samples[c] = new float[b.sampleCount];
+    for (int c = 0; c < b->channelCount; c++) {
+      b->samples[c] = new float[b->sampleCount];
     }
-    for (int s = 0; s < samplesRead * b.channelCount; s++) {
-      int channel = s % b.channelCount;
-      size_t sample = s / b.channelCount;
-      b.samples[channel][sample] = pSampleData[s];
+    for (int s = 0; s < samplesRead * b->channelCount; s++) {
+      int channel = s % b->channelCount;
+      size_t sample = s / b->channelCount;
+      b->samples[channel][sample] = pSampleData[s];
     }
     free(pSampleData);
     drwav_uninit(&wav);
     return true;
+  }
+
+  /**
+   * Will clear the buffer allocated in loadWave
+   */
+  static void unloadWave(IRBundle* b) {
+    if (b->path.GetLength() > 0 && b->samples != nullptr) {
+      // Check if the previous IR is custom and clear out the allocated data
+      for (int c = 0; c < b->channelCount; c++) {
+        delete[] b->samples[c];
+      }
+      delete[] b->samples;
+      b->samples = nullptr;
+    }
   }
 
   void ProcessBlock(iplug::sample** in, iplug::sample** out, const int nFrames) {

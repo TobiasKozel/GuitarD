@@ -118,7 +118,7 @@ class SimpleCabNode final : public Node {
   
   CabNodeSharedData mCabShared = { [&](IRBundle ir) {
     this->mCabShared.loadedIr = ir;
-    this->mConvolver->resampleAndLoadIR(ir);
+    this->mConvolver->resampleAndLoadIR(&ir);
   }, InternalIRs[0], false };
 
 public:
@@ -161,7 +161,7 @@ public:
         }
       }
       mCabShared.loadedIr = load;
-      mConvolver->resampleAndLoadIR(load);
+      mConvolver->resampleAndLoadIR(&load);
     }
     catch (...) {
       WDBGMSG("Failed to load Cab node data!\n");
@@ -171,10 +171,11 @@ public:
   void createBuffers() override {
     Node::createBuffers();
     mConvolver = new WrappedConvolver(mSampleRate, shared.maxBlockSize);
-    mConvolver->resampleAndLoadIR(mCabShared.loadedIr);
+    mConvolver->resampleAndLoadIR(&mCabShared.loadedIr);
   }
 
   void deleteBuffers() override {
+    mConvolver->unloadWave(&mCabShared.loadedIr);
     Node::deleteBuffers();
     delete mConvolver;
     mConvolver = nullptr;

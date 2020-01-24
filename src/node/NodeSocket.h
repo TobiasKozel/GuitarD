@@ -94,10 +94,9 @@ struct NodeSocketIn : public NodeSocket {
 };
 
 struct NodeSocketOut : public NodeSocket {
-  NodeSocketOut(Node* parent, int index, iplug::sample** buffer) {
+  NodeSocketOut(Node* parent, int index) {
     mParentNode = parent;
     mIndex = index;
-    mParentBuffer = buffer;
     mIsInput = false;
   }
 

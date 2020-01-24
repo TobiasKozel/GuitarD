@@ -47,16 +47,19 @@ public:
     shared.outputCount = pOutputs;
     mIsProcessed = false;
     mUiReady = false;
-    OnReset(pSamplerate, pChannles);
-
     // Setup the sockets for the node connections
     for (int i = 0; i < shared.inputCount; i++) {
       shared.socketsIn[i] = new NodeSocketIn(this, i);
     }
 
     for (int i = 0; i < shared.outputCount; i++) {
-      shared.socketsOut[i] = new NodeSocketOut(this, i, mBuffersOut[i]);
+      shared.socketsOut[i] = new NodeSocketOut(this, i);
     }
+
+    // This will create all the needed buffers
+    OnReset(pSamplerate, pChannles);
+
+
 
     positionSockets();
   }
@@ -76,6 +79,7 @@ public:
       for (int c = 0; c < mChannelCount; c++) {
         mBuffersOut[i][c] = new sample[shared.maxBlockSize];
       }
+      shared.socketsOut[i]->mParentBuffer = mBuffersOut[i]; // Need to inform the outputs about the buffer
     }
   }
 

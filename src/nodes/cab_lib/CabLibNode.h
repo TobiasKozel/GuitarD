@@ -83,7 +83,7 @@ class CabLibNode final : public Node {
     if (strncmp(mCabShared.loadedIr.path.Get(), ir.path.Get(), len) != 0) {
       // don't load if the Ir is the same;
       this->mCabShared.loadedIr = ir;
-      this->mConvolver2->resampleAndLoadIR(ir);
+      this->mConvolver2->resampleAndLoadIR(&ir);
       this->mBlendPos = 0;
       this->mIsBlending = true;
     }
@@ -111,7 +111,7 @@ public:
       load.path.Set(path.c_str());
       load.name.Set(load.path.get_filepart());
       mCabShared.loadedIr = load;
-      mConvolver->resampleAndLoadIR(load);
+      mConvolver->resampleAndLoadIR(&load);
     }
     catch (...) {
       WDBGMSG("Failed to load Cab node data!\n");
@@ -126,10 +126,11 @@ public:
     for (int c = 0; c < mChannelCount; c++) {
       mBlendBuffer[c] = new sample[shared.maxBlockSize];
     }
-    mConvolver->resampleAndLoadIR(mCabShared.loadedIr);
+    mConvolver->resampleAndLoadIR(&mCabShared.loadedIr);
   }
 
   void deleteBuffers() override {
+    mConvolver->unloadWave(&mCabShared.loadedIr);
     Node::deleteBuffers();
     delete mConvolver;
     delete mConvolver2;
