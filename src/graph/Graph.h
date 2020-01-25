@@ -144,7 +144,7 @@ public:
 
     mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo &info) {
       MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
-      this->addNode(info.constructor(), nullptr,300, 300);
+      this->addNode(NodeList::createNode(info.name), nullptr,300, 300);
     });
 
     mNodeCloneEvent.subscribe(mBus, MessageBus::CloneNode, [&](Node* node) {

@@ -11,4 +11,10 @@ public:
     Node::setupUi(pGrahics);
     mUi->setColor(Theme::Categories::DISTORTION);
   }
+
+  std::string getLicense() override {
+    std::string l = "\nFaust code from Guitarix, probably needs to be replaced/removed";
+    l += Fuzz::getLicense();
+    return l;
+  }
 };

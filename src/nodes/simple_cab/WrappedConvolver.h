@@ -261,4 +261,16 @@ public:
     }
 #endif
   }
+
+  static std::string getLicense() {
+    std::string l = "Realtime Convolution by\n";
+    l += "https://github.com/HiFi-LoFi\n";
+    l += "https://github.com/HiFi-LoFi/FFTConvolver\n";
+    l += "MIT License\n\n";
+    l += "Wave file reader \"dr_wav\"";
+    l += "https://github.com/mackron\n";
+    l += "https://github.com/mackron/dr_libs/blob/master/dr_wav.h\n";
+    l += "Public domain";
+    return l;
+  }
 };

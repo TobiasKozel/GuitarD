@@ -8,9 +8,14 @@
 #include "src/node/Node.h"
 
 namespace FaustGenerated {
-
+  /**
+   * Passed to the generated faust code to gather the copyright info
+   */
   struct Meta {
-    virtual void declare(const char* key, const char* value) = 0;
+    std::string result = "\nDSP Code generated using Grame Faust\n";
+    void declare(const char* key, const char* value) {
+      result += std::string(key) + ": " + std::string(value) + "\n";
+    };
   };
 
   /**
@@ -77,6 +82,7 @@ namespace FaustGenerated {
     virtual int getNumOutputs() = 0;
     virtual void instanceConstants(int samplingFreq) = 0;
     virtual void instanceClear() = 0;
+    virtual void metadata(Meta* m) = 0;
 
     void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, const int pMaxBuffer = MAX_BUFFER, const int pChannels = 2, int pInputs = 1, int pOutputs = 1) override {
       Node::setup(pBus, pSamplerate, pMaxBuffer, pChannels, getNumInputs() / pChannels, getNumOutputs() / pChannels);
@@ -155,6 +161,15 @@ namespace FaustGenerated {
       }
       compute(nFrames, shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOutAlligned);
       mIsProcessed = true;
+    }
+
+    /**
+     * Retrieve the copyright info from the faust generated code
+     */
+    virtual std::string getLicense() override {
+      Meta m;
+      metadata(&m);
+      return m.result;
     }
   };
 

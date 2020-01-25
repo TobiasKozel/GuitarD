@@ -23,6 +23,10 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+/**
+ * The dsp code was slightly altered so it integrates in the node base class
+ */
+
 class PowerSagNode final : public Node {
   sample mIntensity = 0;
   sample mDepth = 0.3;
@@ -198,5 +202,12 @@ public:
     Node::setupUi(pGrahics);
     mUi->setColor(Theme::Categories::DISTORTION);
   }
-};
 
+  std::string getLicense() override {
+    std::string l = "\nAll of the DSP Copyright(c) 2018 Chris Johnson\n";
+    l += "https://github.com/airwindows\n";
+    l += "https://github.com/airwindows/airwindows/blob/master/plugins/WinVST/PowerSag/PowerSag.cpp\n";
+    l += "MIT License\nFrom the Airwindows plugin \"Powersag\"\n";
+    return l;
+  }
+};

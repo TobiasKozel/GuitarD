@@ -202,4 +202,11 @@ public:
     mUi->setUp();
     mUiReady = true;
   }
+
+  std::string getLicense() override {
+    std::string l = "\nDefault IRs provided by Soundwoofer\n";
+    l += "Public Domain\n\n";
+    l += WrappedConvolver::getLicense();
+    return l;
+  }
 };

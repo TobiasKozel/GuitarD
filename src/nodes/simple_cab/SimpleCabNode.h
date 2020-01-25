@@ -181,7 +181,7 @@ public:
     mConvolver = nullptr;
   }
 
-  virtual void OnSamplerateChanged(const int pSampleRate) override {
+  void OnSamplerateChanged(const int pSampleRate) override {
     deleteBuffers();
     mSampleRate = pSampleRate;
     createBuffers();
@@ -210,6 +210,9 @@ public:
     mUi->setColor(IColor(255, 150, 100, 100));
     mUi->setUp();
     mUiReady = true;
-    
+  }
+
+  std::string getLicense() override {
+    return WrappedConvolver::getLicense();
   }
 };

@@ -420,4 +420,11 @@ public:
       }
     }
   }
+
+  /**
+   * Function to retrieve the license/copyright info about the node
+   */
+  virtual std::string getLicense() {
+    return "Not set";
+  }
 };

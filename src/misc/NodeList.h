@@ -10,9 +10,14 @@ namespace NodeList {
 
   NodeMap nodelist;
 
+  /**
+   * All nodes except input and output will be constructed here
+   */
   inline Node* createNode(const std::string name) {
     if (nodelist.find(name) != nodelist.end()) {
-      return nodelist.at(name).constructor();
+      Node* n = nodelist.at(name).constructor();
+      WDBGMSG(n->getLicense().c_str());
+      return n;
     }
     return nullptr;
   }
