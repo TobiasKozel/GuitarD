@@ -93,6 +93,7 @@ public:
           delete mBuffersOut[i][c];
         }
         delete mBuffersOut[i];
+        shared.socketsOut[i]->mParentBuffer = nullptr;
       }
       delete mBuffersOut;
       mBuffersOut = nullptr;

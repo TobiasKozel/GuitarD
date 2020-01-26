@@ -117,12 +117,10 @@ namespace FaustGenerated {
     }
 
     void OnChannelsChanged(const int pChannels) override {
-      if (mBuffersOut != nullptr) {
-        WDBGMSG("Warning trying to change the channelcount on a faust node!\n");
+      if (pChannels != 2) {
+        WDBGMSG("Fuast code only works with 2 channels!");
       }
-      else {
-        Node::OnChannelsChanged(pChannels);
-      }
+      Node::OnChannelsChanged(pChannels);
     }
 
     void OnSamplerateChanged(const int pSamplerate) override {

@@ -15,6 +15,7 @@
 #include "src/misc/HistoryStack.h"
 #include "FormatGraph.h"
 #include "soundwoofer/soundwoofer.h"
+#include "src/nodes/feedback/FeedbackNode.h"
 
 /**
  * This is the "god object" which will handle all the nodes
@@ -216,9 +217,9 @@ public:
       if (e->set) {
         this->setBlockSize(e->blockSize);
       }
-      else {
-        e->blockSize = this->mMaxBlockSize;
-      }
+      //else {
+      //  e->blockSize = this->mMaxBlockSize;
+      //}
     });
   }
 
@@ -731,10 +732,10 @@ public:
         // mWindowWidth = json["width"]; // Probably no point in changing the window size since it's confusing
         // mWindowHeight = json["height"];
       }
-      lockAudioThread();
       if (json.contains("maxBlockSize")) {
         mMaxBlockSize = json["maxBlockSize"];
       }
+      lockAudioThread();
       Serializer::deserialize(json, mNodes, mOutputNode, mInputNode, mSampleRate, mMaxBlockSize, &mParamManager, mBus);
       if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
         for (int i = 0; i < mNodes.GetSize(); i++) {
@@ -742,6 +743,9 @@ public:
         }
         scaleUi();
       }
+      //if (json.contains("maxBlockSize")) {
+      //  setBlockSize(json["maxBlockSize"]);
+      //}
       unlockAudioThread();
     }
     catch (...) {

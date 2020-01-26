@@ -51,10 +51,6 @@ class FeedbackNode final : public Node {
   sample gain = 0.0;
   WDL_TypedCircBuf<sample> mPrevL;
   WDL_TypedCircBuf<sample> mPrevR;
-  /**
-   * This will change based on the global max buffer
-   */
-  int mMaxBuffer = MAX_BUFFER;
 
 public:
   FeedbackNode(const std::string pType) {
@@ -81,14 +77,14 @@ public:
 
   void createBuffers() override {
     Node::createBuffers();
-    mPrevL.SetSize(mMaxBuffer + 1); // This is needed or the ring buffer will
-    mPrevR.SetSize(mMaxBuffer + 1); // underflow for some reason
+    mPrevL.SetSize(shared.maxBlockSize + 1); // This is needed or the ring buffer will
+    mPrevR.SetSize(shared.maxBlockSize + 1); // underflow for some reason
   }
 
   void deleteBuffers() override {
     Node::deleteBuffers();
-    mPrevL.Reset();
-    mPrevR.Reset();
+    mPrevL.SetSize(0);
+    mPrevR.SetSize(0);
   }
 
 
@@ -97,7 +93,7 @@ public:
     if (mIsProcessed == false) {
       shared.parameters[1].update();
       sample val = ParameterCoupling::dbToLinear(gain);
-      if (mPrevL.NbInBuf() > mMaxBuffer) { // nFrames can never been larger than mMaxBuffer
+      if (mPrevL.NbInBuf() > shared.maxBlockSize) { // nFrames can never been larger than mMaxBuffer
         mPrevL.Get(mBuffersOut[0][0], nFrames);
         mPrevR.Get(mBuffersOut[0][1], nFrames);
         for (int i = 0; i < nFrames; i++) {
