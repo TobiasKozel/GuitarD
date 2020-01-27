@@ -6,7 +6,8 @@ class FeedbackNodeUi : public NodeUi {
   IVButtonControl* mBrowseButton = nullptr;
   MessageBus::Subscription<BlockSizeEvent*> mMaxBlockSizeEvent;
   IPopupMenu mMenu{ "Delay", {"1", "8", "16", "32", "64", "128", "256", "512"},
-    [&](int indexInMenu, IPopupMenu::Item* itemChosen) {
+    [&](IPopupMenu* pMenu) {
+    IPopupMenu::Item* itemChosen = pMenu->GetChosenItem();
     if (itemChosen) {
       const char* text = itemChosen->GetText();
       const int size = std::stoi(text);

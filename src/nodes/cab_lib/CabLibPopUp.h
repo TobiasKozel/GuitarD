@@ -333,7 +333,7 @@ public:
     }
   }
 
-  void OnDetach() override {
+  void OnDetached() override {
     for (int i = 0; i < 3; i++) {
       GetUI()->RemoveControl(mScrollView[i], true);
     }

@@ -63,7 +63,7 @@ public:
   void removeChild(IControl* child, const bool wantsDelete = false, bool skipResize = false) {
     const int index = mChildren.Find(child);
     if (index != -1) {
-      mChildren.Get(index)->OnDetach();
+      mChildren.Get(index)->OnDetached();
       mChildren.Delete(index, wantsDelete);
       if (!skipResize) {
         OnResize();

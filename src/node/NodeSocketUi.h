@@ -39,7 +39,7 @@ public:
     mRECT.R = mRECT.L + mDiameter;
     mRECT.B = mRECT.T + mDiameter;
     SetTargetAndDrawRECTs(mRECT);
-    mBlend = EBlend::Clobber;
+    mBlend = EBlend::Default;
 
     socket->callback = [&](bool doLock) {
       MessageBus::fireEvent(this->mBus, MessageBus::AwaitAudioMutex, doLock);

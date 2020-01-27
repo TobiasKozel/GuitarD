@@ -50,9 +50,9 @@ public:
     OnResize();
   }
 
-  void OnDetach() override {
+  void OnDetached() override {
     GetUI()->RemoveControl(&mScrollview, false);
-    IControl::OnDetach();
+    IControl::OnDetached();
   }
 
   void openGallery(const bool open = true) {

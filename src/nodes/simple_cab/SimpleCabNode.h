@@ -24,7 +24,8 @@ class SimpleCabNodeUi : public NodeUi {
   IText mBlocksizeText;
   IVButtonControl* mBrowseButton = nullptr;
   CabNodeSharedData* mCabShared = nullptr;
-  IPopupMenu mMenu{ "Choose IR", {"Clean", "Air", "From File"}, [&](int indexInMenu, IPopupMenu::Item* itemChosen) {
+  IPopupMenu mMenu{ "Choose IR", {"Clean", "Air", "From File"}, [&](IPopupMenu* pMenu) {
+    IPopupMenu::Item* itemChosen = pMenu->GetChosenItem();
     if (itemChosen) {
       const char* text = itemChosen->GetText();
       if (strncmp(text, "From File", 10) == 0) {

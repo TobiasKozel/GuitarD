@@ -58,7 +58,7 @@ public:
     mOutNode = pOutNode;
     mInNode = pInNode;
     mGraphics = g;
-    mBlend = EBlend::Clobber;
+    mBlend = EBlend::Default;
     
     mDisconnectAllEvent.subscribe(mBus, MessageBus::NodeDisconnectAll, [&](Node*) {
       this->mDirty = true;
