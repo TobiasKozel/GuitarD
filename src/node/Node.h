@@ -400,7 +400,6 @@ public:
    */
   virtual void cleanupUi(IGraphics* pGraphics) {
     if (mUi != nullptr) {
-      mUi->cleanUp();
       pGraphics->RemoveControl(mUi);
       mUi = nullptr;
     }

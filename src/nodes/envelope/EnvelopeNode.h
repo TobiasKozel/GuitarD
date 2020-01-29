@@ -25,9 +25,9 @@ public:
     shared->graphics->AttachControl(mPicker);
   }
 
-  void cleanUp() override {
+  void OnDetached() override {
     shared->graphics->RemoveControl(mPicker);
-    NodeUi::cleanUp();
+    NodeUi::OnDetached();
   }
 
   void OnMouseDown(const float x, const float y, const IMouseMod& mod) override {

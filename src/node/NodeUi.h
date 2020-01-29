@@ -29,8 +29,8 @@ protected:
   MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
   MessageBus::Subscription<QuickConnectRequest> mNodeQuickConnectEvent;
 
-  WDL_PtrList<NodeSocketUi> mInSocketsUi;
-  WDL_PtrList<NodeSocketUi> mOutSocketsUi;
+  NodeSocketUi* mInSocketsUi[MAX_NODE_SOCKETS] = { nullptr };
+  NodeSocketUi* mOutSocketsUi[MAX_NODE_SOCKETS] = { nullptr };
 
   NodeUiHeader mHeader;
   WDL_PtrList<IControl> mElements;
@@ -180,14 +180,14 @@ public:
     for (int i = 0; i < shared->inputCount; i++) {
       NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsIn[i]);
       shared->graphics->AttachControl(socket);
-      mInSocketsUi.Add(socket);
+      mInSocketsUi[i] = socket;
       mElements.Add(socket);
     }
 
     for (int i = 0; i < shared->outputCount; i++) {
       NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsOut[i]);
       shared->graphics->AttachControl(socket);
-      mOutSocketsUi.Add(socket);
+      mOutSocketsUi[i] = socket;
       mElements.Add(socket);
     }
   }
@@ -250,7 +250,7 @@ public:
     translate(0, 0);
   }
 
-  virtual void cleanUp() {
+  void OnDetached() override {
     mDirty = false;
     mDoRender = false;
     for (int i = 0; i < shared->parameterCount; i++) {
@@ -262,12 +262,12 @@ public:
       }
     }
 
-    for (int i = 0; i < mInSocketsUi.GetSize(); i++) {
-      shared->graphics->RemoveControl(mInSocketsUi.Get(i));
+    for (int i = 0; i < shared->inputCount; i++) {
+      shared->graphics->RemoveControl(mInSocketsUi[i]);
     }
 
-    for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
-      shared->graphics->RemoveControl(mOutSocketsUi.Get(i));
+    for (int i = 0; i < shared->outputCount; i++) {
+      shared->graphics->RemoveControl(mOutSocketsUi[i]);
     }
 
     if (mHeader.hasByPass) {
@@ -361,7 +361,7 @@ public:
          * right click drag
          * Get the fist output and drag it
          */
-        NodeSocketUi* socket = mod.L ? mInSocketsUi.Get(0) : mOutSocketsUi.Get(0);
+        NodeSocketUi* socket = mod.L ? mInSocketsUi[0] : mOutSocketsUi[0];
         if (socket != nullptr) {
           socket->OnMouseDown(x, y, mod);
           // swap the captured control to be the outsocket now

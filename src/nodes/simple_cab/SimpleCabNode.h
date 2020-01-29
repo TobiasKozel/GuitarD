@@ -103,8 +103,8 @@ public:
     }
   }
 
-  void cleanUp() override {
-    NodeUi::cleanUp();
+  void OnDetached() override {
+    NodeUi::OnDetached();
     shared->graphics->RemoveControl(mBrowseButton);
   }
 

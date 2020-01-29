@@ -14,7 +14,7 @@
 // Amounts of daw params to register at start since dynamic amounts are not well supported
 #define MAX_DAW_PARAMS 256
 
-// 8 Should be enough for most nodes
+// 8 Sockets for each in and output should be enough
 #define MAX_NODE_SOCKETS 8
 
 // Max amount of sockets a output socket can be connected to (not a hard limit, but weird things will happen)
