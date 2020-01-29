@@ -470,7 +470,7 @@ public:
     mOutputNode->setupUi(mGraphics);
 
     mCableLayer = new CableLayer(mBus, mGraphics, &mNodes, mOutputNode, mInputNode);
-    mCableLayer->setRenderPriority(10);
+    mCableLayer->SetRenderPriority(10);
     mGraphics->AttachControl(mCableLayer);
 
     mSideBar = new SideBar(mBus, mGraphics);
@@ -502,13 +502,13 @@ public:
       mNodes.Get(n)->cleanupUi(mGraphics);
     }
 
-    mGraphics->RemoveControl(mSideBar, true);
+    mGraphics->RemoveControl(mSideBar);
     mSideBar = nullptr;
 
-    mGraphics->RemoveControl(mBackground, true);
+    mGraphics->RemoveControl(mBackground);
     mBackground = nullptr;
 
-    mGraphics->RemoveControl(mCableLayer, true);
+    mGraphics->RemoveControl(mCableLayer);
     mCableLayer = nullptr;
 
     mInputNode->cleanupUi(mGraphics);

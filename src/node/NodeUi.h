@@ -257,23 +257,23 @@ public:
       ParameterCoupling* param = &shared->parameters[i];
       if (param->control != nullptr) {
         // this also destroys the object
-        shared->graphics->RemoveControl(param->control, true);
+        shared->graphics->RemoveControl(param->control);
         param->control = nullptr;
       }
     }
 
     for (int i = 0; i < mInSocketsUi.GetSize(); i++) {
-      shared->graphics->RemoveControl(mInSocketsUi.Get(i), true);
+      shared->graphics->RemoveControl(mInSocketsUi.Get(i));
     }
 
     for (int i = 0; i < mOutSocketsUi.GetSize(); i++) {
-      shared->graphics->RemoveControl(mOutSocketsUi.Get(i), true);
+      shared->graphics->RemoveControl(mOutSocketsUi.Get(i));
     }
 
     if (mHeader.hasByPass) {
-      shared->graphics->RemoveControl(mHeader.bypass, true);
+      shared->graphics->RemoveControl(mHeader.bypass);
     }
-    shared->graphics->RemoveControl(mHeader.remove, true);
+    shared->graphics->RemoveControl(mHeader.remove);
   }
 
   virtual void DrawHeader(IGraphics& g) {

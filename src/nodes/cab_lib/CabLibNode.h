@@ -54,8 +54,8 @@ public:
   }
 
   void cleanUp() override {
-    GetUI()->RemoveControl(mEditButton, true);
-    GetUI()->RemoveControl(mPopUp, true);
+    GetUI()->RemoveControl(mEditButton);
+    GetUI()->RemoveControl(mPopUp);
     NodeUi::cleanUp();
   }
 

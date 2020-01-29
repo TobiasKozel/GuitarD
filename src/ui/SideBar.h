@@ -31,13 +31,13 @@ public:
     });
     avgExecutionTime = 0;
     mStats = DEBUG_FONT;
-    setRenderPriority(11);
+    SetRenderPriority(11);
     mTabs[0] = &mNodeGallery;
     mTabs[1] = &mPresetBrowser;
   }
 
   void OnInit() override {
-    mScrollview.setRenderPriority(12);
+    mScrollview.SetRenderPriority(12);
     mScrollview.setChildPadding(1.f); // Should be 0 but this makes sure there's no trace of the other tabs
     mScrollview.setFullWidthChildren(true);
     mScrollview.setDoDragScroll(false);
@@ -51,7 +51,7 @@ public:
   }
 
   void OnDetached() override {
-    GetUI()->RemoveControl(&mScrollview, false);
+    GetUI()->DetachControl(&mScrollview);
     IControl::OnDetached();
   }
 

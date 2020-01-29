@@ -43,7 +43,7 @@ public:
 
   void cleanUp() override {
     NodeUi::cleanUp();
-    shared->graphics->RemoveControl(mBrowseButton, true);
+    shared->graphics->RemoveControl(mBrowseButton);
   }
 
 };

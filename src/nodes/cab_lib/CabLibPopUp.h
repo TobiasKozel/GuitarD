@@ -210,7 +210,7 @@ public:
   void OnInit() override {
     for (int i = 0; i < 3; i++) {
       mScrollView[i] = new ScrollViewControl();
-      mScrollView[i]->setRenderPriority(16);
+      mScrollView[i]->SetRenderPriority(16);
       mScrollView[i]->setFullWidthChildren(true);
       mScrollView[i]->setChildPadding(2);
       mScrollView[i]->setCleanUpEnabled(false);
@@ -335,7 +335,7 @@ public:
 
   void OnDetached() override {
     for (int i = 0; i < 3; i++) {
-      GetUI()->RemoveControl(mScrollView[i], true);
+      GetUI()->RemoveControl(mScrollView[i]);
     }
     mCabinets.Empty(true);
   }
@@ -362,7 +362,7 @@ public:
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
     const IRECT click(x, y, x, y);
     if (mCloseButton.Contains(click)) {
-      GetUI()->RemoveControl(this, true);
+      GetUI()->RemoveControl(this);
     }
   }
 };

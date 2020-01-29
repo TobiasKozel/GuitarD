@@ -26,7 +26,7 @@ public:
   }
 
   void cleanUp() override {
-    shared->graphics->RemoveControl(mPicker, true);
+    shared->graphics->RemoveControl(mPicker);
     NodeUi::cleanUp();
   }
 
