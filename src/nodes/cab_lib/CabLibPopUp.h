@@ -362,7 +362,7 @@ public:
   void OnMouseDown(float x, float y, const IMouseMod& mod) override {
     const IRECT click(x, y, x, y);
     if (mCloseButton.Contains(click)) {
-      GetUI()->DetachControl(this);
+      GetUI()->RemoveControl(this);
     }
   }
 };

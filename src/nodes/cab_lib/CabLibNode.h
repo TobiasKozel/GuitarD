@@ -49,17 +49,13 @@ public:
   }
 
   void openSettings() {
-    if (mPopUp == nullptr) {
-      mPopUp = new CabLibPopUp(mCabShared);
-    }
+    mPopUp = new CabLibPopUp(mCabShared);
     GetUI()->AttachControl(mPopUp);
   }
 
   void OnDetached() override {
     GetUI()->RemoveControl(mEditButton);
-    if (mPopUp != nullptr) {
-      GetUI()->RemoveControl(mPopUp);
-    }
+    GetUI()->RemoveControl(mPopUp);
     NodeUi::OnDetached();
   }
 
