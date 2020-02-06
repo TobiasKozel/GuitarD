@@ -2,21 +2,23 @@
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
 #include "src/nodes/RegisterNodes.h"
-#include "src/misc/DefaultPreset.h"
 
 
 GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAX_DAW_PARAMS, kNumPrograms)) {
   NodeList::registerNodes();
-  graph = new Graph(&mBus);
-  // Gather a good amount of parameters to expose to the daw based on what nodes are on the canvas
+  mParamManager = new ParameterManager(&mBus);
+
   for (int i = 0; i < MAX_DAW_PARAMS; i++) {
-    graph->mParamManager.addParameter(GetParam(i));
+    // Gather a good amount of parameters to expose to the daw so they can be assigned internally
+    mParamManager->addParameter(GetParam(i));
   }
 
-  IByteChunk factoryPreset;
-  factoryPreset.PutBytes(DEFAULT_PRESET_STRING, strlen(DEFAULT_PRESET_STRING));
-  MakePresetFromChunk("Factory Preset", factoryPreset);
+  mGraph = new Graph(&mBus, mParamManager);
 
+  /**
+   * The DAW needs to be informed if the assignments for parameters have changed
+   * TODOG This doesn't work for VST3 right now for some reason
+   */
   mParamChanged.subscribe(&mBus, MessageBus::ParametersChanged, [&](bool) {
     this->InformHostOfParameterDetailsChange();
   });
@@ -32,26 +34,24 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAX_DAW_PAR
   
   mLayoutFunc = [&](IGraphics* pGraphics) {
     if (pGraphics->NControls()) {
-      // If there are already controls in the context the layout function was only because of a resize
-      this->graph->layoutUi(pGraphics);
       return;
     }
     pGraphics->SetSizeConstraints(PLUG_MIN_WIDTH, PLUG_MAX_WIDTH, PLUG_MIN_HEIGHT, PLUG_MAX_HEIGHT);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     pGraphics->LoadFont("ForkAwesome", ICON_FN);
-    this->graph->setupUi(pGraphics);
+    mGraph->setupUi(pGraphics);
   };
 #endif
 }
 
 void GuitarD::OnReset() {
-  if (graph != nullptr) {
+  if (mGraph != nullptr) {
     const int sr = static_cast<int>(GetSampleRate());
     const int outputChannels = NOutChansConnected();
     const int inputChannels = NInChansConnected();
     if (sr > 0 && outputChannels > 0 && inputChannels > 0) {
       // DAWs seem to
-      graph->OnReset(sr, outputChannels, inputChannels);
+      mGraph->OnReset(sr, outputChannels, inputChannels);
       mReady = true;
     }
   }
@@ -69,12 +69,12 @@ void GuitarD::OnUIClose() {
    * however doing this manually will be safer and make sure all the nodes can clean up
    * after them selves and set the control in the ParameterCoupling to a nullptr
    */
-  graph->cleanupUi();
+  mGraph->cleanupUi();
 }
 
 bool GuitarD::SerializeState(IByteChunk& chunk) const {
   WDL_String serialized;
-  graph->serialize(serialized);
+  mGraph->serialize(serialized);
   if (serialized.GetLength() < 1) {
     return false;
   }
@@ -85,7 +85,7 @@ bool GuitarD::SerializeState(IByteChunk& chunk) const {
 int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
   WDL_String json_string;
   const int pos = chunk.GetStr(json_string, startPos);
-  graph->deserialize(json_string.Get());
+  mGraph->deserialize(json_string.Get());
   return pos;
 }
 
@@ -93,7 +93,7 @@ int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
 void GuitarD::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   // Some DAWs already call the process function without having provided a valid samplerate/channel configuration
   if (mReady) {
-    graph->ProcessBlock(inputs, outputs, nFrames);
+    mGraph->ProcessBlock(inputs, outputs, nFrames);
   }
   else {
     OnReset();

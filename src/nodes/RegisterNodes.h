@@ -1,3 +1,10 @@
+/**
+ * All the nodes need to be included here
+ * registerNodes() will be called when the plugin is constructed
+ * and will register all nodes in a global list which will
+ * be shared across plugin instances if they are in the same process
+ */
+
 #pragma once
 #include "src/misc/NodeList.h"
 #include "src/nodes/stereo_tool/StereoToolNode.h"

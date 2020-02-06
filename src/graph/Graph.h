@@ -3,6 +3,7 @@
 #include "mutex.h"
 #include "json.hpp"
 #include "IPlugConstants.h"
+#include "src/misc/constants.h"
 #include "src/misc/MessageBus.h"
 #include "src/nodes/io/InputNode.h"
 #include "src/nodes/io/OutputNode.h"
@@ -15,7 +16,6 @@
 #include "src/misc/HistoryStack.h"
 #include "FormatGraph.h"
 #include "soundwoofer/soundwoofer.h"
-#include "src/nodes/feedback/FeedbackNode.h"
 
 /**
  * This is the "god object" which will handle all the nodes
@@ -24,6 +24,10 @@
  */
 class Graph {
   MessageBus::Bus* mBus = nullptr;
+
+  /**
+   * Whole lot of subscriptions needed for the graph
+   */
   MessageBus::Subscription<Node*> mNodeDelSub;
   MessageBus::Subscription<Node*> mNodeBypassEvent;
   MessageBus::Subscription<Node*> mNodeCloneEvent;
@@ -40,6 +44,8 @@ class Graph {
 
   IGraphics* mGraphics = nullptr;
 
+  ParameterManager* mParamManager = nullptr;
+
   /**
    * Holds all the nodes in the processing graph
    */
@@ -49,6 +55,7 @@ class Graph {
    * Mutex to keep changes to the graph like adding/removing or rerouting from crashing
    */
   WDL_Mutex mAudioMutex;
+
   /**
    * Acts as a semaphore since the mAudioMutex only needs to be locked once to stop the audio thread
    */
@@ -106,10 +113,8 @@ class Graph {
   sample** mSliceBuffer[2] = { nullptr };
 
 public:
-  ParameterManager mParamManager;
 
-
-  explicit Graph(MessageBus::Bus* pBus) : mParamManager(pBus) {
+  explicit Graph(MessageBus::Bus* pBus, ParameterManager* pParamManager) {
     auto& sw = SoundWoofer::instance();
     sw.setPluginName(PLUG_NAME);
     WDL_String path;
@@ -124,6 +129,7 @@ public:
     //status = sw.fetchPresets();
 
     mBus = pBus;
+    mParamManager = pParamManager;
     
     mInputNode = new InputNode(mBus);
     mOutputNode = new OutputNode(mBus);
@@ -562,14 +568,6 @@ public:
     onViewPortChange(avg.x, avg.y);
   }
 
-  void layoutUi(IGraphics* pGraphics = nullptr) {
-    if (pGraphics != nullptr && pGraphics != mGraphics) {
-      WDBGMSG("Graphics context changed");
-      mGraphics = pGraphics;
-      // TODOG find out whether the context ever changes
-    }
-  }
-
   /**
    * Used to add nodes and pause the audio thread
    */
@@ -580,7 +578,7 @@ public:
     if (clone != nullptr) {
       node->copyState(clone);
     }
-    mParamManager.claimNode(node);
+    mParamManager->claimNode(node);
     node->setupUi(mGraphics);
     if (pInput != nullptr) {
       node->connectInput(pInput->shared.socketsOut[outputIndex], inputIndex);
@@ -663,7 +661,7 @@ public:
       byPassConnection(node);
     }
     node->cleanupUi(mGraphics);
-    mParamManager.releaseNode(node);
+    mParamManager->releaseNode(node);
     node->cleanUp();
     mNodes.DeletePtr(node, true);
     SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
@@ -736,7 +734,7 @@ public:
         mMaxBlockSize = json["maxBlockSize"];
       }
       lockAudioThread();
-      Serializer::deserialize(json, mNodes, mOutputNode, mInputNode, mSampleRate, mMaxBlockSize, &mParamManager, mBus);
+      Serializer::deserialize(json, mNodes, mOutputNode, mInputNode, mSampleRate, mMaxBlockSize, mParamManager, mBus);
       if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
         for (int i = 0; i < mNodes.GetSize(); i++) {
           mNodes.Get(i)->setupUi(mGraphics);

@@ -1,12 +1,10 @@
 #pragma once
 
 const int kNumPrograms = 2;
-#include "json.hpp"
 #include "soundwoofer/soundwoofer.h" // since winsocks does some weird stuff when being included after windows.h it needs to be included here though it's not used here
 #include "IPlug_include_in_plug_hdr.h"
-#include "IControls.h"
-#include "src/misc/constants.h"
 #include "src/graph/Graph.h"
+#include "src/parameter/ParameterManager.h"
 
 using namespace iplug;
 using namespace igraphics;
@@ -18,9 +16,10 @@ class GuitarD : public Plugin
   MessageBus::Bus mBus;
   /** Is true when the plugin is ready to process samples (Knows the samplerate and in out channel count) */
   bool mReady = false;
+  Graph* mGraph = nullptr;
+  ParameterManager* mParamManager = nullptr;
 public:
   GuitarD(const InstanceInfo& info);
-  Graph* graph;
   void OnUIClose() override;
   void OnReset() override;
   void OnActivate(bool active) override;

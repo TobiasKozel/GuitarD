@@ -346,7 +346,6 @@
     <ClInclude Include="..\src\graph\Serializer.h" />
     <ClInclude Include="..\src\graph\SortGraph.h" />
     <ClInclude Include="..\src\misc\constants.h" />
-    <ClInclude Include="..\src\misc\DefaultPreset.h" />
     <ClInclude Include="..\src\misc\EventList.h" />
     <ClInclude Include="..\src\misc\GStructs.h" />
     <ClInclude Include="..\src\misc\HistoryStack.h" />
