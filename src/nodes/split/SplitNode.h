@@ -13,4 +13,4 @@ namespace guitard {
       mUi->setColor(Theme::Categories::TOOLS);
     }
   };
-}namespace guitard {
+}

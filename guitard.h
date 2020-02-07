@@ -4,8 +4,6 @@ const int kNumPrograms = 2;
 #include "soundwoofer/soundwoofer.h" // since winsocks does some weird stuff when being included after windows.h it needs to be included here though it's not used here
 #include "IPlug_include_in_plug_hdr.h"
 
-#define GUITARD_SAMPLE_TYPE iplug::sample
-
 #include "src/graph/Graph.h"
 #include "src/parameter/ParameterManager.h"
 
