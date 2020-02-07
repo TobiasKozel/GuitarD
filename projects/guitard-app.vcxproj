@@ -345,9 +345,9 @@
     <ClInclude Include="..\src\graph\Graph.h" />
     <ClInclude Include="..\src\graph\Serializer.h" />
     <ClInclude Include="..\src\graph\SortGraph.h" />
+    <ClInclude Include="..\src\headless.h" />
     <ClInclude Include="..\src\misc\constants.h" />
     <ClInclude Include="..\src\misc\EventList.h" />
-    <ClInclude Include="..\src\misc\GStructs.h" />
     <ClInclude Include="..\src\misc\HistoryStack.h" />
     <ClInclude Include="..\src\misc\MessageBus.h" />
     <ClInclude Include="..\src\misc\NodeList.h" />
@@ -390,6 +390,10 @@
     <ClInclude Include="..\src\parameter\MeterCoupling.h" />
     <ClInclude Include="..\src\parameter\ParameterCoupling.h" />
     <ClInclude Include="..\src\parameter\ParameterManager.h" />
+    <ClInclude Include="..\src\types\gstructs.h" />
+    <ClInclude Include="..\src\types\iplugTypes.h" />
+    <ClInclude Include="..\src\types\string.h" />
+    <ClInclude Include="..\src\types\types.h" />
     <ClInclude Include="..\src\ui\CableLayer.h" />
     <ClInclude Include="..\src\ui\CustomKnob.h" />
     <ClInclude Include="..\src\ui\gallery\NodeGallery.h" />

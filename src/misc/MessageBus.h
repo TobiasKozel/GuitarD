@@ -1,120 +1,123 @@
 #pragma once
-#include <map>
 #include <functional>
-#include <string>
-#include <vector>
-#include "mutex.h"
+#include <mutex>
 #include "EventList.h"
-#include "GStructs.h"
+namespace guitard {
+  /**
+   * This allows for easy communication between classes which don't know each other
+   * A list of events can be found in EventList.h
+   */
+  namespace MessageBus {
+    // Base class to take advantage of polymorphism
+    class BaseSubscription {
+    public:
+      virtual ~BaseSubscription() { };
+    protected:
+      bool subscribed = false;
+      MESSAGE_ID mEventId = TOTAL_MESSAGE_IDS;
+    };
 
-/**
- * This allows for easy communication between classes which don't know each other
- * A list of events can be found in EventList.h
- */
-namespace MessageBus {
-  // Base class to take advantage of polymorphism
-  class BaseSubscription {
-  public:
-    virtual ~BaseSubscription() { };
-  protected:
-    bool subscribed = false;
-    MESSAGE_ID mEventId = TOTAL_MESSAGE_IDS;
-  };
+    typedef WDL_PtrList<BaseSubscription> SubsVector;
 
-  typedef WDL_PtrList<BaseSubscription> SubsVector;
+    // The bus object knows about all the subscribers and relays the events
+    struct Bus {
+      SubsVector mSubscriptions[TOTAL_MESSAGE_IDS];
+      std::mutex mMutex;
+      int mSubCount = 0;
+      ~Bus() {
+        /**
+         * If the destructor is called, the plugin was probably destroyed
+         * The bus is not responsible for the lifetimes of it's subscriptions
+         * so just clean out all the references and call it a day
+         */
 
-  // The bus object knows about all the subscribers and relays the events
-  struct Bus {
-    SubsVector mSubscriptions[TOTAL_MESSAGE_IDS];
-    WDL_Mutex mMutex;
-    int mSubCount = 0;
-    ~Bus() {
-      /**
-       * If the destructor is called, the plugin was probably destroyed
-       * The bus is not responible for the lifetimes of it's subsriptions
-       * so just clean out all the references and call it a day
-       */
+        for (int i = 0; i < TOTAL_MESSAGE_IDS; i++) {
+          if (mSubscriptions[i].GetSize() > 0) {
+            mSubscriptions[i].Empty(false);
+          }
+        }
+        mSubCount = 0;
+      }
 
-      for (int i = 0; i < TOTAL_MESSAGE_IDS; i++) {
-        if (mSubscriptions[i].GetSize() > 0) {
-          mSubscriptions[i].Empty(false);
+      void addSubscriber(BaseSubscription* sub, const MESSAGE_ID pEventId) {
+        //std::lock_guard<std::mutex> lock(mMutex);
+        mMutex.lock();
+        mSubscriptions[pEventId].Add(sub);
+        mSubCount++;
+        if (mSubCount > 1000) {
+          // This probably means there's a leak
+          WDBGMSG("Subcount %i\n", mSubCount);
+        }
+        mMutex.unlock();
+      }
+
+      void removeSubscriber(BaseSubscription* sub, const MESSAGE_ID pEventId) {
+        if (mSubCount > 0) {
+          // std::lock_guard<std::mutex> lock(mMutex);
+          mMutex.lock();
+          mSubscriptions[pEventId].DeletePtr(sub);
+          mSubCount--;
+          mMutex.unlock();
         }
       }
-      mSubCount = 0;
-    }
+    };
 
-    void addSubscriber(BaseSubscription* sub, const MESSAGE_ID pEventId) {
-      WDL_MutexLock lock(&mMutex);
-      mSubscriptions[pEventId].Add(sub);
-      mSubCount++;
-      if (mSubCount > 1000) {
-        // This probably means there's a leak
-        WDBGMSG("Subcount %i\n", mSubCount);
+    // Actual implementation based on the data type to pass over the Bus
+    template <class T>
+    class Subscription : public BaseSubscription {
+      // The bus it is subscribed to
+      Bus* mBus = nullptr;
+    public:
+      std::function<void(T param)> mCallback;
+
+      Subscription() {
       }
-    }
 
-    void removeSubscriber(BaseSubscription* sub, const MESSAGE_ID pEventId) {
-      if (mSubCount > 0) {
-        WDL_MutexLock lock(&mMutex);
-        mSubscriptions[pEventId].DeletePtr(sub);
-        mSubCount--;
+      Subscription(Bus* pBus, const MESSAGE_ID pEventId, std::function<void(T param)> callback) {
+        subscribe(pBus, pEventId, callback);
       }
-    }
-  };
 
-  // Actual implementation based on the data type to pass over the Bus
-  template <class T>
-  class Subscription : public BaseSubscription {
-    // The bus it is subscribed to
-    Bus* mBus = nullptr;
-  public:
-    std::function<void(T param)> mCallback;
-
-    Subscription() {
-    }
-
-    Subscription(Bus* pBus, const MESSAGE_ID pEventId, std::function<void(T param)> callback) {
-      subscribe(pBus, pEventId, callback);
-    }
-
-    ~Subscription() {
-      if (mBus == nullptr || mEventId >= TOTAL_MESSAGE_IDS || mEventId < 0) {
-        // This shouldn't happen
-        return;
-        assert(false);
+      ~Subscription() {
+        if (mBus == nullptr || mEventId >= TOTAL_MESSAGE_IDS || mEventId < 0) {
+          // This shouldn't happen
+          return;
+          assert(false);
+        }
+        mBus->removeSubscriber(this, mEventId);
       }
-      mBus->removeSubscriber(this, mEventId);
-    }
 
-    void subscribe(Bus* pBus, const MESSAGE_ID pEventId, std::function<void(T param)> callback) {
-      if (subscribed) {
-        WDBGMSG("Trying to subscribe twice on the same Subscription!\n");
+      void subscribe(Bus* pBus, const MESSAGE_ID pEventId, std::function<void(T param)> callback) {
+        if (subscribed) {
+          WDBGMSG("Trying to subscribe twice on the same Subscription!\n");
+          return;
+        }
+        if (pBus == nullptr || pEventId >= TOTAL_MESSAGE_IDS || pEventId < 0) {
+          assert(false);
+        }
+        mBus = pBus;
+        mEventId = pEventId;
+        mCallback = callback;
+        mBus->addSubscriber(this, pEventId);
+        subscribed = true;
+      }
+    };
+
+    template <class T>
+    void fireEvent(Bus* b, const MESSAGE_ID pEventId, T param) {
+      if (b->mSubscriptions[pEventId].GetSize() == 0) {
+        WDBGMSG("Fired a event with not subscribers!\n");
         return;
       }
-      if (pBus == nullptr || pEventId >= TOTAL_MESSAGE_IDS || pEventId < 0) {
-        assert(false);
+      SubsVector& subs = b->mSubscriptions[pEventId];
+      // std::lock_guard<std::mutex> lock(b->mMutex);
+      b->mMutex.lock();
+      for (int i = 0; i < subs.GetSize(); i++) {
+        Subscription<T>* sub = dynamic_cast<Subscription<T>*>(subs.Get(i));
+        if (sub != nullptr) {
+          sub->mCallback(param);
+        }
       }
-      mBus = pBus;
-      mEventId = pEventId;
-      mCallback = callback;
-      mBus->addSubscriber(this, pEventId);
-      subscribed = true;
-    }
-  };
-
-  template <class T>
-  void fireEvent(Bus* b, const MESSAGE_ID pEventId, T param) {
-    if (b->mSubscriptions[pEventId].GetSize() == 0) {
-      WDBGMSG("Fired a event with not subscribers!\n");
-      return;
-    }
-    SubsVector& subs = b->mSubscriptions[pEventId];
-    WDL_MutexLock lock(&b->mMutex);
-    for (int i = 0; i < subs.GetSize(); i++) {
-      Subscription<T>* sub = dynamic_cast<Subscription<T>*>(subs.Get(i));
-      if (sub != nullptr) {
-        sub->mCallback(param);
-      }
+      b->mMutex.unlock();
     }
   }
 }

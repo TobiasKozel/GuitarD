@@ -372,9 +372,6 @@
     <ClInclude Include="..\src\graph\Serializer.h">
       <Filter>src\graph</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\misc\GStructs.h">
-      <Filter>src\misc</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\misc\MessageBus.h">
       <Filter>src\misc</Filter>
     </ClInclude>
@@ -507,6 +504,21 @@
     <ClInclude Include="..\thirdparty\soundwoofer\soundwoofer.h">
       <Filter>thirdparty</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\headless.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\types\types.h">
+      <Filter>src\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\types\gstructs.h">
+      <Filter>src\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\types\string.h">
+      <Filter>src\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\types\iplugTypes.h">
+      <Filter>src\types</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -616,6 +628,9 @@
     </Filter>
     <Filter Include="src\ui\scroll">
       <UniqueIdentifier>{21631177-7fba-431e-96bc-5cec04805732}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\types">
+      <UniqueIdentifier>{276bc1a0-ad58-4738-b973-da451178f264}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

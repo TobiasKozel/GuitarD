@@ -1,25 +1,24 @@
 #include "GuitarD.h"
 #include "IPlug_include_in_plug_src.h"
-#include "IControls.h"
 #include "src/nodes/RegisterNodes.h"
 
 
-GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAX_DAW_PARAMS, kNumPrograms)) {
-  NodeList::registerNodes();
-  mParamManager = new ParameterManager(&mBus);
+GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::MakeConfig(MAX_DAW_PARAMS, kNumPrograms)) {
+  guitard::NodeList::registerNodes();
+  mParamManager = new guitard::ParameterManager(&mBus);
 
   for (int i = 0; i < MAX_DAW_PARAMS; i++) {
     // Gather a good amount of parameters to expose to the daw so they can be assigned internally
     mParamManager->addParameter(GetParam(i));
   }
 
-  mGraph = new Graph(&mBus, mParamManager);
+  mGraph = new guitard::Graph(&mBus, mParamManager);
 
   /**
    * The DAW needs to be informed if the assignments for parameters have changed
    * TODOG This doesn't work for VST3 right now for some reason
    */
-  mParamChanged.subscribe(&mBus, MessageBus::ParametersChanged, [&](bool) {
+  mParamChanged.subscribe(&mBus, guitard::MessageBus::ParametersChanged, [&](bool) {
     this->InformHostOfParameterDetailsChange();
   });
 
@@ -29,10 +28,10 @@ GuitarD::GuitarD(const InstanceInfo& info) : Plugin(info, MakeConfig(MAX_DAW_PAR
    */
 #if IPLUG_EDITOR
   mMakeGraphicsFunc = [&]() {
-    return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, 1.);
+    return iplug::igraphics::MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, 1.);
   };
   
-  mLayoutFunc = [&](IGraphics* pGraphics) {
+  mLayoutFunc = [&](iplug::igraphics::IGraphics* pGraphics) {
     if (pGraphics->NControls()) {
       return;
     }
@@ -72,7 +71,7 @@ void GuitarD::OnUIClose() {
   mGraph->cleanupUi();
 }
 
-bool GuitarD::SerializeState(IByteChunk& chunk) const {
+bool GuitarD::SerializeState(iplug::IByteChunk& chunk) const {
   WDL_String serialized;
   mGraph->serialize(serialized);
   if (serialized.GetLength() < 1) {
@@ -82,7 +81,7 @@ bool GuitarD::SerializeState(IByteChunk& chunk) const {
   return true;
 }
 
-int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
+int GuitarD::UnserializeState(const iplug::IByteChunk& chunk, int startPos) {
   WDL_String json_string;
   const int pos = chunk.GetStr(json_string, startPos);
   mGraph->deserialize(json_string.Get());
@@ -90,7 +89,7 @@ int GuitarD::UnserializeState(const IByteChunk& chunk, int startPos) {
 }
 
 #if IPLUG_DSP
-void GuitarD::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
+void GuitarD::ProcessBlock(iplug::sample** inputs, iplug::sample** outputs, int nFrames) {
   // Some DAWs already call the process function without having provided a valid samplerate/channel configuration
   if (mReady) {
     mGraph->ProcessBlock(inputs, outputs, nFrames);

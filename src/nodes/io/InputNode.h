@@ -3,75 +3,76 @@
 #include "src/node/Node.h"
 #include "src/node/NodeUi.h"
 
+namespace guitard {
+  class InputNodeUi final : public NodeUi {
 
-class InputNodeUi final : public NodeUi {
-  
-  iplug::igraphics::IText mBlocksizeText;
-  std::string mInfo;
-public:
-  InputNodeUi(NodeShared* param) : NodeUi(param) {
-    mInfo = "";
-    mBlocksizeText = DEBUG_FONT;
-  }
-
-  void Draw(IGraphics& g) override {
-    NodeUi::Draw(g);
-    mInfo = "Blocksize: " + std::to_string(shared->node->mLastBlockSize) + " Sample-Rate: " + std::to_string(shared->node->mSampleRate);
-    g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
-  }
-};
-
-class InputNode final : public Node {
-public:
-  InputNode(MessageBus::Bus* pBus) : Node() {
-    shared.type = "Input";
-    mLastBlockSize = -1;
-    if (shared.X == shared.Y && shared.X == 0) {
-      // Place it at the screen edge if no position is set
-      shared.Y = PLUG_HEIGHT * 0.5;
-      shared.X = shared.width * 0.3;
+    iplug::igraphics::IText mBlocksizeText;
+    std::string mInfo;
+  public:
+    InputNodeUi(NodeShared* param) : NodeUi(param) {
+      mInfo = "";
+      mBlocksizeText = DEBUG_FONT;
     }
-    setup(pBus, 48000, MAX_BUFFER, 2, 0, 1);
-  }
 
-  void ProcessBlock(int) override {}
-
-  void setInputChannels(int pInputChannels = 2) {
-    if (pInputChannels != mInputChannels) {
-      mInputChannels = pInputChannels;
+    void Draw(IGraphics& g) override {
+      NodeUi::Draw(g);
+      mInfo = "Blocksize: " + std::to_string(shared->node->mLastBlockSize) + " Sample-Rate: " + std::to_string(shared->node->mSampleRate);
+      g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
     }
-  }
+  };
 
-  /**
-   * Puts the given buffer into the node
-   * Basically used to inject outside audio into the graph
-   */
-  void CopyIn(iplug::sample** in, int nFrames) {
-    mLastBlockSize = nFrames;
-    if (mInputChannels == 1) {
-      for (int i = 0; i < nFrames; i++) {
-        mBuffersOut[0][0][i] = in[0][i];
-        mBuffersOut[0][1][i] = in[0][i];
+  class InputNode final : public Node {
+  public:
+    InputNode(MessageBus::Bus* pBus) : Node() {
+      shared.type = "Input";
+      mLastBlockSize = -1;
+      if (shared.X == shared.Y && shared.X == 0) {
+        // Place it at the screen edge if no position is set
+        shared.Y = PLUG_HEIGHT * 0.5;
+        shared.X = shared.width * 0.3;
+      }
+      setup(pBus, 48000, MAX_BUFFER, 2, 0, 1);
+    }
+
+    void ProcessBlock(int) override {}
+
+    void setInputChannels(int pInputChannels = 2) {
+      if (pInputChannels != mInputChannels) {
+        mInputChannels = pInputChannels;
       }
     }
-    else {
-      for (int c = 0; c < mChannelCount; c++) {
+
+    /**
+     * Puts the given buffer into the node
+     * Basically used to inject outside audio into the graph
+     */
+    void CopyIn(iplug::sample** in, int nFrames) {
+      mLastBlockSize = nFrames;
+      if (mInputChannels == 1) {
         for (int i = 0; i < nFrames; i++) {
-          mBuffersOut[0][c][i] = in[c][i];
+          mBuffersOut[0][0][i] = in[0][i];
+          mBuffersOut[0][1][i] = in[0][i];
         }
       }
+      else {
+        for (int c = 0; c < mChannelCount; c++) {
+          for (int i = 0; i < nFrames; i++) {
+            mBuffersOut[0][c][i] = in[c][i];
+          }
+        }
+      }
+      mIsProcessed = true;
     }
-    mIsProcessed = true;
-  }
 
-  void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    shared.graphics = pGrahics;
-    mUi = new InputNodeUi(&shared);
-    mUi->setColor(IColor(255, 100, 150, 100));
-    pGrahics->AttachControl(mUi);
-    mUi->setUp();
-    mUiReady = true;
-  }
-private:
-  int mInputChannels = 2;
-};
+    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+      shared.graphics = pGrahics;
+      mUi = new InputNodeUi(&shared);
+      mUi->setColor(IColor(255, 100, 150, 100));
+      pGrahics->AttachControl(mUi);
+      mUi->setUp();
+      mUiReady = true;
+    }
+  private:
+    int mInputChannels = 2;
+  };
+}

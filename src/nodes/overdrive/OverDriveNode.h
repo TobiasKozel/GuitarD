@@ -1,14 +1,15 @@
 #pragma once
 #include "OverDrive.h"
+namespace guitard {
+  class OverDriveNode final : public FaustGenerated::OverDrive {
+  public:
+    OverDriveNode(const std::string pType) {
+      shared.type = pType;
+    }
 
-class OverDriveNode final : public FaustGenerated::OverDrive {
-public:
-  OverDriveNode(const std::string pType) {
-    shared.type = pType;
-  }
-
-  void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-    Node::setupUi(pGrahics);
-    mUi->setColor(Theme::Categories::DISTORTION);
-  }
-};
+    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+      Node::setupUi(pGrahics);
+      mUi->setColor(Theme::Categories::DISTORTION);
+    }
+  };
+}
