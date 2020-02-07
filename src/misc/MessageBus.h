@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
-#include <mutex>
 #include "EventList.h"
+#include "src/types/gmutex.h"
 namespace guitard {
   /**
    * This allows for easy communication between classes which don't know each other
@@ -22,7 +22,7 @@ namespace guitard {
     // The bus object knows about all the subscribers and relays the events
     struct Bus {
       SubsVector mSubscriptions[TOTAL_MESSAGE_IDS];
-      std::mutex mMutex;
+      Mutex mMutex;
       int mSubCount = 0;
       ~Bus() {
         /**
@@ -40,24 +40,20 @@ namespace guitard {
       }
 
       void addSubscriber(BaseSubscription* sub, const MESSAGE_ID pEventId) {
-        //std::lock_guard<std::mutex> lock(mMutex);
-        mMutex.lock();
+        LockGuard lock(mMutex);
         mSubscriptions[pEventId].Add(sub);
         mSubCount++;
         if (mSubCount > 1000) {
           // This probably means there's a leak
           WDBGMSG("Subcount %i\n", mSubCount);
         }
-        mMutex.unlock();
       }
 
       void removeSubscriber(BaseSubscription* sub, const MESSAGE_ID pEventId) {
         if (mSubCount > 0) {
-          // std::lock_guard<std::mutex> lock(mMutex);
-          mMutex.lock();
+          LockGuard lock(mMutex);
           mSubscriptions[pEventId].DeletePtr(sub);
           mSubCount--;
-          mMutex.unlock();
         }
       }
     };
@@ -109,15 +105,13 @@ namespace guitard {
         return;
       }
       SubsVector& subs = b->mSubscriptions[pEventId];
-      // std::lock_guard<std::mutex> lock(b->mMutex);
-      b->mMutex.lock();
+      LockGuard lock(b->mMutex);
       for (int i = 0; i < subs.GetSize(); i++) {
         Subscription<T>* sub = dynamic_cast<Subscription<T>*>(subs.Get(i));
         if (sub != nullptr) {
           sub->mCallback(param);
         }
       }
-      b->mMutex.unlock();
     }
   }
 }

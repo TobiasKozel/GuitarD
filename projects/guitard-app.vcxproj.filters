@@ -519,6 +519,9 @@
     <ClInclude Include="..\src\types\iplugTypes.h">
       <Filter>src\types</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\types\gmutex.h">
+      <Filter>src\types</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

@@ -1,9 +1,9 @@
 #pragma once
 #include <chrono>
-#include "mutex.h"
 #include "json.hpp"
 #include "IPlugConstants.h"
 #include "src/misc/constants.h"
+#include "src/types/gmutex.h"
 #include "src/types/types.h"
 #include "src/misc/MessageBus.h"
 #include "src/nodes/io/InputNode.h"
@@ -56,7 +56,7 @@ namespace guitard {
     /**
      * Mutex to keep changes to the graph like adding/removing or rerouting from crashing
      */
-    std::mutex mAudioMutex;
+    Mutex mAudioMutex;
 
     /**
      * Acts as a semaphore since the mAudioMutex only needs to be locked once to stop the audio thread
@@ -363,7 +363,7 @@ namespace guitard {
         }
 
         const auto start = std::chrono::high_resolution_clock::now();
-        std::lock_guard<std::mutex> lock(mAudioMutex);
+        LockGuard lock(mAudioMutex);
         mInputNode->CopyIn(in, nFrames);
         for (int n = 0; n < nodeCount; n++) {
           mNodes.Get(n)->BlockStart();
