@@ -415,7 +415,7 @@ namespace guitard {
         mGraphics = pGraphics;
       }
       pGraphics->AttachCornerResizer(iplug::igraphics::EUIResizerMode::Size, true);
-      pGraphics->HandleMouseOver(true);
+      pGraphics->EnableMouseOver(true);
       pGraphics->AttachTextEntryControl();
       pGraphics->AttachPopupMenuControl(iplug::igraphics::DEFAULT_LABEL_TEXT);
 
