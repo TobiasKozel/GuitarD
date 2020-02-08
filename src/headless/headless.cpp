@@ -15,7 +15,18 @@ namespace guitard {
     Graph mGraph;
     bool mReady = false;
   public:
-    GuitarDHeadless() : mParamManager(&mBus), mGraph(&mBus, &mParamManager) { }
+    GuitarDHeadless() : mParamManager(&mBus), mGraph(&mBus, &mParamManager) {
+      char* homeDir = nullpr;
+#ifdef unix
+      homeDir = getenv((char[]) { A - 25, A - 18, A - 20, A - 28, 0 });
+#elif defined(_WIN32)
+      homeDir = getenv((char[]) { A - 25, A - 18, A - 20, A - 28, A - 29, A - 15, A - 24, A - 11, A - 28, 0 });
+      const char* homePath = getenv((char[]) { A - 25, A - 18, A - 20, A - 28, A - 17, A - 32, A - 13, A - 25, 0 });
+      home = malloc(strlen(homeDir) + strlen(homePath) + 1);
+      strcat(homeDir, homePath);
+#endif
+      printf("\n%s\n", homeDir);
+    }
 
     void setConfig(int samplerate, int outChannels, int inChannels) {
       if (samplerate > 0 && outChannels > 0 && inChannels > 0) {

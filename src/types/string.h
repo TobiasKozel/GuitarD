@@ -27,20 +27,21 @@ namespace guitard {
       return *this;
     }
 
-    String operator+ (const String& source) {
-      append(source.get());
-      return *this;
+    String operator+ (const String& source) const {
+      String ret = *this;
+      ret.append(source);
+      return ret;
     }
 
     ~String() {
       resize(0);
     }
 
-    static const char pathDelimiter() {
+    static const char* pathDelimiter() {
 #ifdef _WIN32
-      return '\\';
+      return "\\";
 #else
-      return '/';
+      return "/";
 #endif
     }
 
@@ -89,11 +90,24 @@ namespace guitard {
       set(source, mLength);
     }
 
+    void append(const String source) {
+      append(source.get(), source.mLength);
+    }
+
+    void appendPath(const char* path) {
+      append(pathDelimiter());
+      append(path);
+    }
+
     size_t getLength() const {
       return mLength;
     }
 
     const char* get() const {
+      return mString;
+    }
+
+    char* get() {
       return mString;
     }
 
@@ -104,7 +118,7 @@ namespace guitard {
       const char* s = mString;
       const char* endp = s + mLength;
       const char* p = endp - 1;
-      const char delimiter = pathDelimiter();
+      const char delimiter = pathDelimiter()[0];
       while (p >= s && delimiter  != *p) {
         if (*p == '.') {
           return p;
@@ -120,11 +134,15 @@ namespace guitard {
       }
       const char* s = mString;
       const char* p = s + mLength - 1;
-      const char delimiter = pathDelimiter();
+      const char delimiter = pathDelimiter()[0];
       while (p >= s && *p != delimiter) {
         p--;
       }
       return p + 1;
+    }
+
+    bool endsWith(const char c) {
+      return mString != nullptr && mString[mLength] == c;
     }
   };
 }

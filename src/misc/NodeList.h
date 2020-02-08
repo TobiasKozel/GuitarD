@@ -9,7 +9,7 @@ namespace guitard {
   namespace NodeList {
     typedef std::map<std::string, NodeInfo> NodeMap;
 
-    NodeMap nodelist;
+    NodeMap nodelist; // This is a global variable!
 
     /**
      * All nodes except input and output will be constructed here

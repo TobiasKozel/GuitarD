@@ -3,23 +3,7 @@
 #include "IControl.h"
 #include "src/ui/ScrollViewControl.h"
 #include "src/ui/theme.h"
-
-// avoid some UNICODE issues with VST3 SDK and WDL dirscan
-#if defined VST3_API && defined OS_WIN
-#ifdef FindFirstFile
-#undef FindFirstFile
-#undef FindNextFile
-#undef WIN32_FIND_DATA
-#undef PWIN32_FIND_DATA
-#define FindFirstFile FindFirstFileA
-#define FindNextFile FindNextFileA
-#define WIN32_FIND_DATA WIN32_FIND_DATAA
-#define LPWIN32_FIND_DATA LPWIN32_FIND_DATAA
-#endif
-#endif
-
-#include "dirscan.h"
-#include "IPlugPaths.h"
+#include "src/types/files.h"
 
 namespace guitard {
 
@@ -99,27 +83,22 @@ namespace guitard {
     }
 
     void scanPositions() {
-      WDL_DirScan dir;
-      if (!dir.First(path.get())) {
-        do {
-          const char* f = dir.GetCurrentFN();
-          // Skip hidden files and folders
-          if (f && f[0] != '.') {
-            if (!dir.GetCurrentIsDirectory()) {
-              // We're only interested in files, each corresponds to a IR
-              MicPosition* pos = new MicPosition(mPosCallback);
-              pos->name.append(f);
-              if (strncmp(".wav", pos->name.getExt(), 5) == 0 ||
-                strncmp(".WAV", pos->name.getExt(), 5) == 0) {
-                dir.GetCurrentFullFN(&pos->path);
-                mPositions.add(pos);
-              }
-              else {
-                delete pos;
-              }
-            }
+      ScanDir dir(path.get());
+      for (int i = 0; i < dir.size(); i++) {
+        if (!dir[i]->isFolder) {
+          // We're only interested in files, each corresponds to a IR
+          MicPosition* pos = new MicPosition(mPosCallback);
+          pos->name = dir[i]->name.get();
+          if (strncmp(".wav", pos->name.getExt(), 5) == 0 ||
+            strncmp(".WAV", pos->name.getExt(), 5) == 0) {
+            pos->path = dir[i]->relative.get();
+            // dir.GetCurrentFullFN(&pos->path);
+            mPositions.add(pos);
           }
-        } while (!dir.Next());
+          else {
+            delete pos;
+          }
+        }
       }
     }
   };
@@ -164,22 +143,17 @@ namespace guitard {
     }
 
     void scanMics() {
-      WDL_DirScan dir;
-      if (!dir.First(path.get())) {
-        do {
-          const char* f = dir.GetCurrentFN();
-          // Skip hidden files and folders
-          if (f && f[0] != '.') {
-            if (dir.GetCurrentIsDirectory()) {
-              // We're only interested in folders, each corresponds to a mic
-              Microphone* mic = new Microphone(mMicCallback, mPosCallback);
-              mMics.add(mic);
-              mic->name.append(f);
-              dir.GetCurrentFullFN(&mic->path);
-              mic->scanPositions();
-            }
-          }
-        } while (!dir.Next());
+      ScanDir dir(path.get());
+      for (int i = 0; i < dir.size(); i++) {
+        if (dir[i]->isFolder) {
+          // We're only interested in folders, each corresponds to a mic
+          Microphone* mic = new Microphone(mMicCallback, mPosCallback);
+          mMics.add(mic);
+          mic->name = dir[i]->name.get();
+          mic->path = dir[i]->relative.get();
+          // dir.GetCurrentFullFN(&mic->path);
+          mic->scanPositions();
+        }
       }
     }
 
@@ -215,36 +189,27 @@ namespace guitard {
         mScrollView[i]->setCleanUpEnabled(false);
         GetUI()->AttachControl(mScrollView[i]);
       }
-      WDL_String path = WDL_String(mPath.get());
-      iplug::INIPath(path, BUNDLE_NAME);
-      mPath.append("\\"); // TODOG Path delimiter
-      mPath.append("impulses");
-      WDL_DirScan dir;
-      if (!dir.First(mPath.get())) {
-        do {
-          const char* f = dir.GetCurrentFN();
-          // Skip hidden files and folders
-          if (f && f[0] != '.') {
-            if (dir.GetCurrentIsDirectory()) {
-              // We're only interested in folders, at the top level each corresponds to a cab
-              Cabinet* cab = new Cabinet(
-                [&](Cabinet* cab) { this->onCabChanged(cab); },
-                [&](Microphone* mic) { this->onMicChanged(mic); },
-                [&](MicPosition* pos) { this->onPositionChanged(pos); }
-              );
-              mCabinets.add(cab);
-              cab->name.append(f);
-              dir.GetCurrentFullFN(&cab->path);
-              cab->scanMics();
-              mScrollView[0]->appendChild(cab);
-            }
-          }
-        } while (!dir.Next());
-        setFromIRBundle();
+      String path = HOME_PATH;
+      path.appendPath("impulses");
+      ScanDir dir(path.get());
+      for (int i = 0; i < dir.size(); i++) {
+        if (dir[i]->isFolder) {
+          // We're only interested in folders, at the top level each corresponds to a cab
+          Cabinet* cab = new Cabinet(
+            [&](Cabinet* cab) { this->onCabChanged(cab); },
+            [&](Microphone* mic) { this->onMicChanged(mic); },
+            [&](MicPosition* pos) { this->onPositionChanged(pos); }
+          );
+          mCabinets.add(cab);
+          cab->name = dir[i]->name.get();
+          cab->path = dir[i]->relative.get();
+          // dir.GetCurrentFullFN(&cab->path);
+          cab->scanMics();
+          mScrollView[0]->appendChild(cab);
+
+        }
       }
-      else {
-        WDBGMSG("IR folder doesn't exist!\n");
-      }
+      setFromIRBundle();
     }
 
     void onCabChanged(Cabinet* newCab) {

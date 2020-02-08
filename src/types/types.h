@@ -1,6 +1,5 @@
 #pragma once
-#include "string.h"
-#include "gstructs.h"
+#include "./string.h"
 
 namespace guitard {
   typedef
@@ -17,4 +16,5 @@ namespace guitard {
 
   static const int kNoParameter = -1;
   static const int kNoValIdx = -1;
+  String HOME_PATH; // This is a global Variable
 }

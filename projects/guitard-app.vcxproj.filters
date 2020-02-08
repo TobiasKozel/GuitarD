@@ -525,6 +525,9 @@
     <ClInclude Include="..\src\types\pointerList.h">
       <Filter>src\types</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\types\files.h">
+      <Filter>src\types</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
