@@ -3,6 +3,7 @@
 #include "circbuf.h"
 
 namespace guitard {
+#ifndef GUITARD_HEADLESS
   class FeedbackNodeUi : public NodeUi {
     IVButtonControl* mBrowseButton = nullptr;
     MessageBus::Subscription<BlockSizeEvent*> mMaxBlockSizeEvent;
@@ -48,6 +49,7 @@ namespace guitard {
     }
 
   };
+#endif
 
   class FeedbackNode final : public Node {
     sample gain = 0.0;
@@ -116,6 +118,7 @@ namespace guitard {
       }
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       shared.graphics = pGrahics;
       mUi = new FeedbackNodeUi(&shared);
@@ -124,5 +127,6 @@ namespace guitard {
       mUi->setUp();
       mUiReady = true;
     }
+#endif
   };
 }

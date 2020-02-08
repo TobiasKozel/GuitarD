@@ -1,4 +1,6 @@
 #pragma once
+#ifndef GUITARD_HEADLESS
+
 #include "IControl.h"
 #include "src/misc/constants.h"
 #include "src/node/Node.h"
@@ -373,3 +375,4 @@ namespace guitard {
     }
   };
 }
+#endif

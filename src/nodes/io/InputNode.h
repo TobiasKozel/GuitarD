@@ -4,6 +4,7 @@
 #include "src/node/NodeUi.h"
 
 namespace guitard {
+#ifndef GUITARD_HEADLESS
   class InputNodeUi final : public NodeUi {
 
     iplug::igraphics::IText mBlocksizeText;
@@ -20,6 +21,7 @@ namespace guitard {
       g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
     }
   };
+#endif
 
   class InputNode final : public Node {
   public:
@@ -64,6 +66,7 @@ namespace guitard {
       mIsProcessed = true;
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       shared.graphics = pGrahics;
       mUi = new InputNodeUi(&shared);
@@ -72,7 +75,9 @@ namespace guitard {
       mUi->setUp();
       mUiReady = true;
     }
+#endif
   private:
     int mInputChannels = 2;
   };
+
 }

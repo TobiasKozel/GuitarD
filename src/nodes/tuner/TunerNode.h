@@ -5,6 +5,7 @@
 #define TWO_YROOT_TWELVE 1.05946309435929526456f
 
 namespace guitard {
+#ifndef GUITARD_HEADLESS
   class TunerNodeUi : public NodeUi {
     std::map<float, std::string> equalPitches;
     const char* mNotes[12] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
@@ -29,6 +30,7 @@ namespace guitard {
       mDirty = true;
     }
   };
+#endif
 
   class TunerNode final : public Node {
   public:
@@ -36,6 +38,7 @@ namespace guitard {
       shared.type = pType;
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       shared.graphics = pGrahics;
       mUi = new TunerNodeUi(&shared);
@@ -44,5 +47,6 @@ namespace guitard {
       mUi->setUp();
       mUiReady = true;
     }
+#endif
   };
 }

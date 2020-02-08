@@ -2,6 +2,7 @@
 #include "ParametricEq.h"
 
 namespace guitard {
+#ifndef GUITARD_HEADLESS
   class ParametricEqNodeUi final : public NodeUi {
   public:
     ParametricEqNodeUi(NodeShared* param) : NodeUi(param) {
@@ -56,6 +57,7 @@ namespace guitard {
       IControl::OnMouseOver(x, y, mod);
     }
   };
+#endif
 
   class ParametricEqNode final : public FaustGenerated::ParametricEq {
   public:
@@ -65,6 +67,7 @@ namespace guitard {
       shared.height = 200;
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       shared.graphics = pGrahics;
       mUi = new ParametricEqNodeUi(&shared);
@@ -96,5 +99,6 @@ namespace guitard {
       mUi->setUp();
       mUiReady = true;
     }
+#endif
   };
 }

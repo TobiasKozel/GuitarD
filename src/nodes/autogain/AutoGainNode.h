@@ -49,12 +49,14 @@ namespace guitard {
           detectedLoudness += avg;
         }
         else {
+#ifndef GUITARD_HEADLESS
           if (shared.parameters[1].control != nullptr) {
 
           }
           else {
 
           }
+#endif
 
           samplesPassed = 0;
           detectMode = false;
@@ -71,9 +73,11 @@ namespace guitard {
       mIsProcessed = true;
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       Node::setupUi(pGrahics);
       mUi->setColor(Theme::Categories::DYNAMICS);
     }
+#endif
   };
 }

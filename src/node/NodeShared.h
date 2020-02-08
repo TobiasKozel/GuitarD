@@ -11,7 +11,9 @@ namespace guitard {
   struct NodeShared {
     std::string type;
     MessageBus::Bus* bus = nullptr;
-    IGraphics* graphics = nullptr;
+#ifndef GUITARD_HEADLESS
+    IGraphics* graphics = nullptr; // TODOG Get rid of this
+#endif
     float width = 250;
     float height = 180;
     float X = 0;

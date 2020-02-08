@@ -9,10 +9,12 @@ namespace guitard {
       shared.width = 300;
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       Node::setupUi(pGrahics);
       mUi->setColor(Theme::Categories::SPATIAL);
     }
+#endif
 
     std::string getLicense() override {
       std::string l = "Code from https://gist.github.com/tomoyanonymous\n";

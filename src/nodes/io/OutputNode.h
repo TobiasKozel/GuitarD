@@ -3,11 +3,13 @@
 #include "src/node/Node.h"
 
 namespace guitard {
+#ifndef GUITARD_HEADLESS
   class OutputNodeUi final : public NodeUi {
   public:
     OutputNodeUi(NodeShared* param) : NodeUi(param) {
     }
   };
+#endif
 
 
   class OutputNode final : public Node {
@@ -57,6 +59,7 @@ namespace guitard {
       mChannelCount = p_channels;
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(IGraphics* pGrahics) override {
       shared.graphics = pGrahics;
       mUi = new OutputNodeUi(&shared);
@@ -65,5 +68,6 @@ namespace guitard {
       mUi->setUp();
       mUiReady = true;
     }
+#endif
   };
 }

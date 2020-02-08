@@ -1,4 +1,5 @@
 #pragma once
+#ifndef GUITARD_HEADLESS
 #include "src/misc/NodeList.h"
 #include "src/ui/theme.h"
 
@@ -38,3 +39,4 @@ namespace guitard {
     }
   };
 }
+#endif

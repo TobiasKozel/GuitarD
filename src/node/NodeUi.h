@@ -1,4 +1,5 @@
 #pragma once
+#ifndef GUITARD_HEADLESS
 #include "IControls.h"
 #include "src/types/iplugTypes.h"
 #include "src/node/NodeSocket.h"
@@ -447,3 +448,9 @@ namespace guitard {
     }
   };
 }
+
+#else
+namespace guitard {
+  class NodeUi;
+}
+#endif

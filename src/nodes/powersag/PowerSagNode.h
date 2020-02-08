@@ -199,10 +199,12 @@ namespace guitard {
       mIsProcessed = true;
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       Node::setupUi(pGrahics);
       mUi->setColor(Theme::Categories::DISTORTION);
     }
+#endif
 
     std::string getLicense() override {
       std::string l = "\nAll of the DSP Copyright(c) 2018 Chris Johnson\n";

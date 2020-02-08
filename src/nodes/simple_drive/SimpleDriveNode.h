@@ -2,6 +2,7 @@
 #include "SimpleDrive.h"
 
 namespace guitard {
+#ifndef GUITARD_HEADLESS
   class SimpleDriveNodeUi final : public NodeUi {
     double last = 0;
     const double speed = 0.2;
@@ -29,6 +30,7 @@ namespace guitard {
     }
 
   };
+#endif
 
   class SimpleDriveNode final : public FaustGenerated::SimpleDrive {
   public:
@@ -36,7 +38,7 @@ namespace guitard {
       shared.type = pType;
     }
 
-
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       shared.graphics = pGrahics;
       mUi = new SimpleDriveNodeUi(&shared);
@@ -55,5 +57,6 @@ namespace guitard {
       mUi->setUp();
       mUiReady = true;
     }
+#endif
   };
 }

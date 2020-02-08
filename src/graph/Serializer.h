@@ -81,7 +81,7 @@ namespace guitard {
     ) {
 
       output->connectInput(nullptr, 0);
-
+#ifndef GUITARD_HEADLESS
       if (input->mUi != nullptr) {
         input->mUi->setTranslation(
           serialized["input"]["position"][0],
@@ -93,6 +93,7 @@ namespace guitard {
         input->shared.Y = serialized["input"]["position"][1];
         input->positionSockets();
       }
+#endif
 
       int expectedIndex = 0;
       int paramBack = MAX_DAW_PARAMS - 1;
@@ -194,6 +195,7 @@ namespace guitard {
 
       //output->X = serialized["output"]["position"][0];
       //output->Y = serialized["output"]["position"][1];
+#ifndef GUITARD_HEADLESS
       if (output->mUi != nullptr) {
         output->mUi->setTranslation(
           serialized["output"]["position"][0],
@@ -205,6 +207,7 @@ namespace guitard {
         output->shared.Y = serialized["output"]["position"][1];
         output->positionSockets();
       }
+#endif
     }
   }
 }

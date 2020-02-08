@@ -1,5 +1,5 @@
 #pragma once
-
+#ifndef GUITARD_HEADLESS
 #include "IControl.h"
 #include "src/parameter/ParameterCoupling.h"
 #include "src/types/types.h"
@@ -119,3 +119,4 @@ namespace guitard {
     bool mValueMouseOver = false;
   };
 }
+#endif

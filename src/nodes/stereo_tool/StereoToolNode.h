@@ -8,6 +8,7 @@ namespace guitard {
       shared.type = pType;
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       //background = new NodeBackground(pGrahics, PNGSTEREOSHAPERBG_FN, L, T,
       //  [&](float x, float y) {
@@ -25,5 +26,6 @@ namespace guitard {
       Node::setupUi(pGrahics);
       mUi->setColor(Theme::Categories::TOOLS);
     }
+#endif
   };
 }

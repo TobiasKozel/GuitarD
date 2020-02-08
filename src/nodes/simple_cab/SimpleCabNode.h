@@ -21,6 +21,8 @@ namespace guitard {
     bool embedIr = false;
   };
 
+#ifndef GUITARD_HEADLESS
+
   class SimpleCabNodeUi : public NodeUi {
     IText mBlocksizeText;
     IVButtonControl* mBrowseButton = nullptr;
@@ -113,7 +115,7 @@ namespace guitard {
       mCabShared = data;
     }
   };
-
+#endif
 
   class SimpleCabNode final : public Node {
     WrappedConvolver* mConvolver = nullptr;
@@ -203,6 +205,7 @@ namespace guitard {
       mIsProcessed = true;
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       shared.graphics = pGrahics;
       SimpleCabNodeUi* ui = new SimpleCabNodeUi(&shared);
@@ -213,6 +216,7 @@ namespace guitard {
       mUi->setUp();
       mUiReady = true;
     }
+#endif
 
     std::string getLicense() override {
       return WrappedConvolver::getLicense();

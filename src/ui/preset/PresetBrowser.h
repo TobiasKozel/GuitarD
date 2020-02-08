@@ -1,4 +1,5 @@
 #pragma once
+#ifndef GUITARD_HEADLESS
 #include "src/ui/ScrollViewControl.h"
 #include "src/misc/MessageBus.h"
 #include "src/ui/ScrollViewChild.h"
@@ -48,3 +49,4 @@ namespace guitard {
     }
   };
 }
+#endif

@@ -14,7 +14,12 @@ namespace guitard {
     sample mMul = 0;
     sample* value = nullptr; // pointer to the value used in the dsp code
     sample baseValue = 0; // This value is only used for params which couldn't claim a DAW parameter to act as the one provided by the IParam
-    IParam* parameter = nullptr; // Param object for outside daw automation
+#ifndef GUITARD_HEADLESS
+    IParam*
+#else
+    void*
+#endif
+      parameter = nullptr; // Param object for outside daw automation
   public:
     enum Type {
       Auto,
@@ -41,7 +46,9 @@ namespace guitard {
     sample stepSize = 0.01;
 
     // Control object which will draw the UI knob
+#ifndef GUITARD_HEADLESS
     IControl* control = nullptr;
+#endif
     // UI position and size
     float x = 0;
     float y = 0;
@@ -130,21 +137,27 @@ namespace guitard {
      * Simply returns the base Value. This is not the value used in the dsp code, since it never has automation applied
      */
     sample getValue() const {
+#ifndef GUITARD_HEADLESS
       if (parameter != nullptr) {
         return parameter->Value();
       }
+#endif
       return baseValue;
     }
 
     void setValue(const sample v) {
+#ifndef GUITARD_HEADLESS
       if (parameter != nullptr) {
         parameter->Set(v);
       }
-      else {
+      else
+#endif
+      {
         baseValue = v;
       }
     }
 
+#ifndef GUITARD_HEADLESS
     void setParam(IParam* p) {
       parameter = p;
       if (p != nullptr) {
@@ -169,10 +182,13 @@ namespace guitard {
         p->Set(baseValue);
       }
     }
+#endif
 
+#ifndef GUITARD_HEADLESS
     IParam* getParam() {
       return parameter;
     }
+#endif
 
     sample scaledToNormalized(const sample v) const {
       return ((v - min) / (max - min));
@@ -200,10 +216,13 @@ namespace guitard {
      * normalized value, this will scale it to the internal DSP value
      */
     void setFromNormalized(const sample v) {
+#ifndef GUITARD_HEADLESS
       if (parameter != nullptr) {
         parameter->SetNormalized(v);
       }
-      else if (type == Frequency) {
+      else
+#endif
+      if (type == Frequency) {
         baseValue = normalizedToExp(v);
       }
       else {
@@ -215,9 +234,11 @@ namespace guitard {
      * Return the normalized and shaped value to use for controls
      */
     sample getNormalized() const {
+#ifndef GUITARD_HEADLESS
       if (parameter != nullptr) {
         return parameter->GetNormalized();
       }
+#endif
       /**
        * TODOG other types of scaling
        */

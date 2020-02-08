@@ -1,6 +1,5 @@
 #pragma once
 
-// #define GUITARD_HEADLESS
 #ifdef GUITARD_HEADLESS
 #include <vector>
 #else
@@ -19,6 +18,9 @@ namespace guitard {
   public:
     T* get(const size_t index) const {
 #ifdef GUITARD_HEADLESS
+      if (index >= mList.size()) {
+        return nullptr;
+      }
       return mList.at(index);
 #else
       return mList.Get(index);

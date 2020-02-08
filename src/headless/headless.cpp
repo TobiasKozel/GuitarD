@@ -4,6 +4,10 @@
  */
 #pragma once
 #define GUITARD_HEADLESS
+#define WDL_RESAMPLE_TYPE float
+#define FLOATCONV
+
+#include "src/types/types.h"
 #include "src/misc/MessageBus.h"
 #include "src/parameter/ParameterManager.h"
 #include "src/graph/Graph.h"
@@ -26,6 +30,7 @@ namespace guitard {
       strcat(homeDir, homePath);
 #endif
       printf("\n%s\n", homeDir);
+      guitard::HOME_PATH = homeDir;
     }
 
     void setConfig(int samplerate, int outChannels, int inChannels) {

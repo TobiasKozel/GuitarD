@@ -8,15 +8,17 @@
 #include "src/misc/MessageBus.h"
 #include "src/nodes/io/InputNode.h"
 #include "src/nodes/io/OutputNode.h"
-#include "src/ui/GraphBackground.h"
 #include "Serializer.h"
-#include "SortGraph.h" 
 #include "src/parameter/ParameterManager.h"
+
+#ifndef GUITARD_HEADLESS
+#include "src/ui/GraphBackground.h"
+#include "SortGraph.h" 
 #include "src/ui/CableLayer.h"
 #include "src/ui/SideBar.h"
 #include "src/misc/HistoryStack.h"
 #include "FormatGraph.h"
-#include "soundwoofer/soundwoofer.h"
+#endif
 
 namespace guitard {
   /**
@@ -27,6 +29,8 @@ namespace guitard {
   class Graph {
     MessageBus::Bus* mBus = nullptr;
 
+
+#ifndef GUITARD_HEADLESS
     /**
      * Whole lot of subscriptions needed for the graph
      */
@@ -43,8 +47,25 @@ namespace guitard {
     MessageBus::Subscription<const char*> mLoadPresetEvent;
     MessageBus::Subscription<WDL_String*> mSavePresetEvent;
     MessageBus::Subscription<BlockSizeEvent*> mMaxBlockSizeEvent;
-
     IGraphics* mGraphics = nullptr;
+
+    /**
+     * Control elements
+     */
+    GraphBackground* mBackground = nullptr; // Always at the bottom
+    CableLayer* mCableLayer = nullptr; // Always below the Gallery
+    SideBar* mSideBar = nullptr; // Always top most
+
+    HistoryStack mHistoryStack;
+
+    /**
+     * Editor window properties
+     * Kept around for the serialization
+     */
+    int mWindowWidth = 0;
+    int mWindowHeight = 0;
+    float mWindowScale = 0;
+#endif
 
     ParameterManager* mParamManager = nullptr;
 
@@ -90,24 +111,9 @@ namespace guitard {
      */
     int mMaxBlockSize = MAX_BUFFER;
 
-    /**
-     * Control elements
-     */
-    GraphBackground* mBackground = nullptr; // Always at the bottom
-    CableLayer* mCableLayer = nullptr; // Always below the Gallery
-    SideBar* mSideBar = nullptr; // Always top most
 
-    HistoryStack mHistoryStack;
 
     GraphStats mStats;
-
-    /**
-     * Editor window properties
-     * Kept around for the serialization
-     */
-    int mWindowWidth = 0;
-    int mWindowHeight = 0;
-    float mWindowScale = 0;
 
     /**
      * Used to slice the dsp block in smaller slices
@@ -124,9 +130,14 @@ namespace guitard {
       mOutputNode = new OutputNode(mBus);
       mOutputNode->connectInput(mInputNode->shared.socketsOut[0]);
 
+#ifndef GUITARD_HEADLESS
       /**
-       * All the events the Graph is subscribed to
+       * All the events the Graph is subscribed to, they're only needed with a gui
        */
+      mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo& info) {
+        MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
+        this->addNode(NodeList::createNode(info.name), nullptr, 300, 300);
+      });
 
       mNodeDelSub.subscribe(mBus, MessageBus::NodeDeleted, [&](Node* param) {
         MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
@@ -138,10 +149,7 @@ namespace guitard {
         this->byPassConnection(param);
       });
 
-      mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo& info) {
-        MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
-        this->addNode(NodeList::createNode(info.name), nullptr, 300, 300);
-      });
+
 
       mNodeCloneEvent.subscribe(mBus, MessageBus::CloneNode, [&](Node* node) {
         Node* clone = NodeList::createNode(node->shared.type);
@@ -150,16 +158,6 @@ namespace guitard {
           clone->mUi->mDragging = true;
           mGraphics->SetCapturedControl(clone->mUi);
         }
-      });
-
-      mAwaitAudioMutexEvent.subscribe(mBus, MessageBus::AwaitAudioMutex, [&](const bool doPause) {
-        if (doPause) {
-          this->lockAudioThread();
-        }
-        else {
-          this->unlockAudioThread();
-        }
-
       });
 
       mPushUndoState.subscribe(mBus, MessageBus::PushUndoState, [&](bool) {
@@ -183,6 +181,14 @@ namespace guitard {
         this->spliceInCombine(node);
       });
 
+      mLoadPresetEvent.subscribe(mBus, MessageBus::LoadPresetFromString, [&](const char* data) {
+        this->deserialize(data);
+      });
+
+      mSavePresetEvent.subscribe(mBus, MessageBus::SavePresetToSring, [&](WDL_String* data) {
+        this->serialize(*data);
+      });
+
       mAutomationRequest.subscribe(mBus, MessageBus::AttachAutomation, [&](AutomationAttachRequest r) {
         MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
         PointerList<Node>& n = this->mNodes;
@@ -200,14 +206,6 @@ namespace guitard {
         }
       });
 
-      mLoadPresetEvent.subscribe(mBus, MessageBus::LoadPresetFromString, [&](const char* data) {
-        this->deserialize(data);
-      });
-
-      mSavePresetEvent.subscribe(mBus, MessageBus::SavePresetToSring, [&](WDL_String* data) {
-        this->serialize(*data);
-      });
-
       mMaxBlockSizeEvent.subscribe(mBus, MessageBus::MaxBlockSizeEvent, [&](BlockSizeEvent* e) {
         if (e->set) {
           this->setBlockSize(e->blockSize);
@@ -216,14 +214,16 @@ namespace guitard {
         //  e->blockSize = this->mMaxBlockSize;
         //}
       });
-    }
 
-    void testadd() {
-      return;
-      // formatTest();
-      Node* test = NodeList::createNode("CabLibNode");
-      addNode(test, nullptr, 0, 500);
-      // mOutputNode->connectInput(test->shared.socketsOut[0]);
+      mAwaitAudioMutexEvent.subscribe(mBus, MessageBus::AwaitAudioMutex, [&](const bool doPause) {
+        if (doPause) {
+          this->lockAudioThread();
+        }
+        else {
+          this->unlockAudioThread();
+        }
+    });
+#endif
     }
 
     ~Graph() {
@@ -231,11 +231,40 @@ namespace guitard {
       // TODOG get rid of all the things
     }
 
+    void lockAudioThread() {
+      if (mPauseAudio == 0) {
+        mAudioMutex.lock();
+      }
+      mPauseAudio++;
+    }
+
+    void unlockAudioThread() {
+      if (mPauseAudio == 1) {
+        mAudioMutex.unlock();
+      }
+      mPauseAudio--;
+    }
+
     void OnReset(const int pSampleRate, const int pOutputChannels = 2, const int pInputChannels = 2) {
       if (pSampleRate != mSampleRate || pOutputChannels != mChannelCount || pInputChannels != mInPutChannelCount) {
         lockAudioThread();
         mSampleRate = pSampleRate;
-        resizeSliceBuffer(pOutputChannels);
+        {
+          if (mSliceBuffer[0] != nullptr) {
+            for (int c = 0; c < pOutputChannels; c++) {
+              delete mSliceBuffer[0];
+              mSliceBuffer[0] = nullptr;
+              delete mSliceBuffer[1];
+              mSliceBuffer[1] = nullptr;
+            }
+          }
+          mSliceBuffer[0] = new sample * [pOutputChannels];
+          mSliceBuffer[1] = new sample * [pOutputChannels];
+          /**
+           * There's no need to create a buffer inside since it will use the pointer from the
+           * scratch buffer offset by the sub-block position
+           */
+        }
         mChannelCount = pOutputChannels;
         mInPutChannelCount = pInputChannels;
         mInputNode->setInputChannels(pInputChannels);
@@ -313,8 +342,10 @@ namespace guitard {
        * Do a version without mutex and stats if there's no gui
        * since there is no need for locking if the graph can't be altered
        */
-      if (mGraphics == nullptr) {
-
+#ifndef GUITARD_HEADLESS
+      if (mGraphics == nullptr)
+#endif
+      {
         mInputNode->CopyIn(in, nFrames);
         for (int n = 0; n < nodeCount; n++) {
           mNodes[n]->BlockStart();
@@ -338,8 +369,9 @@ namespace guitard {
           }
         }
         mOutputNode->CopyOut(out, nFrames);
+        return;
       }
-      else {
+      {
         /**
          * The version with mutex locking
          */
@@ -398,6 +430,7 @@ namespace guitard {
       }
     }
 
+#ifndef GUITARD_HEADLESS
     /**
      * The graph needs to know about the graphics context to add and remove the controls for the nodes
      * It also handles keystrokes globally
@@ -586,12 +619,6 @@ namespace guitard {
       unlockAudioThread();
     }
 
-    void removeAllNodes() {
-      while (mNodes.size()) {
-        removeNode(0);
-      }
-    }
-
     /**
      * Will re route the connections the node provided
      * Only takes care of the first input and first output
@@ -642,12 +669,29 @@ namespace guitard {
     }
 
     /**
+     * Will try to tidy up the node graph, bound to the F key
+     */
+    void arrangeNodes() const {
+      FormatGraph::resetBranchPos(mInputNode);
+      FormatGraph::arrangeBranch(mInputNode, Coord2D{ mInputNode->shared.Y, mInputNode->shared.X });
+      centerGraph();
+    }
+#endif
+
+    void removeAllNodes() {
+      while (mNodes.size()) {
+        removeNode(0);
+      }
+    }
+
+    /**
      * Removes the node and pauses the audio thread
      * Can also bridge the connection if possible
      */
     void removeNode(Node* node, const bool reconnect = false) {
       if (node == mInputNode || node == mOutputNode) { return; }
       lockAudioThread();
+#ifndef GUITARD_HEADLESS
       if (reconnect) {
         /**
          * Since the cleanup will sever all connections to a node, it will have to be done before the
@@ -656,11 +700,14 @@ namespace guitard {
         byPassConnection(node);
       }
       node->cleanupUi(mGraphics);
+#endif
       mParamManager->releaseNode(node);
       node->cleanUp();
       mNodes.remove(node);
       delete node;
+#ifndef GUITARD_HEADLESS
       SortGraph::sortGraph(&mNodes, mInputNode, mOutputNode);
+#endif
       // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
       unlockAudioThread();
     }
@@ -669,6 +716,9 @@ namespace guitard {
       removeNode(mNodes[index]);
     }
 
+
+
+#ifndef GUITARD_HEADLESS
     void serialize(WDL_String& serialized) {
       nlohmann::json json;
       serialize(json);
@@ -700,6 +750,7 @@ namespace guitard {
         assert(false); // Failed to serialize json
       }
     }
+#endif
 
     void deserialize(const char* data) {
       try {
@@ -715,12 +766,6 @@ namespace guitard {
     void deserialize(nlohmann::json& json) {
       try {
         removeAllNodes();
-        mHistoryStack.ClearStack();
-        if (mGraphics != nullptr) {
-          //IGraphics* g = mGraphics;
-          //cleanupUi();
-          //setupUi(g);
-        }
         if (json.contains("scale")) {
           // mWindowScale = json["scale"];
           // mWindowWidth = json["width"]; // Probably no point in changing the window size since it's confusing
@@ -731,12 +776,14 @@ namespace guitard {
         }
         lockAudioThread();
         Serializer::deserialize(json, &mNodes, mOutputNode, mInputNode, mSampleRate, mMaxBlockSize, mParamManager, mBus);
+#ifndef GUITARD_HEADLESS
         if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
           for (int i = 0; i < mNodes.size(); i++) {
             mNodes[i]->setupUi(mGraphics);
           }
           scaleUi();
         }
+#endif
         //if (json.contains("maxBlockSize")) {
         //  setBlockSize(json["maxBlockSize"]);
         //}
@@ -748,49 +795,17 @@ namespace guitard {
     }
 
   private:
-    void resizeSliceBuffer(const int channelCount) {
-      if (mSliceBuffer[0] != nullptr) {
-        for (int c = 0; c < channelCount; c++) {
-          delete mSliceBuffer[0];
-          mSliceBuffer[0] = nullptr;
-          delete mSliceBuffer[1];
-          mSliceBuffer[1] = nullptr;
-        }
-      }
-      mSliceBuffer[0] = new sample * [channelCount];
-      mSliceBuffer[1] = new sample * [channelCount];
-      /**
-       * There's no need to create a buffer inside since it will use the pointer from the
-       * scratch buffer offset by the sub-block position
-       */
-    }
-
-    void lockAudioThread() {
-      if (mPauseAudio == 0) {
-        mAudioMutex.lock();
-      }
-      mPauseAudio++;
-    }
-
-    void unlockAudioThread() {
-      if (mPauseAudio == 1) {
-        mAudioMutex.unlock();
-      }
-      mPauseAudio--;
-    }
-
-    /**
-     * Will try to tidy up the node graph, bound to the F key
-     */
-    void arrangeNodes() const {
-      FormatGraph::resetBranchPos(mInputNode);
-      FormatGraph::arrangeBranch(mInputNode, Coord2D{ mInputNode->shared.Y, mInputNode->shared.X });
-      centerGraph();
-    }
-
+#ifndef GUITARD_HEADLESS
     /**
      * Test Setups
      */
+    void testadd() {
+      return;
+      // formatTest();
+      Node* test = NodeList::createNode("CabLibNode");
+      addNode(test, nullptr, 0, 500);
+      // mOutputNode->connectInput(test->shared.socketsOut[0]);
+    }
 
     void formatTest() {
       /**
@@ -821,6 +836,6 @@ namespace guitard {
       mOutputNode->shared.socketsIn[0]->disconnectAll();
       mOutputNode->connectInput(test7->shared.socketsOut[0]);
     }
-
+#endif
   };
 }

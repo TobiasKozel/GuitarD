@@ -2,6 +2,8 @@
 #include "src/node/Node.h"
 #include "circbuf.h"
 namespace guitard {
+
+#ifndef GUITARD_HEADLESS
   class EnvelopeNodeUi final : public NodeUi {
     IVButtonControl* mPicker = nullptr;
     bool mPickerMode = false;
@@ -87,6 +89,7 @@ namespace guitard {
     }
 
   };
+#endif
 
   /**
    * This will take a signal and allow internal modulation for any other parameters
@@ -197,6 +200,7 @@ namespace guitard {
       mIsProcessed = true;
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       shared.graphics = pGrahics;
       mUi = new EnvelopeNodeUi(&shared);
@@ -205,5 +209,6 @@ namespace guitard {
       mUi->setUp();
       mUiReady = true;
     }
+#endif
   };
 }

@@ -1,9 +1,11 @@
 #pragma once
 #include <json.hpp>
 #include "src/node/Node.h"
+
 #include "CabLibPopUp.h"
 
 namespace guitard {
+#ifndef GUITARD_HEADLESS
   class CabLibNodeUi : public NodeUi {
     // ScrollViewControl* test = nullptr;
     CabLibNodeSharedData* mCabShared = nullptr;
@@ -63,7 +65,7 @@ namespace guitard {
       mCabShared = data;
     }
   };
-
+#endif
 
   class CabLibNode final : public Node {
     /** Time in seconds to use for blending between convolvers */
@@ -192,6 +194,7 @@ namespace guitard {
       mIsProcessed = true;
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(IGraphics* pGraphics) override {
       shared.graphics = pGraphics;
       CabLibNodeUi* ui = new CabLibNodeUi(&shared);
@@ -202,6 +205,7 @@ namespace guitard {
       mUi->setUp();
       mUiReady = true;
     }
+#endif
 
     std::string getLicense() override {
       std::string l = "\nDefault IRs provided by Soundwoofer\n";

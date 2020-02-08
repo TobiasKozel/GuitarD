@@ -1,5 +1,6 @@
 #pragma once
 
+#ifndef GUITARD_HEADLESS
 #include "IControl.h"
 #include "ScrollViewChild.h"
 
@@ -347,3 +348,4 @@ namespace guitard {
     }
   };
 }
+#endif

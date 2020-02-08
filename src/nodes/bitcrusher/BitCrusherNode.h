@@ -9,6 +9,8 @@ namespace guitard {
       shared.height = 240;
       shared.type = pType;
     }
+
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGraphics) override {
       shared.graphics = pGraphics;
       mUi = new NodeUi(&shared);
@@ -25,5 +27,6 @@ namespace guitard {
       mUi->setUp();
       mUiReady = true;
     }
+#endif
   };
 }

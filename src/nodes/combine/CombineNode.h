@@ -137,9 +137,11 @@ namespace guitard {
       }
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       Node::setupUi(pGrahics);
       mUi->setColor(Theme::Categories::TOOLS);
     }
+#endif
   };
 }

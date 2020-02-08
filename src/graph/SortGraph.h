@@ -1,6 +1,6 @@
 #pragma once
 #include "src/node/Node.h"
-
+#ifndef GUITARD_HEADLESS
 namespace guitard {
   namespace SortGraph {
     /**
@@ -52,3 +52,4 @@ namespace guitard {
     }
   }
 }
+#endif

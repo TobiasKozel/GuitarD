@@ -10,7 +10,6 @@
 #endif
 #endif
 
-
 // Max amount of nodes in the graph
 #define MAX_NODES 128
 

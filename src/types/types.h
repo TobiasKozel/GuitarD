@@ -16,5 +16,6 @@ namespace guitard {
 
   static const int kNoParameter = -1;
   static const int kNoValIdx = -1;
+  static const double PI = 3.14159265358979323846;
   String HOME_PATH; // This is a global Variable
 }

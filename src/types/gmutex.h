@@ -1,5 +1,4 @@
 #pragma once
-
 #ifdef GUITARD_HEADLESS
 #include <mutex>
 #else

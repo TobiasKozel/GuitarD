@@ -1,9 +1,13 @@
 #pragma once
 
+#ifndef GUITARD_HEADLESS
 #include "IControl.h"
 #include "src/ui/ScrollViewControl.h"
 #include "src/ui/theme.h"
 #include "src/types/files.h"
+#endif
+#include <functional>
+#include "src/types/gstructs.h"
 
 namespace guitard {
 
@@ -11,7 +15,7 @@ namespace guitard {
     std::function<void(IRBundle)> callback;
     IRBundle loadedIr;
   };
-
+#ifndef GUITARD_HEADLESS
   class MicPosition : public IControl {
   public:
     typedef std::function<void(MicPosition * c)> MicPositionCallback;
@@ -330,4 +334,5 @@ namespace guitard {
       }
     }
   };
+#endif
 }

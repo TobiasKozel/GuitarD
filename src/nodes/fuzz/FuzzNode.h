@@ -8,10 +8,12 @@ namespace guitard {
       shared.type = pType;
     }
 
+#ifndef GUITARD_HEADLESS
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
       Node::setupUi(pGrahics);
       mUi->setColor(Theme::Categories::DISTORTION);
     }
+#endif
 
     std::string getLicense() override {
       std::string l = "\nFaust code from Guitarix, probably needs to be replaced/removed";

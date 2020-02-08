@@ -59,8 +59,9 @@ namespace guitard {
       OnReset(pSamplerate, pChannles);
 
 
-
+#ifndef GUITARD_HEADLESS
       positionSockets();
+#endif
     }
 
     /**
@@ -368,6 +369,7 @@ namespace guitard {
     /**                 UI STUFF                */
 
 
+#ifndef GUITARD_HEADLESS
     /**
      * Generic setup of the parameters to get something on the screen
      */
@@ -378,6 +380,17 @@ namespace guitard {
       pGrahics->AttachControl(mUi);
       mUi->setUp();
       mUiReady = true;
+    }
+
+    /**
+     * Cleans up the IControls for all the parameters
+     */
+    virtual void cleanupUi(IGraphics* pGraphics) {
+      if (mUi != nullptr) {
+        pGraphics->RemoveControl(mUi);
+        mUi = nullptr;
+      }
+      mUiReady = false;
     }
 
     virtual void positionSockets() {
@@ -394,16 +407,7 @@ namespace guitard {
       }
     }
 
-    /**
-     * Cleans up the IControls for all the parameters
-     */
-    virtual void cleanupUi(IGraphics* pGraphics) {
-      if (mUi != nullptr) {
-        pGraphics->RemoveControl(mUi);
-        mUi = nullptr;
-      }
-      mUiReady = false;
-    }
+
 
     void moveAlong(const float x) {
       if (shared.type == "FeedbackNode") { return; }
@@ -419,6 +423,7 @@ namespace guitard {
         }
       }
     }
+#endif
 
     /**
      * Function to retrieve the license/copyright info about the node

@@ -5,6 +5,7 @@
 #include "src/node/NodeShared.h"
 
 namespace guitard {
+#ifndef GUITARD_HEADLESS
   class NodeSocketUi : public IControl {
     MessageBus::Subscription<SocketConnectRequest> mOnConnectionEvent;
     MessageBus::Subscription<SocketConnectRequest> mOnConnectionRedirectEvent;
@@ -150,4 +151,7 @@ namespace guitard {
       mGraphics->SetAllControlsDirty();
     }
   };
+#else
+  class NodeSocketUi;
+#endif
 }
