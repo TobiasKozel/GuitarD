@@ -1,6 +1,5 @@
 #pragma once
 
-#include "IPlugParameter.h"
 #include "src/misc/constants.h"
 #include "src/node/Node.h"
 #include "src/parameter/ParameterCoupling.h"

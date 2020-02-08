@@ -32,7 +32,7 @@ namespace guitard {
     NodeSocketUi* mOutSocketsUi[MAX_NODE_SOCKETS] = { nullptr };
 
     NodeUiHeader mHeader;
-    WDL_PtrList<IControl> mElements;
+    PointerList<IControl> mElements;
 
     ILayerPtr mCachedBgLayer;
     bool mBgIsCached = false;
@@ -159,7 +159,7 @@ namespace guitard {
           const bool bypassed = static_cast<bool>(p->control->GetValue());
           p->control->SetValueFromUserInput(bypassed ? 0.0 : 1.0);
         }, u8"\uf056", u8"\uf011", mIconFont);
-        mElements.Add(mHeader.bypass);
+        mElements.add(mHeader.bypass);
         shared->graphics->AttachControl(mHeader.bypass);
       }
 
@@ -170,7 +170,7 @@ namespace guitard {
       ), [&](IControl* pCaller) {
         MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDeleted, this->shared->node);
       });
-      mElements.Add(mHeader.remove);
+      mElements.add(mHeader.remove);
       shared->graphics->AttachControl(mHeader.remove);
     }
 
@@ -180,14 +180,14 @@ namespace guitard {
         NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsIn[i]);
         shared->graphics->AttachControl(socket);
         mInSocketsUi[i] = socket;
-        mElements.Add(socket);
+        mElements.add(socket);
       }
 
       for (int i = 0; i < shared->outputCount; i++) {
         NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsOut[i]);
         shared->graphics->AttachControl(socket);
         mOutSocketsUi[i] = socket;
-        mElements.Add(socket);
+        mElements.add(socket);
       }
     }
 
@@ -222,7 +222,7 @@ namespace guitard {
           couple->control->SetDirty();
         }
         shared->graphics->AttachControl(couple->control);
-        mElements.Add(couple->control);
+        mElements.add(couple->control);
         if (i == 0 && mHeader.hasByPass) { couple->control->Hide(true); }
 
         // optionally hide the lables etc
@@ -242,7 +242,7 @@ namespace guitard {
           break;
         }
       }
-      mElements.Add(this);
+      mElements.add(this);
       setUpControls();
       setUpSockets();
       setUpHeader();
@@ -394,8 +394,8 @@ namespace guitard {
 
     virtual void translate(const float dX, const float dY) {
       mNoScale = true;
-      for (int i = 0; i < mElements.GetSize(); i++) {
-        moveControl(mElements.Get(i), dX, dY);
+      for (int i = 0; i < mElements.size(); i++) {
+        moveControl(mElements[i], dX, dY);
       }
 
       for (int i = 0; i < shared->inputCount; i++) {

@@ -57,7 +57,7 @@ namespace guitard {
         this->shared->graphics->CreatePopupMenu(*pCaller, mMenu, x, y);
 
       }, "Select IR", DEFAULT_STYLE, true, false);
-      mElements.Add(mBrowseButton);
+      mElements.add(mBrowseButton);
       shared->graphics->AttachControl(mBrowseButton);
     }
 

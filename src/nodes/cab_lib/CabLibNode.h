@@ -21,7 +21,7 @@ namespace guitard {
         this->openSettings();
       }, "Browse", DEFAULT_STYLE, true, false
       );
-      mElements.Add(mEditButton);
+      mElements.add(mEditButton);
       GetUI()->AttachControl(mEditButton);
       //test = new ScrollViewControl(mTargetRECT.GetPadded(-20));
       //test->setDoDragScroll(false);

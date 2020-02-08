@@ -1,10 +1,10 @@
 #pragma once
 #include <chrono>
 #include "json.hpp"
-#include "IPlugConstants.h"
 #include "src/misc/constants.h"
 #include "src/types/gmutex.h"
 #include "src/types/types.h"
+#include "src/types/pointerList.h"
 #include "src/misc/MessageBus.h"
 #include "src/nodes/io/InputNode.h"
 #include "src/nodes/io/OutputNode.h"
@@ -51,7 +51,7 @@ namespace guitard {
     /**
      * Holds all the nodes in the processing graph
      */
-    WDL_PtrList<Node> mNodes;
+    PointerList<Node> mNodes;
 
     /**
      * Mutex to keep changes to the graph like adding/removing or rerouting from crashing
@@ -117,19 +117,6 @@ namespace guitard {
   public:
 
     explicit Graph(MessageBus::Bus* pBus, ParameterManager* pParamManager) {
-      auto& sw = SoundWoofer::instance();
-      sw.setPluginName(PLUG_NAME);
-      WDL_String path;
-      iplug::UserHomePath(path);
-      sw.setHomeDirectory(path.Get());
-      //SoundWoofer::Status status;
-      //status = sw.fetchIRs();
-      //status = sw.loadIR(sw.getIRs().at(0));
-      //sw.flushIRs();
-      //status = sw.loadIR(sw.getIRs().at(0));
-      //status = sw.sendPreset("presetname", "somedata2", 9);
-      //status = sw.fetchPresets();
-
       mBus = pBus;
       mParamManager = pParamManager;
 
@@ -198,9 +185,9 @@ namespace guitard {
 
       mAutomationRequest.subscribe(mBus, MessageBus::AttachAutomation, [&](AutomationAttachRequest r) {
         MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
-        WDL_PtrList<Node>& n = this->mNodes;
-        for (int i = 0; i < n.GetSize(); i++) {
-          Node* node = n.Get(i);
+        PointerList<Node>& n = this->mNodes;
+        for (int i = 0; i < n.size(); i++) {
+          Node* node = n[i];
           if (node == nullptr) { continue; }
           for (int p = 0; p < node->shared.parameterCount; p++) {
             if (node->shared.parameters[p].control == r.targetControl) {
@@ -254,8 +241,8 @@ namespace guitard {
         mInputNode->setInputChannels(pInputChannels);
         mInputNode->OnReset(pSampleRate, pOutputChannels);
         mOutputNode->OnReset(pSampleRate, pOutputChannels);
-        for (int i = 0; i < mNodes.GetSize(); i++) {
-          mNodes.Get(i)->OnReset(pSampleRate, pOutputChannels);
+        for (int i = 0; i < mNodes.size(); i++) {
+          mNodes[i]->OnReset(pSampleRate, pOutputChannels);
         }
         unlockAudioThread();
       }
@@ -263,20 +250,26 @@ namespace guitard {
         /**
          * If nothing has changed we'll assume a transport
          */
-        mInputNode->OnTransport();
-        mOutputNode->OnTransport();
-        for (int i = 0; i < mNodes.GetSize(); i++) {
-          mNodes.Get(i)->OnTransport();
-        }
+        OnTransport();
       }
+    }
+
+    void OnTransport() {
+      lockAudioThread();
+      mInputNode->OnTransport();
+      mOutputNode->OnTransport();
+      for (int i = 0; i < mNodes.size(); i++) {
+        mNodes[i]->OnTransport();
+      }
+      unlockAudioThread();
     }
 
     void setBlockSize(const int size) {
       if (size == mMaxBlockSize || size > MAX_BUFFER) { return; }
       lockAudioThread();
       mMaxBlockSize = size;
-      for (int i = 0; i < mNodes.GetSize(); i++) {
-        Node* n = mNodes.Get(i);
+      for (int i = 0; i < mNodes.size(); i++) {
+        Node* n = mNodes[i];
         n->shared.maxBlockSize = size;
         n->OnReset(mSampleRate, mChannelCount, true);
       }
@@ -313,7 +306,7 @@ namespace guitard {
       }
 
 
-      const int nodeCount = mNodes.GetSize();
+      const int nodeCount = mNodes.size();
       const int maxAttempts = 10;
 
       /**
@@ -324,7 +317,7 @@ namespace guitard {
 
         mInputNode->CopyIn(in, nFrames);
         for (int n = 0; n < nodeCount; n++) {
-          mNodes.Get(n)->BlockStart();
+          mNodes[n]->BlockStart();
         }
         mOutputNode->BlockStart();
 
@@ -333,7 +326,7 @@ namespace guitard {
         int attempts = 0;
         while (!mOutputNode->mIsProcessed && attempts < maxAttempts) {
           for (int n = 0; n < nodeCount; n++) {
-            mNodes.Get(n)->ProcessBlock(nFrames);
+            mNodes[n]->ProcessBlock(nFrames);
           }
           mOutputNode->ProcessBlock(nFrames);
           attempts++;
@@ -341,7 +334,7 @@ namespace guitard {
 
         if (attempts < maxAttempts) {
           for (int n = 0; n < nodeCount; n++) {
-            mNodes.Get(n)->ProcessBlock(nFrames);
+            mNodes[n]->ProcessBlock(nFrames);
           }
         }
         mOutputNode->CopyOut(out, nFrames);
@@ -366,14 +359,14 @@ namespace guitard {
         LockGuard lock(mAudioMutex);
         mInputNode->CopyIn(in, nFrames);
         for (int n = 0; n < nodeCount; n++) {
-          mNodes.Get(n)->BlockStart();
+          mNodes[n]->BlockStart();
         }
         mOutputNode->BlockStart();
         // The List is pre sorted so the attempts are only needed to catch circular dependencies and other edge cases
         int attempts = 0;
         while (!mOutputNode->mIsProcessed && attempts < maxAttempts) {
           for (int n = 0; n < nodeCount; n++) {
-            mNodes.Get(n)->ProcessBlock(nFrames);
+            mNodes[n]->ProcessBlock(nFrames);
           }
           mOutputNode->ProcessBlock(nFrames);
           attempts++;
@@ -382,7 +375,7 @@ namespace guitard {
         // This extra iteration makes sure the feedback loops get data from their previous nodes
         if (attempts < maxAttempts) {
           for (int n = 0; n < nodeCount; n++) {
-            mNodes.Get(n)->ProcessBlock(nFrames);
+            mNodes[n]->ProcessBlock(nFrames);
           }
           if (!mStats.valid) {
             mStats.valid = true;
@@ -458,7 +451,7 @@ namespace guitard {
           }
           if (key.VK == iplug::kVK_S) {
             this->lockAudioThread();
-            SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
+            SortGraph::sortGraph(&mNodes, mInputNode, mOutputNode);
             this->unlockAudioThread();
             return true;
           }
@@ -471,8 +464,8 @@ namespace guitard {
       });
       mGraphics->AttachControl(mBackground);
 
-      for (int n = 0; n < mNodes.GetSize(); n++) {
-        mNodes.Get(n)->setupUi(mGraphics);
+      for (int n = 0; n < mNodes.size(); n++) {
+        mNodes[n]->setupUi(mGraphics);
       }
       mInputNode->setupUi(mGraphics);
       mOutputNode->setupUi(mGraphics);
@@ -506,8 +499,8 @@ namespace guitard {
       mWindowWidth = mGraphics->Width();
       mWindowHeight = mGraphics->Height();
       mWindowScale = mGraphics->GetDrawScale();
-      for (int n = 0; n < mNodes.GetSize(); n++) {
-        mNodes.Get(n)->cleanupUi(mGraphics);
+      for (int n = 0; n < mNodes.size(); n++) {
+        mNodes[n]->cleanupUi(mGraphics);
       }
 
       mGraphics->RemoveControl(mSideBar);
@@ -530,8 +523,8 @@ namespace guitard {
      * creating the illusion of a viewport
      */
     void onViewPortChange(const float dX = 0, const float dY = 0, float scale = 1) const {
-      for (int i = 0; i < mNodes.GetSize(); i++) {
-        mNodes.Get(i)->mUi->translate(dX, dY);
+      for (int i = 0; i < mNodes.size(); i++) {
+        mNodes[i]->mUi->translate(dX, dY);
       }
       mOutputNode->mUi->translate(dX, dY);
       mInputNode->mUi->translate(dX, dY);
@@ -554,9 +547,9 @@ namespace guitard {
      */
     void centerGraph() const {
       Coord2D avg{ 0, 0 };
-      const int count = mNodes.GetSize();
+      const int count = mNodes.size();
       for (int i = 0; i < count; i++) {
-        const Node* n = mNodes.Get(i);
+        const Node* n = mNodes[i];
         avg.x += n->shared.X;
         avg.y += n->shared.Y;
       }
@@ -587,14 +580,14 @@ namespace guitard {
       }
       // Allocating the node is thread safe, but not the node list itself
       lockAudioThread();
-      mNodes.Add(node);
-      SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
+      mNodes.add(node);
+      SortGraph::sortGraph(&mNodes, mInputNode, mOutputNode);
       // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
       unlockAudioThread();
     }
 
     void removeAllNodes() {
-      while (mNodes.GetSize()) {
+      while (mNodes.size()) {
         removeNode(0);
       }
     }
@@ -665,14 +658,15 @@ namespace guitard {
       node->cleanupUi(mGraphics);
       mParamManager->releaseNode(node);
       node->cleanUp();
-      mNodes.DeletePtr(node, true);
-      SortGraph::sortGraph(mNodes, mInputNode, mOutputNode);
+      mNodes.remove(node);
+      delete node;
+      SortGraph::sortGraph(&mNodes, mInputNode, mOutputNode);
       // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
       unlockAudioThread();
     }
 
     void removeNode(const int index) {
-      removeNode(mNodes.Get(index));
+      removeNode(mNodes[index]);
     }
 
     void serialize(WDL_String& serialized) {
@@ -700,7 +694,7 @@ namespace guitard {
         json["width"] = mWindowWidth;
         json["height"] = mWindowHeight;
         json["maxBlockSize"] = mMaxBlockSize;
-        Serializer::serialize(json, mNodes, mInputNode, mOutputNode);
+        Serializer::serialize(json, &mNodes, mInputNode, mOutputNode);
       }
       catch (...) {
         assert(false); // Failed to serialize json
@@ -736,10 +730,10 @@ namespace guitard {
           mMaxBlockSize = json["maxBlockSize"];
         }
         lockAudioThread();
-        Serializer::deserialize(json, mNodes, mOutputNode, mInputNode, mSampleRate, mMaxBlockSize, mParamManager, mBus);
+        Serializer::deserialize(json, &mNodes, mOutputNode, mInputNode, mSampleRate, mMaxBlockSize, mParamManager, mBus);
         if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
-          for (int i = 0; i < mNodes.GetSize(); i++) {
-            mNodes.Get(i)->setupUi(mGraphics);
+          for (int i = 0; i < mNodes.size(); i++) {
+            mNodes[i]->setupUi(mGraphics);
           }
           scaleUi();
         }

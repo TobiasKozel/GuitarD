@@ -1,5 +1,4 @@
 #pragma once
-#include "IControl.h"
 #include "src/misc/NodeList.h"
 #include "src/ui/theme.h"
 

@@ -16,7 +16,7 @@ namespace guitard {
     bool mDoScroll = true;
 
     /** Internal States */
-    WDL_PtrList<IControl> mChildren;
+    PointerList<IControl> mChildren;
     /** Scroll offset in Y */
     float mScrollY = 0;
     /** Content dimensions */
@@ -46,8 +46,8 @@ namespace guitard {
     ScrollViewControl() : IControl({}) {}
 
     void appendChild(IControl* child) {
-      if (mChildren.Find(child) != -1) { return; } // No duplicates
-      mChildren.Add(child);
+      if (mChildren.find(child) != -1) { return; } // No duplicates
+      mChildren.add(child);
       if (mAttached) {
         child->SetDelegate(*GetDelegate());
       }
@@ -59,10 +59,10 @@ namespace guitard {
     }
 
     void removeChild(IControl* child, const bool wantsDelete = false, bool skipResize = false) {
-      const int index = mChildren.Find(child);
+      const int index = mChildren.find(child);
       if (index != -1) {
-        mChildren.Get(index)->OnDetached();
-        mChildren.Delete(index, wantsDelete);
+        mChildren[index]->OnDetached();
+        mChildren.remove(index, wantsDelete);
         if (!skipResize) {
           OnResize();
         }
@@ -75,16 +75,16 @@ namespace guitard {
     }
 
     void clearChildren(bool wantsDelete = false) {
-      while (mChildren.GetSize()) {
-        removeChild(mChildren.Get(0), wantsDelete, true);
+      while (mChildren.size()) {
+        removeChild(mChildren[0], wantsDelete, true);
       }
       OnResize();
     }
 
     void OnInit() override {
       IControl::OnInit();
-      for (int i = 0; i < mChildren.GetSize(); i++) {
-        IControl* c = mChildren.Get(i);
+      for (int i = 0; i < mChildren.size(); i++) {
+        IControl* c = mChildren[i];
         c->SetDelegate(*GetDelegate());
       }
       mAttached = true;
@@ -94,14 +94,14 @@ namespace guitard {
       if (!mAttached) { return; }
       mContentHeight = 0;
       mContentWidth = 0;
-      const int childCount = mChildren.GetSize();
+      const int childCount = mChildren.size();
       if (childCount == 0) { return; }
       /**
        * First align all the children vertically
        */
       for (int i = 0; i < childCount; i++) {
         const bool isLast = i == childCount - 1;
-        IControl* c = mChildren.Get(i);
+        IControl* c = mChildren[i];
         IRECT r = c->GetRECT();
         const float height = r.H();
         const float width = mFullWidthChildren ? mRECT.W() : r.W();
@@ -128,7 +128,7 @@ namespace guitard {
        * Then scroll them according to their scroll position
        */
       for (int i = 0; i < childCount; i++) {
-        IControl* c = mChildren.Get(i);
+        IControl* c = mChildren[i];
         ScrollViewChild* sc = dynamic_cast<ScrollViewChild*>(c);
         IRECT r = c->GetTargetRECT();
         shiftRectY(r, -mScrollY);
@@ -179,7 +179,7 @@ namespace guitard {
     }
 
     void scrollTo(int index) {
-      IControl* c = mChildren.Get(index);
+      IControl* c = mChildren[index];
       if (c != nullptr) {
         mScrollY = c->GetRECT().T - mRECT.T;
         OnResize();
@@ -188,8 +188,8 @@ namespace guitard {
 
     void Draw(IGraphics& g) override {
       g.FillRect(iplug::igraphics::COLOR_DARK_GRAY, mRECT);
-      for (int i = 0; i < mChildren.GetSize(); i++) {
-        mChildren.Get(i)->Draw(g);
+      for (int i = 0; i < mChildren.size(); i++) {
+        mChildren[i]->Draw(g);
       }
       if (mScrollBar) {
         IRECT scroll = mRECT.GetFromRight(mScrollBarWidth);
@@ -253,8 +253,8 @@ namespace guitard {
 
     IControl* getChildAtCoord(const float x, const float y) const {
       const IRECT click = { x, y, x, y };
-      for (int i = 0; i < mChildren.GetSize(); i++) {
-        IControl* c = mChildren.Get(i);
+      for (int i = 0; i < mChildren.size(); i++) {
+        IControl* c = mChildren[i];
         IRECT r = c->GetTargetRECT();
         if (r.Contains(click)) {
           return c;
@@ -336,7 +336,7 @@ namespace guitard {
 
     ~ScrollViewControl() {
       if (mDoCleanUp) {
-        mChildren.Empty(true);
+        mChildren.clear(true);
       }
     }
 

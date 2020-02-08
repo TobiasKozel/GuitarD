@@ -40,7 +40,7 @@ namespace guitard {
     void Draw(IGraphics& g) override {
       if (mSelected) {
         g.FillRect(Theme::IRBrowser::IR_TITLE_BG_ACTIVE, mRECT);
-        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.Get(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.get(), mRECT.GetHPadded(-8));
       }
       else {
         if (mMouseIsOver) {
@@ -49,7 +49,7 @@ namespace guitard {
         else {
           g.FillRect(Theme::IRBrowser::IR_TITLE_BG, mRECT);
         }
-        g.DrawText(Theme::IRBrowser::IR_TITLE, name.Get(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE, name.get(), mRECT.GetHPadded(-8));
       }
     }
 
@@ -57,17 +57,17 @@ namespace guitard {
       mCallback(this);
     }
 
-    WDL_String name;
-    WDL_String path;
+    String name;
+    String path;
   };
 
   class Microphone : public IControl {
   public:
     typedef std::function<void(Microphone * c)> MicrophoneCallback;
     MicrophoneCallback mCallback;
-    WDL_String name;
-    WDL_String path;
-    WDL_PtrList<MicPosition> mPositions;
+    String name;
+    String path;
+    PointerList<MicPosition> mPositions;
     MicPosition::MicPositionCallback mPosCallback;
     bool mSelected = false;
     Microphone(MicrophoneCallback& mc, MicPosition::MicPositionCallback& pc) : IControl({ 0, 0, 0, 20 }) {
@@ -75,13 +75,13 @@ namespace guitard {
       mPosCallback = pc;
     }
     ~Microphone() {
-      mPositions.Empty(true);
+      mPositions.clear(true);
     }
 
     void Draw(IGraphics& g) override {
       if (mSelected) {
         g.FillRect(Theme::IRBrowser::IR_TITLE_BG_ACTIVE, mRECT);
-        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.Get(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.get(), mRECT.GetHPadded(-8));
       }
       else {
         if (mMouseIsOver) {
@@ -90,7 +90,7 @@ namespace guitard {
         else {
           g.FillRect(Theme::IRBrowser::IR_TITLE_BG, mRECT);
         }
-        g.DrawText(Theme::IRBrowser::IR_TITLE, name.Get(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE, name.get(), mRECT.GetHPadded(-8));
       }
     }
 
@@ -100,7 +100,7 @@ namespace guitard {
 
     void scanPositions() {
       WDL_DirScan dir;
-      if (!dir.First(path.Get())) {
+      if (!dir.First(path.get())) {
         do {
           const char* f = dir.GetCurrentFN();
           // Skip hidden files and folders
@@ -108,11 +108,11 @@ namespace guitard {
             if (!dir.GetCurrentIsDirectory()) {
               // We're only interested in files, each corresponds to a IR
               MicPosition* pos = new MicPosition(mPosCallback);
-              pos->name.Append(f);
-              if (strncmp(".wav", pos->name.get_fileext(), 5) == 0 ||
-                strncmp(".WAV", pos->name.get_fileext(), 5) == 0) {
+              pos->name.append(f);
+              if (strncmp(".wav", pos->name.getExt(), 5) == 0 ||
+                strncmp(".WAV", pos->name.getExt(), 5) == 0) {
                 dir.GetCurrentFullFN(&pos->path);
-                mPositions.Add(pos);
+                mPositions.add(pos);
               }
               else {
                 delete pos;
@@ -127,12 +127,12 @@ namespace guitard {
   class Cabinet : public IControl {
   public:
     typedef std::function<void(Cabinet * c)> CabinetCallback;
-    WDL_String name;
-    WDL_String path;
+    String name;
+    String path;
     CabinetCallback mCallback;
     Microphone::MicrophoneCallback mMicCallback;
     MicPosition::MicPositionCallback mPosCallback;
-    WDL_PtrList<Microphone> mMics;
+    PointerList<Microphone> mMics;
     bool mSelected = false;
 
     Cabinet(const CabinetCallback cc, const Microphone::MicrophoneCallback mc, const MicPosition::MicPositionCallback pc)
@@ -144,13 +144,13 @@ namespace guitard {
     }
 
     ~Cabinet() {
-      mMics.Empty(true);
+      mMics.clear(true);
     }
 
     void Draw(IGraphics& g) override {
       if (mSelected) {
         g.FillRect(Theme::IRBrowser::IR_TITLE_BG_ACTIVE, mRECT);
-        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.Get(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.get(), mRECT.GetHPadded(-8));
       }
       else {
         if (mMouseIsOver) {
@@ -159,13 +159,13 @@ namespace guitard {
         else {
           g.FillRect(Theme::IRBrowser::IR_TITLE_BG, mRECT);
         }
-        g.DrawText(Theme::IRBrowser::IR_TITLE, name.Get(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE, name.get(), mRECT.GetHPadded(-8));
       }
     }
 
     void scanMics() {
       WDL_DirScan dir;
-      if (!dir.First(path.Get())) {
+      if (!dir.First(path.get())) {
         do {
           const char* f = dir.GetCurrentFN();
           // Skip hidden files and folders
@@ -173,8 +173,8 @@ namespace guitard {
             if (dir.GetCurrentIsDirectory()) {
               // We're only interested in folders, each corresponds to a mic
               Microphone* mic = new Microphone(mMicCallback, mPosCallback);
-              mMics.Add(mic);
-              mic->name.Append(f);
+              mMics.add(mic);
+              mic->name.append(f);
               dir.GetCurrentFullFN(&mic->path);
               mic->scanPositions();
             }
@@ -195,11 +195,11 @@ namespace guitard {
     IRECT mCloseButton;
     IRECT mPathTitle;
     ScrollViewControl* mScrollView[3] = { nullptr };
-    WDL_PtrList<Cabinet> mCabinets;
+    PointerList<Cabinet> mCabinets;
     Cabinet* mSelectedCab = nullptr;
     Microphone* mSelectedMic = nullptr;
     MicPosition* mSelectedPosition = nullptr;
-    WDL_String mPath;
+    String mPath;
   public:
     CabLibPopUp(CabLibNodeSharedData* shared) : IControl({}) {
       mRenderPriority = 15;
@@ -215,12 +215,12 @@ namespace guitard {
         mScrollView[i]->setCleanUpEnabled(false);
         GetUI()->AttachControl(mScrollView[i]);
       }
-
-      iplug::INIPath(mPath, BUNDLE_NAME);
-      mPath.Append("\\"); // TODOG Path delimiter
-      mPath.Append("impulses");
+      WDL_String path = WDL_String(mPath.get());
+      iplug::INIPath(path, BUNDLE_NAME);
+      mPath.append("\\"); // TODOG Path delimiter
+      mPath.append("impulses");
       WDL_DirScan dir;
-      if (!dir.First(mPath.Get())) {
+      if (!dir.First(mPath.get())) {
         do {
           const char* f = dir.GetCurrentFN();
           // Skip hidden files and folders
@@ -232,8 +232,8 @@ namespace guitard {
                 [&](Microphone* mic) { this->onMicChanged(mic); },
                 [&](MicPosition* pos) { this->onPositionChanged(pos); }
               );
-              mCabinets.Add(cab);
-              cab->name.Append(f);
+              mCabinets.add(cab);
+              cab->name.append(f);
               dir.GetCurrentFullFN(&cab->path);
               cab->scanMics();
               mScrollView[0]->appendChild(cab);
@@ -249,22 +249,22 @@ namespace guitard {
 
     void onCabChanged(Cabinet* newCab) {
       if (newCab == mSelectedCab) { return; }
-      for (int i = 0; i < mCabinets.GetSize(); i++) {
-        mCabinets.Get(i)->mSelected = false;
+      for (int i = 0; i < mCabinets.size(); i++) {
+        mCabinets[i]->mSelected = false;
       }
       if (newCab != nullptr) {
         newCab->mSelected = true;
-        const int micIndex = mSelectedCab->mMics.Find(mSelectedMic);
+        const int micIndex = mSelectedCab->mMics.find(mSelectedMic);
         mSelectedCab = newCab;
         mScrollView[1]->clearChildren();
-        for (int i = 0; i < mSelectedCab->mMics.GetSize(); i++) {
-          mScrollView[1]->appendChild(mSelectedCab->mMics.Get(i));
+        for (int i = 0; i < mSelectedCab->mMics.size(); i++) {
+          mScrollView[1]->appendChild(mSelectedCab->mMics[i]);
         }
-        if (newCab->mMics.GetSize() > micIndex) {
-          onMicChanged(newCab->mMics.Get(micIndex));
+        if (newCab->mMics.size() > micIndex) {
+          onMicChanged(newCab->mMics[micIndex]);
         }
         else {
-          onMicChanged(newCab->mMics.Get(0));
+          onMicChanged(newCab->mMics[0]);
         }
 
       }
@@ -273,25 +273,25 @@ namespace guitard {
 
     void onMicChanged(Microphone* mic) {
       if (mSelectedCab == nullptr || mic == mSelectedMic) { return; }
-      for (int i = 0; i < mSelectedCab->mMics.GetSize(); i++) {
-        mSelectedCab->mMics.Get(i)->mSelected = false;
+      for (int i = 0; i < mSelectedCab->mMics.size(); i++) {
+        mSelectedCab->mMics[i]->mSelected = false;
       }
       int positionIndex = 0;
       if (mSelectedMic != nullptr) {
-        positionIndex = mSelectedMic->mPositions.Find(mSelectedPosition);
+        positionIndex = mSelectedMic->mPositions.find(mSelectedPosition);
       }
       mSelectedMic = mic;
       mScrollView[2]->clearChildren();
       if (mic != nullptr) {
         mic->mSelected = true;
-        for (int i = 0; i < mSelectedMic->mPositions.GetSize(); i++) {
-          mScrollView[2]->appendChild(mSelectedMic->mPositions.Get(i));
+        for (int i = 0; i < mSelectedMic->mPositions.size(); i++) {
+          mScrollView[2]->appendChild(mSelectedMic->mPositions[i]);
         }
-        if (mic->mPositions.GetSize() > positionIndex) {
-          onPositionChanged(mic->mPositions.Get(positionIndex));
+        if (mic->mPositions.size() > positionIndex) {
+          onPositionChanged(mic->mPositions[positionIndex]);
         }
         else {
-          onPositionChanged(mic->mPositions.Get(0));
+          onPositionChanged(mic->mPositions[0]);
         }
       }
       mScrollView[1]->SetDirty(false);
@@ -301,27 +301,27 @@ namespace guitard {
       if (mSelectedMic == nullptr || pos == mSelectedPosition) { return; }
       mSelectedPosition = pos;
       if (pos != nullptr) {
-        for (int i = 0; i < mSelectedMic->mPositions.GetSize(); i++) {
-          mSelectedMic->mPositions.Get(i)->mSelected = false;
+        for (int i = 0; i < mSelectedMic->mPositions.size(); i++) {
+          mSelectedMic->mPositions[i]->mSelected = false;
         }
         pos->mSelected = true;
         IRBundle load;
-        load.path.set(pos->path.Get());
-        load.name.set(pos->name.Get());
+        load.path.set(pos->path.get());
+        load.name.set(pos->name.get());
         mCabShared->callback(load);
       }
       mScrollView[2]->SetDirty(false);
     }
 
     void setFromIRBundle() {
-      for (int i = 0; i < mCabinets.GetSize(); i++) {
-        Cabinet* c = mCabinets.Get(i);
-        for (int j = 0; j < c->mMics.GetSize(); j++) {
-          Microphone* m = c->mMics.Get(j);
-          for (int k = 0; k < m->mPositions.GetSize(); k++) {
-            MicPosition* p = m->mPositions.Get(k);
+      for (int i = 0; i < mCabinets.size(); i++) {
+        Cabinet* c = mCabinets[i];
+        for (int j = 0; j < c->mMics.size(); j++) {
+          Microphone* m = c->mMics[j];
+          for (int k = 0; k < m->mPositions.size(); k++) {
+            MicPosition* p = m->mPositions[k];
             String& path = mCabShared->loadedIr.path;
-            if (strncmp(p->path.Get(), path.get(), path.getLength()) == 0) {
+            if (strncmp(p->path.get(), path.get(), path.getLength()) == 0) {
               onCabChanged(c);
               onMicChanged(m);
               onPositionChanged(p);
@@ -336,7 +336,7 @@ namespace guitard {
       for (int i = 0; i < 3; i++) {
         GetUI()->RemoveControl(mScrollView[i]);
       }
-      mCabinets.Empty(true);
+      mCabinets.clear(true);
     }
 
     void OnResize() override {
@@ -355,7 +355,7 @@ namespace guitard {
     void Draw(IGraphics& g) override {
       g.FillRect(Theme::IRBrowser::BACKGROUND, mRECT);
       g.FillRect(Theme::Colors::ACCENT, mCloseButton);
-      g.DrawText(Theme::IRBrowser::PATH, mPath.Get(), mPathTitle);
+      g.DrawText(Theme::IRBrowser::PATH, mPath.get(), mPathTitle);
     }
 
     void OnMouseDown(float x, float y, const IMouseMod& mod) override {

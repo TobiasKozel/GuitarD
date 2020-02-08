@@ -17,7 +17,7 @@ namespace guitard {
       MESSAGE_ID mEventId = TOTAL_MESSAGE_IDS;
     };
 
-    typedef WDL_PtrList<BaseSubscription> SubsVector;
+    typedef PointerList<BaseSubscription> SubsVector;
 
     // The bus object knows about all the subscribers and relays the events
     struct Bus {
@@ -32,8 +32,8 @@ namespace guitard {
          */
 
         for (int i = 0; i < TOTAL_MESSAGE_IDS; i++) {
-          if (mSubscriptions[i].GetSize() > 0) {
-            mSubscriptions[i].Empty(false);
+          if (mSubscriptions[i].size() > 0) {
+            mSubscriptions[i].clear();
           }
         }
         mSubCount = 0;
@@ -41,7 +41,7 @@ namespace guitard {
 
       void addSubscriber(BaseSubscription* sub, const MESSAGE_ID pEventId) {
         LockGuard lock(mMutex);
-        mSubscriptions[pEventId].Add(sub);
+        mSubscriptions[pEventId].add(sub);
         mSubCount++;
         if (mSubCount > 1000) {
           // This probably means there's a leak
@@ -52,7 +52,7 @@ namespace guitard {
       void removeSubscriber(BaseSubscription* sub, const MESSAGE_ID pEventId) {
         if (mSubCount > 0) {
           LockGuard lock(mMutex);
-          mSubscriptions[pEventId].DeletePtr(sub);
+          mSubscriptions[pEventId].remove(sub);
           mSubCount--;
         }
       }
@@ -100,14 +100,14 @@ namespace guitard {
 
     template <class T>
     void fireEvent(Bus* b, const MESSAGE_ID pEventId, T param) {
-      if (b->mSubscriptions[pEventId].GetSize() == 0) {
+      if (b->mSubscriptions[pEventId].size() == 0) {
         WDBGMSG("Fired a event with not subscribers!\n");
         return;
       }
       SubsVector& subs = b->mSubscriptions[pEventId];
       LockGuard lock(b->mMutex);
-      for (int i = 0; i < subs.GetSize(); i++) {
-        Subscription<T>* sub = dynamic_cast<Subscription<T>*>(subs.Get(i));
+      for (int i = 0; i < subs.size(); i++) {
+        Subscription<T>* sub = dynamic_cast<Subscription<T>*>(subs[i]);
         if (sub != nullptr) {
           sub->mCallback(param);
         }

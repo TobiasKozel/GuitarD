@@ -21,7 +21,7 @@ namespace guitard {
           shared->bus, MessageBus::PickAutomationTarget, shared->node
           );
       }, "Pick Automation Target", DEFAULT_STYLE, true);
-      mElements.Add(mPicker);
+      mElements.add(mPicker);
       shared->graphics->AttachControl(mPicker);
     }
 
@@ -81,7 +81,7 @@ namespace guitard {
           mHistoryLength - i + x,
               y - mHistory[index] * 5000 + 100,
               0, 2
-              );
+        );
       }
       mDirty = true;
     }
@@ -92,7 +92,7 @@ namespace guitard {
    * This will take a signal and allow internal modulation for any other parameters
    */
   class EnvelopeNode final : public Node {
-    WDL_PtrList<ParameterCoupling> mAutomationTargets;
+    PointerList<ParameterCoupling> mAutomationTargets;
     int mAutomationTargetCount = 0;
     sample gain = 0;
     sample filter = 0;
@@ -139,19 +139,19 @@ namespace guitard {
 
     void cleanUp() override {
       Node::cleanUp();
-      for (int i = 0; i < mAutomationTargets.GetSize(); i++) {
-        removeAutomationTarget(mAutomationTargets.Get(i));
+      for (int i = 0; i < mAutomationTargets.size(); i++) {
+        removeAutomationTarget(mAutomationTargets[i]);
       }
     }
 
     void addAutomationTarget(ParameterCoupling* c) override {
       // Check if it's our own target
-      if (mAutomationTargets.Find(c) == -1) {
+      if (mAutomationTargets.find(c) == -1) {
         if (c->automationDependency != nullptr) {
           // If not, but there's still a target, get rid of it
           c->automationDependency->removeAutomationTarget(c);
         }
-        mAutomationTargets.Add(c);
+        mAutomationTargets.add(c);
         mAutomationTargetCount++;
         if (c->automationDependency != nullptr) {
           WDBGMSG("Trying to attach automation to a Param with an automation!\n");
@@ -166,9 +166,9 @@ namespace guitard {
     }
 
     void removeAutomationTarget(ParameterCoupling* c) override {
-      const int i = mAutomationTargets.Find(c);
+      const int i = mAutomationTargets.find(c);
       if (i != -1) {
-        mAutomationTargets.Delete(i);
+        mAutomationTargets.remove(i);
         mAutomationTargetCount--;
         c->automationDependency = nullptr;
         c->automation = 0;
@@ -189,7 +189,7 @@ namespace guitard {
       avg = (filter * value + (1 - filter) * avg);
       current = (avg + offset) * gain;
       for (int i = 0; i < mAutomationTargetCount; i++) {
-        ParameterCoupling* c = mAutomationTargets.Get(i);
+        ParameterCoupling* c = mAutomationTargets.get(i);
         // scale them according to each of the max vals
         // TODOG take into account the scaling type e.g. frequency
         c->automation = current * c->max;

@@ -4,6 +4,20 @@
 
 
 GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::MakeConfig(MAX_DAW_PARAMS, kNumPrograms)) {
+  auto& sw = SoundWoofer::instance();
+  sw.setPluginName(PLUG_NAME);
+  WDL_String path;
+  iplug::UserHomePath(path);
+  sw.setHomeDirectory(path.Get());
+
+  //SoundWoofer::Status status;
+  //status = sw.fetchIRs();
+  //status = sw.loadIR(sw.getIRs().at(0));
+  //sw.flushIRs();
+  //status = sw.loadIR(sw.getIRs().at(0));
+  //status = sw.sendPreset("presetname", "somedata2", 9);
+  //status = sw.fetchPresets();
+
   guitard::NodeList::registerNodes();
   mParamManager = new guitard::ParameterManager(&mBus);
 

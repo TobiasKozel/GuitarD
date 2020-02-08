@@ -38,7 +38,7 @@ namespace guitard {
         this->shared->graphics->CreatePopupMenu(*pCaller, mMenu, x, y);
 
       }, label.c_str(), DEFAULT_STYLE, true, false);
-      mElements.Add(mBrowseButton);
+      mElements.add(mBrowseButton);
       shared->graphics->AttachControl(mBrowseButton);
     }
 

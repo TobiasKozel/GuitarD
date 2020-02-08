@@ -2,7 +2,6 @@
 
 #define FAUSTFLOAT sample
 
-#include "IPlugConstants.h"
 #include "src/misc/constants.h"
 #include "src/parameter/ParameterCoupling.h"
 #include "src/node/Node.h"

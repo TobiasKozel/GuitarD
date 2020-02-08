@@ -4,7 +4,6 @@
 
 namespace guitard {
   class String {
-    const size_t MAX_LENGTH = 1024 * 1024;
     char* mString = nullptr;
     size_t mLength = 0;
   public:
@@ -28,8 +27,21 @@ namespace guitard {
       return *this;
     }
 
+    String operator+ (const String& source) {
+      append(source.get());
+      return *this;
+    }
+
     ~String() {
       resize(0);
+    }
+
+    static const char pathDelimiter() {
+#ifdef _WIN32
+      return '\\';
+#else
+      return '/';
+#endif
     }
 
     void resize(const size_t size, bool keep = true) {
@@ -58,15 +70,11 @@ namespace guitard {
     }
 
     void set(const char* source, const size_t offset = 0) {
-      size_t length = 0;
-      for (size_t i = 0; i < MAX_LENGTH; i++) {
-        if (source[i] == 0) {
-          length = i;
-          break;
-        }
+      const size_t length = strlen(source);
+      if (length > 0) {
+        resize(std::max(length + offset, mLength), 0 < offset);
+        memcpy(mString + offset, source, length);
       }
-      resize(std::max(length + offset, mLength), 0 < offset);
-      memcpy(mString + offset, source, length);
     }
 
     void set(const String& source) {
@@ -77,7 +85,7 @@ namespace guitard {
       set(source->get());
     }
 
-    void append(const char* source) {
+    void append(const char* source, size_t max = 1024 * 1024) {
       set(source, mLength);
     }
 
@@ -90,11 +98,33 @@ namespace guitard {
     }
 
     const char* getExt() {
-      return nullptr;
+      if (mString == nullptr) {
+        return nullptr;
+      }
+      const char* s = mString;
+      const char* endp = s + mLength;
+      const char* p = endp - 1;
+      const char delimiter = pathDelimiter();
+      while (p >= s && delimiter  != *p) {
+        if (*p == '.') {
+          return p;
+        }
+        p--;
+      }
+      return endp;
     }
 
     const char* getFilePart() {
-      return nullptr;
+      if (mString == nullptr) {
+        return nullptr;
+      }
+      const char* s = mString;
+      const char* p = s + mLength - 1;
+      const char delimiter = pathDelimiter();
+      while (p >= s && *p != delimiter) {
+        p--;
+      }
+      return p + 1;
     }
   };
 }

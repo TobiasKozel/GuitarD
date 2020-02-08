@@ -13,7 +13,7 @@ namespace guitard {
    */
   class CableLayer : public IControl {
     IGraphics* mGraphics = nullptr;
-    WDL_PtrList<Node>* mNodes;
+    PointerList<Node>* mNodes;
     Node* mOutNode = nullptr;
     Node* mInNode = nullptr;
 
@@ -47,7 +47,7 @@ namespace guitard {
 
     GraphStats* mStats = nullptr;
   public:
-    CableLayer(MessageBus::Bus* pBus, IGraphics* g, WDL_PtrList<Node>* pNodes, Node* pOutNode, Node* pInNode) :
+    CableLayer(MessageBus::Bus* pBus, IGraphics* g, PointerList<Node>* pNodes, Node* pOutNode, Node* pInNode) :
       IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
     {
       mBus = pBus;
@@ -178,8 +178,8 @@ namespace guitard {
 
     void reverseDraw(IGraphics& g) {
       const float socketRadius = Theme::Sockets::DIAMETER / 2;
-      for (int n = 0; n < mNodes->GetSize() + 1; n++) {
-        Node* curNode = mNodes->Get(n);
+      for (int n = 0; n < mNodes->size() + 1; n++) {
+        Node* curNode = mNodes->get(n);
         if (curNode == nullptr) {
           // only happens for the last node
           curNode = mInNode;
@@ -204,8 +204,8 @@ namespace guitard {
     void Draw(IGraphics& g) override {
       const float socketRadius = Theme::Sockets::DIAMETER / 2;
       // Draw all the connections between nodes
-      for (int n = 0; n < mNodes->GetSize() + 1; n++) {
-        Node* curNode = mNodes->Get(n);
+      for (int n = 0; n < mNodes->size() + 1; n++) {
+        Node* curNode = mNodes->get(n);
         if (curNode == nullptr) {
           // only happens for the last node
           curNode = mOutNode;
@@ -253,8 +253,8 @@ namespace guitard {
       }
 
       // Draw all the sockets
-      for (int n = 0; n < mNodes->GetSize(); n++) {
-        Node* curNode = mNodes->Get(n);
+      for (int n = 0; n < mNodes->size(); n++) {
+        Node* curNode = mNodes->get(n);
         for (int i = 0; i < curNode->shared.outputCount; i++) {
           NodeSocket* curSock = curNode->shared.socketsOut[i];
           if (curSock != nullptr) {
@@ -277,8 +277,8 @@ namespace guitard {
         automation = mPickAutomationTarget;
       }
       if (automation != nullptr) {
-        for (int n = 0; n < mNodes->GetSize(); n++) {
-          Node* curNode = mNodes->Get(n);
+        for (int n = 0; n < mNodes->size(); n++) {
+          Node* curNode = mNodes->get(n);
           for (int p = 0; p < curNode->shared.parameterCount; p++) {
             ParameterCoupling* pc = &curNode->shared.parameters[p];
             if (pc->automationDependency == automation) {
@@ -338,8 +338,8 @@ namespace guitard {
   private:
     NodeSocket* getClosestToConnection(const Coord2D pos) const {
       const float socketRadius = Theme::Sockets::DIAMETER / 2;
-      for (int n = 0; n < mNodes->GetSize() + 1; n++) {
-        Node* curNode = mNodes->Get(n);
+      for (int n = 0; n < mNodes->size() + 1; n++) {
+        Node* curNode = mNodes->get(n);
         if (curNode == nullptr) {
           // only happens for the last node
           curNode = mOutNode;

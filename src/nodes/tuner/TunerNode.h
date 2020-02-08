@@ -1,11 +1,12 @@
 #pragma once
 #include "src/node/Node.h"
+#include <map>
 
 #define TWO_YROOT_TWELVE 1.05946309435929526456f
 
 namespace guitard {
   class TunerNodeUi : public NodeUi {
-    map<float, string> equalPitches;
+    std::map<float, std::string> equalPitches;
     const char* mNotes[12] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
     const char* mCurrentQuantizedPitch;
     int mTunerCentsOff;
@@ -15,7 +16,7 @@ namespace guitard {
     TunerNodeUi(NodeShared* param) : NodeUi(param) {
       float freq = 16.35159783f;
       for (int i = 0; i < 108; i++) {
-        equalPitches.insert(pair<float, const char*>(freq, mNotes[i % 12]));
+        equalPitches.insert(std::pair<float, const char*>(freq, mNotes[i % 12]));
         freq *= TWO_YROOT_TWELVE;
       }
     }
@@ -32,7 +33,7 @@ namespace guitard {
   class TunerNode final : public Node {
   public:
     TunerNode(const std::string pType) {
-      mType = pType;
+      shared.type = pType;
     }
 
     void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "IPlugConstants.h"
-#include "IGraphics.h"
 #include "src/node/NodeUi.h"
 #include "src/node/NodeSocket.h"
 #include "NodeShared.h"
@@ -74,9 +72,9 @@ namespace guitard {
         WDBGMSG("Trying to create a new dsp buffer without cleanung up the old one");
         assert(false);
       }
-      mBuffersOut = new sample * *[shared.outputCount];
+      mBuffersOut = new sample** [shared.outputCount];
       for (int i = 0; i < shared.outputCount; i++) {
-        mBuffersOut[i] = new sample * [mChannelCount];
+        mBuffersOut[i] = new sample* [mChannelCount];
         for (int c = 0; c < mChannelCount; c++) {
           mBuffersOut[i][c] = new sample[shared.maxBlockSize];
         }

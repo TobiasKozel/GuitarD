@@ -1,5 +1,4 @@
 #pragma once
-#include "IPlugParameter.h"
 #include <algorithm>
 #include "src/types/iplugTypes.h"
 

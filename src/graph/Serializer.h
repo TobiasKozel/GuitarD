@@ -12,14 +12,14 @@ namespace guitard {
       InputNode = -1
     };
 
-    inline void serialize(nlohmann::json& serialized, WDL_PtrList<Node>& nodes, Node* input, Node* output) {
+    inline void serialize(nlohmann::json& serialized, PointerList<Node>* nodes, Node* input, Node* output) {
       serialized["input"]["gain"] = 1.0;
       serialized["input"]["position"] = {
         input->shared.X, input->shared.Y
       };
       serialized["nodes"] = nlohmann::json::array();
-      for (int i = 0; i < nodes.GetSize(); i++) {
-        Node* node = nodes.Get(i);
+      for (int i = 0; i < nodes->size(); i++) {
+        Node* node = nodes->get(i);
         serialized["nodes"][i]["position"] = { node->shared.X, node->shared.Y };
         // The index shouldn't really matter since they're all in order
         serialized["nodes"][i]["idx"] = i;
@@ -35,7 +35,7 @@ namespace guitard {
           }
           else {
             serialized["nodes"][i]["inputs"][prev] = {
-              nodes.Find(cNode),
+              nodes->find(cNode),
               node->shared.socketsIn[prev]->getConnectedSocketIndex()
             };
           }
@@ -46,7 +46,7 @@ namespace guitard {
           const char* name = para->name;
           double val = para->getValue();
           int idx = para->parameterIdx;
-          int automation = nodes.Find(para->automationDependency);
+          int automation = nodes->find(para->automationDependency);
           serialized["nodes"][i]["parameters"][p] = {
             { "name", name },
             { "idx", idx},
@@ -67,7 +67,7 @@ namespace guitard {
         lastNodeIndex = InputNode;
       }
       else if (lastNode != nullptr) {
-        lastNodeIndex = nodes.Find(lastNode);
+        lastNodeIndex = nodes->find(lastNode);
       }
       serialized["output"]["inputs"][0] = {
         lastNodeIndex,
@@ -76,7 +76,7 @@ namespace guitard {
     }
 
     inline void deserialize(
-      nlohmann::json& serialized, WDL_PtrList<Node>& nodes, Node* output, Node* input, int sampleRate, int maxBuffer,
+      nlohmann::json& serialized, PointerList<Node>* nodes, Node* output, Node* input, int sampleRate, int maxBuffer,
       ParameterManager* paramManager, MessageBus::Bus* pBus
     ) {
 
@@ -107,7 +107,7 @@ namespace guitard {
         if (expectedIndex != sNode["idx"]) {
           WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
         }
-        nodes.Add(node);
+        nodes->add(node);
         for (auto param : sNode["parameters"]) {
           std::string name = param["name"];
           int found = 0;
@@ -139,14 +139,14 @@ namespace guitard {
       // link them all up accordingly in the second pass
       int currentNodeIdx = 0;
       for (auto sNode : serialized["nodes"]) {
-        Node* node = nodes.Get(currentNodeIdx);
+        Node* node = nodes->get(currentNodeIdx);
         int currentInputIdx = 0;
         for (auto connection : sNode["inputs"]) {
           const int inNodeIdx = connection[0];
           const int inBufferIdx = connection[1];
-          if (inNodeIdx >= 0 && nodes.Get(inNodeIdx) != nullptr) {
+          if (inNodeIdx >= 0 && nodes->get(inNodeIdx) != nullptr) {
             node->connectInput(
-              nodes.Get(inNodeIdx)->shared.socketsOut[inBufferIdx],
+              nodes->get(inNodeIdx)->shared.socketsOut[inBufferIdx],
               currentInputIdx
             );
           }
@@ -170,7 +170,7 @@ namespace guitard {
               if (param.contains("automation")) {
                 const int automationIndex = param.at("automation");
                 if (automationIndex != -1) {
-                  node->attachAutomation(nodes.Get(automationIndex), i);
+                  node->attachAutomation(nodes->get(automationIndex), i);
                 }
               }
             }
@@ -183,9 +183,9 @@ namespace guitard {
       // connect the output nodes to the global output
       const int outNodeIndex = serialized["output"]["inputs"][0][0];
       const int outConnectionIndex = serialized["output"]["inputs"][0][1];
-      if (nodes.Get(outNodeIndex) != nullptr) {
+      if (nodes->get(outNodeIndex) != nullptr) {
         output->connectInput(
-          nodes.Get(outNodeIndex)->shared.socketsOut[outConnectionIndex]
+          nodes->get(outNodeIndex)->shared.socketsOut[outConnectionIndex]
         );
       }
       else if (outNodeIndex == InputNode) {

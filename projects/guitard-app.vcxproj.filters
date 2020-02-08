@@ -504,9 +504,6 @@
     <ClInclude Include="..\thirdparty\soundwoofer\soundwoofer.h">
       <Filter>thirdparty</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\headless.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\types\types.h">
       <Filter>src\types</Filter>
     </ClInclude>
@@ -520,6 +517,12 @@
       <Filter>src\types</Filter>
     </ClInclude>
     <ClInclude Include="..\src\types\gmutex.h">
+      <Filter>src\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\headless\headless.h">
+      <Filter>src\headless</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\types\pointerList.h">
       <Filter>src\types</Filter>
     </ClInclude>
   </ItemGroup>
@@ -634,6 +637,9 @@
     </Filter>
     <Filter Include="src\types">
       <UniqueIdentifier>{276bc1a0-ad58-4738-b973-da451178f264}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\headless">
+      <UniqueIdentifier>{987e35f7-037b-4f09-8e5f-bdea00cda768}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

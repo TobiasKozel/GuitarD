@@ -5,9 +5,9 @@
 
 namespace guitard {
   class GalleryCategory : public IControl {
-    WDL_PtrList<GalleryElement> mElements;
+    PointerList<GalleryElement> mElements;
     bool mOpen = false;
-    WDL_String mName;
+    String mName;
     MessageBus::Bus* mBus = nullptr;
     IRECT mTitleRect;
     float mColumns = 0;
@@ -18,16 +18,15 @@ namespace guitard {
     }
 
     ~GalleryCategory() {
-      mElements.Empty(true);
+      mElements.clear(true);
     }
 
     void addNode(const NodeList::NodeInfo node) {
-      if (mName.GetLength() == 0) {
+      if (mName.getLength() == 0) {
         // Take the name of the first node, they'll all be the same
-        mName.Set(node.categoryName.c_str());
+        mName.set(node.categoryName.c_str());
       }
-      mElements.Compact();
-      mElements.Add(new GalleryElement(node));
+      mElements.add(new GalleryElement(node));
     }
 
     void OnResize() override {
@@ -40,7 +39,7 @@ namespace guitard {
           floor(mRECT.W() / (Theme::Gallery::ELEMENT_WIDTH
             + Theme::Gallery::ELEMENT_PADDING * 1.5))), 1
         );
-        int rows = ceilf(mElements.GetSize() / mColumns);
+        int rows = ceilf(mElements.size() / mColumns);
         mRECT.B +=
           rows * Theme::Gallery::ELEMENT_HEIGHT + rows
           * Theme::Gallery::ELEMENT_PADDING + Theme::Gallery::ELEMENT_PADDING;
@@ -59,8 +58,8 @@ namespace guitard {
         else {
           g.FillRect(Theme::Gallery::CATEGORY_BG, mRECT);
         }
-        for (int i = 0; i < mElements.GetSize(); i++) {
-          mElements.Get(i)->Draw(g, &mRECT, i, mColumns);
+        for (int i = 0; i < mElements.size(); i++) {
+          mElements[i]->Draw(g, &mRECT, i, mColumns);
         }
       }
 
@@ -73,22 +72,22 @@ namespace guitard {
       else {
         g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG, mTitleRect);
       }
-      g.DrawText(Theme::Gallery::CATEGORY_TITLE, mName.Get(), mTitleRect);
+      g.DrawText(Theme::Gallery::CATEGORY_TITLE, mName.get(), mTitleRect);
     }
 
     void OnMouseOver(float x, float y, const IMouseMod& mod) override {
       IControl::OnMouseOver(x, y, mod);
       const IRECT click = { x, y, x, y };
-      for (int i = 0; i < mElements.GetSize(); i++) {
-        GalleryElement* g = mElements.Get(i);
+      for (int i = 0; i < mElements.size(); i++) {
+        GalleryElement* g = mElements[i];
         g->mMouseIsOver = g->mRECT.Contains(click);
       }
     }
 
     void OnMouseOut() override {
       IControl::OnMouseOut();
-      for (int i = 0; i < mElements.GetSize(); i++) {
-        mElements.Get(i)->mMouseIsOver = false;
+      for (int i = 0; i < mElements.size(); i++) {
+        mElements[i]->mMouseIsOver = false;
       }
     }
 
@@ -99,8 +98,8 @@ namespace guitard {
         OnResize();
         return;
       }
-      for (int i = 0; i < mElements.GetSize(); i++) {
-        GalleryElement* elem = mElements.Get(i);
+      for (int i = 0; i < mElements.size(); i++) {
+        GalleryElement* elem = mElements[i];
         if (elem->mRECT.Contains(p)) {
           MessageBus::fireEvent<NodeList::NodeInfo>(mBus, MessageBus::NodeAdd, elem->mInfo);
         }
