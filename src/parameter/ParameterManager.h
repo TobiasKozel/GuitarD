@@ -4,10 +4,17 @@
 #include "src/node/Node.h"
 #include "src/parameter/ParameterCoupling.h"
 #include "src/misc/MessageBus.h"
+
 namespace guitard {
   class ParameterManager {
     MessageBus::Bus* mBus;
-    IParam* mParameters[MAX_DAW_PARAMS] = { nullptr };
+#ifndef GUITARD_HEADLESS
+    IParam*
+#else
+    ParameterCoupling*
+#endif
+    mParameters[MAX_DAW_PARAMS] = { nullptr };
+
     bool mParametersClaimed[MAX_DAW_PARAMS] = { true };
     int mParametersLeft = 0;
 
@@ -16,6 +23,7 @@ namespace guitard {
       mBus = pBus;
     }
 
+#ifndef GUITARD_HEADLESS
     /**
      * This will fill the pool of parameters from the DAW ONCE at plugin startup
      * since most DAWs don't seem to support dynamic parameters
@@ -27,6 +35,7 @@ namespace guitard {
       // all these values have a range from 0-1 since this can't be changed later on
       param->InitDouble((paramprefix + std::to_string(mParametersLeft)).c_str(), 1, 0, 1.0, 0.01);
     }
+#endif
 
     /**
      * This will go over each control element in the paramters array of the node and try to expose it to the daw
@@ -74,7 +83,9 @@ namespace guitard {
       }
       if (MAX_DAW_PARAMS <= i || mParametersClaimed[i] || i == kNoParameter || !couple->wantsDawParameter) {
         // This is bad and means a preset will not load correctly
+#ifndef GUITARD_HEADLESS
         couple->setParam(nullptr);
+#endif
         couple->parameterIdx = kNoParameter;
         if (couple->wantsDawParameter) {
           // Couldn't get a param but wanted one
@@ -85,7 +96,11 @@ namespace guitard {
       }
       mParametersLeft--;
       mParametersClaimed[i] = true;
+#ifndef GUITARD_HEADLESS
       couple->setParam(mParameters[i]);
+#else
+      mParameters[i] = couple; // Store the couple here so it can be accessed from outside
+#endif
       couple->parameterIdx = i;
       WDBGMSG("Claimed param %i\n", i);
       return true;
@@ -100,13 +115,21 @@ namespace guitard {
 
     void releaseParameter(ParameterCoupling* couple) {
       for (int i = 0; i < MAX_DAW_PARAMS; i++) {
+#ifndef GUITARD_HEADLESS
         if (mParameters[i] == couple->getParam()) {
+#else
+        if (mParameters[i] == couple) { // directly compare the couple
+#endif
           mParametersClaimed[i] = false;
           std::string paramprefix = "Uninitialized ";
+#ifndef GUITARD_HEADLESS
           mParameters[i]->InitDouble(
             (paramprefix + std::to_string(mParametersLeft)).c_str(), 1, 0, 1.0, 0.01
           );
           couple->setParam(nullptr);
+#else
+          mParameters[i] = nullptr;
+#endif
           mParametersLeft++;
           WDBGMSG("Released param %i\n", i);
           return;
