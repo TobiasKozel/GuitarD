@@ -823,14 +823,14 @@ namespace audiofft {
       }
     }
 
-    void fft(const Sample* data, Sample* re, Sample* im) override {
+    void fft(const fftconvolver::Sample* data, fftconvolver::Sample* re, fftconvolver::Sample* im) override {
       const size_t size2 = _size / 2;
       DSPSplitComplex splitComplex;
       splitComplex.realp = re;
       splitComplex.imagp = im;
       vDSP_ctoz(reinterpret_cast<const COMPLEX*>(data), 2, &splitComplex, 1, size2);
       vDSP_fft_zrip(_fftSetup, &splitComplex, 1, _powerOf2, FFT_FORWARD);
-      const Sample factor = 0.5f;
+      const fftconvolver::Sample factor = 0.5f;
       vDSP_vsmul(re, 1, &factor, re, 1, size2);
       vDSP_vsmul(im, 1, &factor, im, 1, size2);
       re[size2] = im[0];
@@ -838,17 +838,17 @@ namespace audiofft {
       im[size2] = 0.0f;
     }
 
-    void ifft(Sample* data, const Sample* re, const Sample* im) override {
+    void ifft(fftconvolver::Sample* data, const fftconvolver::Sample* re, const fftconvolver::Sample* im) override {
       const size_t size2 = _size / 2;
-      ::memcpy(_re.data(), re, size2 * sizeof(Sample));
-      ::memcpy(_im.data(), im, size2 * sizeof(Sample));
+      ::memcpy(_re.data(), re, size2 * sizeof(fftconvolver::Sample));
+      ::memcpy(_im.data(), im, size2 * sizeof(fftconvolver::Sample));
       _im[0] = re[size2];
       DSPSplitComplex splitComplex;
       splitComplex.realp = _re.data();
       splitComplex.imagp = _im.data();
       vDSP_fft_zrip(_fftSetup, &splitComplex, 1, _powerOf2, FFT_INVERSE);
       vDSP_ztoc(&splitComplex, 1, reinterpret_cast<COMPLEX*>(data), 2, size2);
-      const Sample factor = 1.0f / static_cast<Sample>(_size);
+      const fftconvolver::Sample factor = 1.0f / static_cast<fftconvolver::Sample>(_size);
       vDSP_vsmul(data, 1, &factor, data, 1, _size);
     }
 
@@ -856,8 +856,8 @@ namespace audiofft {
     size_t _size;
     size_t _powerOf2;
     FFTSetup _fftSetup;
-    std::vector<Sample> _re;
-    std::vector<Sample> _im;
+    std::vector<fftconvolver::Sample> _re;
+    std::vector<fftconvolver::Sample> _im;
   };
 
   /**

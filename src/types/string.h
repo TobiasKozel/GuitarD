@@ -111,10 +111,6 @@ namespace guitard {
       return mString == nullptr ? "" : mString;
     }
 
-    char* get() {
-      return mString == nullptr ? "" : mString; // TODOG I have a feeling this might causing memleaks
-    }
-
     const char* getExt() {
       if (mString == nullptr) {
         return nullptr;

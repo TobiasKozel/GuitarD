@@ -1,6 +1,9 @@
 #include "./guitard.h"
-#include "IPlug_include_in_plug_src.h"
 #include "./src/nodes/RegisterNodes.h"
+
+using namespace iplug;
+#include "IPlug_include_in_plug_src.h"
+
 
 
 GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::MakeConfig(MAX_DAW_PARAMS, kNumPrograms)) {
