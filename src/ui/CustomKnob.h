@@ -1,8 +1,8 @@
 #pragma once
 #ifndef GUITARD_HEADLESS
 #include "IControl.h"
-#include "src/parameter/ParameterCoupling.h"
-#include "src/types/types.h"
+#include "../parameter/ParameterCoupling.h"
+#include "../types/types.h"
 namespace guitard {
   class CustomKnob : public IKnobControlBase {
     ParameterCoupling* mCoupling = nullptr;

@@ -1,12 +1,12 @@
 #pragma once
 #ifndef GUITARD_HEADLESS
 #include "IControls.h"
-#include "src/types/iplugTypes.h"
-#include "src/node/NodeSocket.h"
-#include "src/node/NodeSocketUi.h"
-#include "src/misc/MessageBus.h"
-#include "src/types/gstructs.h"
-#include "NodeShared.h"
+#include "../types/iplugTypes.h"
+#include "../node/NodeSocket.h"
+#include "../node/NodeSocketUi.h"
+#include "../misc/MessageBus.h"
+#include "../types/gstructs.h"
+#include "./NodeShared.h"
 
 namespace guitard {
   class Node;

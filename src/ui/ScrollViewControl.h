@@ -2,7 +2,7 @@
 
 #ifndef GUITARD_HEADLESS
 #include "IControl.h"
-#include "ScrollViewChild.h"
+#include "./ScrollViewChild.h"
 
 namespace guitard {
   class ScrollViewControl : public IControl {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "src/types/gstructs.h"
-#include "clean.h"
-#include "air.h"
+#include "../../types/gstructs.h"
+#include "./clean.h"
+#include "./air.h"
 namespace guitard {
   IRBundle InternalIRs[] = {
     { "Clean", 1, 48000, InteralIR::cleanIRLength, InteralIR::cleanIR },

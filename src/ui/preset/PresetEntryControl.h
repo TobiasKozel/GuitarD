@@ -1,8 +1,8 @@
 #pragma once
 #include "IControl.h"
-#include "src/misc/MessageBus.h"
-#include "src/ui/theme.h"
-#include "soundwoofer/soundwoofer.h"
+#include "../../misc/MessageBus.h"
+#include "../../ui/theme.h"
+#include "../../../thirdparty/soundwoofer/soundwoofer.h"
 
 namespace guitard {
   class PresetEntryControl : public IControl {

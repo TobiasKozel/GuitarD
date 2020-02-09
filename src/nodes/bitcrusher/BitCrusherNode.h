@@ -1,5 +1,5 @@
 #pragma once
-#include "BitCrusher.h"
+#include "../../faust/generated/BitCrusher.h"
 
 namespace guitard {
   class BitCrusherNode final : public FaustGenerated::BitCrusher {

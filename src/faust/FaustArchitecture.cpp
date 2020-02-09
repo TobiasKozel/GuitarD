@@ -1,4 +1,4 @@
-#include "src/faust/FaustHeadlessDsp.h"
+#include "../FaustHeadlessDsp.h"
 
 
 #define min(a,b) (((a)<(b))?(a):(b))

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "src/misc/constants.h"
-#include "src/node/Node.h"
-#include "src/parameter/ParameterCoupling.h"
-#include "src/misc/MessageBus.h"
+#include "../misc/constants.h"
+#include "../node/Node.h"
+#include "../parameter/ParameterCoupling.h"
+#include "../misc/MessageBus.h"
 
 namespace guitard {
   class ParameterManager {

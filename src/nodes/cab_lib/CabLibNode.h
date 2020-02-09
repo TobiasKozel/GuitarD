@@ -1,8 +1,7 @@
 #pragma once
-#include <json.hpp>
-#include "src/node/Node.h"
+#include "../../node/Node.h"
 
-#include "CabLibPopUp.h"
+#include "./CabLibPopUp.h"
 
 namespace guitard {
 #ifndef GUITARD_HEADLESS

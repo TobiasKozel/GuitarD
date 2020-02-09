@@ -1,5 +1,5 @@
 #pragma once
-#include "src/node/Node.h"
+#include "../../node/Node.h"
 namespace guitard {
 
 #ifndef GUITARD_HEADLESS

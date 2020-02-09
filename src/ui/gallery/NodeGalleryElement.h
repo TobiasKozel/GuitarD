@@ -1,7 +1,7 @@
 #pragma once
 #ifndef GUITARD_HEADLESS
-#include "src/misc/NodeList.h"
-#include "src/ui/theme.h"
+#include "../../misc/NodeList.h"
+#include "../../ui/theme.h"
 
 namespace guitard {
   struct GalleryElement {

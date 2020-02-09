@@ -1,5 +1,5 @@
 #pragma once
-#include "ReverseDelay.h"
+#include "../../faust/generated/ReverseDelay.h"
 
 namespace guitard {
   class ReverseDelayNode final : public FaustGenerated::ReverseDelay {

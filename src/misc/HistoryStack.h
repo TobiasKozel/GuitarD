@@ -1,7 +1,6 @@
 #pragma once
 
-#include "constants.h"
-#include "json.hpp"
+#include "./constants.h"
 
 namespace  guitard {
   // TODOG make this instance specific so multiple plugins don't share the same undo stack

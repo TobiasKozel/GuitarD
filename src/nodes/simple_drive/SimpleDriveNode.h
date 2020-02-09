@@ -1,5 +1,5 @@
 #pragma once
-#include "SimpleDrive.h"
+#include "../../faust/generated/SimpleDrive.h"
 
 namespace guitard {
 #ifndef GUITARD_HEADLESS

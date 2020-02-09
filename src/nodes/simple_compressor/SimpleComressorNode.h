@@ -1,5 +1,5 @@
 #pragma once
-#include "SimpleComressor.h"
+#include "../../faust/generated/SimpleComressor.h"
 
 namespace guitard {
   class SimpleComressorNode final : public FaustGenerated::SimpleComressor {

@@ -1,5 +1,5 @@
 #pragma once
-#include "Flanger.h"
+#include "../../faust/generated/Flanger.h"
 
 namespace guitard {
   class FlangerNode final : public FaustGenerated::Flanger {

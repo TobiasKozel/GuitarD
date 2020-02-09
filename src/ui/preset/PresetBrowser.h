@@ -1,10 +1,10 @@
 #pragma once
 #ifndef GUITARD_HEADLESS
-#include "src/ui/ScrollViewControl.h"
-#include "src/misc/MessageBus.h"
-#include "src/ui/ScrollViewChild.h"
-#include "soundwoofer/soundwoofer.h"
-#include "PresetEntryControl.h"
+#include "../../ui/ScrollViewControl.h"
+#include "../../misc/MessageBus.h"
+#include "../../ui/ScrollViewChild.h"
+#include "../../../thirdparty/soundwoofer/soundwoofer.h"
+#include "./PresetEntryControl.h"
 
 namespace guitard {
   class PresetBrowser : public ScrollViewControl, public ScrollViewChild {

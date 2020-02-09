@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
 #include <functional>
-#include "src/node/NodeInfo.h"
+#include "../node/NodeInfo.h"
 
 namespace guitard {
   class Node;

@@ -1,5 +1,5 @@
 #pragma once
-#include "SimpleReverb.h"
+#include "../../faust/generated/SimpleReverb.h"
 
 namespace guitard {
   class SimpleReverbNode final : public FaustGenerated::SimpleReverb {

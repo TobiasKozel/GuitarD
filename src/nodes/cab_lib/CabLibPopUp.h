@@ -2,11 +2,12 @@
 
 #ifndef GUITARD_HEADLESS
 #include "IControl.h"
-#include "src/ui/ScrollViewControl.h"
-#include "src/ui/theme.h"
+#include "../../../thirdparty/soundwoofer/soundwoofer.h"
+#include "../../ui/ScrollViewControl.h"
+#include "../../ui/theme.h"
 #endif
 #include <functional>
-#include "src/types/gstructs.h"
+#include "../../types/gstructs.h"
 
 namespace guitard {
 

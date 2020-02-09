@@ -1,6 +1,6 @@
 #pragma once
 #include <algorithm>
-#include "src/types/iplugTypes.h"
+#include "../types/iplugTypes.h"
 
 namespace guitard {
   /**

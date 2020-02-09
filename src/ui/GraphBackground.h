@@ -1,8 +1,8 @@
 #pragma once
 #ifndef GUITARD_HEADLESS
 #include "IControl.h"
-#include "src/ui/theme.h"
-#include "src/misc/MessageBus.h"
+#include "../ui/theme.h"
+#include "../misc/MessageBus.h"
 
 typedef std::function<void(float x, float y, float scale)> BackgroundMoveCallback;
 

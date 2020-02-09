@@ -1,8 +1,8 @@
 #pragma once
 #include <functional>
-#include "EventList.h"
-#include "src/types/pointerList.h"
-#include "src/types/gmutex.h"
+#include "./EventList.h"
+#include "../types/pointerList.h"
+#include "../types/gmutex.h"
 namespace guitard {
   /**
    * This allows for easy communication between classes which don't know each other

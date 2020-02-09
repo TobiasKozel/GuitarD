@@ -2,11 +2,11 @@
 
 #ifndef GUITARD_HEADLESS
 #include "IControl.h"
-#include "src/ui/ScrollViewControl.h"
-#include "src/misc/MessageBus.h"
-#include "src/ui/theme.h"
-#include "gallery/NodeGallery.h"
-#include "preset/PresetBrowser.h"
+#include "../ui/ScrollViewControl.h"
+#include "../misc/MessageBus.h"
+#include "../ui/theme.h"
+#include "./gallery/NodeGallery.h"
+#include "./preset/PresetBrowser.h"
 
 namespace guitard {
   class SideBar : public IControl {

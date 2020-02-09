@@ -495,9 +495,6 @@
     <ClInclude Include="..\src\types\gmutex.h">
       <Filter>src\types</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\headless\headless.h">
-      <Filter>src\headless</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\types\pointerList.h">
       <Filter>src\types</Filter>
     </ClInclude>
@@ -511,16 +508,16 @@
       <Filter>src\types</Filter>
     </ClInclude>
     <ClInclude Include="..\thirdparty\convolver\fft.h">
-      <Filter>thirdparty\convolverh</Filter>
+      <Filter>thirdparty\convolver</Filter>
     </ClInclude>
     <ClInclude Include="..\thirdparty\convolver\util.h">
-      <Filter>thirdparty\convolverh</Filter>
+      <Filter>thirdparty\convolver</Filter>
     </ClInclude>
     <ClInclude Include="..\thirdparty\convolver\convolver.h">
-      <Filter>thirdparty\convolverh</Filter>
+      <Filter>thirdparty\convolver</Filter>
     </ClInclude>
     <ClInclude Include="..\thirdparty\convolver\twoStageConvolver.h">
-      <Filter>thirdparty\convolverh</Filter>
+      <Filter>thirdparty\convolver</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -562,9 +559,6 @@
     </Filter>
     <Filter Include="thirdparty">
       <UniqueIdentifier>{89a4599c-777c-47fe-92d1-9081f902c5ad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\convolver">
-      <UniqueIdentifier>{60e082e5-694e-455e-8d9b-cbed989c18c6}</UniqueIdentifier>
     </Filter>
     <Filter Include="WDL">
       <UniqueIdentifier>{fa23b9fb-6159-4e25-9eed-6ee81794c82c}</UniqueIdentifier>
@@ -635,10 +629,7 @@
     <Filter Include="src\types">
       <UniqueIdentifier>{276bc1a0-ad58-4738-b973-da451178f264}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\headless">
-      <UniqueIdentifier>{987e35f7-037b-4f09-8e5f-bdea00cda768}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\convolverh">
+    <Filter Include="thirdparty\convolver">
       <UniqueIdentifier>{c6ff16d2-8b86-404f-9517-690abd98b1a4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

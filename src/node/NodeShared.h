@@ -1,8 +1,8 @@
 #pragma once
-#include "src/misc/MessageBus.h"
-#include "src/types/gstructs.h"
-#include "src/parameter/MeterCoupling.h"
-#include "src/parameter/ParameterCoupling.h"
+#include "../misc/MessageBus.h"
+#include "../types/gstructs.h"
+#include "../parameter/MeterCoupling.h"
+#include "../parameter/ParameterCoupling.h"
 
 namespace guitard {
   /**

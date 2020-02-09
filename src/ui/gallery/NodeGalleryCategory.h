@@ -1,8 +1,8 @@
 #pragma once
 #ifndef GUITARD_HEADLESS
 #include "IControl.h"
-#include "src/misc/MessageBus.h"
-#include "NodeGalleryElement.h"
+#include "../../misc/MessageBus.h"
+#include "./NodeGalleryElement.h"
 
 namespace guitard {
   class GalleryCategory : public IControl {

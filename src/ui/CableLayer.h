@@ -2,11 +2,11 @@
 #ifndef GUITARD_HEADLESS
 
 #include "IControl.h"
-#include "src/misc/constants.h"
-#include "src/node/Node.h"
-#include "src/node/NodeSocket.h"
-#include "src/misc/MessageBus.h"
-#include "src/types/gstructs.h"
+#include "../misc/constants.h"
+#include "../node/Node.h"
+#include "../node/NodeSocket.h"
+#include "../misc/MessageBus.h"
+#include "../types/gstructs.h"
 
 namespace guitard {
   /**

@@ -1,8 +1,8 @@
 #pragma once
-#include "src/node/NodeSocket.h"
-#include "src/misc/MessageBus.h"
-#include "src/ui/theme.h"
-#include "src/node/NodeShared.h"
+#include "../node/NodeSocket.h"
+#include "../misc/MessageBus.h"
+#include "../ui/theme.h"
+#include "../node/NodeShared.h"
 
 namespace guitard {
 #ifndef GUITARD_HEADLESS

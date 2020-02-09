@@ -1,7 +1,7 @@
 #pragma once
 
-#include "src/node/Node.h"
-#include "src/node/NodeUi.h"
+#include "../../node/Node.h"
+#include "../../node/NodeUi.h"
 
 namespace guitard {
 #ifndef GUITARD_HEADLESS

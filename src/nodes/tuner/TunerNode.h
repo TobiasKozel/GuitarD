@@ -1,5 +1,5 @@
 #pragma once
-#include "src/node/Node.h"
+#include "../../node/Node.h"
 #include <map>
 
 #define TWO_YROOT_TWELVE 1.05946309435929526456f

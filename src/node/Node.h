@@ -1,8 +1,8 @@
 #pragma once
 
-#include "src/node/NodeUi.h"
-#include "src/node/NodeSocket.h"
-#include "NodeShared.h"
+#include "../node/NodeUi.h"
+#include "../node/NodeSocket.h"
+#include "./NodeShared.h"
 
 namespace guitard {
   /**

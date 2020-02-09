@@ -1,5 +1,5 @@
 #pragma once
-#include "Fuzz.h"
+#include "../../faust/generated/Fuzz.h"
 
 namespace guitard {
   class FuzzNode final : public FaustGenerated::Fuzz {

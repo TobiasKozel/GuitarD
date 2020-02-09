@@ -1,8 +1,7 @@
 #pragma once
-#include "json.hpp"
-#include "src/node/Node.h"
-#include "src/misc/NodeList.h"
-#include "src/parameter/ParameterManager.h"
+#include "../node/Node.h"
+#include "../misc/NodeList.h"
+#include "../parameter/ParameterManager.h"
 
 namespace guitard {
   namespace Serializer {

@@ -1,15 +1,15 @@
 #pragma once
 #include <chrono>
-#include "json.hpp"
-#include "src/misc/constants.h"
-#include "src/types/gmutex.h"
-#include "src/types/types.h"
-#include "src/types/pointerList.h"
-#include "src/misc/MessageBus.h"
-#include "src/nodes/io/InputNode.h"
-#include "src/nodes/io/OutputNode.h"
-#include "Serializer.h"
-#include "src/parameter/ParameterManager.h"
+#include "../../thirdparty/soundwoofer/soundwoofer.h"
+#include "../misc/constants.h"
+#include "../types/gmutex.h"
+#include "../types/types.h"
+#include "../types/pointerList.h"
+#include "../misc/MessageBus.h"
+#include "../nodes/io/InputNode.h"
+#include "../nodes/io/OutputNode.h"
+#include "./Serializer.h"
+#include "../parameter/ParameterManager.h"
 
 #ifndef GUITARD_HEADLESS
 #include "src/ui/GraphBackground.h"

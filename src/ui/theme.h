@@ -1,7 +1,7 @@
 #pragma once
 #include "config.h"
 #include "IPlugStructs.h"
-#include "src/types/iplugTypes.h"
+#include "../types/iplugTypes.h"
 
 namespace guitard {
   namespace Theme {

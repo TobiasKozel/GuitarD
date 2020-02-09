@@ -2,9 +2,9 @@
 
 #define FAUSTFLOAT sample
 
-#include "src/misc/constants.h"
-#include "src/parameter/ParameterCoupling.h"
-#include "src/node/Node.h"
+#include "../misc/constants.h"
+#include "../parameter/ParameterCoupling.h"
+#include "../node/Node.h"
 namespace guitard {
   namespace FaustGenerated {
     /**

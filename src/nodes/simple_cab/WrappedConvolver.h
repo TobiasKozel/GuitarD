@@ -6,15 +6,15 @@
   #include <omp.h>
 #endif
 
-#include "src/misc/constants.h"
-#include "src/types/types.h"
+#include "../../misc/constants.h"
+#include "../../types/types.h"
 #ifndef GUITARD_FLOAT_CONVOLUTION
   #define FFTCONVOLVER_TYPE guitard::sample
 #endif
 
-#include "convolver/twoStageConvolver.h"
-#include "threadpool.h"
-#include "src/types/resampler.h"
+#include "../../../thirdparty/convolver/twoStageConvolver.h"
+#include "../../../thirdparty/threadpool.h"
+#include "../../types/resampler.h"
 
 namespace guitard {
   class WrappedConvolver {

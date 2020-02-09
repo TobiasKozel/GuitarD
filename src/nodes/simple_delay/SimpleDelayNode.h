@@ -1,5 +1,5 @@
 #pragma once
-#include "SimpleDelay.h"
+#include "../../faust/generated/SimpleDelay.h"
 
 namespace guitard {
   class SimpleDelayNode final : public FaustGenerated::SimpleDelay {

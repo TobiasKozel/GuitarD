@@ -1,6 +1,6 @@
 #pragma once
-#include "src/node/Node.h"
-#include "src/types/ringBuffer.h"
+#include "../../node/Node.h"
+#include "../../types/ringBuffer.h"
 
 namespace guitard {
 #ifndef GUITARD_HEADLESS

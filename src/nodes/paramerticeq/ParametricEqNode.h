@@ -1,5 +1,5 @@
 #pragma once
-#include "ParametricEq.h"
+#include "../../faust/generated/ParametricEq.h"
 
 namespace guitard {
 #ifndef GUITARD_HEADLESS

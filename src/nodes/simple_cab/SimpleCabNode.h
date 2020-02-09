@@ -1,11 +1,11 @@
 #pragma once
 
-#include "src/node/Node.h"
+#include "../../node/Node.h"
 #ifndef GUITARD_HEADLESS
 #include "filebrowse.h"
 #endif
-#include "InternalIRs.h"
-#include "WrappedConvolver.h"
+#include "./InternalIRs.h"
+#include "./WrappedConvolver.h"
 
 // TODOG figure out this swell stuff
 #ifdef FillRect
