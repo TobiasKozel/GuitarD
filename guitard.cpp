@@ -1,4 +1,4 @@
-#include "./GuitarD.h"
+#include "./guitard.h"
 #include "IPlug_include_in_plug_src.h"
 #include "./src/nodes/RegisterNodes.h"
 
