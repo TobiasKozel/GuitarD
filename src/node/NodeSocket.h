@@ -15,7 +15,7 @@ namespace guitard {
     bool mConnected = false;
     NodeSocket* mConnectedTo[MAX_SOCKET_CONNECTIONS] = { nullptr };
     // Buffer is only relevant for a output node
-    iplug::sample** mParentBuffer = nullptr;
+    sample** mParentBuffer = nullptr;
     std::function<void(bool)> callback;
     virtual void disconnect(NodeSocket* to = nullptr, bool other = true) = 0;
     virtual void disconnectAll() = 0;

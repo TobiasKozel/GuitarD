@@ -308,7 +308,7 @@ namespace guitard {
     /**
      * Main entry point for the DSP
      */
-    void ProcessBlock(iplug::sample** in, iplug::sample** out, const int nFrames) {
+    void ProcessBlock(sample** in, sample** out, const int nFrames) {
       /**
        * Process the block in smaller bits since it's too large
        * Also abused to lower the delay a feedback node creates

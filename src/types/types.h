@@ -1,6 +1,5 @@
 #pragma once
 #include "./string.h"
-
 namespace guitard {
   typedef
 #ifdef GUITARD_HEADLESS

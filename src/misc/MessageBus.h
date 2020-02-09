@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include "EventList.h"
+#include "src/types/pointerList.h"
 #include "src/types/gmutex.h"
 namespace guitard {
   /**

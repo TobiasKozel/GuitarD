@@ -16,11 +16,13 @@ namespace guitard {
   public:
     OutputNode(MessageBus::Bus* pBus) : Node() {
       shared.type = "Output";
+#ifndef GUITARD_HEADLESS
       if (shared.X == shared.Y && shared.X == 0) {
         // Place it at the screen edge if no position is set
         shared.Y = PLUG_HEIGHT * 0.5;
         shared.X = PLUG_WIDTH - shared.width * 0.3;
       }
+#endif
       setup(pBus, 0, MAX_BUFFER, 2, 1, 0);
     }
 

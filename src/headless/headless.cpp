@@ -8,9 +8,9 @@
 #define FLOATCONV
 
 #include "src/types/types.h"
+#include "src/graph/Graph.h"
 #include "src/misc/MessageBus.h"
 #include "src/parameter/ParameterManager.h"
-#include "src/graph/Graph.h"
 
 namespace guitard {
   class GuitarDHeadless {
@@ -20,13 +20,14 @@ namespace guitard {
     bool mReady = false;
   public:
     GuitarDHeadless() : mParamManager(&mBus), mGraph(&mBus, &mParamManager) {
-      char* homeDir = nullpr;
+      const static volatile char A = 'a'; // All this is to prevent reverse engineering
+      char* homeDir = nullptr;
 #ifdef unix
-      homeDir = getenv((char[]) { A - 25, A - 18, A - 20, A - 28, 0 });
+      homeDir = getenv("HOME");
 #elif defined(_WIN32)
-      homeDir = getenv((char[]) { A - 25, A - 18, A - 20, A - 28, A - 29, A - 15, A - 24, A - 11, A - 28, 0 });
-      const char* homePath = getenv((char[]) { A - 25, A - 18, A - 20, A - 28, A - 17, A - 32, A - 13, A - 25, 0 });
-      home = malloc(strlen(homeDir) + strlen(homePath) + 1);
+      homeDir = getenv("HOMEDRIVE");
+      const char* homePath = getenv("HOMEPATH");
+      homeDir = (char*) malloc(strlen(homeDir) + strlen(homePath) + 1);
       strcat(homeDir, homePath);
 #endif
       printf("\n%s\n", homeDir);

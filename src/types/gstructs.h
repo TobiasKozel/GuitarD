@@ -43,7 +43,9 @@ namespace guitard {
 
   struct AutomationAttachRequest {
     Node* automationNode = nullptr;
+#ifndef GUITARD_HEADLESS
     iplug::igraphics::IControl* targetControl = nullptr;
+#endif
   };
 
   struct NodeDragEndData {

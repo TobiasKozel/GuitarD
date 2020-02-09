@@ -28,11 +28,13 @@ namespace guitard {
     InputNode(MessageBus::Bus* pBus) : Node() {
       shared.type = "Input";
       mLastBlockSize = -1;
+#ifndef GUITARD_HEADLESS
       if (shared.X == shared.Y && shared.X == 0) {
         // Place it at the screen edge if no position is set
         shared.Y = PLUG_HEIGHT * 0.5;
         shared.X = shared.width * 0.3;
       }
+#endif
       setup(pBus, 48000, MAX_BUFFER, 2, 0, 1);
     }
 
@@ -48,7 +50,7 @@ namespace guitard {
      * Puts the given buffer into the node
      * Basically used to inject outside audio into the graph
      */
-    void CopyIn(iplug::sample** in, int nFrames) {
+    void CopyIn(sample** in, int nFrames) {
       mLastBlockSize = nFrames;
       if (mInputChannels == 1) {
         for (int i = 0; i < nFrames; i++) {
