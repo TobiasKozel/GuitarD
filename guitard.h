@@ -1,11 +1,11 @@
 #pragma once
 
 const int kNumPrograms = 2;
-#include "soundwoofer/soundwoofer.h" // since winsocks does some weird stuff when being included after windows.h it needs to be included here though it's not used here
+#include "./thirdparty/soundwoofer/soundwoofer.h" // since winsocks does some weird stuff when being included after windows.h it needs to be included here though it's not used here
 #include "IPlug_include_in_plug_hdr.h"
 
-#include "src/graph/Graph.h"
-#include "src/parameter/ParameterManager.h"
+#include "./src/graph/Graph.h"
+#include "./src/parameter/ParameterManager.h"
 
 class GuitarD : public iplug::Plugin
 {
