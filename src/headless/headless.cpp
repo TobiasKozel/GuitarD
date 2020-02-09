@@ -32,10 +32,13 @@ namespace guitard {
       printf("\n%s\n", homeDir.get());
       auto& sw = SoundWoofer::instance();
       sw.setPluginName("GuitarD");
-      guitard::HOME_PATH = homeDir.get();
+      HOME_PATH = homeDir.get();
       sw.setHomeDirectory(homeDir.get());
     }
 
+    /**
+     * Needs to be called before processing can start to set sample rate and channel config
+     */
     void setConfig(int samplerate, int outChannels, int inChannels) {
       if (samplerate > 0 && outChannels > 0 && inChannels > 0) {
         mGraph.OnReset(samplerate, outChannels, inChannels);
@@ -44,7 +47,6 @@ namespace guitard {
       else {
         mReady = false;
       }
-      
     }
 
     void process(sample** in, sample** out, int samples) {
@@ -53,8 +55,21 @@ namespace guitard {
       }
     }
 
+    /**
+     * Resets the plugin (kills reverb tails etc)
+     */
     void reset() {
       mGraph.OnTransport();
+    }
+
+    /**
+     * Takes a value from 0 to 1 to control the parameter
+     */
+    void setParam(int paramIndex, sample value) {
+      ParameterCoupling* couple = mParamManager.getCoupling(paramIndex);
+      if (couple != nullptr) {
+        couple->setFromNormalized(value);
+      }
     }
 
     /**
@@ -75,6 +90,7 @@ int main() {
   guitard::sample* out[channels];
   for (int i = 0; i < channels; i++) {
     in[i] = new guitard::sample[size];
+    out[i] = new guitard::sample[size];
     memset(in[i],0, size * sizeof(guitard::sample));
   }
   guitard::GuitarDHeadless headless;
