@@ -6,11 +6,10 @@
 #include <omp.h>
 #endif
 #include "fftconvolver/TwoStageFFTConvolver.h"
-#include "resample.h"
 #include "threadpool.h"
 //#define DR_WAV_IMPLEMENTATION
 //#include "dr_wav.h"
-#include "IPlugConstants.h"
+#include "src/types/resampler.h"
 namespace guitard {
   class WrappedConvolver {
     const int CONV_BLOCK_SIZE = 128;
@@ -75,26 +74,14 @@ namespace guitard {
     void resampleAndLoadIR(IRBundle* b) {
       mIRLoaded = false;
       unloadWave(b);
-      // clearLoadedIR();
-      if (b->path.getLength() > 0 && !loadWave(b)) {
+      if (!loadWave(b)) {
         WDBGMSG("Failed to load IR!\n");
         return;
       }
       for (int c = 0; c < b->channelCount; c++) {
-        WDL_Resampler resampler;
-        resampler.SetMode(true, 0, true);
-        resampler.SetFilterParms();
-        resampler.SetFeedMode(true);
-        resampler.SetRates(b->sampleRate, mSampleRate);
-        WDL_RESAMPLE_TYPE* inBuffer;
-        const int inSamples = resampler.ResamplePrepare(b->sampleCount, 1, &inBuffer);
-        for (int i = 0; i < b->sampleCount; i++) {
-          // Adjust the volume, since higher samplerates result in louder outputs
-          inBuffer[i] = b->samples[c][i] * (b->sampleRate / static_cast<float>(mSampleRate)) * 0.2f;
-        }
-        const int newSize = ceil(b->sampleCount * ((mSampleRate / static_cast<float>(b->sampleRate))));
-        WDL_RESAMPLE_TYPE* outBuffer = new WDL_RESAMPLE_TYPE[newSize];
-        const int outSamples = resampler.ResampleOut(outBuffer, inSamples, b->sampleCount, 1);
+        LinearResampler<float, float> resampler(b->sampleRate, mSampleRate);
+        float* outBuffer = nullptr;
+        const size_t outSamples = resampler.resample(b->samples[c], b->sampleCount, &outBuffer, (b->sampleRate / static_cast<float>(mSampleRate)) * 0.2f);
         if (b->channelCount == 1) {
           for (int ch = 0; ch < CHANNEL_COUNT; ch++) {
             mConvolvers[ch]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, outBuffer, outSamples);
@@ -115,6 +102,7 @@ namespace guitard {
      */
     static bool loadWave(IRBundle* b) {
       if (b->samples != nullptr) { return true; } // Already loaded samples
+      if (b->path.isEmpty()) { return false; }
       drwav wav;
       // load the file
       if (!drwav_init_file(&wav, b->path.get(), nullptr)) {

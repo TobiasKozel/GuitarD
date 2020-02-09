@@ -4,7 +4,6 @@
 #include "IControl.h"
 #include "src/ui/ScrollViewControl.h"
 #include "src/ui/theme.h"
-#include "src/types/files.h"
 #endif
 #include <functional>
 #include "src/types/gstructs.h"
@@ -87,23 +86,23 @@ namespace guitard {
     }
 
     void scanPositions() {
-      ScanDir dir(path.get());
-      for (int i = 0; i < dir.size(); i++) {
-        if (!dir[i]->isFolder) {
-          // We're only interested in files, each corresponds to a IR
-          MicPosition* pos = new MicPosition(mPosCallback);
-          pos->name = dir[i]->name.get();
-          if (strncmp(".wav", pos->name.getExt(), 5) == 0 ||
-            strncmp(".WAV", pos->name.getExt(), 5) == 0) {
-            pos->path = dir[i]->relative.get();
-            // dir.GetCurrentFullFN(&pos->path);
-            mPositions.add(pos);
-          }
-          else {
-            delete pos;
-          }
-        }
-      }
+      //ScanDir dir(path.get());
+      //for (int i = 0; i < dir.size(); i++) {
+      //  if (!dir[i]->isFolder) {
+      //    // We're only interested in files, each corresponds to a IR
+      //    MicPosition* pos = new MicPosition(mPosCallback);
+      //    pos->name = dir[i]->name.get();
+      //    if (strncmp(".wav", pos->name.getExt(), 5) == 0 ||
+      //      strncmp(".WAV", pos->name.getExt(), 5) == 0) {
+      //      pos->path = dir[i]->relative.get();
+      //      // dir.GetCurrentFullFN(&pos->path);
+      //      mPositions.add(pos);
+      //    }
+      //    else {
+      //      delete pos;
+      //    }
+      //  }
+      //}
     }
   };
 
@@ -147,18 +146,18 @@ namespace guitard {
     }
 
     void scanMics() {
-      ScanDir dir(path.get());
-      for (int i = 0; i < dir.size(); i++) {
-        if (dir[i]->isFolder) {
-          // We're only interested in folders, each corresponds to a mic
-          Microphone* mic = new Microphone(mMicCallback, mPosCallback);
-          mMics.add(mic);
-          mic->name = dir[i]->name.get();
-          mic->path = dir[i]->relative.get();
-          // dir.GetCurrentFullFN(&mic->path);
-          mic->scanPositions();
-        }
-      }
+      //ScanDir dir(path.get());
+      //for (int i = 0; i < dir.size(); i++) {
+      //  if (dir[i]->isFolder) {
+      //    // We're only interested in folders, each corresponds to a mic
+      //    Microphone* mic = new Microphone(mMicCallback, mPosCallback);
+      //    mMics.add(mic);
+      //    mic->name = dir[i]->name.get();
+      //    mic->path = dir[i]->relative.get();
+      //    // dir.GetCurrentFullFN(&mic->path);
+      //    mic->scanPositions();
+      //  }
+      //}
     }
 
     void OnMouseUp(float x, float y, const IMouseMod& mod) override {
@@ -193,26 +192,26 @@ namespace guitard {
         mScrollView[i]->setCleanUpEnabled(false);
         GetUI()->AttachControl(mScrollView[i]);
       }
-      String path = HOME_PATH;
-      path.appendPath("impulses");
-      ScanDir dir(path.get());
-      for (int i = 0; i < dir.size(); i++) {
-        if (dir[i]->isFolder) {
-          // We're only interested in folders, at the top level each corresponds to a cab
-          Cabinet* cab = new Cabinet(
-            [&](Cabinet* cab) { this->onCabChanged(cab); },
-            [&](Microphone* mic) { this->onMicChanged(mic); },
-            [&](MicPosition* pos) { this->onPositionChanged(pos); }
-          );
-          mCabinets.add(cab);
-          cab->name = dir[i]->name.get();
-          cab->path = dir[i]->relative.get();
-          // dir.GetCurrentFullFN(&cab->path);
-          cab->scanMics();
-          mScrollView[0]->appendChild(cab);
+      //String path = soundfoo;
+      //path.appendPath("impulses");
+      //ScanDir dir(path.get());
+      //for (int i = 0; i < dir.size(); i++) {
+      //  if (dir[i]->isFolder) {
+      //    // We're only interested in folders, at the top level each corresponds to a cab
+      //    Cabinet* cab = new Cabinet(
+      //      [&](Cabinet* cab) { this->onCabChanged(cab); },
+      //      [&](Microphone* mic) { this->onMicChanged(mic); },
+      //      [&](MicPosition* pos) { this->onPositionChanged(pos); }
+      //    );
+      //    mCabinets.add(cab);
+      //    cab->name = dir[i]->name.get();
+      //    cab->path = dir[i]->relative.get();
+      //    // dir.GetCurrentFullFN(&cab->path);
+      //    cab->scanMics();
+      //    mScrollView[0]->appendChild(cab);
 
-        }
-      }
+      //  }
+      //}
       setFromIRBundle();
     }
 

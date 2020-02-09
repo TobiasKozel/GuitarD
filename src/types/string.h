@@ -71,7 +71,7 @@ namespace guitard {
     }
 
     void set(const char* source, const size_t offset = 0) {
-      const size_t length = strlen(source);
+      const size_t length = source == nullptr ? 0 : strlen(source);
       if (length > 0) {
         resize(std::max(length + offset, mLength), 0 < offset);
         memcpy(mString + offset, source, length);
@@ -103,12 +103,16 @@ namespace guitard {
       return mLength;
     }
 
+    bool isEmpty() const {
+      return mLength == 0 || mString == nullptr;
+    }
+
     const char* get() const {
-      return mString;
+      return mString == nullptr ? "" : mString;
     }
 
     char* get() {
-      return mString;
+      return mString == nullptr ? "" : mString; // TODOG I have a feeling this might causing memleaks
     }
 
     const char* getExt() {

@@ -15,6 +15,10 @@
   #include "dr_wav.h"
 #endif
 
+#ifndef SOUNDWOOFER_CUSTOM_DIR
+  #include "dirent.h"
+#endif
+
 #ifdef _WIN32
 #include <sys/stat.h>
 #endif
@@ -81,6 +85,18 @@ public:
     bool local = true;
   };
 
+  /**
+   * Struct used to index directories
+   */
+  struct FileInfo {
+    std::string name;
+    std::string relative;
+    std::string absolute;
+    bool isFolder;
+    std::vector<FileInfo> children;
+  };
+
+
   typedef std::vector<SWImpulse> SWImpulses;
   typedef std::vector<SWRig> SWRigs;
   typedef std::vector<SWPreset> SWPresets;
@@ -92,7 +108,7 @@ public:
 
 
 private:
-  const std::string PATH_SEPERATOR =
+  const std::string PATH_DELIMITER =
 #ifdef _WIN32
     "\\";
 #else
@@ -105,8 +121,10 @@ private:
   bool mUseIrCache = true;
   std::string mPluginName = ""; // Plugin name used to label and filter presets by
   std::string mHomeDirectory; // Directory for this plugin
+  std::string mIrDirectory; // Directory for user IRs
   std::string mIrCacheDirectory; // Directory for caching online IRs
-  std::string mPresetCacheDirectory; // Directory for caching online IRs
+  std::string mPresetCacheDirectory; // Directory for caching online presets
+  std::string mPresetDirectory; // Directory for user IRs
 
   SWImpulses mIRlist;
   SWRigs mCabList;
@@ -152,15 +170,35 @@ public:
    */
   Status setHomeDirectory(std::string path) {
     if (mPluginName.empty()) { return PLUGIN_NAME_NOT_SET; }
-    path += PATH_SEPERATOR + mPluginName + PATH_SEPERATOR;
+    path += PATH_DELIMITER + mPluginName + PATH_DELIMITER;
     mHomeDirectory = path;
-    mPresetCacheDirectory = path + "presets" + PATH_SEPERATOR;
-    mIrCacheDirectory = path + "ir_cache" + PATH_SEPERATOR;
+    mPresetDirectory = path + "presets" + PATH_DELIMITER;
+    mIrDirectory = path + "irs" + PATH_DELIMITER;
+    mPresetCacheDirectory = path + "preset_cache" + PATH_DELIMITER;
+    mIrCacheDirectory = path + "ir_cache" + PATH_DELIMITER;
     bool ok = true;
     ok = createFolder(path.c_str()) != SUCCESS ? false : ok;
     ok = createFolder(mPresetCacheDirectory.c_str()) != SUCCESS ? false : ok;
     ok = createFolder(mIrCacheDirectory.c_str()) != SUCCESS ? false : ok;
+    ok = createFolder(mPresetDirectory.c_str()) != SUCCESS ? false : ok;
+    ok = createFolder(mIrDirectory.c_str()) != SUCCESS ? false : ok;
     return ok ? SUCCESS : GENERIC_ERROR;
+  }
+
+  std::string getUserIrPath() const {
+    return mIrDirectory;
+  }
+
+  std::string getUserPresetPath() const {
+    return mPresetDirectory;
+  }
+
+  std::string getCacheIrPath() const {
+    return mIrCacheDirectory;
+  }
+
+  std::string getCachePresetPath() const {
+    return mPresetCacheDirectory;
   }
 
   /**
@@ -339,6 +377,46 @@ public:
     }
   }
 
+  std::vector<FileInfo> scanDir(const std::string path, bool recursive = false) {
+    FileInfo root;
+    root.absolute = path;
+    root.relative = "." + PATH_DELIMITER;
+    root.name = "";
+    return scanDir(root);
+  }
+
+  virtual std::vector<FileInfo> scanDir(FileInfo& root, bool recursive = false) {
+#ifndef SOUNDWOOFER_CUSTOM_DIR
+    std::vector<FileInfo> ret;
+    struct dirent** files;
+    const int count = scandir(root.absolute.c_str(), &files, nullptr, alphasort);
+    if (count >= 0) {
+      for (int i = 0; i < count; i++) {
+        const struct dirent* ent = files[i];
+        if (ent->d_name[0] != '.') {
+          FileInfo info;
+          info.isFolder = ent->d_type == DT_DIR;
+          info.name = ent->d_name;
+          info.relative = root.relative + PATH_DELIMITER + info.name;
+          info.absolute = root.absolute + PATH_DELIMITER + info.name;
+          root.children.push_back(info);
+          if (recursive && info.isFolder) {
+            scanDir(info, true);
+          }
+          ret.push_back(info);
+        }
+        free(files[i]);
+      }
+      free(files);
+    }
+    else {
+      root.isFolder = false;
+      assert(false);
+    }
+    return ret;
+#endif
+  }
+
   /**
    * Singleton stuff
    */
@@ -356,6 +434,7 @@ public:
       mThread.join();
     }
   }
+
 private:
   /**
    * This will add a TaskBundle to the queue and set off

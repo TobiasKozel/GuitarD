@@ -4,6 +4,9 @@
 
 
 GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::MakeConfig(MAX_DAW_PARAMS, kNumPrograms)) {
+  /**
+   * Setup the soundwoofer lib
+   */
   auto& sw = SoundWoofer::instance();
   sw.setPluginName(PLUG_NAME);
   WDL_String path;
