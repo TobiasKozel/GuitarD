@@ -7,8 +7,10 @@
 #define WDL_RESAMPLE_TYPE float
 #define FLOATCONV
 
+#include "soundwoofer/soundwoofer.h"
 #include "src/types/types.h"
 #include "src/graph/Graph.h"
+#include "src/nodes/RegisterNodes.h"
 #include "src/misc/MessageBus.h"
 #include "src/parameter/ParameterManager.h"
 
@@ -20,18 +22,18 @@ namespace guitard {
     bool mReady = false;
   public:
     GuitarDHeadless() : mParamManager(&mBus), mGraph(&mBus, &mParamManager) {
-      const static volatile char A = 'a'; // All this is to prevent reverse engineering
-      char* homeDir = nullptr;
+      String homeDir;
 #ifdef unix
       homeDir = getenv("HOME");
 #elif defined(_WIN32)
       homeDir = getenv("HOMEDRIVE");
-      const char* homePath = getenv("HOMEPATH");
-      homeDir = (char*) malloc(strlen(homeDir) + strlen(homePath) + 1);
-      strcat(homeDir, homePath);
+      homeDir.append(getenv("HOMEPATH"));
 #endif
-      printf("\n%s\n", homeDir);
-      guitard::HOME_PATH = homeDir;
+      printf("\n%s\n", homeDir.get());
+      auto& sw = SoundWoofer::instance();
+      sw.setPluginName("GuitarD");
+      guitard::HOME_PATH = homeDir.get();
+      sw.setHomeDirectory(homeDir.get());
     }
 
     void setConfig(int samplerate, int outChannels, int inChannels) {
@@ -66,6 +68,7 @@ namespace guitard {
 }
 
 int main() {
+  guitard::NodeList::registerNodes();
   const int size = 128;
   const int channels = 2;
   guitard::sample* in[channels];

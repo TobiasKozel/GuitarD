@@ -1,7 +1,9 @@
 #pragma once
 
 #include "src/node/Node.h"
+#ifndef GUITARD_HEADLESS
 #include "filebrowse.h"
+#endif
 #include "InternalIRs.h"
 #include "WrappedConvolver.h"
 

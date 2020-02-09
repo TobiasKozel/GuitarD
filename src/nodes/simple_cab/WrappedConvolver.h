@@ -151,7 +151,7 @@ namespace guitard {
       }
     }
 
-    void ProcessBlock(iplug::sample** in, iplug::sample** out, const int nFrames) {
+    void ProcessBlock(sample** in, sample** out, const int nFrames) {
       if (!mIRLoaded) {
         for (int c = 0; c < CHANNEL_COUNT; c++) {
           for (int i = 0; i < nFrames; i++) {

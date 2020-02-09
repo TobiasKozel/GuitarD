@@ -1,6 +1,6 @@
 #pragma once
 #include "src/node/Node.h"
-#include "circbuf.h"
+#include "src/types/ringBuffer.h"
 
 namespace guitard {
 #ifndef GUITARD_HEADLESS
@@ -53,8 +53,8 @@ namespace guitard {
 
   class FeedbackNode final : public Node {
     sample gain = 0.0;
-    WDL_TypedCircBuf<sample> mPrevL;
-    WDL_TypedCircBuf<sample> mPrevR;
+    RingBuffer<sample> mPrevL;
+    RingBuffer<sample> mPrevR;
 
   public:
     FeedbackNode(const std::string pType) {
@@ -81,14 +81,14 @@ namespace guitard {
 
     void createBuffers() override {
       Node::createBuffers();
-      mPrevL.SetSize(shared.maxBlockSize + 1); // This is needed or the ring buffer will
-      mPrevR.SetSize(shared.maxBlockSize + 1); // underflow for some reason
+      mPrevL.setSize(shared.maxBlockSize + 1); // This is needed or the ring buffer will
+      mPrevR.setSize(shared.maxBlockSize + 1); // underflow for some reason
     }
 
     void deleteBuffers() override {
       Node::deleteBuffers();
-      mPrevL.SetSize(0);
-      mPrevR.SetSize(0);
+      mPrevL.setSize(0);
+      mPrevR.setSize(0);
     }
 
 
@@ -97,9 +97,9 @@ namespace guitard {
       if (mIsProcessed == false) {
         shared.parameters[1].update();
         sample val = ParameterCoupling::dbToLinear(gain);
-        if (mPrevL.NbInBuf() > shared.maxBlockSize) { // nFrames can never been larger than mMaxBuffer
-          mPrevL.Get(mBuffersOut[0][0], nFrames);
-          mPrevR.Get(mBuffersOut[0][1], nFrames);
+        if (mPrevL.inBuffer() > shared.maxBlockSize) { // nFrames can never been larger than mMaxBuffer
+          mPrevL.get(mBuffersOut[0][0], nFrames);
+          mPrevR.get(mBuffersOut[0][1], nFrames);
           for (int i = 0; i < nFrames; i++) {
             mBuffersOut[0][0][i] *= val;
             mBuffersOut[0][1][i] *= val;
@@ -113,8 +113,8 @@ namespace guitard {
 
       if (inputsReady()) {
         sample** buffer = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
-        mPrevL.Add(buffer[0], nFrames);
-        mPrevR.Add(buffer[1], nFrames);
+        mPrevL.add(buffer[0], nFrames);
+        mPrevR.add(buffer[1], nFrames);
       }
     }
 

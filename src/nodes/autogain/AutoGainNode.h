@@ -3,10 +3,10 @@
 
 namespace guitard {
   class AutoGainNode final : public Node {
-    const iplug::sample detectTime = 2.0;
+    const sample detectTime = 2.0;
     bool detectMode = false;
-    iplug::sample gain = 1;
-    iplug::sample detectedLoudness = 0;
+    sample gain = 1;
+    sample detectedLoudness = 0;
     int samplesPassed = 0;
     int samplesTarget = 0;
   public:

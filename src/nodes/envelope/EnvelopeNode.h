@@ -1,6 +1,5 @@
 #pragma once
 #include "src/node/Node.h"
-#include "circbuf.h"
 namespace guitard {
 
 #ifndef GUITARD_HEADLESS

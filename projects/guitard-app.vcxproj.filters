@@ -531,6 +531,9 @@
     <ClInclude Include="..\src\types\resampler.h">
       <Filter>src\types</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\types\ringBuffer.h">
+      <Filter>src\types</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
