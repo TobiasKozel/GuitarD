@@ -3,13 +3,19 @@
 // #define useOpenMP
 
 #ifdef useOpenMP
-#include <omp.h>
+  #include <omp.h>
 #endif
-#include "fftconvolver/TwoStageFFTConvolver.h"
+
+#include "src/misc/constants.h"
+#include "src/types/types.h"
+#ifndef GUITARD_FLOAT_CONVOLUTION
+  #define FFTCONVOLVER_TYPE guitard::sample
+#endif
+
+#include "convolver/twoStageConvolver.h"
 #include "threadpool.h"
-//#define DR_WAV_IMPLEMENTATION
-//#include "dr_wav.h"
 #include "src/types/resampler.h"
+
 namespace guitard {
   class WrappedConvolver {
     const int CONV_BLOCK_SIZE = 128;
@@ -45,7 +51,7 @@ namespace guitard {
         mConvolvers[c] = new fftconvolver::TwoStageFFTConvolver();
       }
       mMaxBuffer = maxbuffer;
-#ifdef FLOATCONV
+#ifdef GUITARD_FLOAT_CONVOLUTION
       mConversionBufferIn = new WDL_RESAMPLE_TYPE * [CHANNEL_COUNT];
       mConversionBufferOut = new WDL_RESAMPLE_TYPE * [CHANNEL_COUNT];
       for (int c = 0; c < CHANNEL_COUNT; c++) {
@@ -59,7 +65,7 @@ namespace guitard {
       for (int c = 0; c < CHANNEL_COUNT; c++) {
         delete mConvolvers[c];
       }
-#ifdef FLOATCONV
+#ifdef GUITARD_FLOAT_CONVOLUTION
       for (int c = 0; c < CHANNEL_COUNT; c++) {
         delete[] mConversionBufferIn[c];
         delete[] mConversionBufferOut[c];
@@ -160,7 +166,7 @@ namespace guitard {
         }
         return;
       }
-#ifdef FLOATCONV
+#ifdef GUITARD_FLOAT_CONVOLUTION
       /**                           THREADPOOLING ATTEMPT                           */
 #ifdef useThreadPool
       std::future<void> right;

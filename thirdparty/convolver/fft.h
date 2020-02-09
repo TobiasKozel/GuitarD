@@ -19,20 +19,87 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ==================================================================================
 
-#include "AudioFFT.h"
+#ifndef _AUDIOFFT_H
+#define _AUDIOFFT_H
 
+
+/**
+* AudioFFT provides real-to-complex/complex-to-real FFT routines.
+*
+* Features:
+*
+* - Real-complex FFT and complex-real inverse FFT for power-of-2-sized real data.
+*
+* - Uniform interface to different FFT implementations (currently Ooura, FFTW3 and Apple Accelerate).
+*
+* - Complex data is handled in "split-complex" format, i.e. there are separate
+*   arrays for the real and imaginary parts which can be useful for SIMD optimizations
+*   (split-complex arrays have to be of length (size/2+1) representing bins from DC
+*   to Nyquist frequency).
+*
+* - Output is "ready to use" (all scaling etc. is already handled internally).
+*
+* - No allocations/deallocations after the initialization which makes it usable
+*   for real-time audio applications (that's what I wrote it for and using it).
+*
+*
+* How to use it in your project:
+*
+* - Add the .h and .cpp file to your project - that's all.
+*
+* - To get extra speed, you can link FFTW3 to your project and define
+*   AUDIOFFT_FFTW3 (however, please check whether your project suits the
+*   according license).
+*
+* - To get the best speed on Apple platforms, you can link the Apple
+*   Accelerate framework to your project and define
+*   AUDIOFFT_APPLE_ACCELERATE  (however, please check whether your
+*   project suits the according license).
+*
+*
+* Remarks:
+*
+* - AudioFFT is not intended to be the fastest FFT, but to be a fast-enough
+*   FFT suitable for most audio applications.
+*
+* - AudioFFT uses the quite liberal MIT license.
+*
+*
+* Example usage:
+* @code
+* #include "AudioFFT.h"
+*
+* void Example()
+* {
+*   const size_t fftSize = 1024; // Needs to be power of 2!
+*
+*   std::vector<Sample> input(fftSize, 0.0f);
+*   std::vector<Sample> re(audiofft::AudioFFT::ComplexSize(fftSize));
+*   std::vector<Sample> im(audiofft::AudioFFT::ComplexSize(fftSize));
+*   std::vector<Sample> output(fftSize);
+*
+*   audiofft::AudioFFT fft;
+*   fft.init(1024);
+*   fft.fft(input.data(), re.data(), im.data());
+*   fft.ifft(output.data(), re.data(), im.data());
+* }
+* @endcode
+*
+* NOTE: Modified for GuitarD to header only and threw out the FFTW implementation
+*       because of the license
+*/
+
+
+#include <cstddef>
+#include <memory>
+#include "util.h"
 #include <cassert>
 #include <cmath>
-#include <cstring>
-
 
 #if defined(AUDIOFFT_APPLE_ACCELERATE)
   #define AUDIOFFT_APPLE_ACCELERATE_USED
   #include <Accelerate/Accelerate.h>
   #include <vector>
-#elif defined (AUDIOFFT_FFTW3)
-  #define AUDIOFFT_FFTW3_USED
-  #include <fftw3.h>
 #else
   #if !defined(AUDIOFFT_OOURA)
     #define AUDIOFFT_OOURA
@@ -41,83 +108,60 @@
   #include <vector>
 #endif
 
+namespace audiofft {
 
-namespace audiofft
-{
-
-  namespace detail
-  {
-
-    class AudioFFTImpl
-    {
+  namespace detail {
+    class AudioFFTImpl {
     public:
       AudioFFTImpl() = default;
       AudioFFTImpl(const AudioFFTImpl&) = delete;
       AudioFFTImpl& operator=(const AudioFFTImpl&) = delete;
       virtual ~AudioFFTImpl() = default;
       virtual void init(size_t size) = 0;
-      virtual void fft(const Sample* data, Sample* re, Sample* im) = 0;
-      virtual void ifft(Sample* data, const Sample* re, const Sample* im) = 0;
+      virtual void fft(const fftconvolver::Sample * data, fftconvolver::Sample * re, fftconvolver::Sample * im) = 0;
+      virtual void ifft(fftconvolver::Sample * data, const fftconvolver::Sample * re, const fftconvolver::Sample * im) = 0;
     };
 
-
-    constexpr bool IsPowerOf2(size_t val)
-    {
-      return (val == 1 || (val & (val-1)) == 0);
+    constexpr bool IsPowerOf2(size_t val) {
+      return (val == 1 || (val & (val - 1)) == 0);
     }
 
-
     template<typename TypeDest, typename TypeSrc>
-    void ConvertBuffer(TypeDest* dest, const TypeSrc* src, size_t len)
-    {
-      for (size_t i=0; i<len; ++i)
-      {
+    void ConvertBuffer(TypeDest* dest, const TypeSrc* src, const size_t len) {
+      for (size_t i = 0; i < len; ++i) {
         dest[i] = static_cast<TypeDest>(src[i]);
       }
     }
 
-
     template<typename TypeDest, typename TypeSrc, typename TypeFactor>
-    void ScaleBuffer(TypeDest* dest, const TypeSrc* src, const TypeFactor factor, size_t len)
-    {
-      for (size_t i=0; i<len; ++i)
-      {
-        dest[i] = static_cast<TypeDest>(static_cast<TypeFactor>(src[i]) * factor);
+    void ScaleBuffer(TypeDest* dest, const TypeSrc* src, const TypeFactor factor, const size_t len) {
+      for (size_t i = 0; i < len; ++i) {
+        dest[i] = static_cast<TypeDest>(static_cast<TypeFactor>(src[i])* factor);
       }
     }
+  }
 
-  } // End of namespace detail
 
+  // =============================================================
 
-  // ================================================================
+    // ================================================================
 
 
 #ifdef AUDIOFFT_OOURA_USED
-
   /**
    * @internal
    * @class OouraFFT
    * @brief FFT implementation based on the great radix-4 routines by Takuya Ooura
    */
-  class OouraFFT : public detail::AudioFFTImpl
-  {
+  class OouraFFT : public detail::AudioFFTImpl {
   public:
-    OouraFFT() :
-      detail::AudioFFTImpl(),
-      _size(0),
-      _ip(),
-      _w(),
-      _buffer()
-    {
-    }
+    OouraFFT() : detail::AudioFFTImpl(), _size(0), _ip(), _w(), _buffer() {}
 
     OouraFFT(const OouraFFT&) = delete;
     OouraFFT& operator=(const OouraFFT&) = delete;
 
-    virtual void init(size_t size) override
-    {
-      if (_size != size)
-      {
+    void init(size_t size) override {
+      if (_size != size) {
         _ip.resize(2 + static_cast<int>(std::sqrt(static_cast<double>(size))));
         _w.resize(size / 2);
         _buffer.resize(size);
@@ -129,8 +173,7 @@ namespace audiofft
       }
     }
 
-    virtual void fft(const Sample* data, Sample* re, Sample* im) override
-    {
+    void fft(const fftconvolver::Sample* data, fftconvolver::Sample* re, fftconvolver::Sample* im) override {
       // Convert into the format as required by the Ooura FFT
       detail::ConvertBuffer(_buffer.data(), data, _size);
 
@@ -140,12 +183,11 @@ namespace audiofft
       {
         double* b = _buffer.data();
         double* bEnd = b + _size;
-        Sample *r = re;
-        Sample *i = im;
-        while (b != bEnd)
-        {
-          *(r++) = static_cast<Sample>(*(b++));
-          *(i++) = static_cast<Sample>(-(*(b++)));
+        fftconvolver::Sample* r = re;
+        fftconvolver::Sample* i = im;
+        while (b != bEnd) {
+          *(r++) = static_cast<fftconvolver::Sample>(*(b++));
+          *(i++) = static_cast<fftconvolver::Sample>(-(*(b++)));
         }
       }
       const size_t size2 = _size / 2;
@@ -154,24 +196,20 @@ namespace audiofft
       im[size2] = 0.0;
     }
 
-    virtual void ifft(Sample* data, const Sample* re, const Sample* im) override
-    {
+    void ifft(fftconvolver::Sample* data, const fftconvolver::Sample* re, const fftconvolver::Sample* im) override {
       // Convert into the format as required by the Ooura FFT
       {
         double* b = _buffer.data();
         double* bEnd = b + _size;
-        const Sample *r = re;
-        const Sample *i = im;
-        while (b != bEnd)
-        {
+        const fftconvolver::Sample* r = re;
+        const fftconvolver::Sample* i = im;
+        while (b != bEnd) {
           *(b++) = static_cast<double>(*(r++));
           *(b++) = -static_cast<double>(*(i++));
         }
         _buffer[1] = re[_size / 2];
       }
-
       rdft(static_cast<int>(_size), -1, _buffer.data(), _ip.data(), _w.data());
-
       // Convert back to split-complex
       detail::ScaleBuffer(data, _buffer.data(), 2.0 / static_cast<double>(_size), _size);
     }
@@ -182,49 +220,39 @@ namespace audiofft
     std::vector<double> _w;
     std::vector<double> _buffer;
 
-    void rdft(int n, int isgn, double *a, int *ip, double *w)
-    {
+    void rdft(int n, int isgn, double* a, int* ip, double* w) {
       int nw = ip[0];
       int nc = ip[1];
 
-      if (isgn >= 0)
-      {
-        if (n > 4)
-        {
+      if (isgn >= 0) {
+        if (n > 4) {
           bitrv2(n, ip + 2, a);
           cftfsub(n, a, w);
           rftfsub(n, a, nc, w + nw);
         }
-        else if (n == 4)
-        {
+        else if (n == 4) {
           cftfsub(n, a, w);
         }
         double xi = a[0] - a[1];
         a[0] += a[1];
         a[1] = xi;
       }
-      else
-      {
+      else {
         a[1] = 0.5 * (a[0] - a[1]);
         a[0] -= a[1];
-        if (n > 4)
-        {
+        if (n > 4) {
           rftbsub(n, a, nc, w + nw);
           bitrv2(n, ip + 2, a);
           cftbsub(n, a, w);
         }
-        else if (n == 4)
-        {
+        else if (n == 4) {
           cftfsub(n, a, w);
         }
       }
     }
 
-
     /* -------- initializing routines -------- */
-
-    void makewt(int nw, int *ip, double *w)
-    {
+    void makewt(int nw, int* ip, double* w) {
       int j, nwh;
       double delta, x, y;
 
@@ -251,9 +279,7 @@ namespace audiofft
       }
     }
 
-
-    void makect(int nc, int *ip, double *c)
-    {
+    void makect(int nc, int* ip, double* c) {
       int j, nch;
       double delta;
 
@@ -270,12 +296,8 @@ namespace audiofft
       }
     }
 
-
     /* -------- child routines -------- */
-
-
-    void bitrv2(int n, int *ip, double *a)
-    {
+    void bitrv2(int n, int* ip, double* a) {
       int j, j1, k, k1, l, m, m2;
       double xr, xi, yr, yi;
 
@@ -345,7 +367,8 @@ namespace audiofft
           a[k1] = xr;
           a[k1 + 1] = xi;
         }
-      } else {
+      }
+      else {
         for (k = 1; k < m; k++) {
           for (j = 0; j < k; j++) {
             j1 = 2 * j + ip[k];
@@ -374,8 +397,7 @@ namespace audiofft
     }
 
 
-    void cftfsub(int n, double *a, double *w)
-    {
+    void cftfsub(int n, double* a, double* w) {
       int j, j1, j2, j3, l;
       double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
 
@@ -410,7 +432,8 @@ namespace audiofft
           a[j3] = x1r + x3i;
           a[j3 + 1] = x1i - x3r;
         }
-      } else {
+      }
+      else {
         for (j = 0; j < l; j += 2) {
           j1 = j + l;
           x0r = a[j] - a[j1];
@@ -424,8 +447,7 @@ namespace audiofft
     }
 
 
-    void cftbsub(int n, double *a, double *w)
-    {
+    void cftbsub(int n, double* a, double* w) {
       int j, j1, j2, j3, l;
       double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
 
@@ -460,7 +482,8 @@ namespace audiofft
           a[j3] = x1r + x3i;
           a[j3 + 1] = x1i + x3r;
         }
-      } else {
+      }
+      else {
         for (j = 0; j < l; j += 2) {
           j1 = j + l;
           x0r = a[j] - a[j1];
@@ -473,9 +496,7 @@ namespace audiofft
       }
     }
 
-
-    void cft1st(int n, double *a, double *w)
-    {
+    void cft1st(int n, double* a, double* w) {
       int j, k1, k2;
       double wk1r, wk1i, wk2r, wk2i, wk3r, wk3i;
       double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
@@ -579,8 +600,7 @@ namespace audiofft
     }
 
 
-    void cftmdl(int n, int l, double *a, double *w)
-    {
+    void cftmdl(int n, int l, double* a, double* w) {
       int j, j1, j2, j3, k, k1, k2, m, m2;
       double wk1r, wk1i, wk2r, wk2i, wk3r, wk3i;
       double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
@@ -706,8 +726,7 @@ namespace audiofft
     }
 
 
-    void rftfsub(int n, double *a, int nc, double *c)
-    {
+    void rftfsub(int n, double* a, int nc, double* c) {
       int j, k, kk, ks, m;
       double wkr, wki, xr, xi, yr, yi;
 
@@ -731,8 +750,7 @@ namespace audiofft
     }
 
 
-    void rftbsub(int n, double *a, int nc, double *c)
-    {
+    void rftbsub(int n, double* a, int nc, double* c) {
       int j, k, kk, ks, m;
       double wkr, wki, xr, xi, yr, yi;
 
@@ -764,47 +782,27 @@ namespace audiofft
    * @brief Concrete FFT implementation
    */
   typedef OouraFFT AudioFFTImplementation;
-
-
 #endif // AUDIOFFT_OOURA_USED
 
-
-  // ================================================================
-
-
 #ifdef AUDIOFFT_APPLE_ACCELERATE_USED
-
-
   /**
    * @internal
    * @class AppleAccelerateFFT
    * @brief FFT implementation using the Apple Accelerate framework internally
    */
-  class AppleAccelerateFFT : public detail::AudioFFTImpl
-  {
+  class AppleAccelerateFFT : public detail::AudioFFTImpl {
   public:
-    AppleAccelerateFFT() :
-      detail::AudioFFTImpl(),
-      _size(0),
-      _powerOf2(0),
-      _fftSetup(0),
-      _re(),
-      _im()
-    {
-    }
+    AppleAccelerateFFT() : detail::AudioFFTImpl(), _size(0), _powerOf2(0), _fftSetup(0), _re(), _im() {}
 
     AppleAccelerateFFT(const AppleAccelerateFFT&) = delete;
     AppleAccelerateFFT& operator=(const AppleAccelerateFFT&) = delete;
 
-    virtual ~AppleAccelerateFFT()
-    {
+    virtual ~AppleAccelerateFFT() {
       init(0);
     }
 
-    virtual void init(size_t size) override
-    {
-      if (_fftSetup)
-      {
+    void init(size_t size) override {
+      if (_fftSetup) {
         vDSP_destroy_fftsetup(_fftSetup);
         _size = 0;
         _powerOf2 = 0;
@@ -813,12 +811,10 @@ namespace audiofft
         _im.clear();
       }
 
-      if (size > 0)
-      {
+      if (size > 0) {
         _size = size;
         _powerOf2 = 0;
-        while ((1 << _powerOf2) < _size)
-        {
+        while ((1 << _powerOf2) < _size) {
           ++_powerOf2;
         }
         _fftSetup = vDSP_create_fftsetup(_powerOf2, FFT_RADIX2);
@@ -827,8 +823,7 @@ namespace audiofft
       }
     }
 
-    virtual void fft(const Sample* data, Sample* re, Sample* im) override
-    {
+    void fft(const Sample* data, Sample* re, Sample* im) override {
       const size_t size2 = _size / 2;
       DSPSplitComplex splitComplex;
       splitComplex.realp = re;
@@ -843,8 +838,7 @@ namespace audiofft
       im[size2] = 0.0f;
     }
 
-    virtual void ifft(Sample* data, const Sample* re, const Sample* im) override
-    {
+    void ifft(Sample* data, const Sample* re, const Sample* im) override {
       const size_t size2 = _size / 2;
       ::memcpy(_re.data(), re, size2 * sizeof(Sample));
       ::memcpy(_im.data(), im, size2 * sizeof(Sample));
@@ -866,175 +860,83 @@ namespace audiofft
     std::vector<Sample> _im;
   };
 
-
   /**
    * @internal
    * @brief Concrete FFT implementation
    */
   typedef AppleAccelerateFFT AudioFFTImplementation;
-
-
 #endif // AUDIOFFT_APPLE_ACCELERATE_USED
-
 
   // ================================================================
 
 
-#ifdef AUDIOFFT_FFTW3_USED
-
-
   /**
-   * @internal
-   * @class FFTW3FFT
-   * @brief FFT implementation using FFTW3 internally (see fftw.org)
+   * @class AudioFFT
+   * @brief Performs 1D FFTs
    */
-  class FFTW3FFT : public detail::AudioFFTImpl
-  {
+  class AudioFFT {
   public:
-    FFTW3FFT() :
-      detail::AudioFFTImpl(),
-      _size(0),
-      _complexSize(0),
-      _planForward(0),
-      _planBackward(0),
-      _data(0),
-      _re(0),
-      _im(0)
-    {
+    /**
+     * @brief Constructor
+     */
+    AudioFFT() : _impl(new AudioFFTImplementation()) {}
+
+    AudioFFT(const AudioFFT&) = delete;
+    AudioFFT& operator=(const AudioFFT&) = delete;
+
+    /**
+     * @brief Destructor
+     */
+    ~AudioFFT() {}
+
+    /**
+     * @brief Initializes the FFT object
+     * @param size Size of the real input (must be power 2)
+     */
+    void init(size_t size) {
+      assert(detail::IsPowerOf2(size));
+      _impl->init(size);
     }
 
-    FFTW3FFT(const FFTW3FFT&) = delete;
-    FFTW3FFT& operator=(const FFTW3FFT&) = delete;
-
-    virtual ~FFTW3FFT()
-    {
-      init(0);
+    /**
+     * @brief Performs the forward FFT
+     * @param data The real input data (has to be of the length as specified in init())
+     * @param re The real part of the complex output (has to be of length as returned by ComplexSize())
+     * @param im The imaginary part of the complex output (has to be of length as returned by ComplexSize())
+     */
+    void fft(const fftconvolver::Sample* data, fftconvolver::Sample* re, fftconvolver::Sample* im) {
+      _impl->fft(data, re, im);
     }
 
-    virtual void init(size_t size) override
-    {
-      if (_size != size)
-      {
-        if (_size > 0)
-        {
-          fftwf_destroy_plan(_planForward);
-          fftwf_destroy_plan(_planBackward);
-          _planForward = 0;
-          _planBackward = 0;
-          _size = 0;
-          _complexSize = 0;
-
-          if (_data)
-          {
-            fftwf_free(_data);
-            _data = 0;
-          }
-
-          if (_re)
-          {
-            fftwf_free(_re);
-            _re = 0;
-          }
-
-          if (_im)
-          {
-            fftwf_free(_im);
-            _im = 0;
-          }
-        }
-
-        if (size > 0)
-        {
-          _size = size;
-          _complexSize = AudioFFT::ComplexSize(_size);
-          const size_t complexSize = AudioFFT::ComplexSize(_size);
-          _data = reinterpret_cast<Sample*>(fftwf_malloc(_size * sizeof(Sample)));
-          _re = reinterpret_cast<Sample*>(fftwf_malloc(complexSize * sizeof(Sample)));
-          _im = reinterpret_cast<Sample*>(fftwf_malloc(complexSize * sizeof(Sample)));
-
-          fftw_iodim dim;
-          dim.n = static_cast<int>(size);
-          dim.is = 1;
-          dim.os = 1;
-          _planForward = fftwf_plan_guru_split_dft_r2c(1, &dim, 0, 0, _data, _re, _im, FFTW_MEASURE);
-          _planBackward = fftwf_plan_guru_split_dft_c2r(1, &dim, 0, 0, _re, _im, _data, FFTW_MEASURE);
-        }
-      }
+    /**
+     * @brief Performs the inverse FFT
+     * @param data The real output data (has to be of the length as specified in init())
+     * @param re The real part of the complex input (has to be of length as returned by ComplexSize())
+     * @param im The imaginary part of the complex input (has to be of length as returned by ComplexSize())
+     */
+    void ifft(fftconvolver::Sample* data, const fftconvolver::Sample* re, const fftconvolver::Sample* im) {
+      _impl->ifft(data, re, im);
     }
 
-    virtual void fft(const Sample* data, Sample* re, Sample* im) override
-    {
-      ::memcpy(_data, data, _size * sizeof(Sample));
-      fftwf_execute_split_dft_r2c(_planForward, _data, _re, _im);
-      ::memcpy(re, _re, _complexSize * sizeof(Sample));
-      ::memcpy(im, _im, _complexSize * sizeof(Sample));
-    }
-
-    virtual void ifft(Sample* data, const Sample* re, const Sample* im) override
-    {
-      ::memcpy(_re, re, _complexSize * sizeof(Sample));
-      ::memcpy(_im, im, _complexSize * sizeof(Sample));
-      fftwf_execute_split_dft_c2r(_planBackward, _re, _im, _data);
-      detail::ScaleBuffer(data, _data, 1.0f / static_cast<Sample>(_size), _size);
+    /**
+     * @brief Calculates the necessary size of the real/imaginary complex arrays
+     * @param size The size of the real data
+     * @return The size of the real/imaginary complex arrays
+     */
+    static size_t ComplexSize(size_t size) {
+      return (size / 2) + 1;
     }
 
   private:
-    size_t _size;
-    size_t _complexSize;
-    fftwf_plan _planForward;
-    fftwf_plan _planBackward;
-    Sample* _data;
-    Sample* _re;
-    Sample* _im;
+    std::unique_ptr<detail::AudioFFTImpl> _impl;
   };
 
-
   /**
-   * @internal
-   * @brief Concrete FFT implementation
+   * @deprecated
+   * @brief Let's keep an AudioFFTBase type around for now because it has been here already in the 1st version in order to avoid breaking existing code.
    */
-  typedef FFTW3FFT AudioFFTImplementation;
-
-
-#endif // AUDIOFFT_FFTW3_USED
-
-
-  // =============================================================
-
-
-  AudioFFT::AudioFFT() :
-    _impl(new AudioFFTImplementation())
-  {
-  }
-
-
-  AudioFFT::~AudioFFT()
-  {
-  }
-
-
-  void AudioFFT::init(size_t size)
-  {
-    assert(detail::IsPowerOf2(size));
-    _impl->init(size);
-  }
-
-
-  void AudioFFT::fft(const Sample* data, Sample* re, Sample* im)
-  {
-    _impl->fft(data, re, im);
-  }
-
-
-  void AudioFFT::ifft(Sample* data, const Sample* re, const Sample* im)
-  {
-    _impl->ifft(data, re, im);
-  }
-
-
-  size_t AudioFFT::ComplexSize(size_t size)
-  {
-    return (size / 2) + 1;
-  }
+  typedef AudioFFT AudioFFTBase;
 
 } // End of namespace
+
+#endif // Header guard

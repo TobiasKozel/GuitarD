@@ -10,18 +10,24 @@
     #include "httplib.h"
   #endif
 #endif
+
 #ifndef SOUNDWOOFER_CUSTOM_WAVE
   #define DR_WAV_IMPLEMENTATION
   #include "dr_wav.h"
 #endif
 
 #ifndef SOUNDWOOFER_CUSTOM_DIR
-  #include "dirent.h"
+  #ifdef _WIN32
+    #include "./dirent/dirent.h"
+  #else
+    #include "dirent.h"
+  #endif
 #endif
 
 #ifdef _WIN32
-#include <sys/stat.h>
+  #include <sys/stat.h>
 #endif
+
 #include <fstream>
 
 class SoundWoofer {

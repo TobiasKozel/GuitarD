@@ -92,18 +92,6 @@
     <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.cpp">
       <Filter>IGraphics\Drawing</Filter>
     </ClCompile>
-    <ClCompile Include="..\thirdparty\fftconvolver\AudioFFT.cpp">
-      <Filter>thirdparty\convolver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\fftconvolver\FFTConvolver.cpp">
-      <Filter>thirdparty\convolver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.cpp">
-      <Filter>thirdparty\convolver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\fftconvolver\Utilities.cpp">
-      <Filter>thirdparty\convolver</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\WDL\resample.cpp">
       <Filter>WDL</Filter>
     </ClCompile>
@@ -308,18 +296,6 @@
     </ClInclude>
     <ClInclude Include="..\src\faust\FaustHeadlessDsp.h">
       <Filter>src\faust</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\fftconvolver\AudioFFT.h">
-      <Filter>thirdparty\convolver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\fftconvolver\FFTConvolver.h">
-      <Filter>thirdparty\convolver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.h">
-      <Filter>thirdparty\convolver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\fftconvolver\Utilities.h">
-      <Filter>thirdparty\convolver</Filter>
     </ClInclude>
     <ClInclude Include="..\src\nodes\RegisterNodes.h">
       <Filter>src\nodes</Filter>
@@ -534,6 +510,18 @@
     <ClInclude Include="..\src\types\ringBuffer.h">
       <Filter>src\types</Filter>
     </ClInclude>
+    <ClInclude Include="..\thirdparty\convolver\fft.h">
+      <Filter>thirdparty\convolverh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\convolver\util.h">
+      <Filter>thirdparty\convolverh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\convolver\convolver.h">
+      <Filter>thirdparty\convolverh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\convolver\twoStageConvolver.h">
+      <Filter>thirdparty\convolverh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -649,6 +637,9 @@
     </Filter>
     <Filter Include="src\headless">
       <UniqueIdentifier>{987e35f7-037b-4f09-8e5f-bdea00cda768}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\convolverh">
+      <UniqueIdentifier>{c6ff16d2-8b86-404f-9517-690abd98b1a4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

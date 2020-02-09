@@ -411,10 +411,10 @@
     <ClInclude Include="..\src\ui\ScrollViewControl.h" />
     <ClInclude Include="..\src\ui\SideBar.h" />
     <ClInclude Include="..\src\ui\theme.h" />
-    <ClInclude Include="..\thirdparty\fftconvolver\AudioFFT.h" />
-    <ClInclude Include="..\thirdparty\fftconvolver\FFTConvolver.h" />
-    <ClInclude Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.h" />
-    <ClInclude Include="..\thirdparty\fftconvolver\Utilities.h" />
+    <ClInclude Include="..\thirdparty\convolver\convolver.h" />
+    <ClInclude Include="..\thirdparty\convolver\fft.h" />
+    <ClInclude Include="..\thirdparty\convolver\twoStageConvolver.h" />
+    <ClInclude Include="..\thirdparty\convolver\util.h" />
     <ClInclude Include="..\thirdparty\soundwoofer\soundwoofer.h" />
   </ItemGroup>
   <ItemGroup>
@@ -501,10 +501,6 @@
     <ClCompile Include="..\..\..\WDL\resample.cpp" />
     <ClCompile Include="..\..\..\WDL\win32_utf8.c" />
     <ClCompile Include="..\GuitarD.cpp" />
-    <ClCompile Include="..\thirdparty\fftconvolver\AudioFFT.cpp" />
-    <ClCompile Include="..\thirdparty\fftconvolver\FFTConvolver.cpp" />
-    <ClCompile Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.cpp" />
-    <ClCompile Include="..\thirdparty\fftconvolver\Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\main.rc" />
