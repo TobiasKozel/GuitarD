@@ -51,6 +51,12 @@ public:
     UNKNOWN_IR, // This happens when a SWImpulse is passed as an argument which is not in mIRList
   };
 
+  enum Source {
+    SOUNDWOOFER_SRC = 0,
+    USER_SRC,
+    FACTORY_SRC
+  };
+
   /**
    * Soundwoofer structs
    */
@@ -58,12 +64,26 @@ public:
   /**
    * Struct based on an Impulse Response from the soundwoofer API
    */
+  struct SWImpulse;
+  typedef std::shared_ptr<SWImpulse> SWImpulseShared;
+  typedef std::vector<SWImpulseShared> SWImpulses;
+  struct SWRig;
+  typedef std::shared_ptr<SWRig> SWRigShared;
+  typedef std::vector<SWRigShared> SWRigs;
+  struct SWComponent;
+  typedef std::shared_ptr<SWComponent> SWComponentShared;
+  typedef std::vector<SWComponentShared> SWComponents;
+  struct SWPreset;
+  typedef std::shared_ptr<SWPreset> SWPresetsShared;
+  typedef std::vector<SWPresetsShared> SWPresets;
+
   struct SWImpulse {
     std::string id;
     std::string name;
-    std::string micId;
-    std::string rig;
+    std::string micId; // The ID of the mic used to record this
+    std::string rig; // The ID of the SWRig used to record this, not a reference to precent circular deps
     std::string file; // This is either a uuid or a path
+    Source source = SOUNDWOOFER_SRC;
     int micX = 0;
     int micY = 0;
     int micZ = 0;
@@ -71,20 +91,36 @@ public:
     int micPosition;
     std::string userName;
     std::string element;
-    bool local = false;
     int channels = 0;
     int length = 0;
     float** samples = nullptr;
+    int sampleRate = 0;
+    void clearSamples() {
+      if (samples == nullptr) { return; }
+      for (int i = 0; i < channels; i++) {
+        delete[] samples[i];
+      }
+      delete[] samples;
+      samples = nullptr;
+      channels = length = 0;
+    }
+    ~SWImpulse() {
+      clearSamples();
+    }
   };
 
   const std::string TypeMicrophone = "Microphone";
   const std::string TypeCabinet = "Cabinet";
 
+  /**
+   * A component can be a microphone or a specific instance of a Cabinet
+   */
   struct SWComponent {
     std::string id;
     std::string name;
     std::string type; // "Microphone", "Cabinet"
-    int componentBase = 0;
+    Source source = SOUNDWOOFER_SRC;
+    int componentBase = 0; // TODO find out what this represents
     std::string desciption; // TODO there's a typo in the backend
     int year = 0;
     std::string url;
@@ -92,18 +128,24 @@ public:
     std::string brand;
     std::string model;
     std::string baseComponentDescription;
-    bool local = false;
 
   };
 
+  /**
+   * The rig basically represents a Cabinet
+   * It knows which mics were used and what IRs are available
+   * It also knows which specific instance of a Cabinets are available,
+   * since the same cab can be modified or recorded by different people 
+   */
   struct SWRig {
     std::string id;
     std::string name;
-    std::string description;
+    Source source = SOUNDWOOFER_SRC;
     std::string username;
-    std::vector<SWComponent> components;
-    std::vector<SWComponent> microphones;
-    std::vector<SWImpulse> impulses;
+    std::string description;
+    SWComponents components;
+    SWComponents microphones;
+    SWImpulses impulses;
   };
 
   /**
@@ -113,10 +155,10 @@ public:
     std::string name;
     std::string id;
     std::string plugin;
+    Source source = SOUNDWOOFER_SRC;
     std::string data;
     std::string version = "-1";
     std::vector<std::string> tags;
-    bool local = false; // This means the preset is not from the server
   };
 
   /**
@@ -130,12 +172,6 @@ public:
     std::vector<FileInfo> children;
   };
 
-
-  typedef std::vector<SWImpulse> SWImpulses;
-  typedef std::vector<SWRig> SWRigs;
-  typedef std::vector<SWComponent> SWComponents;
-  typedef std::vector<SWPreset> SWPresets;
-
   /**
    * Callback for async operations which provides a status code
    */
@@ -143,11 +179,12 @@ public:
 
 
 private:
-  const SWComponent GenericComponent = { "Generic Component", "Generic Component", TypeCabinet };
-  const SWComponent GenericMicrophone = SWComponent{ "Generic Microphone", "Generic Microphone", TypeMicrophone };
-  const SWRig UncategorizedRig = SWRig {
-    "Uncategorized", "Uncategorized", "", "Various", { GenericMicrophone }, { GenericComponent }
-  };
+  /**
+   * Generic Objects to categorize IRs with no parent
+   */
+  SWComponentShared GenericComponent;
+  SWComponentShared GenericMicrophone;
+  SWRigShared GenericRig;
 
   const std::string PATH_DELIMITER =
 #ifdef _WIN32
@@ -177,6 +214,7 @@ private:
   SWRigs mRigList;
   SWComponents mComponentList;
   SWPresets mPresetList;
+  std::vector<SWPreset> mFactoryPresetList;
 
   /**
    * A function to generalize most tasks used in here
@@ -205,6 +243,16 @@ private:
   bool mThreadRunning = false;
 
   SoundWoofer() {
+    GenericComponent = std::make_shared<SWComponent>(SWComponent {
+      "Generic Component", "Generic Component", TypeCabinet, USER_SRC
+    });
+    GenericMicrophone = std::make_shared<SWComponent>(SWComponent {
+      "Generic Microphone", "Generic Microphone", TypeMicrophone, USER_SRC
+    });
+    GenericRig = std::make_shared<SWRig>(SWRig {
+      "Uncategorized", "Uncategorized", USER_SRC, "Various"
+    });
+    resetIRs();
     // TODO seems like the object will be destroyed once even though it's a singleton
   }
 public:
@@ -267,47 +315,39 @@ public:
    * Will also call clearCachedIRs()
    */
   Status listIRs() {
-    flushIRBuffers();
-    mRigList.clear();
-    mComponentList.clear();
-    mComponentList.push_back(GenericComponent);
-    mComponentList.push_back(GenericMicrophone);
-    mIRlist.clear();
-    SWRig uncategorized = UncategorizedRig;
+    resetIRs();
 
+    // This will cunstruct a generic IR with no cab or mic as a parent
     auto addToUncategorized = [&](FileInfo& info) {
       if (!isWaveName(info.name)) { return; }
-      SWImpulse ir = {"CHECKSUM", info.name, GenericMicrophone.id, uncategorized.id, info.relative };
-      ir.local = true;
-      uncategorized.impulses.push_back(ir);
+      SWImpulseShared ir(new SWImpulse{ "CHECKSUM", info.name, GenericMicrophone->id, GenericRig->id, info.relative, USER_SRC });
+      GenericRig->impulses.push_back(ir);
     };
 
     if (!mIrDirectory.empty()) { // Gather the user IRs in the IR directory
       auto cabLevel = scanDir(mIrDirectory);
       for (auto i : cabLevel) {
         if (i.isFolder) {
-          SWRig rig = { i.name, i.name };
+          SWRigShared rig (new SWRig { i.name, i.name, USER_SRC });
           auto micLevel = scanDir(i);
           for (auto j : micLevel) {
             bool micExists = false;
             for (auto& m : mComponentList) {
-              if (m.name == j.name) {
+              if (m->name == j.name) {
                 micExists = true;
                 break;
               }
             }
-            SWComponent mic = { j.name, j.name, TypeMicrophone };
-            mic.local = true;
-            rig.microphones.push_back(mic);
+            SWComponentShared mic(new SWComponent { j.name, j.name, TypeMicrophone, USER_SRC });
+            rig->microphones.push_back(mic);
             if (!micExists) { mComponentList.push_back(mic); }  // GLOBAL
             if (j.isFolder) {
               auto posLevel = scanDir(j);
               for (auto k : posLevel) {
                 if (!k.isFolder && isWaveName(k.name)) {
-                  SWImpulse ir = {"CHECKSUM", k.name, mic.id, rig.id, k.relative};
-                  ir.local = true;
+                  SWImpulseShared ir(new SWImpulse{ "CHECKSUM", k.name, mic->id, rig->id, k.relative, USER_SRC });
                   mIRlist.push_back(ir); // GLOBAL
-                  rig.impulses.push_back(ir);
+                  rig->impulses.push_back(ir);
                 }
               }
             } else { addToUncategorized(j); } // At mic level
@@ -316,8 +356,6 @@ public:
         } else { addToUncategorized(i); } // At Cabinet level
       }
     }
-
-    mRigList.push_back(uncategorized); // GLOBAL
 
 #ifndef SOUNDWOOFER_NO_API
     std::string data = httpGet("/Impulse");
@@ -343,12 +381,16 @@ public:
    */
   Status listPresets() {
     mPresetList.clear();
-    if (!mPresetDirectory.empty()) {
+    
+    for (auto i : mFactoryPresetList) { // Gather factory presets
+      mPresetList.push_back(std::make_shared<SWPreset>(i));
+    }
+
+    if (!mPresetDirectory.empty()) { // Gather user presets
       auto files = scanDir(mPresetDirectory);
       for (auto i : files) {
         if (!i.isFolder && isJSONName(i.name)) {
-          SWPreset preset = { i.name, i.name, mPluginName };
-          preset.local = true;
+          SWPresetsShared preset(new SWPreset { i.name, i.name, mPluginName, USER_SRC });
           mPresetList.push_back(preset);
         }
       }
@@ -362,7 +404,7 @@ public:
     return SUCCESS;
   }
 
-  Status fetchPresets(const Callback callback) {
+  Status listPresets(const Callback callback) {
     startAsync([&]() {
       return this->listPresets();
     }, callback);
@@ -422,18 +464,23 @@ public:
    * The decoded IR will be in SWImpulse::samples
    * Will block, use a lambda as a callback for async
    */
-  Status loadIR(SWImpulse& ir) {
-    SWImpulse* internalIr = nullptr;
+  Status loadIR(SWImpulseShared outsideIR) {
+    SWImpulseShared ir = nullptr;
+    bool unknownIR = true;
     for (auto& i : mIRlist) {
-      if (i.file == ir.file) { internalIr = &i; }
+      if (i == outsideIR) { // Go look if we know the IR
+        ir = i;
+        unknownIR = false;
+        break;
+      }
     }
-    if (internalIr == nullptr) { return UNKNOWN_IR; }
-    if (internalIr->samples != nullptr) { return SUCCESS; } // already in ram
+    if (unknownIR) { ir = outsideIR; } // We'll still try to load an ir
+    if (outsideIR->samples != nullptr) { return SUCCESS; } // already in ram
 
     Status load = GENERIC_ERROR;
     load = loadWave(ir);
     if (load == SUCCESS) { return SUCCESS; }
-
+    if (unknownIR) { return UNKNOWN_IR; }
 #ifndef SOUNDWOOFER_NO_API
     const std::string result = httpGet("/File/Download/" + ir.file); // fetch it from the server
     if (result.empty()) { return SERVER_ERROR; }
@@ -459,7 +506,7 @@ public:
   /**
    * Async version of downloadIR
    */
-  Status loadIR(SWImpulse& ir, Callback callback) {
+  Status loadIR(SWImpulseShared& ir, Callback callback) {
     startAsync([&]() {
       return loadIR(ir);
     }, callback);
@@ -490,13 +537,7 @@ public:
    */
   void flushIRBuffers() {
     for (auto& i : mIRlist) {
-      if (i.samples != nullptr) {
-        for (int c = 0; c < i.channels; c++) {
-          delete[] i.samples[c];
-        }
-        delete[] i.samples;
-        i.samples = nullptr;
-      }
+      i->clearSamples();
     }
   }
 
@@ -514,7 +555,7 @@ public:
    * Call this if for example the UI gets destroyed to be sure there are no callbacks
    * lingering which might be attached to destroyed UI elements
    */
-  void clearAsyncQueue(bool doJoin = false) {
+  void clearAsyncQueue(const bool doJoin = false) {
     mThreadRunning = false;
     mQueue.clear();
     if (mThread.joinable() && doJoin) {
@@ -522,12 +563,12 @@ public:
     }
   }
 
-  std::vector<FileInfo> scanDir(const std::string path, bool recursive = false) {
+  std::vector<FileInfo> scanDir(const std::string path, const bool recursive = false) {
     FileInfo root;
     root.absolute = path;
     root.relative = "." + PATH_DELIMITER;
     root.name = "";
-    return scanDir(root);
+    return scanDir(root, recursive);
   }
 
   virtual std::vector<FileInfo> scanDir(FileInfo& root, bool recursive = false) {
@@ -583,7 +624,11 @@ public:
 #endif
   }
 
-  std::string hashFile(const char* path) {
+  /**
+   * Simple file hashing from
+   * https://gist.github.com/nitrix/34196ff0c93fdfb01d51
+   */
+  static std::string hashFile(const std::string path) {
     std::ifstream fp(path);
     std::stringstream ss;
 
@@ -606,8 +651,8 @@ public:
   /**
    * Singleton stuff
    */
-  SoundWoofer(const SoundWoofer&) {};
-  SoundWoofer& operator = (const SoundWoofer&) {};
+  SoundWoofer(const SoundWoofer&) = delete;
+  SoundWoofer& operator = (const SoundWoofer&) = delete;
 
   static SoundWoofer& instance() {
     static SoundWoofer instance;
@@ -666,18 +711,20 @@ private:
     auto json = nlohmann::json::parse(data);
     for (auto i : json) {
       try {
-        ret.push_back({
+        ret.push_back(
+          SWImpulseShared(new SWImpulse {
           i["id"],
-          i["micX"], i["micY"], i["micZ"],
-          i["micId"],
           i["name"],
+          i["micId"],
           i["rig"],
           i["file"],
+          SOUNDWOOFER_SRC,
+          i["micX"], i["micY"], i["micZ"],
           i["description"],
           i["micPosition"],
           i["userName"],
           i["element"]
-        });
+        }));
       }
       catch (...) {
         // TODO some of these values are null which will fail
@@ -698,10 +745,13 @@ private:
     auto json = nlohmann::json::parse(data);
     for (auto i : json) {
       try {
-        ret.push_back({
+        ret.push_back(SWRigShared(new SWRig{
           i["id"],
-          i["name"]
-        });
+          i["name"],
+          SOUNDWOOFER_SRC,
+          i["username"],
+          i["description"]
+        }));
       }
       catch (...) {
         assert(false);
@@ -724,10 +774,12 @@ private:
           i["name"],
           i["id"],
           i["plugin"],
-          i["data"]
+          SOUNDWOOFER_SRC,
+          i["data"],
+          i["version"]
         };
         if (preset.plugin == mPluginName) {
-          ret.push_back(preset);
+          ret.push_back(std::make_shared<SWPreset>(preset));
         }
       }
       catch (...) {
@@ -784,26 +836,30 @@ private:
       return SUCCESS;
     }
     return SERVER_ERROR;
-#endif
+#else
     return NOT_IMPLEMENTED;
+#endif
   }
 #endif
 
   /**
    * Will load the wav file to a float buffer in the SWImpulse struct
    */
-  virtual Status loadWave(SWImpulse &ir, const char* waveData = nullptr, const size_t length = 0) {
+  virtual Status loadWave(SWImpulseShared& ir, const char* waveData = nullptr, const size_t length = 0) {
 #ifndef SOUNDWOOFER_CUSTOM_WAVE
     drwav wav;
-    if (waveData != nullptr) {
+    if (waveData != nullptr) { // Means the wave is in memory and not on disk
       if (!drwav_init_memory(&wav, waveData, length, nullptr)) {
         return WAV_ERROR;
       }
     }
-    else {
-      const std::string path = ir.local ? (mIrDirectory + ir.file) : (mIrCacheDirectory + ir.id);
+    else { // Either look in the user IR folder or the IR cache folder
+      const std::string path = ir->source == USER_SRC ? (mIrDirectory + ir->file) : (mIrCacheDirectory + ir->id);
       if (!drwav_init_file(&wav, path.c_str(), nullptr)) {
-        return NOT_CACHED;
+        return NOT_CACHED; // This means we'll need to go online and get the IR
+      }
+      if (ir->source == USER_SRC) { // Hash the file so we can go look for it if the file is missing on load
+        ir->id = hashFile(mIrDirectory + ir->file);
       }
     }
 
@@ -812,24 +868,44 @@ private:
       static_cast<size_t>(wav.totalPCMFrameCount)* wav.channels * sizeof(float)
     ));
 
-    ir.length = drwav_read_pcm_frames_f32(&wav, wav.totalPCMFrameCount, pSampleData);
-    if (ir.length == 0) { return WAV_ERROR; }
-    ir.channels = wav.channels;
-    ir.samples = new float* [ir.channels];
-    for (int c = 0; c < ir.channels; c++) {
-      ir.samples[c] = new float[ir.length];
+    ir->length = drwav_read_pcm_frames_f32(&wav, wav.totalPCMFrameCount, pSampleData);
+    if (ir->length == 0) { return WAV_ERROR; }
+    ir->sampleRate = wav.sampleRate;
+    ir->channels = wav.channels;
+    ir->samples = new float* [ir->channels];
+    for (int c = 0; c < ir->channels; c++) {
+      ir->samples[c] = new float[ir->length];
     }
-    for (int s = 0; s < ir.length * ir.channels; s++) {
-      // slow deinterleaving
-      const int channel = s % ir.channels;
-      const size_t sample = s / ir.channels;
-      ir.samples[channel][sample] = pSampleData[s];
+    for (int s = 0; s < ir->length * ir->channels; s++) {
+      // slow deinterleaving, but it works
+      const int channel = s % ir->channels;
+      const size_t sample = s / ir->channels;
+      ir->samples[channel][sample] = pSampleData[s];
     }
     free(pSampleData);
     drwav_uninit(&wav);
     return SUCCESS;
-#endif
+#else
     return NOT_IMPLEMENTED;
+#endif
+  }
+
+  /**
+   * Will add a generic Mic, amp, factory presets and factory IRs
+   */
+  void resetIRs() {
+    flushIRBuffers();
+    mComponentList.clear();
+    mRigList.clear();
+    mIRlist.clear();
+    GenericRig->impulses.clear();
+    GenericRig->components.clear();
+    GenericRig->impulses.clear();
+    mComponentList.push_back(GenericComponent);
+    mComponentList.push_back(GenericMicrophone);
+    mRigList.push_back(GenericRig);
+    GenericRig->components.push_back(GenericComponent);
+    GenericRig->components.push_back(GenericMicrophone);
   }
 
   /**
@@ -863,6 +939,10 @@ private:
     catch (...) {
       return GENERIC_ERROR;
     }
+  }
+
+  static Status deleteFile(const char* path) {
+    return std::remove(path) == 0 ? SUCCESS : GENERIC_ERROR;
   }
 
   static bool isWaveName(std::string& name) {
