@@ -443,8 +443,8 @@ public:
     return httpPost("/Preset", serialized.c_str(), serialized.size());
   }
 
-  Status sendPreset(SWPreset& preset, Callback callback) {
-    startAsync([&]() {
+  Status sendPreset(SWPreset preset, Callback callback) {
+    startAsync([&, preset]() {
       return sendPreset(preset);
     }, callback);
     return ASYNC;
@@ -511,8 +511,8 @@ public:
   /**
    * Async version of downloadIR
    */
-  Status loadIR(SWImpulseShared& ir, Callback callback) {
-    startAsync([&]() {
+  Status loadIR(SWImpulseShared ir, Callback callback) {
+    startAsync([&, ir]() {
       return loadIR(ir);
     }, callback);
     return ASYNC;
@@ -717,7 +717,7 @@ private:
       if (mThread.joinable()) {
         mThread.join();
       }
-      this->mThreadRunning = true;
+      mThreadRunning = true;
       mMutex.unlock();
       mThread = std::thread([&]() {
         while(mThreadRunning) {

@@ -128,7 +128,7 @@ namespace guitard {
     CabNodeSharedData mCabShared = {
       // This will be called from the gui when the IR changes
       [&](SoundWoofer::SWImpulseShared ir) { 
-      SoundWoofer::instance().loadIR(ir, [&](SoundWoofer::Status status) {
+      SoundWoofer::instance().loadIR(ir, [&, ir](SoundWoofer::Status status) {
         if (status == SoundWoofer::SUCCESS) {
           mCabShared.loadedIr = ir;
           mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
@@ -187,8 +187,8 @@ namespace guitard {
     void createBuffers() override {
       Node::createBuffers();
       mConvolver = new WrappedConvolver(mSampleRate, shared.maxBlockSize);
-      SoundWoofer::SWImpulseShared& ir = mCabShared.loadedIr;
-      SoundWoofer::instance().loadIR(ir, [&](SoundWoofer::Status status) {
+      SoundWoofer::SWImpulseShared ir = mCabShared.loadedIr;
+      SoundWoofer::instance().loadIR(ir, [&, ir](SoundWoofer::Status status) {
         if (status == SoundWoofer::SUCCESS) {
           mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
         }

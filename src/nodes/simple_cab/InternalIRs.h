@@ -9,5 +9,5 @@ namespace guitard {
     SoundWoofer::createGenericIR("Air", InteralIR::airIR, InteralIR::airIRLength, 1, 48000, SoundWoofer::EMBEDDED_SRC)
   };
 
-  int InternalIRsCount = 0;
+  int InternalIRsCount = 2;
 }
