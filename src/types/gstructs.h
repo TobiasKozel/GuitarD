@@ -54,18 +54,18 @@ namespace guitard {
   };
 
 
-  /**
-   * Bundles an impulse response with some meta data about it
-   */
-  struct IRBundle {
-    String name;
-    //WDL_String name;
-    int channelCount = 1;
-    int sampleRate = 48000;
-    size_t sampleCount = 0; // Samplecount for a single channel
-    float** samples = nullptr; // Will always use floats since we only load from 16/24Bit wave 
-    String path; // This is only set if it's a user IR
-  };
+  ///**
+  // * Bundles an impulse response with some meta data about it
+  // */
+  //struct IRBundle {
+  //  String name;
+  //  //WDL_String name;
+  //  int channelCount = 1;
+  //  int sampleRate = 48000;
+  //  size_t sampleCount = 0; // Samplecount for a single channel
+  //  float** samples = nullptr; // Will always use floats since we only load from 16/24Bit wave 
+  //  String path; // This is only set if it's a user IR
+  //};
 
   struct BlockSizeEvent {
     int blockSize;

@@ -11,6 +11,8 @@ namespace guitard {
     int mHead = 0;
     int mTail = 0;
   public:
+    RingBuffer() = default;
+
     ~RingBuffer() {
       setSize(0);
     }

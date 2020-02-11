@@ -51,10 +51,14 @@ public:
     UNKNOWN_IR, // This happens when a SWImpulse is passed as an argument which is not in mIRList
   };
 
+  /**
+   * Mostly relevant for SWImpulse but SWRig, SWComponent and SWPreset will have this property too
+   */
   enum Source {
-    SOUNDWOOFER_SRC = 0,
-    USER_SRC,
-    FACTORY_SRC
+    SOUNDWOOFER_SRC = 0, // file will contain a uuid. IR file will either be on the server or the cache folder
+    USER_SRC,            // Relative path starting from mIrDirectory
+    USER_SRC_ABSOLUTE,   // Absolute path is in the file string will most likely cause issues when loading on a different computer
+    EMBEDDED_SRC         // Means there's no actual file only a float buffer
   };
 
   /**
@@ -95,8 +99,9 @@ public:
     int length = 0;
     float** samples = nullptr;
     int sampleRate = 0;
+
     void clearSamples() {
-      if (samples == nullptr || source == FACTORY_SRC) { return; }
+      if (samples == nullptr || source == EMBEDDED_SRC) { return; }
       for (int i = 0; i < channels; i++) {
         delete[] samples[i];
       }
@@ -480,15 +485,13 @@ public:
     Status load = GENERIC_ERROR;
     load = loadWave(ir);
     if (load == SUCCESS) { return SUCCESS; }
-    if (unknownIR) { return UNKNOWN_IR; }
+    if (unknownIR || ir->source != SOUNDWOOFER_SRC) { return UNKNOWN_IR; }
 #ifndef SOUNDWOOFER_NO_API
-    if (ir->source == SOUNDWOOFER_SRC) {
-      const std::string result = httpGet("/File/Download/" + ir->file); // fetch it from the server
-      if (result.empty()) { return SERVER_ERROR; }
-      load = loadWave(ir, result.c_str(), result.size());
-      if (load == SUCCESS && mCacheIRs) { // Cache the file
-        writeFile((mIrCacheDirectory + ir->id).c_str(), result.c_str(), result.size());
-      }
+    const std::string result = httpGet("/File/Download/" + ir->file); // fetch it from the server
+    if (result.empty()) { return SERVER_ERROR; }
+    load = loadWave(ir, result.c_str(), result.size());
+    if (load == SUCCESS && mCacheIRs) { // Cache the file
+      writeFile((mIrCacheDirectory + ir->id).c_str(), result.c_str(), result.size());
     }
 #endif
     return load;
@@ -564,6 +567,28 @@ public:
       mThread.join();
     }
   }
+
+  /**
+   * Create IRs which live outside the SoundWoofer domain
+   */
+  static SWImpulseShared createGenericIR(
+    std::string name, float** samples, size_t length, size_t channels = 1,
+    size_t sampleRate = 48000, Source source = EMBEDDED_SRC)
+  {
+    SWImpulseShared ret(new SWImpulse());
+    ret->name = name;
+    ret->id = "Factory-" + name;
+    ret->samples = samples;
+    ret->length = length;
+    ret->channels = channels;
+    ret->sampleRate = sampleRate;
+    ret->source = source;
+    return ret;
+  }
+
+  /**
+   * Some Util functions which might be handy, so they're public
+   */
 
   std::vector<FileInfo> scanDir(const std::string path, const bool recursive = false) {
     FileInfo root;
@@ -650,6 +675,16 @@ public:
     return ss.str();
   }
 
+  static bool isWaveName(std::string& name) {
+    return name.length() - name.find_last_of(".WAV") == 4
+      || name.length() - name.find_last_of(".wav") == 4;
+  }
+
+  static bool isJSONName(std::string& name) {
+    return name.length() - name.find_last_of(".JSON") == 5
+      || name.length() - name.find_last_of(".json") == 5;
+  }
+
   /**
    * Singleton stuff
    */
@@ -691,8 +726,7 @@ private:
           mQueue.erase(mQueue.begin());
           mMutex.unlock();
           const Status status = t.task();
-          if (mThreadRunning) {
-            // We might want to terminate here
+          if (mThreadRunning) { // We might want to terminate here
             t.callback(status);
             mMutex.lock();
             mThreadRunning = !mQueue.empty();
@@ -855,8 +889,12 @@ private:
         return WAV_ERROR;
       }
     }
-    else { // Either look in the user IR folder or the IR cache folder
-      const std::string path = ir->source == USER_SRC ? (mIrDirectory + ir->file) : (mIrCacheDirectory + ir->id);
+    else {
+      std::string path;
+      if (ir->source == USER_SRC) { path = mIrDirectory + ir->file; }
+      if (ir->source == USER_SRC_ABSOLUTE) { path = ir->file; }
+      if (ir->source == SOUNDWOOFER_SRC) { path = mIrCacheDirectory + ir->id; }
+
       if (!drwav_init_file(&wav, path.c_str(), nullptr)) {
         return NOT_CACHED; // This means we'll need to go online and get the IR
       }
@@ -945,15 +983,5 @@ private:
 
   static Status deleteFile(const char* path) {
     return std::remove(path) == 0 ? SUCCESS : GENERIC_ERROR;
-  }
-
-  static bool isWaveName(std::string& name) {
-    return name.length() - name.find_last_of(".WAV") == 4
-        || name.length() - name.find_last_of(".wav") == 4;
-  }
-
-  static bool isJSONName(std::string& name) {
-    return name.length() - name.find_last_of(".JSON") == 5
-        || name.length() - name.find_last_of(".json") == 5;
   }
 };

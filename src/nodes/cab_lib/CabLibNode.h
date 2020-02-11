@@ -79,16 +79,20 @@ namespace guitard {
 
     bool mIsBlending = false;
 
-    CabLibNodeSharedData mCabShared = { [&](IRBundle ir) {
-      const int len = std::max(mCabShared.loadedIr.path.getLength(), ir.path.getLength());
-      if (strncmp(mCabShared.loadedIr.path.get(), ir.path.get(), len) != 0) {
+    CabLibNodeSharedData mCabShared = { [&](SoundWoofer::SWImpulseShared ir) {
+      if (mCabShared.loadedIr->file == ir->file) {
         // don't load if the Ir is the same;
-        this->mCabShared.loadedIr = ir;
-        this->mConvolver2->resampleAndLoadIR(&ir);
-        this->mBlendPos = 0;
-        this->mIsBlending = true;
+        SoundWoofer::instance().loadIR(ir, [&](SoundWoofer::Status status) {
+          if (status == SoundWoofer::SUCCESS) {
+            mCabShared.loadedIr = ir;
+            mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
+            mBlendPos = 0;
+            mIsBlending = true;
+          }
+        });
       }
-  }, IRBundle() };
+      },std::make_shared<SoundWoofer::SWImpulse>()
+    };
   public:
     CabLibNode(const std::string pType) {
       shared.type = pType;
@@ -100,19 +104,19 @@ namespace guitard {
 
 
     void serializeAdditional(nlohmann::json& serialized) override {
-      serialized["path"] = mCabShared.loadedIr.path.get();
+      // serialized["path"] = mCabShared.loadedIr.path.get();
     }
     void deserializeAdditional(nlohmann::json& serialized) override {
       try {
-        IRBundle load;
-        if (!serialized.contains("path")) {
-          return;
-        }
-        const std::string path = serialized.at("path");
-        load.path.set(path.c_str());
-        load.name.set(load.path.getFilePart());
-        mCabShared.loadedIr = load;
-        mConvolver->resampleAndLoadIR(&load);
+        //IRBundle load;
+        //if (!serialized.contains("path")) {
+        //  return;
+        //}
+        //const std::string path = serialized.at("path");
+        //load.path.set(path.c_str());
+        //load.name.set(load.path.getFilePart());
+        //mCabShared.loadedIr = load;
+        //mConvolver->resampleAndLoadIR(&load);
       }
       catch (...) {
         WDBGMSG("Failed to load Cab node data!\n");
@@ -127,11 +131,15 @@ namespace guitard {
       for (int c = 0; c < mChannelCount; c++) {
         mBlendBuffer[c] = new sample[shared.maxBlockSize];
       }
-      mConvolver->resampleAndLoadIR(&mCabShared.loadedIr);
+      SoundWoofer::SWImpulseShared& ir = mCabShared.loadedIr;
+      SoundWoofer::instance().loadIR(ir, [&](SoundWoofer::Status status) {
+        if (status == SoundWoofer::SUCCESS) {
+          mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
+        }
+      });
     }
 
     void deleteBuffers() override {
-      mConvolver->unloadWave(&mCabShared.loadedIr);
       Node::deleteBuffers();
       delete mConvolver;
       delete mConvolver2;

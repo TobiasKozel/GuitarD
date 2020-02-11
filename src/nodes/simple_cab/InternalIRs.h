@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../../types/gstructs.h"
+#include "../../../thirdparty/soundwoofer/soundwoofer.h"
 #include "./clean.h"
 #include "./air.h"
 namespace guitard {
-  IRBundle InternalIRs[] = {
-    { "Clean", 1, 48000, InteralIR::cleanIRLength, InteralIR::cleanIR },
-    { "Air", 1, 48000, InteralIR::airIRLength, InteralIR::airIR }
+  SoundWoofer::SWImpulseShared InternalIRs[] = {
+    SoundWoofer::createGenericIR("Clean", InteralIR::cleanIR, InteralIR::cleanIRLength, 1, 48000, SoundWoofer::EMBEDDED_SRC),
+    SoundWoofer::createGenericIR("Air", InteralIR::airIR, InteralIR::airIRLength, 1, 48000, SoundWoofer::EMBEDDED_SRC)
   };
 
-  int InternalIRsCount = 2;
+  int InternalIRsCount = 0;
 }

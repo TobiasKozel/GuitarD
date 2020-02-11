@@ -30,12 +30,12 @@ namespace guitard {
     }
 
     void refresh() {
-      api.fetchPresets([&](SoundWoofer::Status status) {
+      api.listPresets([&](SoundWoofer::Status status) {
         if (status == SoundWoofer::SUCCESS) {
           mPresets = api.getPresets();
           clearChildren(true);
           for (auto& i : mPresets) {
-            PresetEntryControl* p = new PresetEntryControl(mBus, &i);
+            PresetEntryControl* p = new PresetEntryControl(mBus, i);
             appendChild(p);
           }
         }

@@ -15,6 +15,10 @@ namespace guitard {
       set(source);
     }
 
+    // String(String&&) = delete;
+
+    String& operator= (String&&) = delete;
+
     String() = default;
 
     String& operator= (const char* source) {

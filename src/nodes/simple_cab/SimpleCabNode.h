@@ -1,11 +1,13 @@
 #pragma once
 
 #include "../../node/Node.h"
+#include "../../../thirdparty/soundwoofer/soundwoofer.h"
 #ifndef GUITARD_HEADLESS
-#include "filebrowse.h"
+  #include "filebrowse.h"
 #endif
 #include "./InternalIRs.h"
 #include "./WrappedConvolver.h"
+#include "../../types/files.h"
 
 // TODOG figure out this swell stuff
 #ifdef FillRect
@@ -18,9 +20,9 @@
 namespace guitard {
   /** Handy little struct to load irs and so on */
   struct CabNodeSharedData {
-    std::function<void(IRBundle)> callback;
-    IRBundle loadedIr = InternalIRs[0];
-    bool embedIr = false;
+    std::function<void(SoundWoofer::SWImpulseShared)> callback;
+    SoundWoofer::SWImpulseShared loadedIr;
+    // bool embedIr = false;
   };
 
 #ifndef GUITARD_HEADLESS
@@ -32,13 +34,13 @@ namespace guitard {
     IPopupMenu mMenu{ "Choose IR", {"Clean", "Air", "From File"}, [&](IPopupMenu* pMenu) {
       IPopupMenu::Item* itemChosen = pMenu->GetChosenItem();
       if (itemChosen) {
-        const char* text = itemChosen->GetText();
-        if (strncmp(text, "From File", 10) == 0) {
+        const std::string text = itemChosen->GetText();
+        if (text == "From File") {
           this->openFileDialog();
         }
         else {
           for (int i = 0; i < InternalIRsCount; i++) {
-            if (strncmp(InternalIRs[i].name.get(), text, 30) == 0) {
+            if (InternalIRs[i]->name == text) {
               mCabShared->callback(InternalIRs[i]);
             }
           }
@@ -68,18 +70,17 @@ namespace guitard {
 
     void openFileDialog() const {
       const HWND handle = reinterpret_cast<HWND>(shared->graphics->GetWindow());
-      char* result = WDL_ChooseFileForOpen(
+      const std::string result = WDL_ChooseFileForOpen( // TODOG LEAK: the string might leak
         handle, "Open IR", nullptr, nullptr,
-        //"Wave Files\0*.wav;*.WAV\0AIFF Files\0*.aiff;*.AIFF\0", "*.wav",
         "Wave Files\0*.wav;*.WAV\0", "*.wav",
         true, false
       );
-      if (result != nullptr) {
-        WDBGMSG(result);
-        IRBundle load;
-        load.path.set(result);
-        load.name.set(load.path.getFilePart());
-        free(result);
+      if (result.empty()) {
+        WDBGMSG(result.c_str());
+        SoundWoofer::SWImpulseShared load(new SoundWoofer::SWImpulse());
+        load->file = result;
+        load->name = File::getFilePart(result);
+        load->source = SoundWoofer::USER_SRC_ABSOLUTE;
         mCabShared->callback(load);
       }
       else {
@@ -93,10 +94,12 @@ namespace guitard {
      * File drop is only supported in the standalone app
      */
     void OnDrop(const char* str) override {
-      IRBundle load;
-      load.path.set(str);
-      load.name.set(load.path.getFilePart());
-      if (strncmp(load.name.getExt(), ".wav", 4) == 0) {
+      SoundWoofer::SWImpulseShared load(new SoundWoofer::SWImpulse());
+      load->file = str;
+      load->name = File::getFilePart(load->file);
+      load->source = SoundWoofer::USER_SRC_ABSOLUTE;
+      mCabShared->callback(load);
+      if (SoundWoofer::isWaveName(load->name)) {
         mCabShared->callback(load);
       }
     }
@@ -104,7 +107,7 @@ namespace guitard {
     void Draw(IGraphics& g) override {
       NodeUi::Draw(g);
       if (mCabShared != nullptr) {
-        g.DrawText(mBlocksizeText, mCabShared->loadedIr.name.get(), mRECT.GetVShifted(20));
+        g.DrawText(mBlocksizeText, mCabShared->loadedIr->name.c_str(), mRECT.GetVShifted(20));
       }
     }
 
@@ -122,10 +125,17 @@ namespace guitard {
   class SimpleCabNode final : public Node {
     WrappedConvolver* mConvolver = nullptr;
 
-    CabNodeSharedData mCabShared = { [&](IRBundle ir) {
-      this->mCabShared.loadedIr = ir;
-      this->mConvolver->resampleAndLoadIR(&ir);
-    }, InternalIRs[0], false };
+    CabNodeSharedData mCabShared = {
+      // This will be called from the gui when the IR changes
+      [&](SoundWoofer::SWImpulseShared ir) { 
+      SoundWoofer::instance().loadIR(ir, [&](SoundWoofer::Status status) {
+        if (status == SoundWoofer::SUCCESS) {
+          mCabShared.loadedIr = ir;
+          mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
+        }
+      }); },
+      InternalIRs[0] // This is the default IR when the cab gets created
+    };
 
   public:
     SimpleCabNode(const std::string pType) {
@@ -138,36 +148,36 @@ namespace guitard {
     }
 
     void serializeAdditional(nlohmann::json& serialized) override {
-      serialized["irName"] = mCabShared.loadedIr.name.get();
-      bool custom = mCabShared.loadedIr.path.getLength() != 0;
-      serialized["customIR"] = custom;
-      serialized["path"] = custom ? mCabShared.loadedIr.path.get() : "";
+      //serialized["irName"] = mCabShared.loadedIr.name.get();
+      //bool custom = mCabShared.loadedIr.path.getLength() != 0;
+      //serialized["customIR"] = custom;
+      //serialized["path"] = custom ? mCabShared.loadedIr.path.get() : "";
     }
 
     void deserializeAdditional(nlohmann::json& serialized) override {
       try {
-        IRBundle load;
-        if (!serialized.contains("irName")) {
-          return;
-        }
-        const std::string name = serialized.at("irName");
-        load.name.set(name.c_str());
-        const bool customIR = serialized.at("customIR");
-        if (customIR) {
-          const std::string path = serialized.at("path");
-          load.path.set(path.c_str());
-        }
-        else {
-          for (int i = 0; i < InternalIRsCount; i++) {
-            // Go look for the right internal IR
-            if (strncmp(load.name.get(), InternalIRs[i].name.get(), 30) == 0) {
-              load = InternalIRs[i];
-              break;
-            }
-          }
-        }
-        mCabShared.loadedIr = load;
-        mConvolver->resampleAndLoadIR(&load);
+        //IRBundle load;
+        //if (!serialized.contains("irName")) {
+        //  return;
+        //}
+        //const std::string name = serialized.at("irName");
+        //load.name.set(name.c_str());
+        //const bool customIR = serialized.at("customIR");
+        //if (customIR) {
+        //  const std::string path = serialized.at("path");
+        //  load.path.set(path.c_str());
+        //}
+        //else {
+        //  for (int i = 0; i < InternalIRsCount; i++) {
+        //    // Go look for the right internal IR
+        //    if (strncmp(load.name.get(), InternalIRs[i].name.get(), 30) == 0) {
+        //      load = InternalIRs[i];
+        //      break;
+        //    }
+        //  }
+        //}
+        //mCabShared.loadedIr = load;
+        //mConvolver->resampleAndLoadIR(&load);
       }
       catch (...) {
         WDBGMSG("Failed to load Cab node data!\n");
@@ -177,11 +187,15 @@ namespace guitard {
     void createBuffers() override {
       Node::createBuffers();
       mConvolver = new WrappedConvolver(mSampleRate, shared.maxBlockSize);
-      mConvolver->resampleAndLoadIR(&mCabShared.loadedIr);
+      SoundWoofer::SWImpulseShared& ir = mCabShared.loadedIr;
+      SoundWoofer::instance().loadIR(ir, [&](SoundWoofer::Status status) {
+        if (status == SoundWoofer::SUCCESS) {
+          mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
+        }
+      });
     }
 
     void deleteBuffers() override {
-      mConvolver->unloadWave(&mCabShared.loadedIr);
       Node::deleteBuffers();
       delete mConvolver;
       mConvolver = nullptr;

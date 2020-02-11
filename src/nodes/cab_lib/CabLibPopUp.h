@@ -12,8 +12,8 @@
 namespace guitard {
 
   struct CabLibNodeSharedData {
-    std::function<void(IRBundle)> callback;
-    IRBundle loadedIr;
+    std::function<void(SoundWoofer::SWImpulseShared)> callback;
+    SoundWoofer::SWImpulseShared loadedIr;
   };
 #ifndef GUITARD_HEADLESS
   class MicPosition : public IControl {
@@ -273,11 +273,11 @@ namespace guitard {
         for (int i = 0; i < mSelectedMic->mPositions.size(); i++) {
           mSelectedMic->mPositions[i]->mSelected = false;
         }
-        pos->mSelected = true;
-        IRBundle load;
-        load.path.set(pos->path.get());
-        load.name.set(pos->name.get());
-        mCabShared->callback(load);
+        //pos->mSelected = true;
+        //IRBundle load;
+        //load.path.set(pos->path.get());
+        //load.name.set(pos->name.get());
+        //mCabShared->callback(load);
       }
       mScrollView[2]->SetDirty(false);
     }
@@ -288,14 +288,14 @@ namespace guitard {
         for (int j = 0; j < c->mMics.size(); j++) {
           Microphone* m = c->mMics[j];
           for (int k = 0; k < m->mPositions.size(); k++) {
-            MicPosition* p = m->mPositions[k];
-            String& path = mCabShared->loadedIr.path;
-            if (strncmp(p->path.get(), path.get(), path.getLength()) == 0) {
-              onCabChanged(c);
-              onMicChanged(m);
-              onPositionChanged(p);
-              return;
-            }
+            //MicPosition* p = m->mPositions[k];
+            //String& path = mCabShared->loadedIr.path;
+            //if (strncmp(p->path.get(), path.get(), path.getLength()) == 0) {
+            //  onCabChanged(c);
+            //  onMicChanged(m);
+            //  onPositionChanged(p);
+            //  return;
+            //}
           }
         }
       }
