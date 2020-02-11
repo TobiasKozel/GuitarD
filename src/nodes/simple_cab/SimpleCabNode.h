@@ -75,7 +75,7 @@ namespace guitard {
         "Wave Files\0*.wav;*.WAV\0", "*.wav",
         true, false
       );
-      if (result.empty()) {
+      if (!result.empty()) {
         WDBGMSG(result.c_str());
         SoundWoofer::SWImpulseShared load(new SoundWoofer::SWImpulse());
         load->file = result;
@@ -190,7 +190,9 @@ namespace guitard {
       SoundWoofer::SWImpulseShared ir = mCabShared.loadedIr;
       SoundWoofer::instance().loadIR(ir, [&, ir](SoundWoofer::Status status) {
         if (status == SoundWoofer::SUCCESS) {
-          mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
+          if (mConvolver != nullptr) { // Since the lambda could return at a point were samplerate has changed we check for null
+            mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
+          }
         }
       });
     }
@@ -201,10 +203,17 @@ namespace guitard {
       mConvolver = nullptr;
     }
 
-    void OnSamplerateChanged(const int pSampleRate) override {
-      deleteBuffers();
-      mSampleRate = pSampleRate;
-      createBuffers();
+    /**
+     * Take care of samplerate and channel changes directly since both will need the convolver to be reconstructed
+     * This prevents that from happening twice
+     */
+    void OnReset(const int pSampleRate, const int pChannels, const bool force = false) override {
+      if (pSampleRate != mSampleRate || pChannels != mChannelCount  || force) {
+        deleteBuffers();
+        mSampleRate = pSampleRate;
+        mChannelCount = pChannels;
+        createBuffers();
+      }
     }
 
     void ProcessBlock(const int nFrames) override {

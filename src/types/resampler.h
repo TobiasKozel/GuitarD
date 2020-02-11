@@ -44,7 +44,7 @@ namespace guitard {
     Tout* mSincTable = nullptr;
     size_t mWindowSize = 0;
   public:
-    WindowedSincResampler(const double inFreq, const double outFreq, const size_t windowSize = 64) {
+    WindowedSincResampler(const double inFreq, const double outFreq, const size_t windowSize = 24) {
       mStepSize = inFreq / outFreq; // the step size in the input signal
       mWindowSize = windowSize;
       mSincTable = new Tout[windowSize];
