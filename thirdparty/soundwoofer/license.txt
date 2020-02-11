@@ -1,0 +1,16 @@
+httplib (Used for the http requests to the soundwoofer.com API)
+MIT
+https://github.com/yhirose/cpp-httplib
+
+dr_wav (Loading IRs in the CabLib Node and SimpleCab Node)
+Public domain
+https://github.com/mackron/dr_libs
+
+
+json (De-/Serialisation for web API requests and responses)
+MIT
+https://github.com/nlohmann/json
+
+
+Hashing of user IR files
+https://gist.github.com/nitrix/34196ff0c93fdfb01d51
