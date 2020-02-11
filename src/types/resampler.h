@@ -41,52 +41,49 @@ namespace guitard {
   template <typename Tin, typename Tout>
   class WindowedSincResampler {
     double mStepSize = 0;
-    Tout* mWindow = nullptr;
-    size_t mBlockSizeIn = 0;
-    size_t mBlockSizeOut = 0;
+    Tout* mSincTable = nullptr;
+    size_t mWindowSize = 0;
   public:
-    WindowedSincResampler(const double inFreq, const double outFreq, const size_t blockSize = 64) {
-      mStepSize = inFreq / outFreq;
-      mBlockSizeOut = blockSize / mStepSize;
-      mBlockSizeIn = blockSize;
-      mWindow = new Tout[blockSize];
-      for (size_t i = 0; i < blockSize; i++) {
-        mWindow[i] = cos((i * 0.5 * PI) / static_cast<double>(blockSize));
+    WindowedSincResampler(const double inFreq, const double outFreq, const size_t windowSize = 64) {
+      mStepSize = inFreq / outFreq; // the step size in the input signal
+      mWindowSize = windowSize;
+      mSincTable = new Tout[windowSize];
+      double sincIndex = (-windowSize / 2.f) / mStepSize;
+      const double sincStep = 1.f / mStepSize;
+      for (size_t i = 0; i < windowSize; i++) {
+        mSincTable[i] = sinc(sincIndex);
+        sincIndex += sincStep;
       }
+      //for (size_t i = 0; i < blockSize; i++) {
+      //  mWindow[i] = cos((i * 0.5 * PI) / static_cast<double>(blockSize));
+      //}
     }
 
     ~WindowedSincResampler() {
-      delete mWindow;
-    }
-
-    void resampleBlock(Tin* in, Tout* out, Tout amplitude = 1.0) {
-      double j = 0;
-      for (size_t k = 0; k < mBlockSizeOut; k++, j += mStepSize) {
-        Tout interpolated = 0;
-        for (size_t i = 0; i < mBlockSizeIn; i++) {
-          interpolated += in[i] * sinc(j - i) * mWindow[i];
-        }
-        out[k] = interpolated * amplitude;
-      }
+      delete mSincTable;
     }
 
     size_t resample(Tin* in, const size_t length, Tout** out, Tout amplitude = 1.0) {
       const size_t outSamples = length / mStepSize;
-      const size_t iterations = ceil(outSamples / static_cast<double>(mBlockSizeOut));
       if (outSamples <= 0) { return 0; }
-      (*out) = new Tout[iterations * mBlockSizeOut + 1]; // Align the array to whole blocksizes
-      for (size_t c = 0; c < iterations; c++) {
-        // resampleBlock(in + mBlockSizeIn* c, (*out) + mBlockSizeOut * c, amplitude);
-        double j = 0;
-        for (size_t k = 0; k < mBlockSizeOut; k++, j += mStepSize) {
-          Tout interpolated = 0;
-          for (size_t i = mBlockSizeIn * c; i < mBlockSizeIn * c + mBlockSizeIn && i < length; i++) {
-            interpolated += in[i] * sinc(j - i) * mWindow[i];
-          }
-          (*out)[mBlockSizeOut * c + k] = interpolated * amplitude;
+      (*out) = new Tout[outSamples];
+      double j = 0; // The position at which the sinc interpolation of the input signal should be evaluated
+      for (size_t k = 0; k < outSamples; k++, j += mStepSize) {
+        Tout interpolated = 0;
+        const size_t lower = std::max(static_cast<size_t>(0), static_cast<size_t>(j - (mWindowSize / 2)));
+        const size_t upper = std::min(length, static_cast<size_t>(j + mWindowSize / 2));
+        for (size_t i = lower; i < upper; i++) {
+          interpolated += in[i] * sinc(j - i);
         }
+        (*out)[k] = interpolated * amplitude;
       }
       return outSamples;
+    }
+
+    static Tout lerp(const double i, Tin* buf) {
+      const size_t lower = std::floor(i);
+      const double a = i - lower;
+      return (buf[lower] * (1 - a) + buf[lower + 1] * a);
     }
 
     static Tout sinc(const double i) {
