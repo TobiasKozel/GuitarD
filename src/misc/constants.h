@@ -41,4 +41,4 @@
 // Distance in pixels from the cable the cursor needs to be within for the splice in to happen
 #define SPLICEIN_DISTANCE 14
 
-#define GUITARD_FLOAT_CONVOLUTION
+#define GUITARD_FLOAT_CONVOLUTION // Means we'll do float convolution since it allows sse

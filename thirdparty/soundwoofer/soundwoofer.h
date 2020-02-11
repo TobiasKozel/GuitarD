@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef SOUNDWOOFER_CUSTOM_JSON
-  #include "json.hpp"
+  #include "./dependencies/json.hpp"
 #endif
 
 #define SOUNDWOOFER_NO_API
@@ -9,18 +9,18 @@
 #ifndef SOUNDWOOFER_NO_API
   #ifndef SOUNDWOOFER_CUSTOM_HTTP
     // #define CPPHTTPLIB_OPENSSL_SUPPORT
-    #include "httplib.h"
+    #include "./dependencies/httplib.h"
   #endif
 #endif
 
 #ifndef SOUNDWOOFER_CUSTOM_WAVE
   #define DR_WAV_IMPLEMENTATION
-  #include "dr_wav.h"
+  #include "./dependencies/dr_wav.h"
 #endif
 
 #ifndef SOUNDWOOFER_CUSTOM_DIR
   #ifdef _WIN32
-    #include "./dirent/dirent.h"
+    #include "./dependencies/dirent.h"
   #else
     #include "dirent.h"
   #endif
@@ -96,7 +96,7 @@ public:
     float** samples = nullptr;
     int sampleRate = 0;
     void clearSamples() {
-      if (samples == nullptr) { return; }
+      if (samples == nullptr || source == FACTORY_SRC) { return; }
       for (int i = 0; i < channels; i++) {
         delete[] samples[i];
       }
@@ -448,9 +448,9 @@ public:
   /**
    * Load an IR from an id (Only works for Cloud IRs)
    */
-  Status loadIR(std::string id) {
+  Status loadIR(std::string fileId) {
     for (auto &i : mIRlist) {
-      if (id == i.id) {
+      if (fileId == i->file) {
         return loadIR(i);
       }
     }
@@ -482,20 +482,22 @@ public:
     if (load == SUCCESS) { return SUCCESS; }
     if (unknownIR) { return UNKNOWN_IR; }
 #ifndef SOUNDWOOFER_NO_API
-    const std::string result = httpGet("/File/Download/" + ir.file); // fetch it from the server
-    if (result.empty()) { return SERVER_ERROR; }
-    load = loadWave(ir, result.c_str(), result.size());
-    if (load == SUCCESS && mUseIrCache) {
-      writeFile((mIrCacheDirectory + ir.id).c_str(), result.c_str(), result.size());
+    if (ir->source == SOUNDWOOFER_SRC) {
+      const std::string result = httpGet("/File/Download/" + ir->file); // fetch it from the server
+      if (result.empty()) { return SERVER_ERROR; }
+      load = loadWave(ir, result.c_str(), result.size());
+      if (load == SUCCESS && mCacheIRs) { // Cache the file
+        writeFile((mIrCacheDirectory + ir->id).c_str(), result.c_str(), result.size());
+      }
     }
 #endif
     return load;
   }
 
 #ifndef SOUNDWOOFER_NO_API
-  Status loadIR(std::string id, Callback callback) {
+  Status loadIR(std::string fileId, Callback callback) {
     for (auto& i : mIRlist) {
-      if (id == i.id) {
+      if (fileId == i->file) {
         return loadIR(i, callback);
       }
     }
@@ -514,10 +516,10 @@ public:
   }
 
 #ifndef SOUNDWOOFER_NO_API
-  SWImpulse* getIR(std::string id) {
+  SWImpulseShared getIR(std::string fileId) {
     for (auto& i : mIRlist) {
-      if (id == i.id) {
-        return &i;
+      if (fileId == i->file) {
+        return i;
       }
     }
     return nullptr;
