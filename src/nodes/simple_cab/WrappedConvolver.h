@@ -10,6 +10,8 @@
 #include "../../types/types.h"
 #ifndef GUITARD_FLOAT_CONVOLUTION
   #define FFTCONVOLVER_TYPE guitard::sample
+#else
+  #define FFTCONVOLVER_TYPE float
 #endif
 
 #include "../../../thirdparty/convolver/twoStageConvolver.h"
@@ -20,29 +22,39 @@ namespace guitard {
   class WrappedConvolver {
     const int CONV_BLOCK_SIZE = 128;
     const int CONV_TAIL_BLOCK_SIZE = 1024 * 4;
-    const int CHANNEL_COUNT = 2;
+    static const int CHANNEL_COUNT = 2;
     int mMaxBuffer = 0;
 #ifdef useThreadPool
     ctpl::thread_pool tPool;
 #endif
 
     /** We'll only do stereo convolution at most */
-    fftconvolver::TwoStageFFTConvolver* mConvolvers[2] = { nullptr };
+    fftconvolver::TwoStageFFTConvolver* mConvolvers[CHANNEL_COUNT] = { nullptr };
 
     /** Buffers need to be converted from double to float */
-    WDL_RESAMPLE_TYPE** mConversionBufferIn = nullptr;
-    WDL_RESAMPLE_TYPE** mConversionBufferOut = nullptr;
+    FFTCONVOLVER_TYPE** mConversionBufferIn = nullptr;
+    FFTCONVOLVER_TYPE** mConversionBufferOut = nullptr;
 
     int mSampleRate = 0;
 
     bool mIRLoaded = false;
+    const int maxBuffer;
 
     // IRBundle* mLoadedIr = nullptr;
   public:
 
     bool mStereo = false;
 
-    explicit WrappedConvolver(const int samplerate = 48000, const int maxbuffer = 512) {
+    /**
+     * Won't allow copying for now
+     */
+    WrappedConvolver(const WrappedConvolver&) = delete;
+    WrappedConvolver(const WrappedConvolver*) = delete;
+    WrappedConvolver(WrappedConvolver&&) = delete;
+    WrappedConvolver& operator= (const WrappedConvolver&) = delete;
+    WrappedConvolver& operator= (WrappedConvolver&&) = delete;
+
+    explicit WrappedConvolver(const int samplerate = 48000, const int maxBuffer = 512): maxBuffer(maxBuffer) {
 #ifdef useThreadPool
       tPool.resize(2);
 #endif
@@ -50,13 +62,13 @@ namespace guitard {
       for (int c = 0; c < CHANNEL_COUNT; c++) {
         mConvolvers[c] = new fftconvolver::TwoStageFFTConvolver();
       }
-      mMaxBuffer = maxbuffer;
+      mMaxBuffer = maxBuffer;
 #ifdef GUITARD_FLOAT_CONVOLUTION
-      mConversionBufferIn = new WDL_RESAMPLE_TYPE * [CHANNEL_COUNT];
-      mConversionBufferOut = new WDL_RESAMPLE_TYPE * [CHANNEL_COUNT];
+      mConversionBufferIn = new FFTCONVOLVER_TYPE *[CHANNEL_COUNT];
+      mConversionBufferOut = new FFTCONVOLVER_TYPE * [CHANNEL_COUNT];
       for (int c = 0; c < CHANNEL_COUNT; c++) {
-        mConversionBufferIn[c] = new WDL_RESAMPLE_TYPE[mMaxBuffer];
-        mConversionBufferOut[c] = new WDL_RESAMPLE_TYPE[mMaxBuffer];
+        mConversionBufferIn[c] = new FFTCONVOLVER_TYPE[mMaxBuffer];
+        mConversionBufferOut[c] = new FFTCONVOLVER_TYPE[mMaxBuffer];
       }
 #endif
     }
@@ -77,84 +89,23 @@ namespace guitard {
 #endif
     }
 
-    void resampleAndLoadIR(IRBundle* b) {
+    void resampleAndLoadIR(float** samples, size_t sampleCount, size_t sampleRate, size_t channelCount) {
       mIRLoaded = false;
-      unloadWave(b);
-      if (!loadWave(b)) {
-        WDBGMSG("Failed to load IR!\n");
-        return;
-      }
-      for (int c = 0; c < b->channelCount; c++) {
-        LinearResampler<float, float> resampler(b->sampleRate, mSampleRate);
+      for (int c = 0; c < channelCount; c++) {
+        WindowedSincResampler<float, float> resampler(sampleRate, mSampleRate);
         float* outBuffer = nullptr;
-        const size_t outSamples = resampler.resample(b->samples[c], b->sampleCount, &outBuffer, (b->sampleRate / static_cast<float>(mSampleRate)) * 0.2f);
-        if (b->channelCount == 1) {
+        const size_t outSamples = resampler.resample(samples[c], sampleCount, &outBuffer, (sampleRate / static_cast<float>(mSampleRate)) * 0.2f);
+        if (channelCount == 1) {
           for (int ch = 0; ch < CHANNEL_COUNT; ch++) {
             mConvolvers[ch]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, outBuffer, outSamples);
           }
         }
-        else if (b->channelCount == CHANNEL_COUNT) {
+        else if (channelCount == CHANNEL_COUNT) {
           mConvolvers[c]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, outBuffer, outSamples);
         }
         delete[] outBuffer;
       }
       mIRLoaded = true;
-    }
-
-    /**
-     * Only takes a pointer to the ir object to load since it won't really be needed for dsp
-     * It will put the loaded wave in the samples buffer of the ir bundle provided
-     * Call unloadWave to get rid of the allocated buffer
-     */
-    static bool loadWave(IRBundle* b) {
-      if (b->samples != nullptr) { return true; } // Already loaded samples
-      if (b->path.isEmpty()) { return false; }
-      drwav wav;
-      // load the file
-      if (!drwav_init_file(&wav, b->path.get(), nullptr)) {
-        return false;
-      }
-
-      // get space for the samples
-      float* pSampleData = static_cast<float*>(malloc(
-        static_cast<size_t>(wav.totalPCMFrameCount)* wav.channels * sizeof(float)
-      ));
-      const size_t samplesRead = drwav_read_pcm_frames_f32(&wav, wav.totalPCMFrameCount, pSampleData);
-      const float length = samplesRead / static_cast<float>(wav.sampleRate);
-      if (length > 10.f || samplesRead < 1) {
-        // don't load anything longer than 10 seconds or without samples
-        assert(false);
-      }
-      b->sampleRate = wav.sampleRate;
-      b->channelCount = wav.channels;
-      b->sampleCount = samplesRead;
-      b->samples = new float* [b->channelCount];
-      // do some deinterleaving 
-      for (int c = 0; c < b->channelCount; c++) {
-        b->samples[c] = new float[b->sampleCount];
-      }
-      for (int s = 0; s < samplesRead * b->channelCount; s++) {
-        int channel = s % b->channelCount;
-        size_t sample = s / b->channelCount;
-        b->samples[channel][sample] = pSampleData[s];
-      }
-      free(pSampleData);
-      drwav_uninit(&wav);
-      return true;
-    }
-
-    /**
-     * Will clear the buffer allocated in loadWave
-     */
-    static void unloadWave(IRBundle* b) {
-      if (b->path.getLength() > 0 && b->samples != nullptr) {
-        // Check if the previous IR is custom and clear out the allocated data
-        for (int c = 0; c < b->channelCount; c++) {
-          delete[] b->samples[c];
-        }
-        delete[] b->samples;
-        b->samples = nullptr;
-      }
     }
 
     void ProcessBlock(sample** in, sample** out, const int nFrames) {
