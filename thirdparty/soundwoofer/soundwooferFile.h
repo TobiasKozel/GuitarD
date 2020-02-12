@@ -160,7 +160,7 @@ namespace soundwoofer {
     /**
      * Not really up to spec, but this should happen on the backend anyways
      */
-    static std::string generateUUID() {
+    std::string generateUUID() {
       srand(time(nullptr));
       const int charLength = 10 + 26;
       const char chars[] = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -173,6 +173,17 @@ namespace soundwoofer {
       std::string ret;
       ret.append(out, UUIDLength);
       return ret;
+    }
+
+    bool isUUID(const std::string id) {
+      if (id.size() != 36) { return false; }
+      if ((id[9] & id[14] & id[19] & id[24]) != '-') { return false; }
+      for (size_t i = 0; i < id.size(); i++) {
+        const char c = id[i];
+        if ('a' <= c && c <= 'z' || '0' <= c && c <= '9' || c == '-') {}
+        else { return false; }
+      }
+      return true;
     }
   }
 }

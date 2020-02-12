@@ -33,15 +33,19 @@ namespace guitard {
     }
 
     void OnMouseUp(const float x, const float y, const IMouseMod& mod) override {
-      if (true) {
-        soundwoofer::async::loadPreset(mPreset, [&](soundwoofer::Status status) {
-          if (status == soundwoofer::SUCCESS) {
-            MessageBus::fireEvent<const char*>(
-              mBus, MessageBus::LoadPresetFromString, mPreset->data.c_str()
-            );
-          }
-        });
+      soundwoofer::instance().loadPreset(mPreset);
+      if (!mPreset->data.empty()) {
+        MessageBus::fireEvent<const char*>(
+          mBus, MessageBus::LoadPresetFromString, mPreset->data.c_str()
+        );
       }
+      //soundwoofer::async::loadPreset(mPreset, [&](soundwoofer::Status status) {
+      //  if (status == soundwoofer::SUCCESS) {
+      //    MessageBus::fireEvent<const char*>(
+      //      mBus, MessageBus::LoadPresetFromString, mPreset->data.c_str()
+      //    );
+      //  }
+      //});
     }
   };
 }

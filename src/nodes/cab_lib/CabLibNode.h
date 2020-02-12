@@ -83,14 +83,14 @@ namespace guitard {
       [&](soundwoofer::SWImpulseShared ir) { // Callback for the UI to change IRs
         if (mCabShared.loadedIr->file != ir->file) {
           // don't load if the Ir is the same
-          soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
-            if (status == soundwoofer::SUCCESS) {
-              mCabShared.loadedIr = ir;
-              mConvolver2->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
-              mBlendPos = 0;
-              mIsBlending = true;
-            }
-          });
+          //soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
+          //  if (status == soundwoofer::SUCCESS) {
+          //    mCabShared.loadedIr = ir;
+          //    mConvolver2->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
+          //    mBlendPos = 0;
+          //    mIsBlending = true;
+          //  }
+          //});
         }
       },std::make_shared<soundwoofer::SWImpulse>()
     };
@@ -133,12 +133,14 @@ namespace guitard {
         mBlendBuffer[c] = new sample[shared.maxBlockSize];
       }
       soundwoofer::SWImpulseShared& ir = mCabShared.loadedIr;
-      soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
-        if (status == soundwoofer::SUCCESS) {
-          if (mConvolver == nullptr) { return; }
-          mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
-        }
-      });
+      soundwoofer::instance().loadIR(ir);
+      mConvolver->loadIR(ir->samples, ir->length, ir->channels);
+      //soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
+      //  if (status == soundwoofer::SUCCESS) {
+      //    if (mConvolver == nullptr) { return; }
+      //    mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
+      //  }
+      //});
     }
 
     void deleteBuffers() override {

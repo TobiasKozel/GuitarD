@@ -28,7 +28,7 @@ namespace guitard {
     void Draw(IGraphics& g) override {
       if (mSelected) {
         g.FillRect(Theme::IRBrowser::IR_TITLE_BG_ACTIVE, mRECT);
-        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.get(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.c_str(), mRECT.GetHPadded(-8));
       }
       else {
         if (mMouseIsOver) {
@@ -37,7 +37,7 @@ namespace guitard {
         else {
           g.FillRect(Theme::IRBrowser::IR_TITLE_BG, mRECT);
         }
-        g.DrawText(Theme::IRBrowser::IR_TITLE, name.get(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE, name.c_str(), mRECT.GetHPadded(-8));
       }
     }
 
@@ -45,16 +45,16 @@ namespace guitard {
       mCallback(this);
     }
 
-    String name;
-    String path;
+    std::string name;
+    std::string path;
   };
 
   class Microphone : public IControl {
   public:
     typedef std::function<void(Microphone * c)> MicrophoneCallback;
     MicrophoneCallback mCallback;
-    String name;
-    String path;
+    std::string name;
+    std::string path;
     PointerList<MicPosition> mPositions;
     MicPosition::MicPositionCallback mPosCallback;
     bool mSelected = false;
@@ -69,7 +69,7 @@ namespace guitard {
     void Draw(IGraphics& g) override {
       if (mSelected) {
         g.FillRect(Theme::IRBrowser::IR_TITLE_BG_ACTIVE, mRECT);
-        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.get(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.c_str(), mRECT.GetHPadded(-8));
       }
       else {
         if (mMouseIsOver) {
@@ -78,7 +78,7 @@ namespace guitard {
         else {
           g.FillRect(Theme::IRBrowser::IR_TITLE_BG, mRECT);
         }
-        g.DrawText(Theme::IRBrowser::IR_TITLE, name.get(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE, name.c_str(), mRECT.GetHPadded(-8));
       }
     }
 
@@ -177,7 +177,7 @@ namespace guitard {
     Cabinet* mSelectedCab = nullptr;
     Microphone* mSelectedMic = nullptr;
     MicPosition* mSelectedPosition = nullptr;
-    String mPath;
+    std::string mPath;
   public:
     CabLibPopUp(CabLibNodeSharedData* shared) : IControl({}) {
       mRenderPriority = 15;
@@ -193,20 +193,20 @@ namespace guitard {
         mScrollView[i]->setCleanUpEnabled(false);
         GetUI()->AttachControl(mScrollView[i]);
       }
-      soundwoofer::async::listIRs([&](soundwoofer::Status status) {
-        if (status != soundwoofer::SUCCESS) { return; }
-        auto rigs = soundwoofer::instance().getRigs();
-        for (auto& i : rigs) {
-          Cabinet* cab = new Cabinet(
-          [&](Cabinet* cab) { this->onCabChanged(cab); },
-          [&](Microphone* mic) { this->onMicChanged(mic); },
-          [&](MicPosition* pos) { this->onPositionChanged(pos); }
-          );
-          mCabinets.add(cab);
-          cab->name = i->name;
-          cab->path = i->name;
-        }
-      });
+      //soundwoofer::async::listIRs([&](soundwoofer::Status status) {
+      //  if (status != soundwoofer::SUCCESS) { return; }
+      //  auto rigs = soundwoofer::instance().getRigs();
+      //  for (auto& i : rigs) {
+      //    Cabinet* cab = new Cabinet(
+      //    [&](Cabinet* cab) { this->onCabChanged(cab); },
+      //    [&](Microphone* mic) { this->onMicChanged(mic); },
+      //    [&](MicPosition* pos) { this->onPositionChanged(pos); }
+      //    );
+      //    mCabinets.add(cab);
+      //    cab->name = i->name;
+      //    cab->path = i->name;
+      //  }
+      //});
       //String path = soundfoo;
       //path.appendPath("impulses");
       //ScanDir dir(path.get());
@@ -338,7 +338,7 @@ namespace guitard {
     void Draw(IGraphics& g) override {
       g.FillRect(Theme::IRBrowser::BACKGROUND, mRECT);
       g.FillRect(Theme::Colors::ACCENT, mCloseButton);
-      g.DrawText(Theme::IRBrowser::PATH, mPath.get(), mPathTitle);
+      g.DrawText(Theme::IRBrowser::PATH, mPath.c_str(), mPathTitle);
     }
 
     void OnMouseDown(float x, float y, const IMouseMod& mod) override {

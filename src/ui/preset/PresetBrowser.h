@@ -28,20 +28,26 @@ namespace guitard {
       refresh();
     }
 
-    void refresh() {
-      soundwoofer::async::listPresets([&](soundwoofer::Status status) {
-        soundwoofer::SWPresets result = soundwoofer::instance().getPresets();
-        if (status == soundwoofer::SUCCESS || result.size()) { // The server might fail, but there can be user presets
-          mPresets = result;
-          clearChildren(true);
-          for (auto& i : mPresets) {
-            PresetEntryControl* p = new PresetEntryControl(mBus, i);
-            appendChild(p);
-          }
+    void putPresets() {
+      soundwoofer::SWPresets result = soundwoofer::instance().getPresets();
+      if (result.size()) {
+        mPresets = result;
+        clearChildren(true);
+        for (auto& i : mPresets) {
+          PresetEntryControl* p = new PresetEntryControl(mBus, i);
+          appendChild(p);
         }
-        GetUI()->SetAllControlsDirty();
-        OnResize();
-      });
+      }
+      GetUI()->SetAllControlsDirty();
+      OnResize();
+    }
+
+    void refresh() {
+      soundwoofer::instance().listPresets();
+      putPresets();
+      //soundwoofer::async::listPresets([&](soundwoofer::Status status) {
+      //  putPresets();
+      //});
     }
 
     void onScrollOutView() override {

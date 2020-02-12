@@ -723,7 +723,7 @@ namespace guitard {
       nlohmann::json json;
       serialize(json);
       try {
-        serialized.Set(json.dump().c_str());
+        serialized.Set(json.dump(4).c_str());
       }
       catch (...) {
         assert(false); // Failed to dump json

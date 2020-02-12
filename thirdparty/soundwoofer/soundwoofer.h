@@ -17,11 +17,6 @@
   #include "./dependencies/base64.h"
 #endif
 
-#ifndef SOUNDWOOFER_CUSTOM_WAVE
-  #define DR_WAV_IMPLEMENTATION
-  #include "./dependencies/dr_wav.h"
-#endif
-
 #include "./soundwooferTypes.h"
 #include "./soundwooferFile.h"
 #include "./soundwooferWave.h"
@@ -44,8 +39,6 @@ namespace soundwoofer {
 #endif
     bool mCacheIRs = false;
     bool mCachePresets = false;
-
-    int mTargetSampleRate = 0;
 
     std::string mPluginName; // Plugin name used to label and filter presets by
     std::string mPluginVersion;
@@ -87,13 +80,6 @@ namespace soundwoofer {
 
     void setPluginVersion(const std::string& version) {
       mPluginVersion = version;
-    }
-
-    /**
-     * Any non 0 value will do resampling when calling load IR
-     */
-    void setTargetSampleRate(int sampleRate) {
-      mTargetSampleRate = sampleRate;
     }
 
     /**
@@ -233,22 +219,6 @@ namespace soundwoofer {
 
 #ifndef SOUNDWOOFER_NO_API
     /**
-     * Assembles a SWPreset and sends it to the server
-     * Doesn't update the cached presets
-     */
-    Status sendPreset(const std::string name, const char* data, const size_t length) {
-      if (mPluginName.empty()) { return PLUGIN_NAME_NOT_SET; }
-      SWPreset preset = {
-        name,
-        file::generateUUID(),
-        mPluginName
-      };
-      preset.data.append(data, length);
-      return sendPreset(preset);
-    }
-
-
-    /**
      * Sends the preset to the server
      * Doesn't update the cached preset list
      */
@@ -260,18 +230,6 @@ namespace soundwoofer {
       return httpPost("/Preset", serialized.c_str(), serialized.size());
     }
 
-
-    /**
-     * Load an IR from an id (Only works for Cloud IRs)
-     */
-    Status loadIR(std::string fileId) {
-      for (auto& i : mIRlist) {
-        if (fileId == i->file) {
-          return loadIR(i);
-        }
-      }
-      return GENERIC_ERROR;
-    }
 #endif
 
     /**
@@ -280,32 +238,34 @@ namespace soundwoofer {
      * The decoded IR will be in SWImpulse::samples
      * Will block, use a lambda as a callback for async
      */
-    Status loadIR(SWImpulseShared outsideIR) {
-      SWImpulseShared ir = nullptr;
-      bool unknownIR = true;
-      for (auto& i : mIRlist) {
-        if (i == outsideIR) { // Go look if we know the IR
-          ir = i;
-          unknownIR = false;
-          break;
+    Status loadIR(SWImpulseShared ir, size_t sampleRate = 0, bool normalize = true) {
+      if (ir->samples != nullptr) {
+        if (normalize) {
+          wave::normalizeIR(ir);
         }
+        return SUCCESS; // Already in ram
       }
-      if (unknownIR) { ir = outsideIR; } // We'll still try to load an ir
-      if (outsideIR->samples != nullptr) { return SUCCESS; } // already in ram
 
-      Status load = GENERIC_ERROR;
-      load = loadWave(ir);
-      if (load == SUCCESS) { return SUCCESS; }
-      if (unknownIR || ir->source != SOUNDWOOFER_SRC) { return UNKNOWN_IR; }
+      Status ret = GENERIC_ERROR;
+      // Try loading the wave from disk first
+      std::string path;
+      if (ir->source == USER_SRC) { path = mIrDirectory + ir->file; }
+      if (ir->source == USER_SRC_ABSOLUTE) { path = ir->file; }
+      if (ir->source == SOUNDWOOFER_SRC) { path = mIrCacheDirectory + ir->id; }
+      ret = wave::loadWaveFile(ir, path, sampleRate, normalize);
+      if (ret == SUCCESS) { return SUCCESS; } // Loaded from disk
+      if (ir->source != SOUNDWOOFER_SRC) { return UNKNOWN_IR; } // No file and also not a online IR
 #ifndef SOUNDWOOFER_NO_API
+      // Go look online
       const std::string result = httpGet("/File/Download/" + ir->file);
       if (result.empty()) { return SERVER_ERROR; }
-      load = loadWave(ir, result.c_str(), result.size());
-      if (load == SUCCESS && mCacheIRs) { // Cache the file
+      ret = wave::loadWaveMemory(ir, result.c_str(), result.size(), sampleRate, normalize);
+      if (ret == SUCCESS && mCacheIRs) {
+        // Cache the file
         file::writeFile((mIrCacheDirectory + ir->id).c_str(), result.c_str(), result.size());
       }
 #endif
-      return load;
+      return ret;
     }
 
     Status loadPreset(SWPresetsShared preset) {
@@ -377,13 +337,6 @@ namespace soundwoofer {
     static SW& instance() {
       static SW instance;
       return instance;
-    }
-
-    virtual ~SW() {
-      flushIRBuffers();
-      //if (mThread.joinable()) {
-      //  mThread.join();
-      //}
     }
 
   private:
@@ -526,77 +479,15 @@ namespace soundwoofer {
 #endif
 
     /**
-     * Will load the wav file to a float buffer in the SWImpulse struct
-     */
-    virtual Status loadWave(SWImpulseShared& ir, const char* waveData = nullptr, const size_t length = 0) {
-#ifndef SOUNDWOOFER_CUSTOM_WAVE
-      drwav wav;
-      if (waveData != nullptr) { // Means the wave is in memory and not on disk
-        if (!drwav_init_memory(&wav, waveData, length, nullptr)) {
-          return WAV_ERROR;
-        }
-      }
-      else {
-        std::string path;
-        if (ir->source == USER_SRC) { path = mIrDirectory + ir->file; }
-        if (ir->source == USER_SRC_ABSOLUTE) { path = ir->file; }
-        if (ir->source == SOUNDWOOFER_SRC) { path = mIrCacheDirectory + ir->id; }
-
-        if (!drwav_init_file(&wav, path.c_str(), nullptr)) {
-          return NOT_CACHED; // This means we'll need to go online and get the IR
-        }
-        if (ir->source == USER_SRC) { // Hash the file so we can go look for it if the file is missing on load
-          ir->id = file::hashFile(mIrDirectory + ir->file);
-        }
-      }
-
-      // interleaved buffer
-      float* pSampleData = static_cast<float*>(malloc(
-        static_cast<size_t>(wav.totalPCMFrameCount)* wav.channels * sizeof(float)
-      ));
-
-      ir->length = drwav_read_pcm_frames_f32(&wav, wav.totalPCMFrameCount, pSampleData);
-      if (ir->length == 0) { return WAV_ERROR; }
-      ir->sampleRate = wav.sampleRate;
-      ir->channels = wav.channels;
-      ir->samples = new float* [ir->channels];
-      for (int c = 0; c < ir->channels; c++) {
-        ir->samples[c] = new float[ir->length];
-      }
-      for (int s = 0; s < ir->length * ir->channels; s++) {
-        // slow deinterleaving, but it works
-        const int channel = s % ir->channels;
-        const size_t sample = s / ir->channels;
-        ir->samples[channel][sample] = pSampleData[s];
-      }
-      free(pSampleData);
-      drwav_uninit(&wav);
-      if (mTargetSampleRate > 0 && ir->sampleRate != mTargetSampleRate) {
-        wave::WindowedSincResampler<float, float> resampler(ir->sampleRate, mTargetSampleRate);
-        float** resampled = new float*[ir->channels];
-        size_t sampleCount = 0;
-        const size_t channelCount = ir->channels;
-        for (size_t i = 0; i < channelCount; i++) {
-          sampleCount = resampler.resample(ir->samples[i], ir->length, &(resampled[i]));
-        }
-        ir->clearSamples();
-        ir->length = sampleCount;
-        ir->channels = channelCount;
-        ir->samples = resampled;
-      }
-      return SUCCESS;
-#else
-      return NOT_IMPLEMENTED;
-#endif
-    }
-
-    /**
      * Will add a generic Mic, amp, factory presets and factory IRs
      */
     void resetIRs() {
       flushIRBuffers();
+      for (auto& i : mComponentList) { i->managed = false; }
       mComponentList.clear();
+      for (auto& i : mRigList) { i->managed = false; }
       mRigList.clear();
+      for (auto& i : mIRlist) { i->managed = false; }
       mIRlist.clear();
       GenericRig->impulses.clear();
       GenericRig->components.clear();

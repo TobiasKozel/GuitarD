@@ -64,7 +64,7 @@ namespace guitard {
     }
 
     size_t resample(Tin* in, const size_t length, Tout** out, Tout amplitude = 1.0) {
-      const size_t outSamples = length / mStepSize;
+      const size_t outSamples = std::floor(length / mStepSize);
       if (outSamples <= 0) { return 0; }
       (*out) = new Tout[outSamples];
       double j = 0; // The position at which the sinc interpolation of the input signal should be evaluated

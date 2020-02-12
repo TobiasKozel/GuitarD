@@ -39,6 +39,7 @@ namespace guitard {
 
     bool mIRLoaded = false;
     const int maxBuffer;
+    bool mIsProcessing = false;
   public:
 
     bool mStereo = false;
@@ -87,27 +88,20 @@ namespace guitard {
 #endif
     }
 
-    void resampleAndLoadIR(float** samples, const size_t sampleCount, const size_t sampleRate, const size_t channelCount) {
+    void loadIR(float** samples, const size_t sampleCount, const size_t channelCount) {
       if (samples == nullptr || sampleCount == 0 || channelCount == 0) { return; }
       mIRLoaded = false;
+      while (mIsProcessing) {}
+
       for (int c = 0; c < channelCount; c++) {
-        WindowedSincResampler<float, float> resampler(sampleRate, mSampleRate);
-        float* outBuffer = nullptr; // Will be allocated in the resampler
-
-        const size_t outSamples = resampler.resample(
-          samples[c], sampleCount, &outBuffer,
-          (sampleRate / static_cast<float>(mSampleRate)) * 0.2f
-        );
-
         if (channelCount == 1) {
           for (int ch = 0; ch < CHANNEL_COUNT; ch++) {
-            mConvolvers[ch]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, outBuffer, outSamples);
+            mConvolvers[ch]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, samples[0], sampleCount);
           }
         }
         else if (channelCount == CHANNEL_COUNT) {
-          mConvolvers[c]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, outBuffer, outSamples);
+          mConvolvers[c]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, samples[c], sampleCount);
         }
-        delete[] outBuffer;
       }
       mIRLoaded = true;
     }
@@ -121,6 +115,7 @@ namespace guitard {
         }
         return;
       }
+      mIsProcessing = true;
 #ifdef GUITARD_FLOAT_CONVOLUTION
       /**                           THREADPOOLING ATTEMPT                           */
 #ifdef useThreadPool
@@ -209,6 +204,7 @@ namespace guitard {
         }
       }
 #endif
+      mIsProcessing = false;
     }
 
     static std::string getLicense() {

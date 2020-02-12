@@ -74,49 +74,40 @@ namespace soundwoofer {
       }
     }
 
-    Status listIRs(const Callback callback, void* invocedBy = nullptr) {
-      _::startAsync([&]() {
-        return instance().listIRs();
-      }, callback, invocedBy);
-      return ASYNC;
-    }
+    //Status listIRs(const Callback callback, void* invocedBy = nullptr) {
+    //  _::startAsync([&]() {
+    //    return instance().listIRs();
+    //  }, callback, invocedBy);
+    //  return ASYNC;
+    //}
 
-    Status listPresets(const Callback callback, void* invocedBy = nullptr) {
-      _::startAsync([&]() {
-        return instance().listPresets();
-      }, callback, invocedBy);
-      return ASYNC;
-    }
+    //Status listPresets(const Callback callback, void* invocedBy = nullptr) {
+    //  _::startAsync([&]() {
+    //    return instance().listPresets();
+    //  }, callback, invocedBy);
+    //  return ASYNC;
+    //}
 
-    Status sendPreset(const std::string name, const char* data, const size_t length, Callback callback, void* invocedBy = nullptr) {
-      _::startAsync([&, name, data, length]() {
-        return instance().sendPreset(name, data, length);
-      }, callback, invocedBy);
-      return ASYNC;
-    }
+    //Status sendPreset(const SWPreset preset, Callback callback, void* invocedBy = nullptr) {
+    //  _::startAsync([&, preset]() {
+    //    return instance().sendPreset(preset);
+    //  }, callback, invocedBy);
+    //  return ASYNC;
+    //}
 
-    Status loadIR(const SWImpulseShared ir, Callback callback, void* invocedBy = nullptr) {
-      _::startAsync([&, ir]() {
-        return instance().loadIR(ir);
-      }, callback, invocedBy);
-      return ASYNC;
-    }
+    //Status loadIR(const SWImpulseShared ir, Callback callback, void* invocedBy = nullptr) {
+    //  _::startAsync([&, ir]() {
+    //    return instance().loadIR(ir);
+    //  }, callback, invocedBy);
+    //  return ASYNC;
+    //}
 
-    Status loadIR(std::string fileId, Callback callback, void* invocedBy = nullptr) {
-      //for (auto& i : mIRlist) {
-      //  if (fileId == i->file) {
-      //    return loadIR(i, callback);
-      //  }
-      //}
-      return GENERIC_ERROR;
-    }
-
-    Status loadPreset(SWPresetsShared preset, Callback callback, void* invocedBy = nullptr) {
-      _::startAsync([&, preset]() {
-        return instance().loadPreset(preset);
-      }, callback, invocedBy);
-      return ASYNC;
-    }
+    //Status loadPreset(SWPresetsShared preset, Callback callback, void* invocedBy = nullptr) {
+    //  _::startAsync([&, preset]() {
+    //    return instance().loadPreset(preset);
+    //  }, callback, invocedBy);
+    //  return ASYNC;
+    //}
 
     /**
      * Clears the async queue, but doesn't terminate a running task

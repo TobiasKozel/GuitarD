@@ -8,7 +8,7 @@ namespace guitard {
   class GalleryCategory : public IControl {
     PointerList<GalleryElement> mElements;
     bool mOpen = false;
-    String mName;
+    std::string mName;
     MessageBus::Bus* mBus = nullptr;
     IRECT mTitleRect;
     float mColumns = 0;
@@ -23,9 +23,9 @@ namespace guitard {
     }
 
     void addNode(const NodeList::NodeInfo node) {
-      if (mName.getLength() == 0) {
+      if (mName.size() == 0) {
         // Take the name of the first node, they'll all be the same
-        mName.set(node.categoryName.c_str());
+        mName = node.categoryName.c_str();
       }
       mElements.add(new GalleryElement(node));
     }
@@ -73,7 +73,7 @@ namespace guitard {
       else {
         g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG, mTitleRect);
       }
-      g.DrawText(Theme::Gallery::CATEGORY_TITLE, mName.get(), mTitleRect);
+      g.DrawText(Theme::Gallery::CATEGORY_TITLE, mName.c_str(), mTitleRect);
     }
 
     void OnMouseOver(float x, float y, const IMouseMod& mod) override {

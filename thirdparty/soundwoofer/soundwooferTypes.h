@@ -51,7 +51,7 @@ namespace soundwoofer {
     std::string micId; // The ID of the mic used to record this
     std::string rig; // The ID of the SWRig used to record this, not a reference to precent circular deps
     std::string file; // This is either a uuid or a path
-    Source source = SOUNDWOOFER_SRC;
+    Source source = SOUNDWOOFER_SRC; // Internally used
     int micX = 0;
     int micY = 0;
     int micZ = 0;
@@ -59,10 +59,16 @@ namespace soundwoofer {
     int micPosition;
     std::string userName;
     std::string element;
-    int channels = 0;
-    int length = 0;
-    float** samples = nullptr;
-    int sampleRate = 0;
+    size_t channels = 0; // Holds the channel count after loadIR
+    size_t length = 0;  // Holds the length in samples for a single channel after loadIR
+    float** samples = nullptr;  // Holds the sample data after loadIR
+    size_t sampleRate = 0;  // Holds the sample rate after loadIR
+    /**
+     * Used internally, if this is true, this means soundwoofer is no longer managing the IR
+     * After calling listIRs all the IRs objects will not be part of soundwoofer
+     */
+    bool managed = true;
+    bool normalized = false;
 
     void clearSamples() {
       if (samples == nullptr || source == EMBEDDED_SRC) { return; }
@@ -88,13 +94,13 @@ namespace soundwoofer {
     Source source = SOUNDWOOFER_SRC;
     int componentBase = 0; // TODO find out what this represents
     std::string desciption; // TODO there's a typo in the backend
-    int year = 0;
+    size_t year = 0;
     std::string url;
     std::string userName;
     std::string brand;
     std::string model;
     std::string baseComponentDescription;
-
+    bool managed = true;
   };
 
   /**
@@ -112,6 +118,7 @@ namespace soundwoofer {
     SWComponents components;
     SWComponents microphones;
     SWImpulses impulses;
+    bool managed = true;
   };
 
   /**
@@ -125,6 +132,7 @@ namespace soundwoofer {
     std::string data;
     std::string version = "-1";
     std::vector<std::string> tags;
+    bool managed = true;
   };
 
   /**

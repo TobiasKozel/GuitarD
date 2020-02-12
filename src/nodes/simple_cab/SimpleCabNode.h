@@ -125,15 +125,19 @@ namespace guitard {
   class SimpleCabNode final : public Node {
     WrappedConvolver* mConvolver = nullptr;
 
-    CabNodeSharedData mCabShared = {
+    CabNodeSharedData mCabShared = { [&](soundwoofer::SWImpulseShared ir) {
       // This will be called from the gui when the IR changes
-      [&](soundwoofer::SWImpulseShared ir) {
-      soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
-        if (status == soundwoofer::SUCCESS) {
-          mCabShared.loadedIr = ir;
-          mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
-        }
-      }); },
+      soundwoofer::instance().loadIR(ir, mSampleRate);
+      mConvolver->loadIR(ir->samples, ir->length, ir->channels);
+      //soundwoofer::async::loadIR(ir,
+      //  [&, ir](soundwoofer::Status status) {
+      //    if (status == soundwoofer::SUCCESS) {
+      //      mCabShared.loadedIr = ir;
+      //      mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
+      //    }
+      //  }
+      //);
+      },
       InternalIRs[0] // This is the default IR when the cab gets created
     };
 
@@ -155,46 +159,50 @@ namespace guitard {
     }
 
     void deserializeAdditional(nlohmann::json& serialized) override {
-      try {
-        //IRBundle load;
-        //if (!serialized.contains("irName")) {
-        //  return;
-        //}
-        //const std::string name = serialized.at("irName");
-        //load.name.set(name.c_str());
-        //const bool customIR = serialized.at("customIR");
-        //if (customIR) {
-        //  const std::string path = serialized.at("path");
-        //  load.path.set(path.c_str());
-        //}
-        //else {
-        //  for (int i = 0; i < InternalIRsCount; i++) {
-        //    // Go look for the right internal IR
-        //    if (strncmp(load.name.get(), InternalIRs[i].name.get(), 30) == 0) {
-        //      load = InternalIRs[i];
-        //      break;
-        //    }
-        //  }
-        //}
-        //mCabShared.loadedIr = load;
-        //mConvolver->resampleAndLoadIR(&load);
-      }
-      catch (...) {
-        WDBGMSG("Failed to load Cab node data!\n");
-      }
+      //try {
+      //  IRBundle load;
+      //  if (!serialized.contains("irName")) {
+      //    return;
+      //  }
+      //  const std::string name = serialized.at("irName");
+      //  load.name.set(name.c_str());
+      //  const bool customIR = serialized.at("customIR");
+      //  if (customIR) {
+      //    const std::string path = serialized.at("path");
+      //    load.path.set(path.c_str());
+      //  }
+      //  else {
+      //    for (int i = 0; i < InternalIRsCount; i++) {
+      //      // Go look for the right internal IR
+      //      if (strncmp(load.name.get(), InternalIRs[i].name.get(), 30) == 0) {
+      //        load = InternalIRs[i];
+      //        break;
+      //      }
+      //    }
+      //  }
+      //  mCabShared.loadedIr = load;
+      //  mConvolver->resampleAndLoadIR(&load);
+      //}
+      //catch (...) {
+      //  WDBGMSG("Failed to load Cab node data!\n");
+      //}
     }
 
     void createBuffers() override {
       Node::createBuffers();
       mConvolver = new WrappedConvolver(mSampleRate, shared.maxBlockSize);
       soundwoofer::SWImpulseShared ir = mCabShared.loadedIr;
-      soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
-        if (status == soundwoofer::SUCCESS) {
-          if (mConvolver != nullptr) { // Since the lambda could return at a point were samplerate has changed we check for null
-            mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
-          }
-        }
-      });
+      soundwoofer::instance().loadIR(ir, mSampleRate);
+      if (mConvolver != nullptr) { // Since the lambda could return at a point were samplerate has changed we check for null
+        mConvolver->loadIR(ir->samples, ir->length, ir->channels);
+      }
+      //soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
+      //  if (status == soundwoofer::SUCCESS) {
+      //    if (mConvolver != nullptr) { // Since the lambda could return at a point were samplerate has changed we check for null
+      //      mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
+      //    }
+      //  }
+      //});
     }
 
     void deleteBuffers() override {
