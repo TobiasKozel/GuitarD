@@ -10,7 +10,7 @@ GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::M
   /**
    * Setup the soundwoofer lib
    */
-  auto& sw = SoundWoofer::instance();
+  auto& sw = soundwoofer::instance();
   sw.setPluginName(PLUG_NAME);
   WDL_String path;
   iplug::UserHomePath(path);

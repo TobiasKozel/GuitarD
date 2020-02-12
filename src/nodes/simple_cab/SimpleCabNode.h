@@ -20,8 +20,8 @@
 namespace guitard {
   /** Handy little struct to load irs and so on */
   struct CabNodeSharedData {
-    std::function<void(SoundWoofer::SWImpulseShared)> callback;
-    SoundWoofer::SWImpulseShared loadedIr;
+    std::function<void(soundwoofer::SWImpulseShared)> callback;
+    soundwoofer::SWImpulseShared loadedIr;
     // bool embedIr = false;
   };
 
@@ -77,10 +77,10 @@ namespace guitard {
       );
       if (!result.empty()) {
         WDBGMSG(result.c_str());
-        SoundWoofer::SWImpulseShared load(new SoundWoofer::SWImpulse());
+        soundwoofer::SWImpulseShared load(new soundwoofer::SWImpulse());
         load->file = result;
         load->name = File::getFilePart(result);
-        load->source = SoundWoofer::USER_SRC_ABSOLUTE;
+        load->source = soundwoofer::USER_SRC_ABSOLUTE;
         mCabShared->callback(load);
       }
       else {
@@ -94,12 +94,12 @@ namespace guitard {
      * File drop is only supported in the standalone app
      */
     void OnDrop(const char* str) override {
-      SoundWoofer::SWImpulseShared load(new SoundWoofer::SWImpulse());
+      soundwoofer::SWImpulseShared load(new soundwoofer::SWImpulse());
       load->file = str;
       load->name = File::getFilePart(load->file);
-      load->source = SoundWoofer::USER_SRC_ABSOLUTE;
+      load->source = soundwoofer::USER_SRC_ABSOLUTE;
       mCabShared->callback(load);
-      if (SoundWoofer::isWaveName(load->name)) {
+      if (soundwoofer::file::isWaveName(load->name)) {
         mCabShared->callback(load);
       }
     }
@@ -127,9 +127,9 @@ namespace guitard {
 
     CabNodeSharedData mCabShared = {
       // This will be called from the gui when the IR changes
-      [&](SoundWoofer::SWImpulseShared ir) { 
-      SoundWoofer::instance().loadIR(ir, [&, ir](SoundWoofer::Status status) {
-        if (status == SoundWoofer::SUCCESS) {
+      [&](soundwoofer::SWImpulseShared ir) {
+      soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
+        if (status == soundwoofer::SUCCESS) {
           mCabShared.loadedIr = ir;
           mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
         }
@@ -187,9 +187,9 @@ namespace guitard {
     void createBuffers() override {
       Node::createBuffers();
       mConvolver = new WrappedConvolver(mSampleRate, shared.maxBlockSize);
-      SoundWoofer::SWImpulseShared ir = mCabShared.loadedIr;
-      SoundWoofer::instance().loadIR(ir, [&, ir](SoundWoofer::Status status) {
-        if (status == SoundWoofer::SUCCESS) {
+      soundwoofer::SWImpulseShared ir = mCabShared.loadedIr;
+      soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
+        if (status == soundwoofer::SUCCESS) {
           if (mConvolver != nullptr) { // Since the lambda could return at a point were samplerate has changed we check for null
             mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
           }

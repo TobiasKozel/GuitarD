@@ -477,9 +477,6 @@
     <ClInclude Include="..\src\ui\preset\PresetEntryControl.h">
       <Filter>src\ui\preset</Filter>
     </ClInclude>
-    <ClInclude Include="..\thirdparty\soundwoofer\soundwoofer.h">
-      <Filter>thirdparty</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\types\types.h">
       <Filter>src\types</Filter>
     </ClInclude>
@@ -518,6 +515,21 @@
     </ClInclude>
     <ClInclude Include="..\thirdparty\convolver\twoStageConvolver.h">
       <Filter>thirdparty\convolver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwoofer.h">
+      <Filter>thirdparty\soundwoofer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwooferTypes.h">
+      <Filter>thirdparty\soundwoofer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwooferFile.h">
+      <Filter>thirdparty\soundwoofer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwooferAsync.h">
+      <Filter>thirdparty\soundwoofer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwooferWave.h">
+      <Filter>thirdparty\soundwoofer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -631,6 +643,9 @@
     </Filter>
     <Filter Include="thirdparty\convolver">
       <UniqueIdentifier>{c6ff16d2-8b86-404f-9517-690abd98b1a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\soundwoofer">
+      <UniqueIdentifier>{ab94dda7-4cf0-4ef8-b861-44ce67656018}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

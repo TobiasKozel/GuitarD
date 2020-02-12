@@ -79,19 +79,20 @@ namespace guitard {
 
     bool mIsBlending = false;
 
-    CabLibNodeSharedData mCabShared = { [&](SoundWoofer::SWImpulseShared ir) {
-      if (mCabShared.loadedIr->file == ir->file) {
-        // don't load if the Ir is the same;
-        SoundWoofer::instance().loadIR(ir, [&](SoundWoofer::Status status) {
-          if (status == SoundWoofer::SUCCESS) {
-            mCabShared.loadedIr = ir;
-            mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
-            mBlendPos = 0;
-            mIsBlending = true;
-          }
-        });
-      }
-      },std::make_shared<SoundWoofer::SWImpulse>()
+    CabLibNodeSharedData mCabShared = {
+      [&](soundwoofer::SWImpulseShared ir) { // Callback for the UI to change IRs
+        if (mCabShared.loadedIr->file != ir->file) {
+          // don't load if the Ir is the same
+          soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
+            if (status == soundwoofer::SUCCESS) {
+              mCabShared.loadedIr = ir;
+              mConvolver2->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
+              mBlendPos = 0;
+              mIsBlending = true;
+            }
+          });
+        }
+      },std::make_shared<soundwoofer::SWImpulse>()
     };
   public:
     CabLibNode(const std::string pType) {
@@ -131,9 +132,10 @@ namespace guitard {
       for (int c = 0; c < mChannelCount; c++) {
         mBlendBuffer[c] = new sample[shared.maxBlockSize];
       }
-      SoundWoofer::SWImpulseShared& ir = mCabShared.loadedIr;
-      SoundWoofer::instance().loadIR(ir, [&](SoundWoofer::Status status) {
-        if (status == SoundWoofer::SUCCESS) {
+      soundwoofer::SWImpulseShared& ir = mCabShared.loadedIr;
+      soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
+        if (status == soundwoofer::SUCCESS) {
+          if (mConvolver == nullptr) { return; }
           mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
         }
       });
@@ -151,24 +153,31 @@ namespace guitard {
       delete[] mBlendBuffer;
     }
 
-    void OnSamplerateChanged(const int pSampleRate) override {
-      deleteBuffers();
-      mSampleRate = pSampleRate;
-      mBlendStep = 1.0f / (pSampleRate * mTransitionTime);
-      createBuffers();
+    /**
+     * Take care of samplerate and channel changes directly since both will need the convolver to be reconstructed
+     * This prevents that from happening twice
+     */
+    void OnReset(const int pSampleRate, const int pChannels, const bool force = false) override {
+      if (pSampleRate != mSampleRate || pChannels != mChannelCount || force) {
+        deleteBuffers();
+        mSampleRate = pSampleRate;
+        mChannelCount = pChannels;
+        mBlendStep = 1.0f / (pSampleRate * mTransitionTime);
+        createBuffers();
+      }
     }
 
     void ProcessBlock(const int nFrames) override {
       if (!inputsReady() || mIsProcessed || byPass()) { return; }
-      shared.parameters[1].update();
       if (mConvolver == nullptr) {
         outputSilence();
         return;
       }
+      shared.parameters[1].update(); // this is the stereo param
       mConvolver->mStereo = mStereo > 0.5 ? true : false;
 
-      if (mIsBlending) {
-        mConvolver2->mStereo = mConvolver->mStereo;
+      if (mIsBlending) { // Means we'll need to take care of 2 convolvers
+        mConvolver2->mStereo = mConvolver->mStereo; // Sync the stereo flag
         mConvolver->ProcessBlock(
           shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0], nFrames
         );
@@ -186,14 +195,12 @@ namespace guitard {
             mBuffersOut[0][c][i] = mBuffersOut[0][c][i] * (1 - mBlendPos) + mBlendBuffer[c][i] * mBlendPos;
           }
         }
-        if (mBlendPos >= 1.0) {
+        if (mBlendPos >= 1.0) { // Blend is over
           mIsBlending = false;
-          WrappedConvolver* swap = mConvolver;
-          mConvolver = mConvolver2;
-          mConvolver2 = swap;
+          std::swap(mConvolver, mConvolver2);
         }
       }
-      else {
+      else { // Normal processing
         mConvolver->ProcessBlock(
           shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0], nFrames
         );

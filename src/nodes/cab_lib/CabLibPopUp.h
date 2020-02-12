@@ -12,8 +12,8 @@
 namespace guitard {
 
   struct CabLibNodeSharedData {
-    std::function<void(SoundWoofer::SWImpulseShared)> callback;
-    SoundWoofer::SWImpulseShared loadedIr;
+    std::function<void(soundwoofer::SWImpulseShared)> callback;
+    soundwoofer::SWImpulseShared loadedIr;
   };
 #ifndef GUITARD_HEADLESS
   class MicPosition : public IControl {
@@ -110,8 +110,8 @@ namespace guitard {
   class Cabinet : public IControl {
   public:
     typedef std::function<void(Cabinet * c)> CabinetCallback;
-    String name;
-    String path;
+    std::string name;
+    std::string path;
     CabinetCallback mCallback;
     Microphone::MicrophoneCallback mMicCallback;
     MicPosition::MicPositionCallback mPosCallback;
@@ -133,7 +133,7 @@ namespace guitard {
     void Draw(IGraphics& g) override {
       if (mSelected) {
         g.FillRect(Theme::IRBrowser::IR_TITLE_BG_ACTIVE, mRECT);
-        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.get(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.c_str(), mRECT.GetHPadded(-8));
       }
       else {
         if (mMouseIsOver) {
@@ -142,7 +142,7 @@ namespace guitard {
         else {
           g.FillRect(Theme::IRBrowser::IR_TITLE_BG, mRECT);
         }
-        g.DrawText(Theme::IRBrowser::IR_TITLE, name.get(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE, name.c_str(), mRECT.GetHPadded(-8));
       }
     }
 
@@ -193,6 +193,20 @@ namespace guitard {
         mScrollView[i]->setCleanUpEnabled(false);
         GetUI()->AttachControl(mScrollView[i]);
       }
+      soundwoofer::async::listIRs([&](soundwoofer::Status status) {
+        if (status != soundwoofer::SUCCESS) { return; }
+        auto rigs = soundwoofer::instance().getRigs();
+        for (auto& i : rigs) {
+          Cabinet* cab = new Cabinet(
+          [&](Cabinet* cab) { this->onCabChanged(cab); },
+          [&](Microphone* mic) { this->onMicChanged(mic); },
+          [&](MicPosition* pos) { this->onPositionChanged(pos); }
+          );
+          mCabinets.add(cab);
+          cab->name = i->name;
+          cab->path = i->name;
+        }
+      });
       //String path = soundfoo;
       //path.appendPath("impulses");
       //ScanDir dir(path.get());
@@ -213,7 +227,7 @@ namespace guitard {
 
       //  }
       //}
-      setFromIRBundle();
+      //setFromIRBundle();
     }
 
     void onCabChanged(Cabinet* newCab) {

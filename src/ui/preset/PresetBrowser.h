@@ -9,8 +9,7 @@
 namespace guitard {
   class PresetBrowser : public ScrollViewControl, public ScrollViewChild {
     MessageBus::Bus* mBus = nullptr;
-    SoundWoofer& api = SoundWoofer::instance();
-    SoundWoofer::SWPresets mPresets;
+    soundwoofer::SWPresets mPresets;
   public:
 
     PresetBrowser(MessageBus::Bus* pBus, IGraphics* g) :
@@ -30,17 +29,18 @@ namespace guitard {
     }
 
     void refresh() {
-      api.listPresets([&](SoundWoofer::Status status) {
-        if (status == SoundWoofer::SUCCESS) {
-          mPresets = api.getPresets();
+      soundwoofer::async::listPresets([&](soundwoofer::Status status) {
+        soundwoofer::SWPresets result = soundwoofer::instance().getPresets();
+        if (status == soundwoofer::SUCCESS || result.size()) { // The server might fail, but there can be user presets
+          mPresets = result;
           clearChildren(true);
           for (auto& i : mPresets) {
             PresetEntryControl* p = new PresetEntryControl(mBus, i);
             appendChild(p);
           }
         }
+        GetUI()->SetAllControlsDirty();
         OnResize();
-        GetUI()->SetAllControlsDirty(); // Needed since nothing else triggers a new frame to be rendered
       });
     }
 

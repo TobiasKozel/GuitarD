@@ -7,9 +7,9 @@
 namespace guitard {
   class PresetEntryControl : public IControl {
     MessageBus::Bus* mBus = nullptr;
-    SoundWoofer::SWPresetsShared mPreset = nullptr;
+    soundwoofer::SWPresetsShared mPreset = nullptr;
   public:
-    PresetEntryControl(MessageBus::Bus* bus, SoundWoofer::SWPresetsShared preset) : IControl({}) {
+    PresetEntryControl(MessageBus::Bus* bus, soundwoofer::SWPresetsShared preset) : IControl({}) {
       mBus = bus;
       mPreset = preset;
       mRECT.T = 0;
@@ -34,7 +34,13 @@ namespace guitard {
 
     void OnMouseUp(const float x, const float y, const IMouseMod& mod) override {
       if (true) {
-        MessageBus::fireEvent<const char*>(mBus, MessageBus::LoadPresetFromString, mPreset->data.c_str());
+        soundwoofer::async::loadPreset(mPreset, [&](soundwoofer::Status status) {
+          if (status == soundwoofer::SUCCESS) {
+            MessageBus::fireEvent<const char*>(
+              mBus, MessageBus::LoadPresetFromString, mPreset->data.c_str()
+            );
+          }
+        });
       }
     }
   };

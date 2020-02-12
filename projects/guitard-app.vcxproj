@@ -415,6 +415,10 @@
     <ClInclude Include="..\thirdparty\convolver\twoStageConvolver.h" />
     <ClInclude Include="..\thirdparty\convolver\util.h" />
     <ClInclude Include="..\thirdparty\soundwoofer\soundwoofer.h" />
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwooferAsync.h" />
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwooferFile.h" />
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwooferTypes.h" />
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwooferWave.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Dependencies\IPlug\RTAudio\include\asio.cpp" />

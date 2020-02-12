@@ -39,8 +39,6 @@ namespace guitard {
 
     bool mIRLoaded = false;
     const int maxBuffer;
-
-    // IRBundle* mLoadedIr = nullptr;
   public:
 
     bool mStereo = false;
@@ -89,12 +87,18 @@ namespace guitard {
 #endif
     }
 
-    void resampleAndLoadIR(float** samples, size_t sampleCount, size_t sampleRate, size_t channelCount) {
+    void resampleAndLoadIR(float** samples, const size_t sampleCount, const size_t sampleRate, const size_t channelCount) {
+      if (samples == nullptr || sampleCount == 0 || channelCount == 0) { return; }
       mIRLoaded = false;
       for (int c = 0; c < channelCount; c++) {
         WindowedSincResampler<float, float> resampler(sampleRate, mSampleRate);
-        float* outBuffer = nullptr;
-        const size_t outSamples = resampler.resample(samples[c], sampleCount, &outBuffer, (sampleRate / static_cast<float>(mSampleRate)) * 0.2f);
+        float* outBuffer = nullptr; // Will be allocated in the resampler
+
+        const size_t outSamples = resampler.resample(
+          samples[c], sampleCount, &outBuffer,
+          (sampleRate / static_cast<float>(mSampleRate)) * 0.2f
+        );
+
         if (channelCount == 1) {
           for (int ch = 0; ch < CHANNEL_COUNT; ch++) {
             mConvolvers[ch]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, outBuffer, outSamples);
