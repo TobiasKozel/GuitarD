@@ -143,21 +143,6 @@
     <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.cpp">
       <Filter>IGraphics\Drawing</Filter>
     </ClCompile>
-    <ClCompile Include="..\thirdparty\fftconvolver\AudioFFT.cpp">
-      <Filter>thirdparty\convolver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\fftconvolver\FFTConvolver.cpp">
-      <Filter>thirdparty\convolver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.cpp">
-      <Filter>thirdparty\convolver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\fftconvolver\Utilities.cpp">
-      <Filter>thirdparty\convolver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\WDL\resample.cpp">
-      <Filter>WDL</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\WDL\win32_utf8.c">
       <Filter>WDL</Filter>
     </ClCompile>
@@ -399,18 +384,6 @@
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.h">
       <Filter>IGraphics\Drawing</Filter>
     </ClInclude>
-    <ClInclude Include="..\thirdparty\fftconvolver\AudioFFT.h">
-      <Filter>thirdparty\convolver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\fftconvolver\FFTConvolver.h">
-      <Filter>thirdparty\convolver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.h">
-      <Filter>thirdparty\convolver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\fftconvolver\Utilities.h">
-      <Filter>thirdparty\convolver</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -472,9 +445,6 @@
     </Filter>
     <Filter Include="thirdparty">
       <UniqueIdentifier>{37cc0328-7952-42ef-9df4-1a5e231e30a5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\convolver">
-      <UniqueIdentifier>{7f7348ce-df0b-4c18-8794-acf96ee57a60}</UniqueIdentifier>
     </Filter>
     <Filter Include="WDL">
       <UniqueIdentifier>{b9ad1656-a635-499e-b530-64530d6b1094}</UniqueIdentifier>
