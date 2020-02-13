@@ -96,13 +96,27 @@ namespace guitard {
       mContentHeight = 0;
       mContentWidth = 0;
       const int childCount = mChildren.size();
-      if (childCount == 0) { return; }
+
+      /**
+       * Go look for the last visible child
+       */
+      IControl* lastChild = nullptr; 
+      for (int i = childCount - 1; 0 <= i; i--) {
+        if (!mChildren[i]->IsHidden()) {
+          lastChild = mChildren[i];
+          break;
+        }
+      }
+
+      if (childCount == 0 || lastChild == nullptr) { return; }
+
       /**
        * First align all the children vertically
        */
       for (int i = 0; i < childCount; i++) {
-        const bool isLast = i == childCount - 1;
         IControl* c = mChildren[i];
+        if (c->IsHidden()) { continue; }
+        const bool isLast = lastChild == c;
         IRECT r = c->GetRECT();
         const float height = r.H();
         const float width = mFullWidthChildren ? mRECT.W() : r.W();
@@ -130,6 +144,7 @@ namespace guitard {
        */
       for (int i = 0; i < childCount; i++) {
         IControl* c = mChildren[i];
+        if (c->IsHidden()) { continue; }
         ScrollViewChild* sc = dynamic_cast<ScrollViewChild*>(c);
         IRECT r = c->GetTargetRECT();
         shiftRectY(r, -mScrollY);
@@ -190,7 +205,9 @@ namespace guitard {
     void Draw(IGraphics& g) override {
       g.FillRect(iplug::igraphics::COLOR_DARK_GRAY, mRECT);
       for (int i = 0; i < mChildren.size(); i++) {
-        mChildren[i]->Draw(g);
+        if (!mChildren[i]->IsHidden()) {
+          mChildren[i]->Draw(g);
+        }
       }
       if (mScrollBar) {
         IRECT scroll = mRECT.GetFromRight(mScrollBarWidth);
@@ -256,6 +273,7 @@ namespace guitard {
       const IRECT click = { x, y, x, y };
       for (int i = 0; i < mChildren.size(); i++) {
         IControl* c = mChildren[i];
+        if (c->IsHidden()) { continue; }
         IRECT r = c->GetTargetRECT();
         if (r.Contains(click)) {
           return c;

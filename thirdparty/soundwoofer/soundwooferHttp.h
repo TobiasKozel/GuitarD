@@ -9,9 +9,9 @@
 
 namespace soundwoofer {
   namespace http {
-    // const std::string BACKEND_URL = "svenssj.tech";
+    const std::string BACKEND_URL = "svenssj.tech";
+    // const std::string BACKEND_URL = "localhost";
     const std::string API_VERSION = "0.1";
-    const std::string BACKEND_URL = "localhost";
     const int BACKEND_PORT = 5000;
 
 #ifndef SOUNDWOOFER_CUSTOM_HTTP

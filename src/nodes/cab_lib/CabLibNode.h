@@ -133,8 +133,11 @@ namespace guitard {
         mBlendBuffer[c] = new sample[shared.maxBlockSize];
       }
       soundwoofer::SWImpulseShared& ir = mCabShared.loadedIr;
+      WDBGMSG("Load ir");
       soundwoofer::ir::load(ir);
+      WDBGMSG("Load done load");
       mConvolver->loadIR(ir->samples, ir->length, ir->channels);
+      WDBGMSG("In convolver");
       //soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
       //  if (status == soundwoofer::SUCCESS) {
       //    if (mConvolver == nullptr) { return; }

@@ -16,19 +16,23 @@ namespace guitard {
     soundwoofer::SWImpulseShared loadedIr;
   };
 #ifndef GUITARD_HEADLESS
-  class MicPosition : public IControl {
+  class LibIr : public IControl {
   public:
-    typedef std::function<void(MicPosition * c)> MicPositionCallback;
+    typedef std::function<void(LibIr * c)> IrCallback;
     bool mSelected = false;
-    MicPositionCallback mCallback;
-    MicPosition(MicPositionCallback& callback) : IControl({ 0, 0, 0, 20 }) {
+    IrCallback mCallback;
+    soundwoofer::SWImpulseShared mIr;
+    std::string mName;
+    LibIr(soundwoofer::SWImpulseShared ir, IrCallback callback) : IControl({ 0, 0, 0, 20 }) {
       mCallback = callback;
+      mIr = ir;
+      mName = ir->name;
     }
 
     void Draw(IGraphics& g) override {
       if (mSelected) {
         g.FillRect(Theme::IRBrowser::IR_TITLE_BG_ACTIVE, mRECT);
-        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.c_str(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, mName.c_str(), mRECT.GetHPadded(-8));
       }
       else {
         if (mMouseIsOver) {
@@ -37,7 +41,7 @@ namespace guitard {
         else {
           g.FillRect(Theme::IRBrowser::IR_TITLE_BG, mRECT);
         }
-        g.DrawText(Theme::IRBrowser::IR_TITLE, name.c_str(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE, mName.c_str(), mRECT.GetHPadded(-8));
       }
     }
 
@@ -45,31 +49,27 @@ namespace guitard {
       mCallback(this);
     }
 
-    std::string name;
-    std::string path;
+    
   };
 
-  class Microphone : public IControl {
+  class LibMic : public IControl {
   public:
-    typedef std::function<void(Microphone * c)> MicrophoneCallback;
-    MicrophoneCallback mCallback;
-    std::string name;
-    std::string path;
-    PointerList<MicPosition> mPositions;
-    MicPosition::MicPositionCallback mPosCallback;
+    typedef std::function<void(LibMic * c)> MicCallback;
+    MicCallback mCallback;
+    soundwoofer::SWComponentShared mMic;
+    std::string mName;
     bool mSelected = false;
-    Microphone(MicrophoneCallback& mc, MicPosition::MicPositionCallback& pc) : IControl({ 0, 0, 0, 20 }) {
+    LibMic(soundwoofer::SWComponentShared mic,  MicCallback mc) : IControl({ 0, 0, 0, 20 }) {
       mCallback = mc;
-      mPosCallback = pc;
+      mMic = mic;
+      mName = mMic->name;
     }
-    ~Microphone() {
-      mPositions.clear(true);
-    }
+    ~LibMic() { }
 
     void Draw(IGraphics& g) override {
       if (mSelected) {
         g.FillRect(Theme::IRBrowser::IR_TITLE_BG_ACTIVE, mRECT);
-        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.c_str(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, mName.c_str(), mRECT.GetHPadded(-8));
       }
       else {
         if (mMouseIsOver) {
@@ -78,62 +78,38 @@ namespace guitard {
         else {
           g.FillRect(Theme::IRBrowser::IR_TITLE_BG, mRECT);
         }
-        g.DrawText(Theme::IRBrowser::IR_TITLE, name.c_str(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE, mName.c_str(), mRECT.GetHPadded(-8));
       }
     }
 
     void OnMouseUp(float x, float y, const IMouseMod& mod) override {
       mCallback(this);
     }
-
-    void scanPositions() {
-      //ScanDir dir(path.get());
-      //for (int i = 0; i < dir.size(); i++) {
-      //  if (!dir[i]->isFolder) {
-      //    // We're only interested in files, each corresponds to a IR
-      //    MicPosition* pos = new MicPosition(mPosCallback);
-      //    pos->name = dir[i]->name.get();
-      //    if (strncmp(".wav", pos->name.getExt(), 5) == 0 ||
-      //      strncmp(".WAV", pos->name.getExt(), 5) == 0) {
-      //      pos->path = dir[i]->relative.get();
-      //      // dir.GetCurrentFullFN(&pos->path);
-      //      mPositions.add(pos);
-      //    }
-      //    else {
-      //      delete pos;
-      //    }
-      //  }
-      //}
-    }
   };
 
-  class Cabinet : public IControl {
+  class LibRig : public IControl {
   public:
-    typedef std::function<void(Cabinet * c)> CabinetCallback;
-    std::string name;
-    std::string path;
-    CabinetCallback mCallback;
-    Microphone::MicrophoneCallback mMicCallback;
-    MicPosition::MicPositionCallback mPosCallback;
-    PointerList<Microphone> mMics;
+    typedef std::function<void(LibRig* c)> RigCallback;
+    RigCallback mCallback;
+    soundwoofer::SWRigShared mRig;
     bool mSelected = false;
+    std::string mName;
+    PointerList<LibMic> mMics;
+    PointerList<LibIr> mIrs;
+    
 
-    Cabinet(const CabinetCallback cc, const Microphone::MicrophoneCallback mc, const MicPosition::MicPositionCallback pc)
-      : IControl({ 0, 0, 0, 20 })
-    {
+    LibRig(soundwoofer::SWRigShared rig, const RigCallback cc) : IControl({ 0, 0, 0, 20 }) {
       mCallback = cc;
-      mMicCallback = mc;
-      mPosCallback = pc;
+      mRig = rig;
+      mName = rig->name;
     }
 
-    ~Cabinet() {
-      mMics.clear(true);
-    }
+    ~LibRig() { }
 
     void Draw(IGraphics& g) override {
       if (mSelected) {
         g.FillRect(Theme::IRBrowser::IR_TITLE_BG_ACTIVE, mRECT);
-        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, name.c_str(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE_ACTIVE, mName.c_str(), mRECT.GetHPadded(-8));
       }
       else {
         if (mMouseIsOver) {
@@ -142,30 +118,14 @@ namespace guitard {
         else {
           g.FillRect(Theme::IRBrowser::IR_TITLE_BG, mRECT);
         }
-        g.DrawText(Theme::IRBrowser::IR_TITLE, name.c_str(), mRECT.GetHPadded(-8));
+        g.DrawText(Theme::IRBrowser::IR_TITLE, mName.c_str(), mRECT.GetHPadded(-8));
       }
-    }
-
-    void scanMics() {
-      //ScanDir dir(path.get());
-      //for (int i = 0; i < dir.size(); i++) {
-      //  if (dir[i]->isFolder) {
-      //    // We're only interested in folders, each corresponds to a mic
-      //    Microphone* mic = new Microphone(mMicCallback, mPosCallback);
-      //    mMics.add(mic);
-      //    mic->name = dir[i]->name.get();
-      //    mic->path = dir[i]->relative.get();
-      //    // dir.GetCurrentFullFN(&mic->path);
-      //    mic->scanPositions();
-      //  }
-      //}
     }
 
     void OnMouseUp(float x, float y, const IMouseMod& mod) override {
       mCallback(this);
     }
   };
-
 
 
   class CabLibPopUp : public IControl {
@@ -173,11 +133,178 @@ namespace guitard {
     IRECT mCloseButton;
     IRECT mPathTitle;
     ScrollViewControl* mScrollView[3] = { nullptr };
-    PointerList<Cabinet> mCabinets;
-    Cabinet* mSelectedCab = nullptr;
-    Microphone* mSelectedMic = nullptr;
-    MicPosition* mSelectedPosition = nullptr;
+    PointerList<LibRig> mRigs;
+    PointerList<LibMic> mMics;
+    PointerList<LibIr> mIrs;
+
+    LibRig* mSelectedRig = nullptr;
+    LibMic* mSelectedMic = nullptr;
+    LibIr* mSelectedIr = nullptr;
     std::string mPath;
+
+    void changeIr(LibIr* newIr) {
+      LibIr* prevIr = mSelectedIr;
+      mSelectedIr = nullptr;
+
+      if (newIr == nullptr) {
+        if (prevIr != nullptr) {
+          for (int i = 0; i < mSelectedRig->mIrs.size(); i++) {
+            LibIr* c = mSelectedRig->mIrs[i];
+            if (mSelectedMic->mMic->id == c->mIr->micId) { // Look if it matches the mic
+              if (prevIr->mIr->id == c->mIr->id) { // look if it matches the last ir
+                mSelectedIr = c;
+              }
+            }
+          }
+        }
+
+        // Use the first one if no match is found
+        if (mSelectedIr == nullptr && mSelectedRig->mIrs.size()) {
+          mSelectedIr = mSelectedRig->mIrs[0];
+        }
+      }
+      else {
+        mSelectedIr = newIr;
+      }
+
+
+      if (prevIr != nullptr) {
+        prevIr->mSelected = false;
+      }
+
+      if (mSelectedIr == nullptr) { return; }
+
+      mSelectedIr->mSelected = true;
+      mScrollView[2]->SetDirty();
+
+      mCabShared->callback(mSelectedIr->mIr);
+    }
+
+    void changeMic(LibMic* newMic) {
+      mScrollView[2]->clearChildren(); // Clear out old irs
+      LibMic* prevMic = mSelectedMic;
+      mSelectedMic = nullptr;
+
+      if (newMic == nullptr) {
+        // Try to match the old mic
+        if (prevMic != nullptr) {
+          
+          for (int i = 0; i < mSelectedRig->mMics.size(); i++) {
+            if (prevMic->mMic->id == mSelectedRig->mMics[i]->mMic->id) {
+              mSelectedMic = mSelectedRig->mMics[i]; // Found a match
+              break;
+            }
+          }
+        }
+
+        // Use the first one if there's no match
+        if (mSelectedMic == nullptr && mSelectedRig->mMics.size()) {
+          mSelectedMic = mSelectedRig->mMics[0];
+        }
+      }
+      else {
+        mSelectedMic = newMic;
+      }
+
+      if (prevMic != nullptr ) {
+        prevMic->mSelected = false;
+      }
+
+      if (mSelectedMic == nullptr) { return; }
+      mSelectedMic->mSelected = true;
+
+      for (int i = 0; i < mSelectedRig->mIrs.size(); i++) {
+        // Add the new Irs which match the micid
+        if (mSelectedMic->mMic->id == mSelectedRig->mIrs[i]->mIr->micId) {
+          mScrollView[2]->appendChild(mSelectedRig->mIrs[i]);
+        }
+      }
+
+      mScrollView[1]->SetDirty();
+      changeIr(nullptr);
+    }
+
+    void changeRig(LibRig* newRig) {
+      mScrollView[1]->clearChildren(); // Clear out old mics
+      if (mSelectedRig != nullptr) {
+        mSelectedRig->mSelected = false;
+      }
+      mSelectedRig = newRig;
+      mScrollView[0]->SetDirty();
+      if (mSelectedRig == nullptr) { return; }
+      for (int i = 0; i < newRig->mMics.size(); i++) {
+        // Add the new ones
+        mScrollView[1]->appendChild(mSelectedRig->mMics[i]);
+      }
+      mSelectedRig->mSelected = true;
+      changeMic(nullptr);
+    }
+
+    soundwoofer::async::Callback mCallback = std::make_shared<soundwoofer::async::CallbackFunc>(
+      [&](soundwoofer::Status status) {
+        // if (status != soundwoofer::SUCCESS) { return; }
+        auto rigs = soundwoofer::ir::getRig();
+        for (auto& i : rigs) { // Build the rigs
+          LibRig* rig = new LibRig(i, [&](LibRig* callbackRig) {
+            changeRig(callbackRig);
+          });
+          mScrollView[0]->appendChild(rig);
+          mRigs.add(rig);
+
+          for (auto& j : i->microphones) { // Build the mics
+            if (j->type != "Microphone") { continue; } // Only Mics
+            LibMic* duplicate = nullptr;
+            for (int k = 0; k < mMics.size(); k++) {
+              if (mMics[k]->mMic->id == j->id) {
+                duplicate = mMics[k];
+                break;
+              }
+            }
+
+            if (duplicate != nullptr) {
+              rig->mMics.add(duplicate);
+              continue;
+            } // No dupes
+            LibMic* mic = new LibMic(j, [&](LibMic* callbackMic) {
+              changeMic(callbackMic);
+            });
+            mMics.add(mic);
+            rig->mMics.add(mic);
+          }
+
+          for (auto& j : i->impulses) {
+            LibIr* ir = new LibIr(j, [&](LibIr* callbackIr) {
+              changeIr(callbackIr);
+            });
+            mIrs.add(ir);
+            rig->mIrs.add(ir);
+          }
+        }
+
+        for (int r = 0; r < mRigs.size(); r++) {
+          LibRig* rig = mRigs[r];
+          for (int i = 0; i < rig->mIrs.size(); i++) {
+            LibIr* ir = rig->mIrs[i];
+            if (ir->mIr->file == mCabShared->loadedIr->file) { // Found the ir
+              for (int m = 0; m < rig->mMics.size(); m++) {
+                LibMic* mic = rig->mMics[m];
+                if (ir->mIr->micId == mic->mMic->id) { // Found the mic
+                  changeRig(rig);
+                  changeMic(mic);
+                  changeIr(ir);
+                }
+              }
+            }
+          }
+        }
+
+        mScrollView[0]->OnResize();
+        mScrollView[1]->OnResize();
+        mScrollView[2]->OnResize();
+        // this->setFromIRBundle();
+      }
+    );
+
   public:
     CabLibPopUp(CabLibNodeSharedData* shared) : IControl({}) {
       mRenderPriority = 15;
@@ -185,7 +312,7 @@ namespace guitard {
     }
 
     void OnInit() override {
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 3; i++) { // Create three scroll views
         mScrollView[i] = new ScrollViewControl();
         mScrollView[i]->SetRenderPriority(16);
         mScrollView[i]->setFullWidthChildren(true);
@@ -193,133 +320,16 @@ namespace guitard {
         mScrollView[i]->setCleanUpEnabled(false);
         GetUI()->AttachControl(mScrollView[i]);
       }
-      //soundwoofer::async::listIRs([&](soundwoofer::Status status) {
-      //  if (status != soundwoofer::SUCCESS) { return; }
-      //  auto rigs = soundwoofer::instance().getRigs();
-      //  for (auto& i : rigs) {
-      //    Cabinet* cab = new Cabinet(
-      //    [&](Cabinet* cab) { this->onCabChanged(cab); },
-      //    [&](Microphone* mic) { this->onMicChanged(mic); },
-      //    [&](MicPosition* pos) { this->onPositionChanged(pos); }
-      //    );
-      //    mCabinets.add(cab);
-      //    cab->name = i->name;
-      //    cab->path = i->name;
-      //  }
-      //});
-      //String path = soundfoo;
-      //path.appendPath("impulses");
-      //ScanDir dir(path.get());
-      //for (int i = 0; i < dir.size(); i++) {
-      //  if (dir[i]->isFolder) {
-      //    // We're only interested in folders, at the top level each corresponds to a cab
-      //    Cabinet* cab = new Cabinet(
-      //      [&](Cabinet* cab) { this->onCabChanged(cab); },
-      //      [&](Microphone* mic) { this->onMicChanged(mic); },
-      //      [&](MicPosition* pos) { this->onPositionChanged(pos); }
-      //    );
-      //    mCabinets.add(cab);
-      //    cab->name = dir[i]->name.get();
-      //    cab->path = dir[i]->relative.get();
-      //    // dir.GetCurrentFullFN(&cab->path);
-      //    cab->scanMics();
-      //    mScrollView[0]->appendChild(cab);
-
-      //  }
-      //}
-      //setFromIRBundle();
-    }
-
-    void onCabChanged(Cabinet* newCab) {
-      if (newCab == mSelectedCab) { return; }
-      for (int i = 0; i < mCabinets.size(); i++) {
-        mCabinets[i]->mSelected = false;
-      }
-      if (newCab != nullptr) {
-        newCab->mSelected = true;
-        const int micIndex = mSelectedCab->mMics.find(mSelectedMic);
-        mSelectedCab = newCab;
-        mScrollView[1]->clearChildren();
-        for (int i = 0; i < mSelectedCab->mMics.size(); i++) {
-          mScrollView[1]->appendChild(mSelectedCab->mMics[i]);
-        }
-        if (newCab->mMics.size() > micIndex) {
-          onMicChanged(newCab->mMics[micIndex]);
-        }
-        else {
-          onMicChanged(newCab->mMics[0]);
-        }
-
-      }
-      mScrollView[0]->SetDirty(false);
-    }
-
-    void onMicChanged(Microphone* mic) {
-      if (mSelectedCab == nullptr || mic == mSelectedMic) { return; }
-      for (int i = 0; i < mSelectedCab->mMics.size(); i++) {
-        mSelectedCab->mMics[i]->mSelected = false;
-      }
-      int positionIndex = 0;
-      if (mSelectedMic != nullptr) {
-        positionIndex = mSelectedMic->mPositions.find(mSelectedPosition);
-      }
-      mSelectedMic = mic;
-      mScrollView[2]->clearChildren();
-      if (mic != nullptr) {
-        mic->mSelected = true;
-        for (int i = 0; i < mSelectedMic->mPositions.size(); i++) {
-          mScrollView[2]->appendChild(mSelectedMic->mPositions[i]);
-        }
-        if (mic->mPositions.size() > positionIndex) {
-          onPositionChanged(mic->mPositions[positionIndex]);
-        }
-        else {
-          onPositionChanged(mic->mPositions[0]);
-        }
-      }
-      mScrollView[1]->SetDirty(false);
-    }
-
-    void onPositionChanged(MicPosition* pos) {
-      if (mSelectedMic == nullptr || pos == mSelectedPosition) { return; }
-      mSelectedPosition = pos;
-      if (pos != nullptr) {
-        for (int i = 0; i < mSelectedMic->mPositions.size(); i++) {
-          mSelectedMic->mPositions[i]->mSelected = false;
-        }
-        //pos->mSelected = true;
-        //IRBundle load;
-        //load.path.set(pos->path.get());
-        //load.name.set(pos->name.get());
-        //mCabShared->callback(load);
-      }
-      mScrollView[2]->SetDirty(false);
-    }
-
-    void setFromIRBundle() {
-      for (int i = 0; i < mCabinets.size(); i++) {
-        Cabinet* c = mCabinets[i];
-        for (int j = 0; j < c->mMics.size(); j++) {
-          Microphone* m = c->mMics[j];
-          for (int k = 0; k < m->mPositions.size(); k++) {
-            //MicPosition* p = m->mPositions[k];
-            //String& path = mCabShared->loadedIr.path;
-            //if (strncmp(p->path.get(), path.get(), path.getLength()) == 0) {
-            //  onCabChanged(c);
-            //  onMicChanged(m);
-            //  onPositionChanged(p);
-            //  return;
-            //}
-          }
-        }
-      }
+      soundwoofer::async::ir::list(mCallback);
     }
 
     void OnDetached() override {
       for (int i = 0; i < 3; i++) {
         GetUI()->RemoveControl(mScrollView[i]);
       }
-      mCabinets.clear(true);
+      mRigs.clear(true);
+      mMics.clear(true);
+      mIrs.clear(true);
     }
 
     void OnResize() override {

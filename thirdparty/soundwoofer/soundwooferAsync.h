@@ -2,6 +2,7 @@
 #include <mutex>
 #include <functional>
 #include <thread>
+#include <memory>
 #include "./soundwooferTypes.h"
 
 namespace soundwoofer {
@@ -127,12 +128,14 @@ namespace soundwoofer {
         return ASYNC;
       }
 
+#ifndef SOUNDWOOFER_NO_API
       Status send(const SWPreset preset, Callback callback) {
         _::startAsync([&, preset]() {
           return soundwoofer::preset::send(preset);
         }, callback);
         return ASYNC;
       }
+#endif
 
       Status load(SWPresetsShared preset, Callback callback) {
         _::startAsync([&, preset]() {

@@ -1,6 +1,6 @@
 #pragma once
 
-// #define SOUNDWOOFER_NO_API
+#define SOUNDWOOFER_NO_API
 
 #include "./soundwooferTypes.h"
 #include "./soundwooferFile.h"
@@ -115,16 +115,23 @@ namespace soundwoofer {
             SWRigShared rig(new SWRig{ i.name, i.name, USER_SRC });
             auto micLevel = file::scanDir(i);
             for (auto j : micLevel) {
-              bool micExists = false;
+              SWComponentShared existingMic;
               for (auto& m : state::componentList) {
                 if (m->name == j.name) {
-                  micExists = true;
+                  existingMic = m;
                   break;
                 }
               }
-              SWComponentShared mic(new SWComponent{ j.name, j.name, TypeMicrophone, USER_SRC });
+              SWComponentShared mic;
+              if (existingMic == nullptr) { // Make a new one
+                mic = SWComponentShared(new SWComponent{ j.name, j.name, TypeMicrophone, USER_SRC });
+              }
+              else {
+                mic = existingMic;
+              }
+              
               rig->microphones.push_back(mic);
-              if (!micExists) { state::componentList.push_back(mic); }  // GLOBAL
+              if (existingMic == nullptr) { state::componentList.push_back(mic); }  // Only register it globally once
               if (j.isFolder) {
                 auto posLevel = file::scanDir(j);
                 for (auto k : posLevel) {
@@ -208,6 +215,10 @@ namespace soundwoofer {
       ret->source = source;
       return ret;
     }
+
+    SWRigs getRig() {
+      return state::rigList;
+    }
   }
 
   namespace preset {
@@ -248,6 +259,7 @@ namespace soundwoofer {
 
     Status load(SWPresetsShared preset) {
       if (!preset->data.empty()) { return SUCCESS; }
+#ifndef SOUNDWOOFER_NO_API
       if (preset->source == SOUNDWOOFER_SRC) { // online
         const std::string result = http::get("/Preset/" + preset->id);
         if (result.empty()) { return SERVER_ERROR; }
@@ -256,6 +268,7 @@ namespace soundwoofer {
         preset->data = dl.at(0)->data;
         return SUCCESS;
       }
+#endif
       // offline
       std::ifstream file(state::presetDirectory + file::PATH_DELIMITER + preset->name);
       const std::string str((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
