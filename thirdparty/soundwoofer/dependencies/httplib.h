@@ -1,7 +1,7 @@
 //
 //  httplib.h
 //
-//  Copyright (c) 2019 Yuji Hirose. All rights reserved.
+//  Copyright (c) 2020 Yuji Hirose. All rights reserved.
 //  MIT License
 //
 
@@ -41,7 +41,7 @@
 #endif
 
 #ifndef CPPHTTPLIB_PAYLOAD_MAX_LENGTH
-#define CPPHTTPLIB_PAYLOAD_MAX_LENGTH (std::numeric_limits<size_t>::max)()
+#define CPPHTTPLIB_PAYLOAD_MAX_LENGTH (std::numeric_limits<size_t>::max())
 #endif
 
 #ifndef CPPHTTPLIB_RECV_BUFSIZ
@@ -49,7 +49,7 @@
 #endif
 
 #ifndef CPPHTTPLIB_THREAD_POOL_COUNT
-#define CPPHTTPLIB_THREAD_POOL_COUNT (std::thread::hardware_concurrency())
+#define CPPHTTPLIB_THREAD_POOL_COUNT (std::max(1u, std::thread::hardware_concurrency() - 1))
 #endif
 
 /*
@@ -219,7 +219,7 @@ public:
 
   std::function<void(const char *data, size_t data_len)> write;
   std::function<void()> done;
-  // TODO: std::function<bool()> is_alive;
+  std::function<bool()> is_writable;
 };
 
 using ContentProvider =
@@ -344,14 +344,18 @@ struct Response {
 class Stream {
 public:
   virtual ~Stream() = default;
+
+  virtual bool is_readable() const = 0;
+  virtual bool is_writable() const = 0;
+
   virtual int read(char *ptr, size_t size) = 0;
-  virtual int write(const char *ptr, size_t size1) = 0;
-  virtual int write(const char *ptr) = 0;
-  virtual int write(const std::string &s) = 0;
+  virtual int write(const char *ptr, size_t size) = 0;
   virtual std::string get_remote_addr() const = 0;
 
   template <typename... Args>
   int write_format(const char *fmt, const Args &... args);
+  int write(const char *ptr);
+  int write(const std::string &s);
 };
 
 class TaskQueue {
@@ -439,6 +443,8 @@ public:
   using Handler = std::function<void(const Request &, Response &)>;
   using HandlerWithContentReader = std::function<void(
       const Request &, Response &, const ContentReader &content_reader)>;
+  using Expect100ContinueHandler =
+      std::function<int(const Request &, Response &)>;
 
   Server();
 
@@ -456,13 +462,18 @@ public:
   Server &Delete(const char *pattern, Handler handler);
   Server &Options(const char *pattern, Handler handler);
 
-  bool set_base_dir(const char *dir, const char *mount_point = nullptr);
+  [[deprecated]] bool set_base_dir(const char *dir,
+                                   const char *mount_point = nullptr);
+  bool set_mount_point(const char *mount_point, const char *dir);
+  bool remove_mount_point(const char *mount_point);
   void set_file_extension_and_mimetype_mapping(const char *ext,
                                                const char *mime);
   void set_file_request_handler(Handler handler);
 
   void set_error_handler(Handler handler);
   void set_logger(Logger logger);
+
+  void set_expect_100_continue_handler(Expect100ContinueHandler handler);
 
   void set_keep_alive_max_count(size_t count);
   void set_read_timeout(time_t sec, time_t usec);
@@ -491,7 +502,7 @@ protected:
 
 private:
   using Handlers = std::vector<std::pair<std::regex, Handler>>;
-  using HandersForContentReader =
+  using HandlersForContentReader =
       std::vector<std::pair<std::regex, HandlerWithContentReader>>;
 
   socket_t create_server_socket(const char *host, int port,
@@ -500,11 +511,11 @@ private:
   bool listen_internal();
 
   bool routing(Request &req, Response &res, Stream &strm, bool last_connection);
-  bool handle_file_request(Request &req, Response &res);
+  bool handle_file_request(Request &req, Response &res, bool head = false);
   bool dispatch_request(Request &req, Response &res, Handlers &handlers);
   bool dispatch_request_for_content_reader(Request &req, Response &res,
                                            ContentReader content_reader,
-                                           HandersForContentReader &handlers);
+                                           HandlersForContentReader &handlers);
 
   bool parse_request_line(const char *s, Request &req);
   bool write_response(Stream &strm, bool last_connection, const Request &req,
@@ -532,15 +543,16 @@ private:
   Handler file_request_handler_;
   Handlers get_handlers_;
   Handlers post_handlers_;
-  HandersForContentReader post_handlers_for_content_reader_;
+  HandlersForContentReader post_handlers_for_content_reader_;
   Handlers put_handlers_;
-  HandersForContentReader put_handlers_for_content_reader_;
+  HandlersForContentReader put_handlers_for_content_reader_;
   Handlers patch_handlers_;
-  HandersForContentReader patch_handlers_for_content_reader_;
+  HandlersForContentReader patch_handlers_for_content_reader_;
   Handlers delete_handlers_;
   Handlers options_handlers_;
   Handler error_handler_;
   Logger logger_;
+  Expect100ContinueHandler expect_100_continue_handler_;
 };
 
 class Client {
@@ -630,6 +642,11 @@ public:
                                 size_t content_length,
                                 ContentProvider content_provider,
                                 const char *content_type);
+
+  std::shared_ptr<Response> Put(const char *path, const Params &params);
+
+  std::shared_ptr<Response> Put(const char *path, const Headers &headers,
+                                const Params &params);
 
   std::shared_ptr<Response> Patch(const char *path, const std::string &body,
                                   const char *content_type);
@@ -1176,6 +1193,28 @@ inline int select_read(socket_t sock, time_t sec, time_t usec) {
 #endif
 }
 
+inline int select_write(socket_t sock, time_t sec, time_t usec) {
+#ifdef CPPHTTPLIB_USE_POLL
+  struct pollfd pfd_read;
+  pfd_read.fd = sock;
+  pfd_read.events = POLLOUT;
+
+  auto timeout = static_cast<int>(sec * 1000 + usec / 1000);
+
+  return poll(&pfd_read, 1, timeout);
+#else
+  fd_set fds;
+  FD_ZERO(&fds);
+  FD_SET(sock, &fds);
+
+  timeval tv;
+  tv.tv_sec = static_cast<long>(sec);
+  tv.tv_usec = static_cast<long>(usec);
+
+  return select(static_cast<int>(sock + 1), nullptr, &fds, nullptr, &tv);
+#endif
+}
+
 inline bool wait_until_socket_is_ready(socket_t sock, time_t sec, time_t usec) {
 #ifdef CPPHTTPLIB_USE_POLL
   struct pollfd pfd_read;
@@ -1223,10 +1262,10 @@ public:
                time_t read_timeout_usec);
   ~SocketStream() override;
 
+  bool is_readable() const override;
+  bool is_writable() const override;
   int read(char *ptr, size_t size) override;
   int write(const char *ptr, size_t size) override;
-  int write(const char *ptr) override;
-  int write(const std::string &s) override;
   std::string get_remote_addr() const override;
 
 private:
@@ -1242,11 +1281,11 @@ public:
                   time_t read_timeout_usec);
   virtual ~SSLSocketStream();
 
-  virtual int read(char *ptr, size_t size);
-  virtual int write(const char *ptr, size_t size);
-  virtual int write(const char *ptr);
-  virtual int write(const std::string &s);
-  virtual std::string get_remote_addr() const;
+  bool is_readable() const override;
+  bool is_writable() const override;
+  int read(char *ptr, size_t size) override;
+  int write(const char *ptr, size_t size) override;
+  std::string get_remote_addr() const override;
 
 private:
   socket_t sock_;
@@ -1261,10 +1300,10 @@ public:
   BufferStream() = default;
   ~BufferStream() override = default;
 
+  bool is_readable() const override;
+  bool is_writable() const override;
   int read(char *ptr, size_t size) override;
   int write(const char *ptr, size_t size) override;
-  int write(const char *ptr) override;
-  int write(const std::string &s) override;
   std::string get_remote_addr() const override;
 
   const std::string &get_buffer() const;
@@ -1555,6 +1594,7 @@ find_content_type(const std::string &path,
 
 inline const char *status_message(int status) {
   switch (status) {
+  case 100: return "Continue";
   case 200: return "OK";
   case 202: return "Accepted";
   case 204: return "No Content";
@@ -1571,6 +1611,8 @@ inline const char *status_message(int status) {
   case 414: return "Request-URI Too Long";
   case 415: return "Unsupported Media Type";
   case 416: return "Range Not Satisfiable";
+  case 417: return "Expectation Failed";
+  case 503: return "Service Unavailable";
 
   default:
   case 500: return "Internal Server Error";
@@ -1903,6 +1945,7 @@ inline ssize_t write_content(Stream &strm, ContentProvider content_provider,
       written_length = strm.write(d, l);
     };
     data_sink.done = [&](void) { written_length = -1; };
+    data_sink.is_writable = [&](void) { return strm.is_writable(); };
 
     content_provider(offset, end_offset - offset, data_sink);
     if (written_length < 0) { return written_length; }
@@ -1933,6 +1976,7 @@ inline ssize_t write_content_chunked(Stream &strm,
       data_available = false;
       written_length = strm.write("0\r\n\r\n");
     };
+    data_sink.is_writable = [&](void) { return strm.is_writable(); };
 
     content_provider(offset, 0, data_sink);
 
@@ -2157,6 +2201,8 @@ public:
       case 3: { // Body
         {
           auto pattern = crlf_ + dash_;
+          if (pattern.size() > buf_.size()) { return true; }
+
           auto pos = buf_.find(pattern);
           if (pos == std::string::npos) { pos = buf_.size(); }
           if (!content_callback(buf_.data(), pos)) {
@@ -2688,6 +2734,12 @@ inline void Response::set_chunked_content_provider(
 }
 
 // Rstream implementation
+inline int Stream::write(const char *ptr) { return write(ptr, strlen(ptr)); }
+
+inline int Stream::write(const std::string &s) {
+  return write(s.data(), s.size());
+}
+
 template <typename... Args>
 inline int Stream::write_format(const char *fmt, const Args &... args) {
   std::array<char, 2048> buf;
@@ -2727,23 +2779,22 @@ inline SocketStream::SocketStream(socket_t sock, time_t read_timeout_sec,
 
 inline SocketStream::~SocketStream() {}
 
+inline bool SocketStream::is_readable() const {
+  return detail::select_read(sock_, read_timeout_sec_, read_timeout_usec_) > 0;
+}
+
+inline bool SocketStream::is_writable() const {
+  return detail::select_write(sock_, 0, 0) > 0;
+}
+
 inline int SocketStream::read(char *ptr, size_t size) {
-  if (detail::select_read(sock_, read_timeout_sec_, read_timeout_usec_) > 0) {
-    return recv(sock_, ptr, static_cast<int>(size), 0);
-  }
+  if (is_readable()) { return recv(sock_, ptr, static_cast<int>(size), 0); }
   return -1;
 }
 
 inline int SocketStream::write(const char *ptr, size_t size) {
-  return send(sock_, ptr, static_cast<int>(size), 0);
-}
-
-inline int SocketStream::write(const char *ptr) {
-  return write(ptr, strlen(ptr));
-}
-
-inline int SocketStream::write(const std::string &s) {
-  return write(s.data(), s.size());
+  if (is_writable()) { return send(sock_, ptr, static_cast<int>(size), 0); }
+  return -1;
 }
 
 inline std::string SocketStream::get_remote_addr() const {
@@ -2751,6 +2802,10 @@ inline std::string SocketStream::get_remote_addr() const {
 }
 
 // Buffer stream implementation
+inline bool BufferStream::is_readable() const { return true; }
+
+inline bool BufferStream::is_writable() const { return true; }
+
 inline int BufferStream::read(char *ptr, size_t size) {
 #if defined(_MSC_VER) && _MSC_VER < 1900
   int len_read = static_cast<int>(buffer._Copy_s(ptr, size, size, position));
@@ -2764,14 +2819,6 @@ inline int BufferStream::read(char *ptr, size_t size) {
 inline int BufferStream::write(const char *ptr, size_t size) {
   buffer.append(ptr, size);
   return static_cast<int>(size);
-}
-
-inline int BufferStream::write(const char *ptr) {
-  return write(ptr, strlen(ptr));
-}
-
-inline int BufferStream::write(const std::string &s) {
-  return write(s.data(), s.size());
 }
 
 inline std::string BufferStream::get_remote_addr() const { return ""; }
@@ -2847,10 +2894,24 @@ inline Server &Server::Options(const char *pattern, Handler handler) {
 }
 
 inline bool Server::set_base_dir(const char *dir, const char *mount_point) {
+  return set_mount_point(mount_point, dir);
+}
+
+inline bool Server::set_mount_point(const char *mount_point, const char *dir) {
   if (detail::is_dir(dir)) {
     std::string mnt = mount_point ? mount_point : "/";
     if (!mnt.empty() && mnt[0] == '/') {
       base_dirs_.emplace_back(mnt, dir);
+      return true;
+    }
+  }
+  return false;
+}
+
+inline bool Server::remove_mount_point(const char *mount_point) {
+  for (auto it = base_dirs_.begin(); it != base_dirs_.end(); ++it) {
+    if (it->first == mount_point) {
+      base_dirs_.erase(it);
       return true;
     }
   }
@@ -2871,6 +2932,11 @@ inline void Server::set_error_handler(Handler handler) {
 }
 
 inline void Server::set_logger(Logger logger) { logger_ = std::move(logger); }
+
+inline void
+Server::set_expect_100_continue_handler(Expect100ContinueHandler handler) {
+  expect_100_continue_handler_ = std::move(handler);
+}
 
 inline void Server::set_keep_alive_max_count(size_t count) {
   keep_alive_max_count_ = count;
@@ -2953,11 +3019,12 @@ inline bool Server::write_response(Stream &strm, bool last_connection,
     res.set_header("Connection", "Keep-Alive");
   }
 
-  if (!res.has_header("Content-Type")) {
+  if (!res.has_header("Content-Type") &&
+      (!res.body.empty() || res.content_length > 0)) {
     res.set_header("Content-Type", "text/plain");
   }
 
-  if (!res.has_header("Accept-Ranges")) {
+  if (!res.has_header("Accept-Ranges") && req.method == "HEAD") {
     res.set_header("Accept-Ranges", "bytes");
   }
 
@@ -3170,7 +3237,8 @@ inline bool Server::read_content_core(Stream &strm, bool last_connection,
   return true;
 }
 
-inline bool Server::handle_file_request(Request &req, Response &res) {
+inline bool Server::handle_file_request(Request &req, Response &res,
+                                        bool head) {
   for (const auto &kv : base_dirs_) {
     const auto &mount_point = kv.first;
     const auto &base_dir = kv.second;
@@ -3188,7 +3256,9 @@ inline bool Server::handle_file_request(Request &req, Response &res) {
               detail::find_content_type(path, file_extension_and_mimetype_map_);
           if (type) { res.set_header("Content-Type", type); }
           res.status = 200;
-          if (file_request_handler_) { file_request_handler_(req, res); }
+          if (!head && file_request_handler_) {
+            file_request_handler_(req, res);
+          }
           return true;
         }
       }
@@ -3289,7 +3359,11 @@ inline bool Server::listen_internal() {
 inline bool Server::routing(Request &req, Response &res, Stream &strm,
                             bool last_connection) {
   // File handler
-  if (req.method == "GET" && handle_file_request(req, res)) { return true; }
+  bool is_head_request = req.method == "HEAD";
+  if ((req.method == "GET" || is_head_request) &&
+      handle_file_request(req, res, is_head_request)) {
+    return true;
+  }
 
   if (detail::expect_content(req)) {
     // Content reader handler
@@ -3359,10 +3433,9 @@ inline bool Server::dispatch_request(Request &req, Response &res,
   return false;
 }
 
-inline bool
-Server::dispatch_request_for_content_reader(Request &req, Response &res,
-                                            ContentReader content_reader,
-                                            HandersForContentReader &handlers) {
+inline bool Server::dispatch_request_for_content_reader(
+    Request &req, Response &res, ContentReader content_reader,
+    HandlersForContentReader &handlers) {
   for (const auto &x : handlers) {
     const auto &pattern = x.first;
     const auto &handler = x.second;
@@ -3425,6 +3498,21 @@ Server::process_request(Stream &strm, bool last_connection,
   }
 
   if (setup_request) { setup_request(req); }
+
+  if (req.get_header_value("Expect") == "100-continue") {
+    auto status = 100;
+    if (expect_100_continue_handler_) {
+      status = expect_100_continue_handler_(req, res);
+    }
+    switch (status) {
+    case 100:
+    case 417:
+      strm.write_format("HTTP/1.1 %d %s\r\n\r\n", status,
+                        detail::status_message(status));
+      break;
+    default: return write_response(strm, last_connection, req, res);
+    }
+  }
 
   // Rounting
   if (routing(req, res, strm, last_connection)) {
@@ -3764,6 +3852,7 @@ inline bool Client::write_request(Stream &strm, const Request &req,
         auto written_length = strm.write(d, l);
         offset += written_length;
       };
+      data_sink.is_writable = [&](void) { return strm.is_writable(); };
 
       while (offset < end_offset) {
         req.content_provider(offset, end_offset - offset, data_sink);
@@ -3797,6 +3886,7 @@ inline std::shared_ptr<Response> Client::send_with_content_provider(
         req.body.append(data, data_len);
         offset += data_len;
       };
+      data_sink.is_writable = [&](void) { return true; };
 
       while (offset < content_length) {
         content_provider(offset, content_length - offset, data_sink);
@@ -4085,6 +4175,24 @@ Client::Put(const char *path, const Headers &headers, size_t content_length,
                                     content_type);
 }
 
+inline std::shared_ptr<Response> Client::Put(const char *path,
+                                             const Params &params) {
+  return Put(path, Headers(), params);
+}
+
+inline std::shared_ptr<Response>
+Client::Put(const char *path, const Headers &headers, const Params &params) {
+  std::string query;
+  for (auto it = params.begin(); it != params.end(); ++it) {
+    if (it != params.begin()) { query += "&"; }
+    query += it->first;
+    query += "=";
+    query += detail::encode_url(it->second);
+  }
+
+  return Put(path, headers, query, "application/x-www-form-urlencoded");
+}
+
 inline std::shared_ptr<Response> Client::Patch(const char *path,
                                                const std::string &body,
                                                const char *content_type) {
@@ -4349,6 +4457,14 @@ inline SSLSocketStream::SSLSocketStream(socket_t sock, SSL *ssl,
 
 inline SSLSocketStream::~SSLSocketStream() {}
 
+inline bool SSLSocketStream::is_readable() const {
+  return detail::select_read(sock_, read_timeout_sec_, read_timeout_usec_) > 0;
+}
+
+inline bool SSLSocketStream::is_writable() const {
+  return detail::select_write(sock_, 0, 0) > 0;
+}
+
 inline int SSLSocketStream::read(char *ptr, size_t size) {
   if (SSL_pending(ssl_) > 0 ||
       select_read(sock_, read_timeout_sec_, read_timeout_usec_) > 0) {
@@ -4358,15 +4474,8 @@ inline int SSLSocketStream::read(char *ptr, size_t size) {
 }
 
 inline int SSLSocketStream::write(const char *ptr, size_t size) {
-  return SSL_write(ssl_, ptr, static_cast<int>(size));
-}
-
-inline int SSLSocketStream::write(const char *ptr) {
-  return write(ptr, strlen(ptr));
-}
-
-inline int SSLSocketStream::write(const std::string &s) {
-  return write(s.data(), s.size());
+  if (is_writable()) { return SSL_write(ssl_, ptr, static_cast<int>(size)); }
+  return -1;
 }
 
 inline std::string SSLSocketStream::get_remote_addr() const {

@@ -1,7 +1,7 @@
 /*
     __ _____ _____ _____
  __|  |   __|     |   | |  JSON for Modern C++
-|  |  |__   |  |  | | | |  version 3.7.1
+|  |  |__   |  |  | | | |  version 3.7.3
 |_____|_____|_____|_|___|  https://github.com/nlohmann/json
 
 Licensed under the MIT License <http://opensource.org/licenses/MIT>.
@@ -32,7 +32,7 @@ SOFTWARE.
 
 #define NLOHMANN_JSON_VERSION_MAJOR 3
 #define NLOHMANN_JSON_VERSION_MINOR 7
-#define NLOHMANN_JSON_VERSION_PATCH 1
+#define NLOHMANN_JSON_VERSION_PATCH 3
 
 #include <algorithm> // all_of, find, for_each
 #include <cassert> // assert
@@ -2328,7 +2328,7 @@ struct iterator_traits<T*, enable_if_t<std::is_object<T>::value>>
 // #include <nlohmann/detail/meta/void_t.hpp>
 
 
-// http://en.cppreference.com/w/cpp/experimental/is_detected
+// https://en.cppreference.com/w/cpp/experimental/is_detected
 namespace nlohmann
 {
 namespace detail
@@ -2861,7 +2861,7 @@ enum class value_t : std::uint8_t
     number_integer,   ///< number value (signed integer)
     number_unsigned,  ///< number value (unsigned integer)
     number_float,     ///< number value (floating-point)
-    discarded         ///< discarded by the the parser callback function
+    discarded         ///< discarded by the parser callback function
 };
 
 /*!
@@ -4250,7 +4250,7 @@ class input_adapter
     {
 #ifndef NDEBUG
         // assertion to check that the iterator range is indeed contiguous,
-        // see http://stackoverflow.com/a/35008842/266378 for more discussion
+        // see https://stackoverflow.com/a/35008842/266378 for more discussion
         const auto is_contiguous = std::accumulate(
                                        first, last, std::pair<bool, int>(true, 0),
                                        [&first](std::pair<bool, int> res, decltype(*first) val)
@@ -5263,7 +5263,7 @@ class binary_reader
 
     @return true if and only if system's byte order is little endian
 
-    @note from http://stackoverflow.com/a/1001328/266378
+    @note from https://stackoverflow.com/a/1001328/266378
     */
     static constexpr bool little_endianess(int num = 1) noexcept
     {
@@ -7983,7 +7983,7 @@ class lexer
     minus    | zero     | any1     | [error]  | [error] | [error] | [error]  | [error]
     zero     | done     | done     | exponent | done    | done    | decimal1 | done
     any1     | any1     | any1     | exponent | done    | done    | decimal1 | done
-    decimal1 | decimal2 | [error]  | [error]  | [error] | [error] | [error]  | [error]
+    decimal1 | decimal2 | decimal2 | [error]  | [error] | [error] | [error]  | [error]
     decimal2 | decimal2 | decimal2 | exponent | done    | done    | done     | done
     exponent | any2     | any2     | [error]  | sign    | sign    | [error]  | [error]
     sign     | any2     | any2     | [error]  | [error] | [error] | [error]  | [error]
@@ -8678,7 +8678,7 @@ namespace detail
 /*!
 @brief syntax analysis
 
-This class implements a recursive decent parser.
+This class implements a recursive descent parser.
 */
 template<typename BasicJsonType>
 class parser
@@ -12155,7 +12155,7 @@ class binary_writer
     {
         std::size_t array_index = 0ul;
 
-        const std::size_t embedded_document_size = std::accumulate(std::begin(value), std::end(value), 0ul, [&array_index](std::size_t result, const typename BasicJsonType::array_t::value_type & el)
+        const std::size_t embedded_document_size = std::accumulate(std::begin(value), std::end(value), std::size_t(0), [&array_index](std::size_t result, const typename BasicJsonType::array_t::value_type & el)
         {
             return result + calc_bson_element_size(std::to_string(array_index++), el);
         });
@@ -12276,7 +12276,7 @@ class binary_writer
     */
     static std::size_t calc_bson_object_size(const typename BasicJsonType::object_t& value)
     {
-        std::size_t document_size = std::accumulate(value.begin(), value.end(), 0ul,
+        std::size_t document_size = std::accumulate(value.begin(), value.end(), std::size_t(0),
                                     [](size_t result, const typename BasicJsonType::object_t::value_type & el)
         {
             return result += calc_bson_element_size(el.first, el.second);
@@ -14694,7 +14694,7 @@ relationship:
 The invariants are checked by member function assert_invariant().
 
 @internal
-@note ObjectType trick from http://stackoverflow.com/a/9860911
+@note ObjectType trick from https://stackoverflow.com/a/9860911
 @endinternal
 
 @see [RFC 7159: The JavaScript Object Notation (JSON) Data Interchange
@@ -15496,7 +15496,7 @@ class basic_json
                     object = nullptr;  // silence warning, see #821
                     if (JSON_HEDLEY_UNLIKELY(t == value_t::null))
                     {
-                        JSON_THROW(other_error::create(500, "961c151d2e87f2686a955a9be24d316f1362bf21 3.7.1")); // LCOV_EXCL_LINE
+                        JSON_THROW(other_error::create(500, "961c151d2e87f2686a955a9be24d316f1362bf21 3.7.3")); // LCOV_EXCL_LINE
                     }
                     break;
                 }
@@ -15541,6 +15541,53 @@ class basic_json
 
         void destroy(value_t t) noexcept
         {
+            // flatten the current json_value to a heap-allocated stack
+            std::vector<basic_json> stack;
+
+            // move the top-level items to stack
+            if (t == value_t::array)
+            {
+                stack.reserve(array->size());
+                std::move(array->begin(), array->end(), std::back_inserter(stack));
+            }
+            else if (t == value_t::object)
+            {
+                stack.reserve(object->size());
+                for (auto&& it : *object)
+                {
+                    stack.push_back(std::move(it.second));
+                }
+            }
+
+            while (not stack.empty())
+            {
+                // move the last item to local variable to be processed
+                basic_json current_item(std::move(stack.back()));
+                stack.pop_back();
+
+                // if current_item is array/object, move
+                // its children to the stack to be processed later
+                if (current_item.is_array())
+                {
+                    std::move(current_item.m_value.array->begin(), current_item.m_value.array->end(),
+                              std::back_inserter(stack));
+
+                    current_item.m_value.array->clear();
+                }
+                else if (current_item.is_object())
+                {
+                    for (auto&& it : *current_item.m_value.object)
+                    {
+                        stack.push_back(std::move(it.second));
+                    }
+
+                    current_item.m_value.object->clear();
+                }
+
+                // it's now safe that current_item get destructed
+                // since it doesn't have any children
+            }
+
             switch (t)
             {
                 case value_t::object:
@@ -21831,7 +21878,7 @@ class basic_json
 
     Uses a JSON pointer to retrieve a reference to the respective JSON value.
     No bound checking is performed. The function does not change the JSON
-    value; no `null` values are created. In particular, the the special value
+    value; no `null` values are created. In particular, the special value
     `-` yields an exception.
 
     @param[in] ptr  JSON pointer to the desired element
