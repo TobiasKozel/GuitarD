@@ -236,7 +236,7 @@ namespace soundwoofer {
       if (state::pluginName.empty()) { return PLUGIN_NAME_NOT_SET; }
       std::string data = http::get("/Preset");
       if (data.empty()) { return SERVER_ERROR; }
-      SWPresets online = parse::presets(data, state::pluginName);
+      SWPresets online = parse::presets(data);
       state::presetList.insert(state::presetList.end(), online.begin(), online.end());
 #endif
       return SUCCESS;
@@ -251,7 +251,7 @@ namespace soundwoofer {
       if (preset->source == SOUNDWOOFER_SRC) { // online
         const std::string result = http::get("/Preset/" + preset->id);
         if (result.empty()) { return SERVER_ERROR; }
-        const auto dl = parse::presets(result, state::pluginName);
+        const auto dl = parse::presets(result);
         if (dl.size() != 1) { return SERVER_ERROR; }
         preset->data = dl.at(0)->data;
         return SUCCESS;

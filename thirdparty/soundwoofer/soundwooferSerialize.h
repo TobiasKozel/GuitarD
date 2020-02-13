@@ -110,7 +110,7 @@ namespace soundwoofer {
       return ret;
     }
 
-    SWPresetsShared preset(nlohmann::json& i, const std::string pluginName) {
+    SWPresetsShared preset(nlohmann::json& i) {
       try {
         SWPreset preset = {
           i["name"],
@@ -120,7 +120,7 @@ namespace soundwoofer {
           i["data"],
           i["version"]
         };
-        if (preset.plugin == pluginName) {
+        if (preset.plugin == state::pluginName) {
           return std::make_shared<SWPreset>(preset);
         }
       }
@@ -128,7 +128,7 @@ namespace soundwoofer {
       return SWPresetsShared();
     }
 
-    SWPresetsShared preset(const std::string data, const std::string pluginName) {
+    SWPresetsShared preset(const std::string data) {
       SWPresetsShared ret;
       if (data.size() <= 2) { return ret; } // means empty, or empty array/object
       nlohmann::json json;
@@ -138,10 +138,10 @@ namespace soundwoofer {
       catch (...) {
         return ret;
       }
-      return preset(json, pluginName);
+      return preset(json);
     }
 
-    SWPresets presets(const std::string& data, const std::string pluginName) {
+    SWPresets presets(const std::string& data) {
       auto ret = SWPresets();
       if (data.size() <= 2) { return ret; }
       nlohmann::json json;
@@ -152,7 +152,7 @@ namespace soundwoofer {
         return ret;
       }
       for (auto i : json) {
-        auto p = preset(i, pluginName);
+        auto p = preset(i);
         if (p != nullptr) {
           ret.push_back(p);
         }
