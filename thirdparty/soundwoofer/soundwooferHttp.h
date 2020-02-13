@@ -25,7 +25,7 @@ namespace soundwoofer {
       if (res && res->status == 200) {
         return res->body;
       }
-      assert(false); // You need to override this function if you want to use a different http lib!
+      return "";
     }
 
     Status post(const std::string endpoint, const char* data, const size_t length, const std::string mime = "application/json") {

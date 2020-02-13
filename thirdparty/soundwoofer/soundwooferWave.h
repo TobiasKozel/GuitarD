@@ -26,9 +26,9 @@ namespace soundwoofer {
       }
 
       size_t resample(Tin* in, const size_t length, Tout** out) {
-        const size_t outSamples = std::floor(length / mStepSize);
+        const size_t outSamples = static_cast<size_t>(std::floor(length / mStepSize));
         if (outSamples <= 0) { return 0; }
-        Tout amplitude = mStepSize; // need to compensate for change in amplitude
+        Tout amplitude = static_cast<Tout>(mStepSize); // need to compensate for change in amplitude
         (*out) = new Tout[outSamples];
         double j = 0; // The position at which the sinc interpolation of the input signal should be evaluated
         for (size_t k = 0; k < outSamples; k++, j += mStepSize) {
@@ -53,7 +53,7 @@ namespace soundwoofer {
         if (i == 0) {
           return 1;
         }
-        return (sin(PI * i) / (PI * i));
+        return static_cast<Tout>((sin(PI * i) / (PI * i)));
       }
     };
 
@@ -112,7 +112,7 @@ namespace soundwoofer {
 
       // slow deinterleaving, but it works
       for (size_t s = 0; s < ir->length * ir->channels; s++) {
-        const int channel = s % ir->channels;
+        const size_t channel = s % ir->channels;
         const size_t sample = s / ir->channels;
         ir->samples[channel][sample] = pSampleData[s];
       }
@@ -140,6 +140,7 @@ namespace soundwoofer {
         ir->samples = resampled; // new buffers
         ir->sampleRate = sampleRate;
       }
+      return SUCCESS;
     }
 
     /**

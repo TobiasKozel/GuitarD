@@ -267,8 +267,8 @@ namespace soundwoofer {
     /**
      * Sends the preset to the server
      */
-    Status send(const SWPreset preset, const std::string pluginName) {
-      if (pluginName.empty()) { return PLUGIN_NAME_NOT_SET; }
+    Status send(const SWPreset preset) {
+      if (state::pluginName.empty()) { return PLUGIN_NAME_NOT_SET; }
 
       const std::string serialized = encode::preset(preset);
       if (serialized.empty()) { return JSON_ENCODE_ERROR; }
@@ -278,6 +278,6 @@ namespace soundwoofer {
   }
 }
 
-#ifdef SOUNDWOOFER_DO_ASYNC
+#ifndef SOUNDWOOFER_NO_ASYNC
   #include "./soundwooferAsync.h"
 #endif

@@ -39,14 +39,14 @@ namespace soundwoofer {
       std::string name;
       std::string relative;
       std::string absolute;
-      bool isFolder;
+      bool isFolder = false;
       std::vector<FileInfo> children;
     };
 
 #ifndef SOUNDWOOFER_CUSTOM_DIR
     std::vector<FileInfo> scanDir(FileInfo& root, bool recursive = false) {
       std::vector<FileInfo> ret;
-      struct dirent** files;
+      struct dirent** files = nullptr;
       const int count = scandir(root.absolute.c_str(), &files, nullptr, alphasort);
       if (count >= 0) {
         for (int i = 0; i < count; i++) {

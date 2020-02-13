@@ -9,6 +9,9 @@ namespace soundwoofer {
    * Allows async operations wrapping the SW singleton
    */
   namespace async {
+    /**
+     * There's no reason to touch anything in here
+     */
     namespace _ {
       /**
        * A function to generalize most tasks used in here
@@ -74,40 +77,46 @@ namespace soundwoofer {
       }
     }
 
-    //Status listIRs(const Callback callback, void* invocedBy = nullptr) {
-    //  _::startAsync([&]() {
-    //    return instance().listIRs();
-    //  }, callback, invocedBy);
-    //  return ASYNC;
-    //}
+    namespace ir {
+      Status list(const Callback callback, void* invocedBy = nullptr) {
+        _::startAsync([&]() {
+          return soundwoofer::ir::list();
+        }, callback, invocedBy);
+        return ASYNC;
+      }
 
-    //Status listPresets(const Callback callback, void* invocedBy = nullptr) {
-    //  _::startAsync([&]() {
-    //    return instance().listPresets();
-    //  }, callback, invocedBy);
-    //  return ASYNC;
-    //}
+      Status loadIR(const SWImpulseShared ir, Callback callback, void* invocedBy = nullptr) {
+        _::startAsync([&, ir]() {
+          return soundwoofer::ir::load(ir);
+        }, callback, invocedBy);
+        return ASYNC;
+      }
+    }
 
-    //Status sendPreset(const SWPreset preset, Callback callback, void* invocedBy = nullptr) {
-    //  _::startAsync([&, preset]() {
-    //    return instance().sendPreset(preset);
-    //  }, callback, invocedBy);
-    //  return ASYNC;
-    //}
+    namespace preset {
+      Status listPresets(const Callback callback, void* invocedBy = nullptr) {
+        _::startAsync([&]() {
+          return soundwoofer::preset::list();
+        }, callback, invocedBy);
+        return ASYNC;
+      }
 
-    //Status loadIR(const SWImpulseShared ir, Callback callback, void* invocedBy = nullptr) {
-    //  _::startAsync([&, ir]() {
-    //    return instance().loadIR(ir);
-    //  }, callback, invocedBy);
-    //  return ASYNC;
-    //}
+      Status sendPreset(const SWPreset preset, Callback callback, void* invocedBy = nullptr) {
+        _::startAsync([&, preset]() {
+          return soundwoofer::preset::send(preset);
+        }, callback, invocedBy);
+        return ASYNC;
+      }
 
-    //Status loadPreset(SWPresetsShared preset, Callback callback, void* invocedBy = nullptr) {
-    //  _::startAsync([&, preset]() {
-    //    return instance().loadPreset(preset);
-    //  }, callback, invocedBy);
-    //  return ASYNC;
-    //}
+      Status loadPreset(SWPresetsShared preset, Callback callback, void* invocedBy = nullptr) {
+        _::startAsync([&, preset]() {
+          return soundwoofer::preset::load(preset);
+        }, callback, invocedBy);
+        return ASYNC;
+      }
+    }
+
+
 
     /**
      * Clears the async queue, but doesn't terminate a running task

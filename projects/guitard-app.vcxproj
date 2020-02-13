@@ -396,7 +396,6 @@
     <ClInclude Include="..\src\types\pointerList.h" />
     <ClInclude Include="..\src\types\resampler.h" />
     <ClInclude Include="..\src\types\ringBuffer.h" />
-    <ClInclude Include="..\src\types\string.h" />
     <ClInclude Include="..\src\types\types.h" />
     <ClInclude Include="..\src\ui\CableLayer.h" />
     <ClInclude Include="..\src\ui\CustomKnob.h" />

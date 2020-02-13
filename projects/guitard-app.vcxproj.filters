@@ -483,9 +483,6 @@
     <ClInclude Include="..\src\types\gstructs.h">
       <Filter>src\types</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\types\string.h">
-      <Filter>src\types</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\types\iplugTypes.h">
       <Filter>src\types</Filter>
     </ClInclude>
