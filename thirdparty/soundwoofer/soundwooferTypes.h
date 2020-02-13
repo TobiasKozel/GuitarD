@@ -141,11 +141,6 @@ namespace soundwoofer {
   };
 
   /**
-   * Callback for async operations which provides a status code
-   */
-  typedef std::function<void(Status)> Callback;
-
-  /**
    * This represents the current state of soundwoofer and config
    * Feel free to read data from here but don't alter it
    */

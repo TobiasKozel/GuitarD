@@ -10,6 +10,12 @@ namespace guitard {
   class PresetBrowser : public ScrollViewControl, public ScrollViewChild {
     MessageBus::Bus* mBus = nullptr;
     soundwoofer::SWPresets mPresets;
+    soundwoofer::async::Callback mCallback =
+      std::make_shared<soundwoofer::async::CallbackFunc>(
+      [&](soundwoofer::Status s) {
+        this->putPresets();
+      }
+    );
   public:
 
     PresetBrowser(MessageBus::Bus* pBus, IGraphics* g) :
@@ -28,6 +34,10 @@ namespace guitard {
       refresh();
     }
 
+    void OnDetached() override {
+      IControl::OnDetached();
+    }
+
     void putPresets() {
       soundwoofer::SWPresets result = soundwoofer::preset::get();
       if (result.size()) {
@@ -43,11 +53,9 @@ namespace guitard {
     }
 
     void refresh() {
-      soundwoofer::preset::list();
-      putPresets();
-      //soundwoofer::async::listPresets([&](soundwoofer::Status status) {
-      //  putPresets();
-      //});
+      //soundwoofer::preset::list();
+      //putPresets();
+      soundwoofer::async::preset::list(mCallback);
     }
 
     void onScrollOutView() override {

@@ -9,10 +9,20 @@ namespace soundwoofer {
    * Allows async operations wrapping the SW singleton
    */
   namespace async {
+    void cancelAll(const bool doJoin = false);
+
+    typedef std::function<void(Status)> CallbackFunc;
+
+    /**
+     * Callback for async operations which provides a status code
+     */
+    typedef std::shared_ptr<std::function<void(Status)>> Callback;
+
     /**
      * There's no reason to touch anything in here
      */
     namespace _ {
+
       /**
        * A function to generalize most tasks used in here
        * Will provide a status code
@@ -25,13 +35,14 @@ namespace soundwoofer {
       struct TaskBundle {
         Callback callback;
         Task task;
-        void* parent = nullptr; // This can be used by plugin instances for identification
       };
+
+      typedef std::shared_ptr<TaskBundle> TaskBundleShared;
 
       /**
        * Tasks will be queued up here and processed from back to front by mThread
        */
-      std::vector<TaskBundle> mQueue;
+      std::vector<TaskBundleShared> mQueue;
 
       /**
        * This will mutex the mQueue
@@ -40,15 +51,23 @@ namespace soundwoofer {
       std::thread mThread;
       bool mThreadRunning = false;
 
+      struct LifeCycleHook {
+        static LifeCycleHook& instance() {
+          static LifeCycleHook _instance; return _instance;
+        }
+        ~LifeCycleHook() { cancelAll(true); }
+      };
+
       /**
        * This will add a TaskBundle to the queue and set off
        * the thread to work on the queue if it's not already running
        */
-      void startAsync(Task task, Callback callback, void* invocedBy = nullptr) {
+      void startAsync(Task task, Callback callback) {
+        LifeCycleHook::instance(); // Create the stack singleton to clean up on program exit
         mMutex.lock();
-        mQueue.push_back({
-          callback, task, invocedBy
-        });
+        mQueue.push_back(std::make_shared<TaskBundle>(TaskBundle {
+          callback, task
+        }));
         if (!mThreadRunning) {
           if (mThread.joinable()) {
             mThread.join();
@@ -58,12 +77,19 @@ namespace soundwoofer {
           mThread = std::thread([&]() {
             while (mThreadRunning) {
               mMutex.lock(); // Mutex to make sure the queue doesn't get corrupted
-              TaskBundle t = *mQueue.begin();
+              if (mQueue.empty()) { // Could be empty by now
+                mMutex.unlock();
+                continue;
+              }
+              TaskBundleShared t = *mQueue.begin(); // A copy to ensure the object keeps on living
               mQueue.erase(mQueue.begin());
               mMutex.unlock();
-              const Status status = t.task();
-              if (mThreadRunning) { // We might want to terminate here
-                t.callback(status);
+              const Status status = t->task(); // Do the main task
+              if (mThreadRunning) { // We might want to terminate here if the whole queue was cleared
+                const int count = t->callback.use_count();
+                if (1 < count) { // More than one owner (this one) means it's still valid
+                  (*t->callback)(status); // Do the callback if it's still valid
+                }
                 mMutex.lock();
                 mThreadRunning = !mQueue.empty();
                 mMutex.unlock();
@@ -78,40 +104,40 @@ namespace soundwoofer {
     }
 
     namespace ir {
-      Status list(const Callback callback, void* invocedBy = nullptr) {
+      Status list(const Callback callback) {
         _::startAsync([&]() {
           return soundwoofer::ir::list();
-        }, callback, invocedBy);
+        }, callback);
         return ASYNC;
       }
 
-      Status loadIR(const SWImpulseShared ir, Callback callback, void* invocedBy = nullptr) {
+      Status load(const SWImpulseShared ir, Callback callback) {
         _::startAsync([&, ir]() {
           return soundwoofer::ir::load(ir);
-        }, callback, invocedBy);
+        }, callback);
         return ASYNC;
       }
     }
 
     namespace preset {
-      Status listPresets(const Callback callback, void* invocedBy = nullptr) {
+      Status list(const Callback callback) {
         _::startAsync([&]() {
           return soundwoofer::preset::list();
-        }, callback, invocedBy);
+        }, callback);
         return ASYNC;
       }
 
-      Status sendPreset(const SWPreset preset, Callback callback, void* invocedBy = nullptr) {
+      Status send(const SWPreset preset, Callback callback) {
         _::startAsync([&, preset]() {
           return soundwoofer::preset::send(preset);
-        }, callback, invocedBy);
+        }, callback);
         return ASYNC;
       }
 
-      Status loadPreset(SWPresetsShared preset, Callback callback, void* invocedBy = nullptr) {
+      Status load(SWPresetsShared preset, Callback callback) {
         _::startAsync([&, preset]() {
           return soundwoofer::preset::load(preset);
-        }, callback, invocedBy);
+        }, callback);
         return ASYNC;
       }
     }
@@ -122,23 +148,12 @@ namespace soundwoofer {
      * Clears the async queue, but doesn't terminate a running task
      * Call this if for example the UI gets destroyed to be sure there are no callbacks
      * lingering which might be attached to destroyed UI elements
-     * @param invocedBy if nullptr will clear the whole queue
      */
-    void clearAsyncQueue(void* invocedBy = nullptr, const bool doJoin = false) {
+    void cancelAll(const bool doJoin) {
       _::mMutex.lock();
-      if (invocedBy == nullptr) {
-        _::mThreadRunning = false;
-        _::mQueue.clear();
-      }
-      else {
-        auto it = _::mQueue.begin();
-        while (it != _::mQueue.end()) {
-          if (it->parent == invocedBy) {
-            it = _::mQueue.erase(it);
-          }
-          else ++it;
-        }
-      }
+      _::mThreadRunning = false;
+      _::mQueue.clear();
+
       if (_::mThread.joinable() && doJoin) {
         _::mThread.join();
       }
