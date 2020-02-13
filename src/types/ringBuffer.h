@@ -53,12 +53,12 @@ namespace guitard {
         const int spaceLeft = mSize - tailStart;
         if (spaceLeft < elements) {
           // Means it wraps around and split in two moves
-          memmove(out, mBuffer + tailStart, spaceLeft);
-          memmove(out + spaceLeft, mBuffer, elements - spaceLeft);
+          memmove(out, mBuffer + tailStart, spaceLeft * sizeof(T));
+          memmove(out + spaceLeft, mBuffer, (elements - spaceLeft) * sizeof(T));
         }
         else {
           // Enough space left and can be done in one step
-          memmove(out, mBuffer + tailStart, elements);
+          memmove(out, mBuffer + tailStart, elements * sizeof(T));
         }
       }
       return elements;
@@ -83,12 +83,12 @@ namespace guitard {
         const int spaceLeftTail = mSize - mTail;
         if (spaceLeftTail < elements) {
           // We'll need to wrap around since there's not enough space left
-          memmove(mBuffer + mTail, in, spaceLeftTail);
-          memmove(mBuffer, in + spaceLeftTail, elements - spaceLeftTail);
+          memmove(mBuffer + mTail, in, spaceLeftTail * sizeof(T));
+          memmove(mBuffer, in + spaceLeftTail, (elements - spaceLeftTail) * sizeof(T));
           mTail = elements - spaceLeftTail;
         }
         else { // If there's enough space left we can just copy the buffer starting at the tail index
-          memmove(mBuffer + mTail, in, elements);
+          memmove(mBuffer + mTail, in, elements * sizeof(T));
           // If we end up taking all space left for the tail, move it back to the start, otherwise move it forward
           mTail = (spaceLeftTail == elements) ? 0 : mTail + elements;
         }

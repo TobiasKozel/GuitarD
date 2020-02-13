@@ -93,8 +93,6 @@ namespace guitard {
 
 
     void ProcessBlock(int nFrames) override {
-      outputSilence();
-      return;
       if (byPass()) { return; }
       if (mIsProcessed == false) {
         shared.parameters[1].update();
