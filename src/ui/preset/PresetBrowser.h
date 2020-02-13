@@ -29,7 +29,7 @@ namespace guitard {
     }
 
     void putPresets() {
-      soundwoofer::SWPresets result = soundwoofer::instance().getPresets();
+      soundwoofer::SWPresets result = soundwoofer::preset::get();
       if (result.size()) {
         mPresets = result;
         clearChildren(true);
@@ -43,7 +43,7 @@ namespace guitard {
     }
 
     void refresh() {
-      soundwoofer::instance().listPresets();
+      soundwoofer::preset::list();
       putPresets();
       //soundwoofer::async::listPresets([&](soundwoofer::Status status) {
       //  putPresets();

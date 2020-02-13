@@ -5,6 +5,7 @@
   #include "./dependencies/dr_wav.h"
 #endif
 
+#include <algorithm>
 #include "./soundwooferFile.h"
 #include "./soundwooferTypes.h"
 
@@ -75,7 +76,7 @@ namespace soundwoofer {
       sum = sum / static_cast<float>(ir->channels);
       sum = (1.f / sum) * 4;
       peak = (1.f / peak) * 0.9; // bit of headroom
-      const float mix = 0.2;
+      const float mix = 0.1;
 
       for (size_t s = 0; s < ir->length; s++) {
         for (size_t c = 0; c < ir->channels; c++) {

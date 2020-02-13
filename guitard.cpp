@@ -10,12 +10,11 @@ GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::M
   /**
    * Setup the soundwoofer lib
    */
-  auto& sw = soundwoofer::instance();
-  sw.setPluginName(PLUG_NAME);
+  soundwoofer::setup::setPluginName(PLUG_NAME);
   WDL_String path;
   iplug::UserHomePath(path);
   guitard::HOME_PATH = path.Get();
-  sw.setHomeDirectory(path.Get());
+  soundwoofer::setup::setHomeDirectory(path.Get());
 
   //SoundWoofer::Status status;
   //status = sw.fetchIRs();

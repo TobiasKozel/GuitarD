@@ -1,9 +1,11 @@
 #pragma once
+#include <string>
+#include <memory>
+#include <vector>
+#include <functional>
 
 namespace soundwoofer {
   static const double PI = 3.1415926535897932384626433832795;
-
-  class SW;
 
   enum Status {
     SUCCESS = 0,
@@ -80,6 +82,7 @@ namespace soundwoofer {
       delete[] samples;
       samples = nullptr;
       channels = length = 0;
+      normalized = false;
     }
     ~SWImpulse() {
       clearSamples();
@@ -141,4 +144,43 @@ namespace soundwoofer {
    * Callback for async operations which provides a status code
    */
   typedef std::function<void(Status)> Callback;
+
+  /**
+   * This represents the current state of soundwoofer and config
+   * Feel free to read data from here but don't alter it
+   */
+  namespace state {
+    /**
+     * Generic Objects to categorize IRs with no parent
+     */
+    SWComponentShared GenericComponent = std::make_shared<SWComponent>(SWComponent{
+      "Generic Component", "Generic Component", TypeCabinet, USER_SRC
+    });
+
+    SWComponentShared GenericMicrophone = std::make_shared<SWComponent>(SWComponent{
+       "Generic Microphone", "Generic Microphone", TypeMicrophone, USER_SRC
+    });
+
+    SWRigShared GenericRig = std::make_shared<SWRig>(SWRig{
+       "Uncategorized", "Uncategorized", USER_SRC, "Various"
+    });
+
+
+    bool cacheIRs = false;
+    bool cachePresets = false;
+
+    std::string pluginName; // Plugin name used to label and filter presets by
+    std::string pluginVersion;
+    std::string homeDirectory; // Directory for this plugin
+    std::string irDirectory; // Directory for user IRs
+    std::string irCacheDirectory; // Directory for caching online IRs
+    std::string presetCacheDirectory; // Directory for caching online presets
+    std::string presetDirectory; // Directory for user IRs
+
+    SWImpulses irList;
+    SWRigs rigList;
+    SWComponents componentList;
+    SWPresets presetList;
+    std::vector<SWPreset> factoryPresetList;
+  };
 }

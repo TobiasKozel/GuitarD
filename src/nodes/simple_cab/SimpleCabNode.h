@@ -127,7 +127,7 @@ namespace guitard {
 
     CabNodeSharedData mCabShared = { [&](soundwoofer::SWImpulseShared ir) {
       // This will be called from the gui when the IR changes
-      soundwoofer::instance().loadIR(ir, mSampleRate);
+      soundwoofer::ir::load(ir, mSampleRate);
       mConvolver->loadIR(ir->samples, ir->length, ir->channels);
       //soundwoofer::async::loadIR(ir,
       //  [&, ir](soundwoofer::Status status) {
@@ -192,7 +192,7 @@ namespace guitard {
       Node::createBuffers();
       mConvolver = new WrappedConvolver(mSampleRate, shared.maxBlockSize);
       soundwoofer::SWImpulseShared ir = mCabShared.loadedIr;
-      soundwoofer::instance().loadIR(ir, mSampleRate);
+      soundwoofer::ir::load(ir, mSampleRate);
       if (mConvolver != nullptr) { // Since the lambda could return at a point were samplerate has changed we check for null
         mConvolver->loadIR(ir->samples, ir->length, ir->channels);
       }

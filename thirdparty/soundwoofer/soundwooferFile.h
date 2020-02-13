@@ -69,7 +69,6 @@ namespace soundwoofer {
       }
       else {
         root.isFolder = false;
-        assert(false);
       }
       return ret;
     }

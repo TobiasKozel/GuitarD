@@ -33,7 +33,7 @@ namespace guitard {
     }
 
     void OnMouseUp(const float x, const float y, const IMouseMod& mod) override {
-      soundwoofer::instance().loadPreset(mPreset);
+      soundwoofer::preset::load(mPreset);
       if (!mPreset->data.empty()) {
         MessageBus::fireEvent<const char*>(
           mBus, MessageBus::LoadPresetFromString, mPreset->data.c_str()

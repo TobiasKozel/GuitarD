@@ -5,8 +5,8 @@
 #include "./air.h"
 namespace guitard {
   soundwoofer::SWImpulseShared InternalIRs[] = {
-    soundwoofer::createGenericIR("Clean", InteralIR::cleanIR, InteralIR::cleanIRLength, 1, 48000, soundwoofer::EMBEDDED_SRC),
-    soundwoofer::createGenericIR("Air", InteralIR::airIR, InteralIR::airIRLength, 1, 48000, soundwoofer::EMBEDDED_SRC)
+    soundwoofer::ir::createGeneric("Clean", InteralIR::cleanIR, InteralIR::cleanIRLength, 1, 48000, soundwoofer::EMBEDDED_SRC),
+    soundwoofer::ir::createGeneric("Air", InteralIR::airIR, InteralIR::airIRLength, 1, 48000, soundwoofer::EMBEDDED_SRC)
   };
 
   int InternalIRsCount = 2;
