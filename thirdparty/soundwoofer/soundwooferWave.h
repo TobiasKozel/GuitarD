@@ -22,6 +22,10 @@ namespace soundwoofer {
     public:
       WindowedSincResampler(const double inFreq, const double outFreq, const size_t windowSize = 24) {
         mStepSize = inFreq / outFreq; // the step size in the input signal
+        if (mStepSize < 0.1 || 10 < mStepSize) { // Limit to 10x resampling factor
+          mStepSize = 1.0;
+          assert(false);
+        }
         mWindowSize = windowSize;
       }
 

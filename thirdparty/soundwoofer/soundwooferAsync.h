@@ -112,9 +112,16 @@ namespace soundwoofer {
         return ASYNC;
       }
 
-      Status load(const SWImpulseShared ir, Callback callback) {
-        _::startAsync([&, ir]() {
-          return soundwoofer::ir::load(ir);
+      Status load(SWImpulseShared ir, Callback callback, size_t sampleRate = 0, bool normalize = true) {
+        _::startAsync([&, ir, sampleRate, normalize]() {
+          return soundwoofer::ir::load(ir, sampleRate, normalize);
+        }, callback);
+        return ASYNC;
+      }
+
+      Status loadUnknown(SWImpulseShared* ir, Callback callback, size_t sampleRate = 0, bool normalize = true) {
+        _::startAsync([&, ir, sampleRate, normalize]() {
+          return soundwoofer::ir::loadUnknown(ir, sampleRate, normalize);
         }, callback);
         return ASYNC;
       }

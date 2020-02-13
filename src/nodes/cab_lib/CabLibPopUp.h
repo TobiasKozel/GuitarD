@@ -147,11 +147,13 @@ namespace guitard {
       mSelectedIr = nullptr;
 
       if (newIr == nullptr) {
+        LibIr* first = nullptr;
         if (prevIr != nullptr) {
           for (int i = 0; i < mSelectedRig->mIrs.size(); i++) {
             LibIr* c = mSelectedRig->mIrs[i];
             if (mSelectedMic->mMic->id == c->mIr->micId) { // Look if it matches the mic
-              if (prevIr->mIr->id == c->mIr->id) { // look if it matches the last ir
+              if (first == nullptr) { first = c; } // save the first one in case we don't find a match
+              if (prevIr->mIr->name == c->mIr->name) { // look if it matches the last ir
                 mSelectedIr = c;
               }
             }
@@ -159,8 +161,8 @@ namespace guitard {
         }
 
         // Use the first one if no match is found
-        if (mSelectedIr == nullptr && mSelectedRig->mIrs.size()) {
-          mSelectedIr = mSelectedRig->mIrs[0];
+        if (mSelectedIr == nullptr && first != nullptr) {
+          mSelectedIr = first;
         }
       }
       else {
@@ -172,7 +174,10 @@ namespace guitard {
         prevIr->mSelected = false;
       }
 
-      if (mSelectedIr == nullptr) { return; }
+      if (mSelectedIr == nullptr) {
+        mScrollView[2]->SetDirty();
+        return;
+      }
 
       mSelectedIr->mSelected = true;
       mScrollView[2]->SetDirty();
@@ -210,7 +215,10 @@ namespace guitard {
         prevMic->mSelected = false;
       }
 
-      if (mSelectedMic == nullptr) { return; }
+      if (mSelectedMic == nullptr) {
+        mScrollView[1]->SetDirty();
+        return;
+      }
       mSelectedMic->mSelected = true;
 
       for (int i = 0; i < mSelectedRig->mIrs.size(); i++) {

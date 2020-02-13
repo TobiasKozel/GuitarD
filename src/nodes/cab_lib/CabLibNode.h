@@ -77,20 +77,17 @@ namespace guitard {
     /** Secondary convolver only used for blending */
     WrappedConvolver* mConvolver2 = nullptr;
 
+    soundwoofer::async::Callback mCallback;
+
     bool mIsBlending = false;
 
     CabLibNodeSharedData mCabShared = {
       [&](soundwoofer::SWImpulseShared ir) { // Callback for the UI to change IRs
         if (mCabShared.loadedIr->file != ir->file) {
           // don't load if the Ir is the same
-          //soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
-          //  if (status == soundwoofer::SUCCESS) {
-          //    mCabShared.loadedIr = ir;
-          //    mConvolver2->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
-          //    mBlendPos = 0;
-          //    mIsBlending = true;
-          //  }
-          //});
+          mCabShared.loadedIr = ir;
+          soundwoofer::async::ir::load(ir, mCallback, mSampleRate);
+          // soundwoofer::ir::load(ir, mSampleRate);
         }
       },std::make_shared<soundwoofer::SWImpulse>()
     };
@@ -101,23 +98,36 @@ namespace guitard {
       addByPassParam();
       addStereoParam();
       shared.parameters[1].y = -30;
+      mCallback = std::make_shared<soundwoofer::async::CallbackFunc>(
+        [&](soundwoofer::Status s) {
+        
+        mConvolver2->loadIR(
+          mCabShared.loadedIr->samples,
+          mCabShared.loadedIr->length,
+          mCabShared.loadedIr->channels
+        );
+        mBlendPos = 0;
+        mIsBlending = true;
+        }
+      );
     }
 
 
     void serializeAdditional(nlohmann::json& serialized) override {
-      // serialized["path"] = mCabShared.loadedIr.path.get();
+      serialized["path"] = mCabShared.loadedIr->file;
+      serialized["id"] = mCabShared.loadedIr->id;
     }
     void deserializeAdditional(nlohmann::json& serialized) override {
       try {
-        //IRBundle load;
-        //if (!serialized.contains("path")) {
-        //  return;
-        //}
-        //const std::string path = serialized.at("path");
-        //load.path.set(path.c_str());
-        //load.name.set(load.path.getFilePart());
-        //mCabShared.loadedIr = load;
-        //mConvolver->resampleAndLoadIR(&load);
+        if (!serialized.contains("path")) {
+          return;
+        }
+        mCabShared.loadedIr = std::make_shared<soundwoofer::SWImpulse>();
+        mCabShared.loadedIr->file = serialized.at("path").get<std::string>();
+        if (serialized.contains("id")) {
+          mCabShared.loadedIr->id = serialized.at("id").get<std::string>();
+        }
+        soundwoofer::async::ir::loadUnknown(&mCabShared.loadedIr, mCallback, mSampleRate);
       }
       catch (...) {
         WDBGMSG("Failed to load Cab node data!\n");

@@ -184,5 +184,9 @@ namespace soundwoofer {
       }
       return true;
     }
+
+    bool isRelative(const std::string path) {
+      return path[0] == '.';
+    }
   }
 }

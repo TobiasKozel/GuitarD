@@ -198,6 +198,21 @@ namespace soundwoofer {
       return ret;
     }
 
+    Status loadUnknown(SWImpulseShared* ir, size_t sampleRate = 0, bool normalize = true) {
+      for (auto& i : state::irList) {
+        if (i->file == (*ir)->file) {
+          (*ir) = i; // Already known IR
+        }
+      }
+      if (file::isUUID((*ir)->file)) {
+        (*ir)->source = SOUNDWOOFER_SRC; // Soundwoofer ir, not yet known
+      }
+      if (file::isRelative((*ir)->file) && file::isWaveName((*ir)->file)) {
+        (*ir)->source = USER_SRC;
+      }
+      return load((*ir), sampleRate, normalize);
+    }
+
     /**
      * Create IRs which live outside the SoundWoofer domain
      */
