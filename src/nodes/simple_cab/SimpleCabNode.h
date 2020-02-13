@@ -42,6 +42,7 @@ namespace guitard {
           for (int i = 0; i < InternalIRsCount; i++) {
             if (InternalIRs[i]->name == text) {
               mCabShared->callback(InternalIRs[i]);
+              break;
             }
           }
         }
@@ -126,17 +127,10 @@ namespace guitard {
     WrappedConvolver* mConvolver = nullptr;
 
     CabNodeSharedData mCabShared = { [&](soundwoofer::SWImpulseShared ir) {
-      // This will be called from the gui when the IR changes
-      soundwoofer::ir::load(ir, mSampleRate);
-      mConvolver->loadIR(ir->samples, ir->length, ir->channels);
-      //soundwoofer::async::loadIR(ir,
-      //  [&, ir](soundwoofer::Status status) {
-      //    if (status == soundwoofer::SUCCESS) {
-      //      mCabShared.loadedIr = ir;
-      //      mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
-      //    }
-      //  }
-      //);
+        // This will be called from the gui when the IR changes
+        soundwoofer::ir::load(ir, mSampleRate);
+        mConvolver->loadIR(ir->samples, ir->length, ir->channels);
+        mCabShared.loadedIr = ir;
       },
       InternalIRs[0] // This is the default IR when the cab gets created
     };
@@ -152,40 +146,36 @@ namespace guitard {
     }
 
     void serializeAdditional(nlohmann::json& serialized) override {
-      //serialized["irName"] = mCabShared.loadedIr.name.get();
-      //bool custom = mCabShared.loadedIr.path.getLength() != 0;
-      //serialized["customIR"] = custom;
-      //serialized["path"] = custom ? mCabShared.loadedIr.path.get() : "";
+      serialized["irName"] = mCabShared.loadedIr->name;
+      bool custom = mCabShared.loadedIr->source != soundwoofer::EMBEDDED_SRC;
+      serialized["customIR"] = custom;
+      serialized["path"] = mCabShared.loadedIr->file;
     }
 
     void deserializeAdditional(nlohmann::json& serialized) override {
-      //try {
-      //  IRBundle load;
-      //  if (!serialized.contains("irName")) {
-      //    return;
-      //  }
-      //  const std::string name = serialized.at("irName");
-      //  load.name.set(name.c_str());
-      //  const bool customIR = serialized.at("customIR");
-      //  if (customIR) {
-      //    const std::string path = serialized.at("path");
-      //    load.path.set(path.c_str());
-      //  }
-      //  else {
-      //    for (int i = 0; i < InternalIRsCount; i++) {
-      //      // Go look for the right internal IR
-      //      if (strncmp(load.name.get(), InternalIRs[i].name.get(), 30) == 0) {
-      //        load = InternalIRs[i];
-      //        break;
-      //      }
-      //    }
-      //  }
-      //  mCabShared.loadedIr = load;
-      //  mConvolver->resampleAndLoadIR(&load);
-      //}
-      //catch (...) {
-      //  WDBGMSG("Failed to load Cab node data!\n");
-      //}
+      try {
+        soundwoofer::SWImpulseShared load(new soundwoofer::SWImpulse());
+        if (!serialized.contains("irName")) {
+          return;
+        }
+        load->name = serialized.at("irName").get<std::string>();
+        const bool customIR = serialized.at("customIR");
+        load->file = serialized.at("path").get<std::string>();
+        load->source = soundwoofer::USER_SRC_ABSOLUTE;
+        if (!customIR) {
+          for (int i = 0; i < InternalIRsCount; i++) {
+            // Go look for the right internal IR
+            if (InternalIRs[i]->name == load->name) {
+              load = InternalIRs[i];
+              break;
+            }
+          }
+        }
+        mCabShared.callback(load);
+      }
+      catch (...) {
+        WDBGMSG("Failed to load Cab node data!\n");
+      }
     }
 
     void createBuffers() override {
