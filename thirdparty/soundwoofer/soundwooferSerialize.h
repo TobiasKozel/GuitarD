@@ -15,19 +15,23 @@ namespace soundwoofer {
 #ifndef SOUNDWOOFER_CUSTOM_JSON
     SWImpulseShared ir(nlohmann::json& i) {
       try {
-        return SWImpulseShared(new SWImpulse {
-          i["id"],
-          i["name"],
-          i["micId"],
-          i["rig"],
-          i["file"],
-          SOUNDWOOFER_SRC,
-          i["micX"], i["micY"], i["micZ"],
-          i["description"],
-          i["micPosition"],
-          i["userName"],
-          i["element"]
-        });
+        SWImpulse obj;
+        // We need these or else the ir can't be used
+        obj.id = i.at("id").get<std::string>();
+        obj.name = i.at("name").get<std::string>();
+        obj.micId = i.at("micId").get<std::string>();
+        obj.rig = i.at("rig").get<std::string>();
+        obj.file = i.at("file").get<std::string>();
+        obj.source = SOUNDWOOFER_SRC;
+        // these are optional
+        if (!i.at("micX").is_null()) obj.micX = i.at("micX").get<int>();
+        if (!i.at("micY").is_null()) obj.micY = i.at("micY").get<int>();
+        if (!i.at("micZ").is_null()) obj.micZ = i.at("micZ").get<int>();
+        if (!i.at("description").is_null()) obj.description = i.at("description").get<std::string>();
+        if (!i.at("micPosition").is_null()) obj.micPosition = i.at("micPosition").get<int>();
+        if (!i.at("userName").is_null()) obj.userName = i.at("userName").get<std::string>();
+        if (!i.at("element").is_null()) obj.element = i.at("element").get<std::string>();
+        return std::make_shared<SWImpulse>(obj);
       }
       catch (...) {
         // TODO some of these values are null which will fail
@@ -67,13 +71,13 @@ namespace soundwoofer {
 
     SWRigShared rig(nlohmann::json& i) {
       try {
-        return SWRigShared(new SWRig{
-          i["id"],
-          i["name"],
-          SOUNDWOOFER_SRC,
-          i["username"],
-          i["description"]
-        });
+        SWRig obj;
+        obj.name = i.at("name").get<std::string>();
+        obj.id = i.at("id").get<std::string>();
+        obj.source = SOUNDWOOFER_SRC;
+        if (!i.at("desciption").is_null()) obj.description = i.at("desciption").get<std::string>();
+        if (!i.at("userName").is_null()) obj.userName = i.at("userName").get<std::string>();
+        return std::make_shared<SWRig>(obj);
       }
       catch (...) {
         assert(false);
@@ -106,6 +110,50 @@ namespace soundwoofer {
       }
       for (auto i : json) {
         ret.push_back(rig(i));
+      }
+      return ret;
+    }
+
+    SWComponentShared component(nlohmann::json& i) {
+      try {
+        SWComponent obj;
+        obj.id = i.at("id").get<std::string>();
+        obj.name = i.at("name").get<std::string>();
+        obj.componentBase = i.at("componentBase").get<int>();
+        obj.source = SOUNDWOOFER_SRC;
+        return std::make_shared<SWComponent>(obj);
+      }
+      catch (...) {
+        assert(false);
+      }
+      return SWComponentShared();
+    }
+
+    SWComponentShared component(const std::string& data) {
+      SWComponentShared ret;
+      if (data.size() <= 2) { return ret; } // means empty, or empty array/object
+      nlohmann::json json;
+      try {
+        json = nlohmann::json::parse(data);
+      }
+      catch (...) {
+        return ret;
+      }
+      return component(json);
+    }
+
+    SWComponents components(const std::string& data) {
+      auto ret = SWComponents();
+      if (data.size() <= 2) { return ret; }
+      nlohmann::json json;
+      try {
+        json = nlohmann::json::parse(data);
+      }
+      catch (...) {
+        return ret;
+      }
+      for (auto i : json) {
+        ret.push_back(component(i));
       }
       return ret;
     }

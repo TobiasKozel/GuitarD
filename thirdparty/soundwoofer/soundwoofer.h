@@ -1,6 +1,6 @@
 #pragma once
 
-#define SOUNDWOOFER_NO_API
+// #define SOUNDWOOFER_NO_API
 
 #include "./soundwooferTypes.h"
 #include "./soundwooferFile.h"
@@ -151,13 +151,34 @@ namespace soundwoofer {
       }
 
 #ifndef SOUNDWOOFER_NO_API
-      std::string data = http::get("/Impulse");
+      std::string data;
+      data = http::get("/Impulse");
       if (data.empty()) { return SERVER_ERROR; }
-      state::irList = parse::irs(data);
+      SWImpulses swIrs = parse::irs(data);
+      state::irList.insert(state::irList.end(), swIrs.begin(), swIrs.end());
+      data = http::get("/Component");
+      if (data.empty()) { return SERVER_ERROR; }
+      SWComponents swComps = parse::components(data);
+      state::componentList.insert(state::componentList.end(), swComps.begin(), swComps.end());
+      data = http::get("/Rig");
+      if (data.empty()) { return SERVER_ERROR; }
+      SWRigs swRigs = parse::rigs(data);
+      for (auto& rig : swRigs) {
+        state::rigList.push_back(rig);
+        for (auto& ir : state::irList) {
+          if (rig->id == ir->rig) {
+            rig->impulses.push_back(ir);
+            for (auto& mic : state::componentList) {
+              if (mic->id == ir->micId) {
+                rig->microphones.push_back(mic);
+                mic->type = TypeMicrophone;
+                break;
+              }
+            }
+          }
+        }
+      }
 #endif
-      //data = httpGet("/Rig");
-      //if (data.empty()) { return SERVER_ERROR; }
-      //mCabList = parseRigs(data);
       return SUCCESS;
       // TODO assign them to the cabs an mics
     }
@@ -169,6 +190,7 @@ namespace soundwoofer {
      * Will block, use a lambda as a callback for async
      */
     Status load(SWImpulseShared ir, size_t sampleRate = 0, bool normalize = true) {
+      if (ir == nullptr) { return GENERIC_ERROR; }
       if (ir->samples != nullptr) {
         if (normalize) {
           wave::normalizeIR(ir);

@@ -144,7 +144,7 @@ namespace guitard {
       }
       soundwoofer::SWImpulseShared& ir = mCabShared.loadedIr;
       WDBGMSG("Load ir");
-      soundwoofer::ir::load(ir);
+      soundwoofer::ir::load(ir, mSampleRate);
       WDBGMSG("Load done load");
       mConvolver->loadIR(ir->samples, ir->length, ir->channels);
       WDBGMSG("In convolver");

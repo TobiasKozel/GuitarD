@@ -118,7 +118,7 @@ namespace soundwoofer {
     std::string id;
     std::string name;
     Source source = SOUNDWOOFER_SRC;
-    std::string username;
+    std::string userName;
     std::string description;
     SWComponents components;
     SWComponents microphones;
