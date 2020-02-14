@@ -8,11 +8,8 @@
     #include "./dependencies/dirent.h"
   #else
     #include "dirent.h"
+    #include <sys/stat.h>
   #endif
-#endif
-
-#ifdef _WIN32
-  #include <sys/stat.h>
 #endif
 
 #include <iostream>

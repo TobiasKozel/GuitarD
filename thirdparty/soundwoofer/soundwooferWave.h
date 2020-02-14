@@ -6,6 +6,7 @@
 #endif
 
 #include <algorithm>
+#include <cmath>
 #include "./soundwooferFile.h"
 #include "./soundwooferTypes.h"
 
