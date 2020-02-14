@@ -39,8 +39,6 @@ namespace guitard {
 
     void OnInit() override {
       mScrollview.SetRenderPriority(12);
-      mScrollview.setChildPadding(1.f); // Should be 0 but this makes sure there's no trace of the other tabs
-      mScrollview.setFullWidthChildren(true);
       mScrollview.setDoDragScroll(false);
       mScrollview.setDoScroll(false);
       mScrollview.setScrollBarEnable(false);
@@ -106,12 +104,15 @@ namespace guitard {
         IRECT main = bounds.GetPadded(-Theme::Gallery::PADDING);
         main.R -= 20;
         for (int i = 0; i < mTabCount; i++) {
-          mTabs[i]->SetTargetAndDrawRECTs(main);
+          if (i == mOpenTab) {
+            mTabs[i]->Hide(false);
+            mTabs[i]->SetTargetAndDrawRECTs(main);
+          }
+          else {
+            mTabs[i]->Hide(true);
+          }
         }
-        // mTabs[0]->SetTargetAndDrawRECTs(main);
-        mScrollview.SetTargetAndDrawRECTs(main /** .GetVSliced(40) */);
-        mScrollview.scrollTo(mOpenTab);
-        // mSearch->SetTargetAndDrawRECTs(main.GetFromTop(30));
+        mScrollview.SetTargetAndDrawRECTs(main);
       }
       else {
         bounds.Pad(-Theme::Gallery::PADDING);
