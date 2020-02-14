@@ -141,6 +141,7 @@ namespace guitard {
     LibMic* mSelectedMic = nullptr;
     LibIr* mSelectedIr = nullptr;
     std::string mPath;
+    bool mLoading = false;
 
     void changeIr(LibIr* newIr) {
       LibIr* prevIr = mSelectedIr;
@@ -303,11 +304,8 @@ namespace guitard {
             }
           }
         }
-
-        mScrollView[0]->OnResize();
-        mScrollView[1]->OnResize();
-        mScrollView[2]->OnResize();
-        // this->setFromIRBundle();
+        mPath = soundwoofer::state::irDirectory;
+        GetUI()->SetAllControlsDirty();
       }
     );
 
@@ -326,6 +324,7 @@ namespace guitard {
         mScrollView[i]->setCleanUpEnabled(false);
         GetUI()->AttachControl(mScrollView[i]);
       }
+      mPath = "Loading...";
       soundwoofer::async::ir::list(mCallback);
     }
 
@@ -361,6 +360,12 @@ namespace guitard {
       const IRECT click(x, y, x, y);
       if (mCloseButton.Contains(click)) {
         GetUI()->RemoveControl(this);
+      }
+      if (mPathTitle.Contains(click)) {
+        WDL_String path;
+        path.Set(mPath.c_str());
+        path.remove_trailing_dirchars();
+        GetUI()->RevealPathInExplorerOrFinder(path);
       }
     }
   };
