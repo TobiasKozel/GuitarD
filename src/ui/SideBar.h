@@ -20,8 +20,23 @@ namespace guitard {
     NodeGallery mNodeGallery;
     PresetBrowser mPresetBrowser;
     int mOpenTab = 0;
+
     static const int mTabCount = 2;
-    IControl* mTabs[mTabCount] = { nullptr };
+    const float mHeaderWith = 30.f;
+    const float mHeaderHeight = 120.f;
+    const IRECT mHeaderTextBox = { 0, 0, mHeaderHeight, mHeaderWith };
+    const float mHeaderPadding = 6.f;
+
+    struct Tab {
+      IRECT header;
+      ILayerPtr layer;
+      IControl* tab = nullptr;
+      std::string name;
+    };
+
+    bool mBgCached = false;
+
+    Tab mTabs[mTabCount];
 
     SideBar(MessageBus::Bus* pBus, IGraphics* g) :
       IControl(IRECT(), kNoParameter), mNodeGallery(pBus, g), mPresetBrowser(pBus, g)
@@ -33,8 +48,10 @@ namespace guitard {
       avgExecutionTime = 0;
       mStats = DEBUG_FONT;
       SetRenderPriority(11);
-      mTabs[0] = &mNodeGallery;
-      mTabs[1] = &mPresetBrowser;
+      mTabs[0].tab = &mNodeGallery;
+      mTabs[0].name = "Nodes";
+      mTabs[1].tab = &mPresetBrowser;
+      mTabs[1].name = "Presets";
     }
 
     void OnInit() override {
@@ -67,10 +84,35 @@ namespace guitard {
     void Draw(IGraphics& g) override {
       if (mIsOpen) {
         g.FillRect(Theme::Gallery::BACKGROUND, mRECT);
+        drawTabHeaders(g);
       }
       else {
         drawButton(g);
       }
+    }
+
+    void drawTabHeaders(IGraphics& g) {
+      for (int i = 0; i < mTabCount; i++) {
+        g.FillRect(i == mOpenTab ?
+          Theme::Gallery::CATEGORY_TITLE_BG_OPEN :
+          Theme::Gallery::CATEGORY_TITLE_BG, mTabs[i].header
+        );
+        if (!mBgCached) {
+          IRECT layerPost = mTabs[i].header;
+          layerPost.Translate(
+            -mHeaderTextBox.W() * 0.5 + mHeaderTextBox.H() * 0.5,
+            mHeaderTextBox.W() * 0.5 - mHeaderTextBox.H() * 0.5
+          );
+          layerPost.R = layerPost.L + mHeaderTextBox.W();
+          layerPost.B = layerPost.T + mHeaderTextBox.H();
+          g.StartLayer(this, layerPost);
+          // g.FillRect(Theme::Colors::ACCENT, layerPost);
+          g.DrawText(Theme::Gallery::CATEGORY_TITLE, mTabs[i].name.c_str(), layerPost);
+          mTabs[i].layer = g.EndLayer();
+        }
+        g.DrawRotatedLayer(mTabs[i].layer, 90);
+      }
+      mBgCached = true;
     }
 
     void drawButton(IGraphics& g) {
@@ -94,6 +136,7 @@ namespace guitard {
     }
 
     void OnResize() override {
+      mBgCached = false;
       IRECT bounds = GetUI()->GetBounds();
       if (mIsOpen) {
         bounds.Pad(-Theme::Gallery::PADDING);
@@ -102,15 +145,19 @@ namespace guitard {
         mRECT = bounds;
         mTargetRECT = bounds;
         IRECT main = bounds.GetPadded(-Theme::Gallery::PADDING);
-        main.R -= 20;
+        main.R -= mHeaderWith;
         for (int i = 0; i < mTabCount; i++) {
           if (i == mOpenTab) {
-            mTabs[i]->Hide(false);
-            mTabs[i]->SetTargetAndDrawRECTs(main);
+            mTabs[i].tab->Hide(false);
+            mTabs[i].tab->SetTargetAndDrawRECTs(main);
           }
           else {
-            mTabs[i]->Hide(true);
+            mTabs[i].tab->Hide(true);
           }
+          mTabs[i].header.L = main.R;
+          mTabs[i].header.R = main.R + mHeaderWith;
+          mTabs[i].header.T = main.T + i * (mHeaderHeight + mHeaderPadding);
+          mTabs[i].header.B = mTabs[i].header.T + mHeaderHeight;
         }
         mScrollview.SetTargetAndDrawRECTs(main);
       }
@@ -129,11 +176,15 @@ namespace guitard {
       }
       else {
         if (mod.R || true) {
-          mOpenTab++;
-          if (mOpenTab >= mTabCount) {
-            mOpenTab = 0;
+          IRECT mouse = { x, y, x, y };
+          for (int i = 0; i < mTabCount; i++) {
+            if (mTabs[i].header.Contains(mouse)) {
+              mOpenTab = i;
+              mDirty = true;
+              OnResize();
+              break;
+            }
           }
-          OnResize();
         }
       }
     }
