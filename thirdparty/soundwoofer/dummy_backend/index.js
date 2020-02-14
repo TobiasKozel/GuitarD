@@ -52,7 +52,8 @@ var presets = [
     }
 ];
 
-let basePath = "./thirdparty/soundwoofer/dummy_backend/";
+// let basePath = "./thirdparty/soundwoofer/dummy_backend/";
+let basePath = "";
 
 http.createServer((req, res) => {
     if (req.method == "POST") {
@@ -113,11 +114,19 @@ http.createServer((req, res) => {
             //     console.log("Error: " + err.message);
             // });
 
-            let data = fs.readFileSync(basePath + "irs/" + id);
-            console.log("Fetching IR File...");
-            res.writeHead(200, {"Content-Type": "application/octet-stream"});
-            res.write(data, "binary");
-            res.end(null, "binary");
+            let data;
+            try {
+                data = fs.readFileSync(basePath + "irs/" + id);
+                console.log("Fetching IR File...");
+                res.writeHead(200, {"Content-Type": "application/octet-stream"});
+                res.write(data, "binary");
+                res.end(null, "binary");
+            } catch(err) {
+                console.log("error loading ir file");
+                res.writeHead(200, {"Content-Type": "application/json"});
+                res.end(body);
+            }
+            
         }
         else {
             res.writeHead(200, {"Content-Type": "application/json"});

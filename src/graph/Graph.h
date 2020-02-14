@@ -528,7 +528,7 @@ namespace guitard {
     }
 
     void cleanupUi() {
-      // soundwoofer::async::clearAsyncQueue();
+      soundwoofer::async::cancelAll(true);
       mWindowWidth = mGraphics->Width();
       mWindowHeight = mGraphics->Height();
       mWindowScale = mGraphics->GetDrawScale();
