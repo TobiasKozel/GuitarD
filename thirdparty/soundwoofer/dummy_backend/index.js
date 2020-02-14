@@ -52,7 +52,7 @@ var presets = [
     }
 ];
 
-
+let basePath = "./thirdparty/soundwoofer/dummy_backend/";
 
 http.createServer((req, res) => {
     if (req.method == "POST") {
@@ -79,27 +79,43 @@ http.createServer((req, res) => {
         }
 
         if (req.url.search("/Impulse") === 0) {
-            let data = JSON.parse(fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/irs.json"));
+            let data = JSON.parse(fs.readFileSync(basePath + "irs.json"));
             body = JSON.stringify(data);
             console.log("Fetching IR list...");
         }
 
         if (req.url.search("/Component") === 0) {
-            let data = JSON.parse(fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/components.json"));
+            let data = JSON.parse(fs.readFileSync(basePath + "components.json"));
             body = JSON.stringify(data);
             console.log("Fetching Components...");
         }
 
         if (req.url.search("/Rig") === 0) {
-            let data = JSON.parse(fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/rigs.json"));
+            let data = JSON.parse(fs.readFileSync(basePath + "rigs.json"));
             body = JSON.stringify(data);
             console.log("Fetching Rigs...");
         }
         if (req.url.search("/File") === 0) {
             let id = req.url.slice("/File/Download/".length);
-            let data = fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/irs/" + id);
+
+            // Proxy 
+            // let data = Buffer.alloc(0);
+            // http.get("http://svenssj.tech:5000/File/Download/" + id, (resp) => {
+            //     resp.on('data', (chunk) => {
+            //         data = Buffer.concat([data, chunk]);
+            //     });
+            //     resp.on('end', () => {
+            //         res.write(data, "binary");
+            //         res.end(null, "binary");
+            //         console.log("finnished dl");
+            //     });
+            // }).on("error", (err) => {
+            //     console.log("Error: " + err.message);
+            // });
+
+            let data = fs.readFileSync(basePath + "irs/" + id);
             console.log("Fetching IR File...");
-            // res.writeHead(200, {"Content-Type": "application/json"});
+            res.writeHead(200, {"Content-Type": "application/octet-stream"});
             res.write(data, "binary");
             res.end(null, "binary");
         }
@@ -108,4 +124,4 @@ http.createServer((req, res) => {
             res.end(body);
         }
     }
-}).listen(5000); 
+}).listen(55555); 

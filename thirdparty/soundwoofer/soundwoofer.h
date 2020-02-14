@@ -178,7 +178,7 @@ namespace soundwoofer {
       }
       SWImpulses swIrs = parse::irs(data);
       //for (auto& i : swIrs) {
-      //  load(i);
+      //  load(i, 48000);
       //}
       state::irList.insert(state::irList.end(), swIrs.begin(), swIrs.end());
       data = http::get("/Component");

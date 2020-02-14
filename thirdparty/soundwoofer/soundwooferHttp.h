@@ -9,10 +9,11 @@
 
 namespace soundwoofer {
   namespace http {
-    const std::string BACKEND_URL = "svenssj.tech";
+    // const std::string BACKEND_URL = "svenssj.tech";
     // const std::string BACKEND_URL = "localhost";
+    const std::string BACKEND_URL = "saphiredsigns.de";
     const std::string API_VERSION = "0.1";
-    const int BACKEND_PORT = 5000;
+    const int BACKEND_PORT = 55555;
 
 #ifndef SOUNDWOOFER_CUSTOM_HTTP
     namespace _ {
@@ -25,12 +26,12 @@ namespace soundwoofer {
       bool isSetup = false;
       void setup () {
         if (isSetup) { return; }
-        _::cli.set_timeout_sec(10);
-        _::cli.set_read_timeout(10, 0);
+        _::cli.set_timeout_sec(3);
+        _::cli.set_read_timeout(3, 0);
         //_::cli.set_logger([](const auto& req, const auto& res) {
         //  int i = 0;
         //});
-        cli.set_keep_alive_max_count(10);
+        cli.set_keep_alive_max_count(3);
         isSetup = true;
       }
     }
@@ -43,22 +44,10 @@ namespace soundwoofer {
      */
     std::string get(const std::string endpoint) {
       _::setup();
-
-      httplib::Client cli(BACKEND_URL, BACKEND_PORT);
       auto res = _::cli.Get(endpoint.c_str(), _::headers);
       if (res && res->status == 200) {
         return res->body;
       }
-      //std::vector<httplib::Request> requests;
-      //httplib::Get(requests, endpoint.c_str(), _::headers);
-      //std::vector<httplib::Response> responses;
-      //if (cli.send(requests, responses)) {
-      //  for (const auto& res : responses) {
-      //    if (res.status == 200) {
-      //      return res.body;
-      //    }
-      //  }
-      //}
       return "";
     }
 
