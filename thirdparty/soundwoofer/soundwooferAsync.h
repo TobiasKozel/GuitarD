@@ -23,6 +23,12 @@ namespace soundwoofer {
      * There's no reason to touch anything in here
      */
     namespace _ {
+      int maxQueueLength =
+#ifndef SOUNDWOOFER_MAX_ASYNC_QUEUE
+        3;
+#else
+        SOUNDWOOFER_MAX_ASYNC_QUEUE;
+#endif
 
       /**
        * A function to generalize most tasks used in here
@@ -48,9 +54,9 @@ namespace soundwoofer {
       /**
        * This will mutex the mQueue
        */
-      std::mutex mMutex;
-      std::thread mThread;
-      bool mThreadRunning = false;
+      std::mutex mutex;
+      std::thread thread;
+      bool threadRunning = false;
 
       struct LifeCycleHook {
         static LifeCycleHook& instance() {
@@ -64,42 +70,45 @@ namespace soundwoofer {
        * the thread to work on the queue if it's not already running
        */
       void startAsync(Task task, Callback callback) {
+        if (maxQueueLength < _::mQueue.size()) {
+          cancelAll(true);
+        }
         LifeCycleHook::instance(); // Create the stack singleton to clean up on program exit
-        mMutex.lock();
+        mutex.lock();
         mQueue.push_back(std::make_shared<TaskBundle>(TaskBundle {
           callback, task
         }));
-        if (!mThreadRunning) {
-          if (mThread.joinable()) {
-            mThread.join();
+        if (!threadRunning) {
+          if (thread.joinable()) {
+            thread.join();
           }
-          mThreadRunning = true;
-          mMutex.unlock();
-          mThread = std::thread([&]() {
-            while (mThreadRunning) {
-              mMutex.lock(); // Mutex to make sure the queue doesn't get corrupted
+          threadRunning = true;
+          mutex.unlock();
+          thread = std::thread([&]() {
+            while (threadRunning) {
+              mutex.lock(); // Mutex to make sure the queue doesn't get corrupted
               if (mQueue.empty()) { // Could be empty by now
-                mMutex.unlock();
+                mutex.unlock();
                 continue;
               }
               TaskBundleShared t = *mQueue.begin(); // A copy to ensure the object keeps on living
               mQueue.erase(mQueue.begin());
-              mMutex.unlock();
+              mutex.unlock();
               const Status status = t->task(); // Do the main task
-              if (mThreadRunning) { // We might want to terminate here if the whole queue was cleared
+              if (threadRunning) { // We might want to terminate here if the whole queue was cleared
                 const int count = t->callback.use_count();
                 if (1 < count) { // More than one owner (this one) means it's still valid
                   (*t->callback)(status); // Do the callback if it's still valid
                 }
-                mMutex.lock();
-                mThreadRunning = !mQueue.empty();
-                mMutex.unlock();
+                mutex.lock();
+                threadRunning = !mQueue.empty();
+                mutex.unlock();
               }
             }
           });
         }
         else {
-          mMutex.unlock();
+          mutex.unlock();
         }
       }
     }
@@ -160,14 +169,14 @@ namespace soundwoofer {
      * lingering which might be attached to destroyed UI elements
      */
     void cancelAll(const bool doJoin) {
-      _::mMutex.lock();
-      _::mThreadRunning = false;
+      _::mutex.lock();
+      _::threadRunning = false;
       _::mQueue.clear();
 
-      if (_::mThread.joinable() && doJoin) {
-        _::mThread.join();
+      if (_::thread.joinable() && doJoin) {
+        _::thread.join();
       }
-      _::mMutex.unlock();
+      _::mutex.unlock();
     }
   }
 }
