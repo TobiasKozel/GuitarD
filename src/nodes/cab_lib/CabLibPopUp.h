@@ -148,14 +148,12 @@ namespace guitard {
 
       if (newIr == nullptr) {
         LibIr* first = nullptr;
-        if (prevIr != nullptr) {
-          for (int i = 0; i < mSelectedRig->mIrs.size(); i++) {
-            LibIr* c = mSelectedRig->mIrs[i];
-            if (mSelectedMic->mMic->id == c->mIr->micId) { // Look if it matches the mic
-              if (first == nullptr) { first = c; } // save the first one in case we don't find a match
-              if (prevIr->mIr->name == c->mIr->name) { // look if it matches the last ir
-                mSelectedIr = c;
-              }
+        for (int i = 0; i < mSelectedRig->mIrs.size(); i++) {
+          LibIr* c = mSelectedRig->mIrs[i];
+          if (mSelectedMic->mMic->id == c->mIr->micId) { // Look if it matches the mic
+            if (first == nullptr) { first = c; } // save the first one in case we don't find a match
+            if (prevIr != nullptr && prevIr->mIr->name == c->mIr->name) { // look if it matches the last ir
+              mSelectedIr = c;
             }
           }
         }

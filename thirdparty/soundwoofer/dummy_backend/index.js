@@ -79,19 +79,26 @@ http.createServer((req, res) => {
         }
 
         if (req.url.search("/Impulse") === 0) {
-            let data = JSON.parse(fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/Impulse.json"));
+            let data = JSON.parse(fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/irs.json"));
             body = JSON.stringify(data);
-            console.log("Fetching Impulse Responses...");
+            console.log("Fetching IR list...");
+        }
+
+        if (req.url.search("/Component") === 0) {
+            let data = JSON.parse(fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/components.json"));
+            body = JSON.stringify(data);
+            console.log("Fetching Components...");
         }
 
         if (req.url.search("/Rig") === 0) {
-            let data = JSON.parse(fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/Rig.json"));
+            let data = JSON.parse(fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/rigs.json"));
             body = JSON.stringify(data);
-            console.log("Fetching Rig...");
+            console.log("Fetching Rigs...");
         }
         if (req.url.search("/File") === 0) {
-            let data = fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/ir.wav");
-            console.log("Fetching IR...");
+            let id = req.url.slice("/File/Download/".length);
+            let data = fs.readFileSync("./thirdparty/soundwoofer/dummy_backend/irs/" + id);
+            console.log("Fetching IR File...");
             // res.writeHead(200, {"Content-Type": "application/json"});
             res.write(data, "binary");
             res.end(null, "binary");

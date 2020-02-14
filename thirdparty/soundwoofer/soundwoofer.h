@@ -50,6 +50,24 @@ namespace soundwoofer {
   }
 
   namespace ir {
+    Status list();
+
+    Status load(SWImpulseShared ir, size_t sampleRate = 0, bool normalize = true);
+
+    /**
+     * Load from an unknown source, like when loading up the project
+     * before list() was called
+     */
+    Status loadUnknown(SWImpulseShared* ir, size_t sampleRate = 0, bool normalize = true);
+
+    /**
+     * Create IRs which live outside the SoundWoofer domain
+     */
+    SWImpulseShared createGeneric(
+      std::string name, float** samples, size_t length, size_t channels = 1,
+      size_t sampleRate = 48000, Source source = EMBEDDED_SRC
+    );
+
     /**
      * Will clear out all IR buffers currently in ram
      */ 
@@ -88,6 +106,8 @@ namespace soundwoofer {
       state::GenericRig->components.push_back(state::GenericComponent);
       state::GenericRig->components.push_back(state::GenericMicrophone);
     }
+
+    
 
     /**
      * Gets a list of all the Impulse responses from the server and the local folder
@@ -153,15 +173,24 @@ namespace soundwoofer {
 #ifndef SOUNDWOOFER_NO_API
       std::string data;
       data = http::get("/Impulse");
-      if (data.empty()) { return SERVER_ERROR; }
+      if (data.empty()) {
+        return SERVER_ERROR;
+      }
       SWImpulses swIrs = parse::irs(data);
+      //for (auto& i : swIrs) {
+      //  load(i);
+      //}
       state::irList.insert(state::irList.end(), swIrs.begin(), swIrs.end());
       data = http::get("/Component");
-      if (data.empty()) { return SERVER_ERROR; }
+      if (data.empty()) {
+        return SERVER_ERROR;
+      }
       SWComponents swComps = parse::components(data);
       state::componentList.insert(state::componentList.end(), swComps.begin(), swComps.end());
       data = http::get("/Rig");
-      if (data.empty()) { return SERVER_ERROR; }
+      if (data.empty()) {
+        return SERVER_ERROR;
+      }
       SWRigs swRigs = parse::rigs(data);
       for (auto& rig : swRigs) {
         state::rigList.push_back(rig);
@@ -189,8 +218,8 @@ namespace soundwoofer {
      * The decoded IR will be in SWImpulse::samples
      * Will block, use a lambda as a callback for async
      */
-    Status load(SWImpulseShared ir, size_t sampleRate = 0, bool normalize = true) {
-      if (ir == nullptr) { return GENERIC_ERROR; }
+    Status load(SWImpulseShared ir, size_t sampleRate, bool normalize) {
+      if (ir == nullptr || (ir->id.empty() && ir->file.empty())) { return GENERIC_ERROR; }
       if (ir->samples != nullptr) {
         if (normalize) {
           wave::normalizeIR(ir);
@@ -203,7 +232,7 @@ namespace soundwoofer {
       std::string path;
       if (ir->source == USER_SRC) { path = state::irDirectory + ir->file; }
       if (ir->source == USER_SRC_ABSOLUTE) { path = ir->file; }
-      if (ir->source == SOUNDWOOFER_SRC) { path = state::irCacheDirectory + ir->id; }
+      if (ir->source == SOUNDWOOFER_SRC) { path = state::irCacheDirectory + ir->file; }
       ret = wave::loadWaveFile(ir, path, sampleRate, normalize);
       if (ret == SUCCESS) { return SUCCESS; } // Loaded from disk
       if (ir->source != SOUNDWOOFER_SRC) { return UNKNOWN_IR; } // No file and also not a online IR
@@ -214,13 +243,13 @@ namespace soundwoofer {
       ret = wave::loadWaveMemory(ir, result.c_str(), result.size(), sampleRate, normalize);
       if (ret == SUCCESS && state::cacheIRs) {
         // Cache the file
-        file::writeFile((state::irCacheDirectory + ir->id).c_str(), result.c_str(), result.size());
+        file::writeFile((state::irCacheDirectory + ir->file).c_str(), result.c_str(), result.size());
       }
 #endif
       return ret;
     }
 
-    Status loadUnknown(SWImpulseShared* ir, size_t sampleRate = 0, bool normalize = true) {
+    Status loadUnknown(SWImpulseShared* ir, size_t sampleRate, bool normalize) {
       for (auto& i : state::irList) {
         if (i->file == (*ir)->file) {
           (*ir) = i; // Already known IR
@@ -235,13 +264,9 @@ namespace soundwoofer {
       return load((*ir), sampleRate, normalize);
     }
 
-    /**
-     * Create IRs which live outside the SoundWoofer domain
-     */
     SWImpulseShared createGeneric(
-      std::string name, float** samples, size_t length, size_t channels = 1,
-      size_t sampleRate = 48000, Source source = EMBEDDED_SRC)
-    {
+      std::string name, float** samples, size_t length, size_t channels, size_t sampleRate, Source source
+    ) {
       SWImpulseShared ret(new SWImpulse());
       ret->name = name;
       ret->id = "generic";
