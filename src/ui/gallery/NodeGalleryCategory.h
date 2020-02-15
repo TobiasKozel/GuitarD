@@ -5,13 +5,14 @@
 #include "./NodeGalleryElement.h"
 
 namespace guitard {
-  class GalleryCategory : public IControl {
+  class GalleryCategory : public IControl, public ScrollViewChild {
     PointerList<GalleryElement> mElements;
     bool mOpen = false;
     std::string mName;
     MessageBus::Bus* mBus = nullptr;
     IRECT mTitleRect;
     float mColumns = 0;
+    GalleryElement* mMouseDownEl = nullptr;
   public:
 
     GalleryCategory(MessageBus::Bus* bus) : IControl({}) {
@@ -87,12 +88,16 @@ namespace guitard {
 
     void OnMouseOut() override {
       IControl::OnMouseOut();
+      mMouseDownEl = nullptr;
+      mHandleDrag = false;
       for (int i = 0; i < mElements.size(); i++) {
         mElements[i]->mMouseIsOver = false;
       }
     }
 
     void OnMouseUp(const float x, const float y, const IMouseMod& mod) override {
+      mMouseDownEl = nullptr;
+      mHandleDrag = false;
       IRECT p(x, y, x, y);
       if (mTitleRect.Contains(p)) {
         mOpen = !mOpen;
@@ -103,6 +108,34 @@ namespace guitard {
         GalleryElement* elem = mElements[i];
         if (elem->mRECT.Contains(p)) {
           MessageBus::fireEvent<NodeList::NodeInfo>(mBus, MessageBus::NodeAdd, elem->mInfo);
+        }
+      }
+    }
+
+    void OnMouseDown(float x, float y, const IMouseMod& mod) override {
+      IRECT p(x, y, x, y);
+      for (int i = 0; i < mElements.size(); i++) {
+        GalleryElement* elem = mElements[i];
+        if (elem->mRECT.Contains(p)) {
+          mMouseDownEl = elem;
+          mHandleDrag = true;
+          return;
+        }
+      }
+      mMouseDownEl = nullptr;
+    }
+
+    void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
+      if (std::abs(dX) + std::abs(dY) < 5) { return; }
+      IRECT p(x, y, x, y);
+      for (int i = 0; i < mElements.size(); i++) {
+        GalleryElement* elem = mElements[i];
+        if (elem == mMouseDownEl && elem->mRECT.Contains(p)) {
+          MessageBus::fireEvent<NodeDragSpawnRequest>(mBus, MessageBus::NodeDragSpawn, {
+            {x, y}, elem->mInfo.name
+          });
+          MessageBus::fireEvent<bool>(mBus, MessageBus::OpenGallery, false);
+          return;
         }
       }
     }

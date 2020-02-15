@@ -9,6 +9,8 @@ namespace guitard {
   protected:
     bool mIsInView = false;
   public:
+
+    bool mHandleDrag = false;
     virtual ~ScrollViewChild() = default;
 
     /**

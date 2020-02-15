@@ -37,6 +37,7 @@ namespace guitard {
     MessageBus::Subscription<Node*> mNodeDelSub;
     MessageBus::Subscription<Node*> mNodeBypassEvent;
     MessageBus::Subscription<Node*> mNodeCloneEvent;
+    MessageBus::Subscription<NodeDragSpawnRequest> mNodeDragSpawn;
     MessageBus::Subscription<Node*> mNodeSpliceCombineEvent;
     MessageBus::Subscription<NodeList::NodeInfo> mNodeAddEvent;
     MessageBus::Subscription<bool> mAwaitAudioMutexEvent;
@@ -157,6 +158,15 @@ namespace guitard {
           this->addNode(clone, nullptr, node->shared.X, node->shared.Y, 0, 0, node);
           clone->mUi->mDragging = true;
           mGraphics->SetCapturedControl(clone->mUi);
+        }
+      });
+
+      mNodeDragSpawn.subscribe(mBus, MessageBus::NodeDragSpawn, [&](NodeDragSpawnRequest req) {
+        Node* node = NodeList::createNode(req.name);
+        if (node != nullptr) {
+          this->addNode(node, nullptr, req.pos.x, req.pos.y, 0, 0);
+          node->mUi->mDragging = true;
+          mGraphics->SetCapturedControl(node->mUi);
         }
       });
 

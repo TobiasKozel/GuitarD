@@ -10,11 +10,14 @@ namespace guitard {
     float y = 0;
   };
 
-
-
   struct QuickConnectRequest {
     Coord2D pos;
     NodeSocket* from;
+  };
+
+  struct NodeDragSpawnRequest {
+    Coord2D pos;
+    std::string name;
   };
 
   struct NodeSpliceInPair {

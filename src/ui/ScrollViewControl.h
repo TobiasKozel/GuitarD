@@ -248,13 +248,15 @@ namespace guitard {
         scroll(dY / mScrollBarRatio);
       }
       else {
-        if (mod.C || !mDoDragScroll || mCapturedControl != nullptr) {
-          IControl* c = nullptr;
-          c = mCapturedControl != nullptr ? mCapturedControl : getChildAtCoord(x, y);
-          if (c != nullptr) {
-            mCapturedControl = c;
+        IControl* child = getChildAtCoord(x, y);
+        ScrollViewChild* scrollChild = dynamic_cast<ScrollViewChild*>(child);
+        if (mod.C || !mDoDragScroll || mCapturedControl != nullptr || scrollChild != nullptr && scrollChild->mHandleDrag) {
+          if (mCapturedControl != nullptr) { child = mCapturedControl; }
+          child = mCapturedControl != nullptr ? mCapturedControl : child;
+          if (child != nullptr) {
+            mCapturedControl = child;
             /** TODO: figure out a way to allow controls to handle a drag */
-            c->OnMouseDrag(x, y, dX, dY, mod);
+            child->OnMouseDrag(x, y, dX, dY, mod);
             mDirty = true;
           }
           else {

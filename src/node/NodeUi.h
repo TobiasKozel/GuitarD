@@ -297,7 +297,7 @@ namespace guitard {
       }
     }
 
-    virtual void Draw(IGraphics& g) override {
+    void Draw(IGraphics& g) override {
 #if defined(NODE_SHADOW) || defined (NODE_CACHE_BG)
       if (!mBgIsCached) {
         g.StartLayer(this, mRECT);
