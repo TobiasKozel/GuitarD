@@ -9,6 +9,7 @@
 
 namespace soundwoofer {
   namespace http {
+    bool offline = false;
     // const std::string BACKEND_URL = "svenssj.tech";
     // const std::string BACKEND_URL = "localhost";
     const std::string BACKEND_URL = "saphiredsigns.de";
@@ -46,8 +47,10 @@ namespace soundwoofer {
       _::setup();
       auto res = _::cli.Get(endpoint.c_str(), _::headers);
       if (res && res->status == 200) {
+        offline = false;
         return res->body;
       }
+      offline = true;
       return "";
     }
 
@@ -58,8 +61,10 @@ namespace soundwoofer {
       // body += "\0"; // make sure it's null terminated
       auto res = _::cli.Post(endpoint.c_str(), _::headers, body, mime.c_str());
       if (res && res->status == 200) {
+        offline = false;
         return SUCCESS;
       }
+      offline = true;
       return SERVER_ERROR;
     }
 #endif

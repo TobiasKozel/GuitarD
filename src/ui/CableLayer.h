@@ -27,7 +27,7 @@ namespace guitard {
 
     MessageBus::Bus* mBus = nullptr;
     MessageBus::Subscription<Node*> mDisconnectAllEvent;
-    MessageBus::Subscription<Coord2D> mNodeDraggedEvent;
+    MessageBus::Subscription<Drag> mNodeDraggedEvent;
     MessageBus::Subscription<Coord2D> mNodeSeverEvent;
     MessageBus::Subscription<NodeDragEndData> mNodeDraggedEndEvent;
     MessageBus::Subscription<NodeSocket*> mPreviewSocketEvent;
@@ -64,8 +64,8 @@ namespace guitard {
         this->mDirty = true;
       });
 
-      mNodeDraggedEvent.subscribe(mBus, MessageBus::NodeDragged, [&](const Coord2D pos) {
-        mHighlightSocket = getClosestToConnection(pos);
+      mNodeDraggedEvent.subscribe(mBus, MessageBus::NodeDragged, [&](const Drag drag) {
+        mHighlightSocket = getClosestToConnection(drag.pos);
       });
 
       mNodeSeverEvent.subscribe(mBus, MessageBus::SeverNodeConnection, [&](const Coord2D pos) {

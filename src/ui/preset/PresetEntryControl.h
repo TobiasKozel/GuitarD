@@ -7,9 +7,9 @@
 namespace guitard {
   class PresetEntryControl : public IControl {
     MessageBus::Bus* mBus = nullptr;
-    soundwoofer::SWPresetsShared mPreset = nullptr;
+    soundwoofer::SWPresetShared mPreset = nullptr;
   public:
-    PresetEntryControl(MessageBus::Bus* bus, soundwoofer::SWPresetsShared preset) : IControl({}) {
+    PresetEntryControl(MessageBus::Bus* bus, soundwoofer::SWPresetShared preset) : IControl({}) {
       mBus = bus;
       mPreset = preset;
       mRECT.T = 0;

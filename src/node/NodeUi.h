@@ -45,6 +45,8 @@ namespace guitard {
     ISVG mSvgBg = ISVG(nullptr);
     IText mIconFont;
     bool mDoRender = true;
+    bool mSelected = false;
+    bool mSelectPressed = false;
 
 
   public:
@@ -251,6 +253,9 @@ namespace guitard {
     }
 
     void OnDetached() override {
+      MessageBus::fireEvent<NodeSelectionChanged>(
+        shared->bus, MessageBus::NodeSelectionChange, { this, false, true }
+      );
       mDirty = false;
       mDoRender = false;
       for (int i = 0; i < shared->parameterCount; i++) {
@@ -280,7 +285,7 @@ namespace guitard {
       IRECT bound = IRECT(
         mTargetRECT.L, mTargetRECT.T, mTargetRECT.R, mTargetRECT.T + Theme::Node::HEADER_SIZE
       );
-      g.FillRect(Theme::Node::HEADER, bound);
+      g.FillRect(mSelected ? Theme::Node::HEADER_SELECTED : Theme::Node::HEADER, bound);
       g.DrawText(Theme::Node::HEADER_TEXT, shared->type.c_str(), bound);
     }
 
@@ -320,16 +325,48 @@ namespace guitard {
 #endif
     }
 
-    virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
-      if (mDragging) {
-        mDragging = false;
-        MessageBus::fireEvent<NodeDragEndData>(shared->bus, MessageBus::NodeDraggedEnd, { shared->node, !mod.A && mod.C && mod.S });
-        return;
+    void OnMouseDown(float x, float y, const IMouseMod& mod) override {
+      IControl::OnMouseDown(x, y, mod);
+      mSelectPressed = (!mod.A && mod.C && !mod.S);
+      if (!mSelected) {
+        MessageBus::fireEvent<NodeSelectionChanged>(
+          shared->bus, MessageBus::NodeSelectionChange, { this, !mSelectPressed }
+        );
+      }
+      else if (mSelectPressed) {
+        MessageBus::fireEvent<NodeSelectionChanged>(
+          shared->bus, MessageBus::NodeSelectionChange, { this, false }
+        );
       }
     }
 
+    void OnMouseDblClick(float x, float y, const IMouseMod& mod) override {
+      IControl::OnMouseDblClick(x, y, mod);
+      /**
+       * Delete on alt double click
+       */
+      if (mod.A && !mod.C && !mod.S) {
+        MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDeleted, shared->node);
+      }
+    }
+
+    void OnMouseUp(float x, float y, const IMouseMod& mod) override {
+      if (mDragging) {
+        mDragging = false;
+        MessageBus::fireEvent<NodeDragEndData>(shared->bus, MessageBus::NodeDraggedEnd, { shared->node, !mod.A && mod.C && mod.S });
+      }
+      else {
+        if (!mSelected && !mSelectPressed) {
+          MessageBus::fireEvent<NodeSelectionChanged>(
+            shared->bus, MessageBus::NodeSelectionChange, { this, false }
+          );
+        }
+      }
+      mSelectPressed = false;
+    }
+
     void OnMouseDrag(const float x, const float y, const float dX, const float dY, const IMouseMod& mod) override {
-      if (!mDragging) {
+      if (!mDragging && std::abs(dX) + std::abs(dY) > 1.f) {
         if (mod.A && mod.C && !mod.S) {
           /**
            * Alt and Control
@@ -350,7 +387,7 @@ namespace guitard {
         }
         if (!mod.A && mod.C && !mod.S) {
           /**
-           * Control crag
+           * Control drag
            * Duplicate the node
            */
           MessageBus::fireEvent<Node*>(shared->bus, MessageBus::CloneNode, shared->node);
@@ -389,8 +426,8 @@ namespace guitard {
        * Default case is simple drag
        */
       mDragging = true;
-      MessageBus::fireEvent<Coord2D>(shared->bus, MessageBus::NodeDragged, Coord2D{ x, y });
-      translate(dX, dY);
+      MessageBus::fireEvent<Drag>(shared->bus, MessageBus::NodeDragged, Drag{ {x, y}, {dX, dY } });
+      // translate(dX, dY);
     }
 
     virtual void translate(const float dX, const float dY) {
@@ -415,7 +452,7 @@ namespace guitard {
       shared->graphics->SetAllControlsDirty();
     }
 
-    virtual void OnResize() override {
+    void OnResize() override {
       if (!mNoScale) {
         mBgIsCached = false;
       }
@@ -426,6 +463,12 @@ namespace guitard {
       const float dX = x - shared->X;
       const float dY = y - shared->Y;
       translate(dX, dY);
+    }
+
+    void setSelected(bool selected) {
+      mBgIsCached = false;
+      mSelected = selected;
+      mDirty = true;
     }
 
 

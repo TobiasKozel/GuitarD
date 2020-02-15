@@ -3,11 +3,17 @@
 namespace guitard {
   // Some structs used to pass around bundled data with the MessageBus
   class Node;
+  class NodeUi;
   struct NodeSocket;
 
   struct Coord2D {
     float x = 0;
     float y = 0;
+  };
+
+  struct Drag {
+    Coord2D pos;
+    Coord2D delta;
   };
 
   struct QuickConnectRequest {
@@ -54,6 +60,12 @@ namespace guitard {
   struct NodeDragEndData {
     Node* node;
     bool addCombineNode;
+  };
+
+  struct NodeSelectionChanged {
+    NodeUi* node = nullptr;
+    bool replace = false;
+    bool remove = false;
   };
 
 

@@ -46,8 +46,8 @@ namespace soundwoofer {
   typedef std::shared_ptr<SWComponent> SWComponentShared;
   typedef std::vector<SWComponentShared> SWComponents;
   struct SWPreset;
-  typedef std::shared_ptr<SWPreset> SWPresetsShared;
-  typedef std::vector<SWPresetsShared> SWPresets;
+  typedef std::shared_ptr<SWPreset> SWPresetShared;
+  typedef std::vector<SWPresetShared> SWPresets;
 
   struct SWImpulse {
     std::string id;
@@ -171,6 +171,10 @@ namespace soundwoofer {
     std::string irCacheDirectory; // Directory for caching online IRs
     std::string presetCacheDirectory; // Directory for caching online presets
     std::string presetDirectory; // Directory for user IRs
+
+    bool componentListCached = false;
+    bool irListCached = false;
+    bool rigListCached = false;
 
     SWImpulses irList;
     SWRigs rigList;

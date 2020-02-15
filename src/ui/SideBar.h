@@ -22,10 +22,8 @@ namespace guitard {
     int mOpenTab = 0;
 
     static const int mTabCount = 2;
-    const float mHeaderWith = 30.f;
-    const float mHeaderHeight = 120.f;
-    const IRECT mHeaderTextBox = { 0, 0, mHeaderHeight, mHeaderWith };
-    const float mHeaderPadding = 6.f;
+
+    const IRECT mHeaderTextBox = { 0, 0, Theme::SideBar::HEADER_HEIGHT, Theme::SideBar::HEADER_WITH };
 
     struct Tab {
       IRECT header;
@@ -145,7 +143,7 @@ namespace guitard {
         mRECT = bounds;
         mTargetRECT = bounds;
         IRECT main = bounds.GetPadded(-Theme::Gallery::PADDING);
-        main.R -= mHeaderWith;
+        main.R -= Theme::SideBar::HEADER_WITH;
         for (int i = 0; i < mTabCount; i++) {
           if (i == mOpenTab) {
             mTabs[i].tab->Hide(false);
@@ -155,9 +153,9 @@ namespace guitard {
             mTabs[i].tab->Hide(true);
           }
           mTabs[i].header.L = main.R;
-          mTabs[i].header.R = main.R + mHeaderWith;
-          mTabs[i].header.T = main.T + i * (mHeaderHeight + mHeaderPadding);
-          mTabs[i].header.B = mTabs[i].header.T + mHeaderHeight;
+          mTabs[i].header.R = main.R + Theme::SideBar::HEADER_WITH;
+          mTabs[i].header.T = main.T + i * (Theme::SideBar::HEADER_HEIGHT + Theme::SideBar::HEADER_PADDING);
+          mTabs[i].header.B = mTabs[i].header.T + Theme::SideBar::HEADER_HEIGHT;
         }
         mScrollview.SetTargetAndDrawRECTs(main);
       }

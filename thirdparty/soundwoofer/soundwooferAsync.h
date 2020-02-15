@@ -145,7 +145,7 @@ namespace soundwoofer {
       }
 
 #ifndef SOUNDWOOFER_NO_API
-      Status send(const SWPreset preset, Callback callback) {
+      Status send(const SWPresetShared preset, Callback callback) {
         _::startAsync([&, preset]() {
           return soundwoofer::preset::send(preset);
         }, callback);
@@ -153,7 +153,7 @@ namespace soundwoofer {
       }
 #endif
 
-      Status load(SWPresetsShared preset, Callback callback) {
+      Status load(SWPresetShared preset, Callback callback) {
         _::startAsync([&, preset]() {
           return soundwoofer::preset::load(preset);
         }, callback);

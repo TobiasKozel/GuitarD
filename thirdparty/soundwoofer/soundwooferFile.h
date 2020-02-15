@@ -16,6 +16,7 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <cassert>
 
 namespace soundwoofer {
   /**
@@ -74,7 +75,7 @@ namespace soundwoofer {
     std::vector<FileInfo> scanDir(const std::string path, const bool recursive = false) {
       FileInfo root;
       root.absolute = path;
-      root.relative = "." + file::PATH_DELIMITER;
+      root.relative = "." + PATH_DELIMITER;
       root.name = "";
       return scanDir(root, recursive);
     }
@@ -151,6 +152,21 @@ namespace soundwoofer {
     bool isJSONName(std::string& name) {
       return name.length() - name.find_last_of(".JSON") == 5
         || name.length() - name.find_last_of(".json") == 5;
+    }
+
+    std::string platformPath(std::string path) {
+      for (size_t i = 1; i < path.size(); i++) {
+        if ((path[i - 1] == '/' || path[i - 1] == '\\') && (path[i] == '/' || path[i] == '\\')) {
+          // need to get rid of double slashes
+          assert(false);
+        }
+      }
+      for (size_t i = 0; i < path.size(); i++) {
+        if (path[i] == '/' || path[i] == '\\') {
+          path[i] = PATH_DELIMITER[0];
+        }
+      }
+      return path;
     }
 
     /**

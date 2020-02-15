@@ -50,7 +50,7 @@ namespace soundwoofer {
   }
 
   namespace ir {
-    Status list();
+    Status list(bool reset = false);
 
     Status load(SWImpulseShared ir, size_t sampleRate = 0, bool normalize = true);
 
@@ -93,10 +93,13 @@ namespace soundwoofer {
       flushBuffers();
       for (auto& i : state::componentList) { i->managed = false; }
       state::componentList.clear();
+      state::componentListCached = false;
       for (auto& i : state::rigList) { i->managed = false; }
       state::rigList.clear();
+      state::rigListCached = false;
       for (auto& i : state::irList) { i->managed = false; }
       state::irList.clear();
+      state::rigListCached = false;
       state::GenericRig->impulses.clear();
       state::GenericRig->components.clear();
       state::GenericRig->impulses.clear();
@@ -113,8 +116,10 @@ namespace soundwoofer {
      * Gets a list of all the Impulse responses from the server and the local folder
      * Will also call clearCachedIRs()
      */
-    Status list() {
-      resetAll();
+    Status list(bool reset) {
+      if (reset) {
+        resetAll();
+      }
 
       // This will cunstruct a generic IR with no cab or mic as a parent
       auto addToUncategorized = [&](file::FileInfo& info) {
@@ -299,7 +304,7 @@ namespace soundwoofer {
         auto files = file::scanDir(state::presetDirectory);
         for (auto i : files) {
           if (!i.isFolder && file::isJSONName(i.name)) {
-            SWPresetsShared preset(new SWPreset{ i.name, i.name, state::pluginName, USER_SRC });
+            SWPresetShared preset(new SWPreset{ i.name, i.name, state::pluginName, USER_SRC });
             state::presetList.push_back(preset);
           }
         }
@@ -319,7 +324,7 @@ namespace soundwoofer {
       return state::presetList;
     }
 
-    Status load(SWPresetsShared preset) {
+    Status load(SWPresetShared preset) {
       if (!preset->data.empty()) { return SUCCESS; }
 #ifndef SOUNDWOOFER_NO_API
       if (preset->source == SOUNDWOOFER_SRC) { // online
@@ -333,16 +338,29 @@ namespace soundwoofer {
 #endif
       // offline
       std::ifstream file(state::presetDirectory + file::PATH_DELIMITER + preset->name);
+      // TODO binary presets
       const std::string str((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
       preset->data = str;
       return SUCCESS;
+    }
+
+    Status save(const SWPresetShared preset) {
+      // TODO binary presets
+      Status status = file::writeFile(
+        (state::presetDirectory + file::PATH_DELIMITER + preset->name).c_str(),
+        preset->data.c_str(), preset->data.size()
+      );
+      if (status == SUCCESS) {
+        // state::presetList.push_back(preset);
+      }
+      return status;
     }
 
 #ifndef SOUNDWOOFER_NO_API
     /**
      * Sends the preset to the server
      */
-    Status send(const SWPreset preset) {
+    Status send(const SWPresetShared preset) {
       if (state::pluginName.empty()) { return PLUGIN_NAME_NOT_SET; }
 
       const std::string serialized = encode::preset(preset);

@@ -48,6 +48,8 @@ namespace guitard {
     MessageBus::Subscription<const char*> mLoadPresetEvent;
     MessageBus::Subscription<WDL_String*> mSavePresetEvent;
     MessageBus::Subscription<BlockSizeEvent*> mMaxBlockSizeEvent;
+    MessageBus::Subscription<NodeSelectionChanged> mSelectionChagedEvent;
+    MessageBus::Subscription<Drag> mNodeDragged;
     IGraphics* mGraphics = nullptr;
 
     /**
@@ -112,7 +114,7 @@ namespace guitard {
      */
     int mMaxBlockSize = MAX_BUFFER;
 
-
+    PointerList<NodeUi> mSelectedNodes;
 
     GraphStats mStats;
 
@@ -158,6 +160,9 @@ namespace guitard {
           this->addNode(clone, nullptr, node->shared.X, node->shared.Y, 0, 0, node);
           clone->mUi->mDragging = true;
           mGraphics->SetCapturedControl(clone->mUi);
+          MessageBus::fireEvent<NodeSelectionChanged>(
+            mBus, MessageBus::NodeSelectionChange, { clone->mUi, true }
+          );
         }
       });
 
@@ -167,6 +172,9 @@ namespace guitard {
           this->addNode(node, nullptr, req.pos.x, req.pos.y, 0, 0);
           node->mUi->mDragging = true;
           mGraphics->SetCapturedControl(node->mUi);
+          MessageBus::fireEvent<NodeSelectionChanged>(
+            mBus, MessageBus::NodeSelectionChange, { node->mUi, true }
+          );
         }
       });
 
@@ -232,7 +240,41 @@ namespace guitard {
         else {
           this->unlockAudioThread();
         }
-    });
+      });
+
+      mSelectionChagedEvent.subscribe(mBus, MessageBus::NodeSelectionChange, [&](NodeSelectionChanged event) {
+        if (event.remove) {
+          event.node->setSelected(false);
+          mSelectedNodes.remove(event.node);
+          return;
+        }
+        if (event.replace) { // replace whole selection
+          for (size_t i = 0; i < mSelectedNodes.size(); i++) {
+            mSelectedNodes[i]->setSelected(false);
+          }
+          mSelectedNodes.clear();
+          if (event.node != nullptr) { // clear it completly
+            event.node->setSelected(true);
+            mSelectedNodes.add(event.node); // Replace Selection
+          }
+        }
+        else { // toggle selection
+          if (mSelectedNodes.find(event.node) == -1) {
+            event.node->setSelected(true);
+            mSelectedNodes.add(event.node); // Wasn't selected, add now
+          }
+          else {
+            event.node->setSelected(false);
+            mSelectedNodes.remove(event.node); // Was selected, remove now
+          }
+        }
+      });
+
+      mNodeDragged.subscribe(mBus, MessageBus::NodeDragged, [&](const Drag drag) {
+        for (int i = 0; i < mSelectedNodes.size(); i++) {
+          mSelectedNodes[i]->translate(drag.delta.x, drag.delta.y);
+        }
+      });
 #endif
     }
 
@@ -539,6 +581,7 @@ namespace guitard {
 
     void cleanupUi() {
       soundwoofer::async::cancelAll(true);
+      mSelectedNodes.clear();
       mWindowWidth = mGraphics->Width();
       mWindowHeight = mGraphics->Height();
       mWindowScale = mGraphics->GetDrawScale();

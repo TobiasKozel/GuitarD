@@ -76,6 +76,9 @@ namespace guitard {
       if (mod.R || mod.L) {
         MessageBus::fireEvent<bool>(mBus, MessageBus::OpenGallery, mod.R);
       }
+      MessageBus::fireEvent<NodeSelectionChanged>(
+        mBus, MessageBus::NodeSelectionChange, { nullptr, true }
+      );
     }
 
     void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {

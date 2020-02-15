@@ -65,7 +65,7 @@ namespace guitard {
 #endif
     }
 
-    size_t find(const T* element) const {
+    int find(const T* element) const {
 #ifdef GUITARD_HEADLESS
       auto position = std::find(mList.begin(), mList.end(), element);
       if (position != mList.end()) {

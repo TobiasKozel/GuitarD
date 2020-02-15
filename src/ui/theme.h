@@ -16,6 +16,12 @@ namespace guitard {
       const float BACKGROUND_DETAIL_WIDTH = 1.5;
     }
 
+    namespace SideBar {
+      const float HEADER_WITH = 26.f;
+      const float HEADER_HEIGHT = 120.f;
+      const float HEADER_PADDING = 6.f;
+    }
+
     namespace Gallery {
       const float ADD_CIRCLE_DIAMETER = 48.f;
       const float ADD_CIRCLE_RADIUS = ADD_CIRCLE_DIAMETER * 0.5f;
@@ -83,6 +89,7 @@ namespace guitard {
 #define NODE_ROUNDED_CORNER
 #define NODE_SHADOW
       const IColor HEADER{ 255, 30, 30, 30 };
+      const IColor HEADER_SELECTED{ 255, 255, 100, 30 };
       const IText HEADER_TEXT(16, iplug::igraphics::COLOR_WHITE, "Roboto-Regular", iplug::igraphics::EAlign::Center, iplug::igraphics::EVAlign::Middle, 0);
       const float HEADER_SIZE = 20;
       const float HEADER_BYPASS_LEFT = 6;
