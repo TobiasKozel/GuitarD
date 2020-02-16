@@ -344,7 +344,8 @@ namespace guitard {
     void OnMouseOut() override {
       IControl::OnMouseOut();
       mScrollBarHover = false;
-      if (mMouseOver != nullptr) {
+      mScrollBarDragging = false;
+      if (mMouseOver != nullptr) { // Relay mouse out to child
         mMouseOver->OnMouseOut();
         mMouseOver = nullptr;
       }

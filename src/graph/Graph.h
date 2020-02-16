@@ -678,21 +678,26 @@ namespace guitard {
      */
     void byPassConnection(Node* node) const {
       if (node->shared.inputCount > 0 && node->shared.outputCount > 0) {
-        NodeSocket* prevSock = node->shared.socketsIn[0];
-        NodeSocket* nextSock = node->shared.socketsOut[0];
-        if (prevSock != nullptr && prevSock->mConnectedTo[0] != nullptr && nextSock != nullptr) {
-          for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
-            if (nextSock->mConnectedTo[i] != nullptr) {
-              MessageBus::fireEvent<SocketConnectRequest>(mBus,
-                MessageBus::SocketRedirectConnection,
-                SocketConnectRequest{
-                  prevSock->mConnectedTo[0],
-                  nextSock->mConnectedTo[i]
-                }
-              );
+        NodeSocket* inSock = node->shared.socketsIn[0];
+        NodeSocket* outSock = node->shared.socketsOut[0];
+        NodeSocket* prevSock = inSock->mConnectedTo[0];
+        if (prevSock != nullptr) { // make sure there's a previous node
+          int nextSocketCount = 0;
+          NodeSocket* nextSockets[MAX_SOCKET_CONNECTIONS] = { nullptr };
+          for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) { // Gather all the sockets connected to the output of this node
+            NodeSocket* nextSock = outSock->mConnectedTo[i];
+            if (nextSock != nullptr) {
+              nextSockets[nextSocketCount] = nextSock;
+              nextSocketCount++;
             }
           }
-          MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDisconnectAll, node);
+
+          outSock->disconnectAll();
+          inSock->disconnectAll();
+
+          for (int i = 0; i < nextSocketCount; i++) {
+            prevSock->connect(nextSockets[i]);
+          }
         }
       }
     }
