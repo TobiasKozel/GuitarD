@@ -10,10 +10,8 @@ namespace guitard {
   class GraphBackground : public IControl {
     MessageBus::Bus* mBus;
     IGraphics* mGraphics;
-    float mX = 0;
-    float mY = 0;
-    float offsetX = 0;
-    float offsetY = 0;
+    Coord2D mOffset;
+    Coord2D mMouseDown;
     float lastWidth;
     float lastHeight;
     bool triggeredScale;
@@ -35,12 +33,12 @@ namespace guitard {
      * Draw the simple background shapes
      */
     void Draw(IGraphics& g) override {
-      int windowX = g.Width();
-      int windowY = g.Height();
+      const int windowX = g.Width();
+      const int windowY = g.Height();
       g.FillRect(Theme::Graph::BACKGROUND, mRECT);
       const float dist = Theme::Graph::BACKGROUND_DETAIL_DIST;
-      const float yStart = fmod(offsetY, dist) - dist;
-      const float xStart = fmod(offsetX, dist) - dist;
+      const float xStart = fmod(mOffset.x, dist) - dist;
+      const float yStart = fmod(mOffset.y, dist) - dist;
       const float detailSize = Theme::Graph::BACKGROUND_DETAIL_SIZE;
       const float detailWidth = Theme::Graph::BACKGROUND_DETAIL_WIDTH;
 
@@ -76,10 +74,18 @@ namespace guitard {
       if (mod.R || mod.L) {
         MessageBus::fireEvent<bool>(mBus, MessageBus::OpenGallery, mod.R);
       }
-      MessageBus::fireEvent<NodeSelectionChanged>(
-        mBus, MessageBus::NodeSelectionChange, { nullptr, true }
-      );
+      mMouseDown.x = x;
+      mMouseDown.y = y;
     }
+
+    void OnMouseUp(float x, float y, const IMouseMod& mod) override {
+      if (std::abs(x - mMouseDown.x) + std::abs(y - mMouseDown.y) < 3) { // If we moved less than a few pixels, deselect
+        MessageBus::fireEvent<NodeSelectionChanged>(
+          mBus, MessageBus::NodeSelectionChange, { nullptr, true }
+        );
+      }
+    }
+
 
     void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
       /**
@@ -128,8 +134,8 @@ namespace guitard {
 
   protected:
     void translate(float dX, float dY) {
-      offsetX += (dX);
-      offsetY += (dY);
+      mOffset.x += dX;
+      mOffset.y += dY;
       mCallback(dX, dY, 1.f);
     }
 
