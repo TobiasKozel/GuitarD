@@ -33,15 +33,15 @@ namespace guitard {
      */
     void init() {
       std::map<std::string, GalleryCategory*> uniqueCat;
-      for (auto i : NodeList::nodelist) {
+      for (auto& i : NodeList::nodelist) {
         if (uniqueCat.find(i.second.categoryName) == uniqueCat.end()) {
           GalleryCategory* cat = new GalleryCategory(mBus);
           uniqueCat.insert(std::pair<std::string, GalleryCategory*>(i.second.categoryName, cat));
           appendChild(cat);
         }
       }
-      for (auto i : NodeList::nodelist) {
-        uniqueCat.at(i.second.categoryName)->addNode(i.second);
+      for (auto& i : NodeList::nodelist) {
+        uniqueCat.at(i.second.categoryName)->addNode(&i.second);
       }
     }
   };

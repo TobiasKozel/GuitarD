@@ -23,10 +23,10 @@ namespace guitard {
       mElements.clear(true);
     }
 
-    void addNode(const NodeList::NodeInfo node) {
+    void addNode(NodeList::NodeInfo* node) {
       if (mName.size() == 0) {
         // Take the name of the first node, they'll all be the same
-        mName = node.categoryName.c_str();
+        mName = node->categoryName.c_str();
       }
       mElements.add(new GalleryElement(node));
     }
@@ -107,7 +107,7 @@ namespace guitard {
       for (int i = 0; i < mElements.size(); i++) {
         GalleryElement* elem = mElements[i];
         if (elem->mRECT.Contains(p)) {
-          MessageBus::fireEvent<NodeList::NodeInfo>(mBus, MessageBus::NodeAdd, elem->mInfo);
+          MessageBus::fireEvent<NodeList::NodeInfo>(mBus, MessageBus::NodeAdd, *elem->mInfo);
         }
       }
     }
@@ -132,7 +132,7 @@ namespace guitard {
         GalleryElement* elem = mElements[i];
         if (elem == mMouseDownEl && elem->mRECT.Contains(p)) {
           MessageBus::fireEvent<NodeDragSpawnRequest>(mBus, MessageBus::NodeDragSpawn, {
-            {x, y}, elem->mInfo.name
+            {x, y}, elem->mInfo->name
           });
           MessageBus::fireEvent<bool>(mBus, MessageBus::OpenGallery, false);
           return;

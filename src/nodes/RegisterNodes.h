@@ -39,7 +39,7 @@ namespace guitard {
         "Combine",
         "asd",
         "Signal Flow",
-        "Description",
+        "Will combine two signals",
         [](NodeInfo* info) { return new CombineNode(info); }
         });
 
@@ -48,7 +48,7 @@ namespace guitard {
         "Split L/R",
         "asd",
         "Signal Flow",
-        "Description",
+        "Splits a signal into Left/Right and Mid/Side channels",
         [](NodeInfo* info) { return new SplitNode(info); }
         });
 
@@ -57,7 +57,7 @@ namespace guitard {
         "Band Split",
         "asd",
         "Signal Flow",
-        "Description",
+        "Splits up a signal into three frequency bands with Butterworth High/Lowpass filters",
         [](NodeInfo* info) { return new BandSplitNode(info); }
         });
 
@@ -67,7 +67,7 @@ namespace guitard {
         "Stereo Tool",
         "asd",
         "Tools",
-        "Description",
+        "Does panning and Stereo width",
         [](NodeInfo* info) { return new StereoToolNode(info); }
         });
 
@@ -76,7 +76,7 @@ namespace guitard {
         "Feedback",
         "asd",
         "Tools",
-        "Description",
+        "Allows feeding back an output signal into an input socket (Unstable)",
         [](NodeInfo* info) { return new FeedbackNode(info); }
         });
 
@@ -85,7 +85,7 @@ namespace guitard {
         "Phase Tool",
         "asd",
         "Tools",
-        "Description",
+        "Delays a signal",
         [](NodeInfo* info) { return new PhaseToolNode(info); }
         });
 
@@ -139,16 +139,16 @@ namespace guitard {
         "Power Sag",
         "asd",
         "Distortion",
-        "Description",
+        "Emulates amp sag effect",
         [](NodeInfo* info) { return new PowerSagNode(info); }
         });
 
       registerNode(NodeInfo{
         "SimpleDelayNode",
-        "Mono Delay",
+        "Basic Delay",
         "asd",
         "Delays/Reverbs",
-        "Description",
+        "A very simple delay effect",
         [](NodeInfo* info) { return new SimpleDelayNode(info); }
         });
 
@@ -157,16 +157,16 @@ namespace guitard {
         "Stereo Reverb",
         "asd",
         "Delays/Reverbs",
-        "Description",
+        "Zika Reverb",
         [](NodeInfo* info) { return new SimpleReverbNode(info); }
         });
 
       registerNode(NodeInfo{
         "ReverseDelayNode",
-        "Reverse Reverb",
+        "Reverse Delay",
         "asd",
         "Delays/Reverbs",
-        "Description",
+        "Reversed Delay effect (Kinda Clicky)",
         [](NodeInfo* info) { return new ReverseDelayNode(info); }
         });
 
@@ -175,7 +175,7 @@ namespace guitard {
         "Simple Cabinet",
         "asd",
         "Cabinets",
-        "Description",
+        "Provides a few IRs and allow loading .wav IRs up to 10 seconds",
         [](NodeInfo* info) { return new SimpleCabNode(info); }
         });
 
@@ -184,7 +184,7 @@ namespace guitard {
         "Cabinet Library",
         "asd",
         "Cabinets",
-        "Description",
+        "Allows flipping through IRs quickly. Offline and Online (Soundwoofer) IR database",
         [](NodeInfo* info) { return new CabLibNode(info); }
         });
 
@@ -212,7 +212,7 @@ namespace guitard {
         "Parametric Equalizer",
         "asd",
         "Filters",
-        "Description",
+        "Very bad EQ",
         [](NodeInfo* info) { return new ParametricEqNode(info); }
         });
 

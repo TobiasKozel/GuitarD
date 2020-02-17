@@ -5,16 +5,16 @@
 
 namespace guitard {
   struct GalleryElement {
-    NodeList::NodeInfo mInfo;
+    NodeList::NodeInfo* mInfo;
     IRECT mRECT;
     IBitmap* mBitmap;
     const char* mName;
     const char* mImage;
     bool mMouseIsOver = false;
 
-    GalleryElement(NodeList::NodeInfo node) {
+    GalleryElement(NodeList::NodeInfo* node) {
       mInfo = node;
-      mName = mInfo.displayName.c_str();
+      mName = mInfo->displayName.c_str();
     }
 
     void Draw(IGraphics& g, IRECT* rect, int index, int columns) {
