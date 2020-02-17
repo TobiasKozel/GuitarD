@@ -22,7 +22,7 @@ namespace guitard {
     bool mSelected = false;
     IrCallback mCallback;
     soundwoofer::SWImpulseShared mIr;
-    std::string mName;
+    String mName;
     LibIr(soundwoofer::SWImpulseShared ir, IrCallback callback) : IControl({ 0, 0, 0, 20 }) {
       mCallback = callback;
       mIr = ir;
@@ -57,7 +57,7 @@ namespace guitard {
     typedef std::function<void(LibMic * c)> MicCallback;
     MicCallback mCallback;
     soundwoofer::SWComponentShared mMic;
-    std::string mName;
+    String mName;
     bool mSelected = false;
     LibMic(soundwoofer::SWComponentShared mic,  MicCallback mc) : IControl({ 0, 0, 0, 20 }) {
       mCallback = mc;
@@ -93,7 +93,7 @@ namespace guitard {
     RigCallback mCallback;
     soundwoofer::SWRigShared mRig;
     bool mSelected = false;
-    std::string mName;
+    String mName;
     PointerList<LibMic> mMics;
     PointerList<LibIr> mIrs;
     
@@ -140,7 +140,7 @@ namespace guitard {
     LibRig* mSelectedRig = nullptr;
     LibMic* mSelectedMic = nullptr;
     LibIr* mSelectedIr = nullptr;
-    std::string mPath;
+    String mPath;
     bool mLoading = false;
 
     void changeIr(LibIr* newIr) {

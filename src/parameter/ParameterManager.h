@@ -29,7 +29,7 @@ namespace guitard {
      * since most DAWs don't seem to support dynamic parameters
      */
     void addParameter(IParam* param) {
-      std::string paramprefix = "Uninitialized ";
+      String paramprefix = "Uninitialized ";
       mParametersClaimed[mParametersLeft] = false;
       mParameters[mParametersLeft++] = param;
       // all these values have a range from 0-1 since this can't be changed later on
@@ -43,7 +43,7 @@ namespace guitard {
      */
     bool claimNode(Node* node) {
       bool gotAllParams = true;
-      std::string prefix = node->shared.info->displayName;
+      String prefix = node->shared.info->displayName;
       for (int i = 0; i < node->shared.parameterCount; i++) {
         if (!claimParameter(&node->shared.parameters[i], prefix.c_str())) {
           /**
@@ -62,13 +62,13 @@ namespace guitard {
      */
     bool claimParameter(ParameterCoupling* couple, const char* prefix = nullptr) {
       const char* name = couple->name;
-      std::string stringName;
+      String stringName;
       if (prefix != nullptr) {
         /**
          * In case we get a node name as a prefix use that but keep the string object around until
          * the init function has copied it into the daw land
          */
-        stringName = std::string(prefix) + " " + std::string(name);
+        stringName = String(prefix) + " " + String(name);
         name = stringName.c_str();
       }
       int i = couple->parameterIdx;
@@ -121,7 +121,7 @@ namespace guitard {
         if (mParameters[i] == couple) { // directly compare the couple
 #endif
           mParametersClaimed[i] = false;
-          std::string paramprefix = "Uninitialized ";
+          const String paramprefix = "Uninitialized ";
 #ifndef GUITARD_HEADLESS
           mParameters[i]->InitDouble(
             (paramprefix + std::to_string(mParametersLeft)).c_str(), 1, 0, 1.0, 0.01

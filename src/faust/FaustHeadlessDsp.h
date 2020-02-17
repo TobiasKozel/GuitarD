@@ -11,9 +11,9 @@ namespace guitard {
      * Passed to the generated faust code to gather the copyright info
      */
     struct Meta {
-      std::string result = "\nDSP Code generated using Grame Faust\n";
+      String result = "\nDSP Code generated using Grame Faust\n";
       void declare(const char* key, const char* value) {
-        result += std::string(key) + ": " + std::string(value) + "\n";
+        result += String(key) + ": " + String(value) + "\n";
       };
     };
 
@@ -164,7 +164,7 @@ namespace guitard {
       /**
        * Retrieve the copyright info from the faust generated code
        */
-      std::string getLicense() override {
+      String getLicense() override {
         Meta m;
         metadata(&m);
         return m.result;

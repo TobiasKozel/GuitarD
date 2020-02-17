@@ -207,8 +207,8 @@ namespace guitard {
     }
 #endif
 
-    std::string getLicense() override {
-      std::string l = "\nAll of the DSP Copyright(c) 2018 Chris Johnson\n";
+    String getLicense() override {
+      String l = "\nAll of the DSP Copyright(c) 2018 Chris Johnson\n";
       l += "https://github.com/airwindows\n";
       l += "https://github.com/airwindows/airwindows/blob/master/plugins/WinVST/PowerSag/PowerSag.cpp\n";
       l += "MIT License\nFrom the Airwindows plugin \"Powersag\"\n";

@@ -15,8 +15,8 @@ namespace guitard {
     }
 #endif
 
-    std::string getLicense() override {
-      std::string l = "\nFaust code from Guitarix, probably needs to be replaced/removed";
+    String getLicense() override {
+      String l = "\nFaust code from Guitarix, probably needs to be replaced/removed";
       l += Fuzz::getLicense();
       return l;
     }

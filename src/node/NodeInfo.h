@@ -10,11 +10,11 @@ namespace guitard {
     typedef std::function<Node* (NodeInfo*)> NodeConstructor;
 
     struct NodeInfo {
-      std::string name; // Will be used internally for serialization, construction and so on
-      std::string displayName; // only used to display
-      std::string image;
-      std::string categoryName;
-      std::string description;
+      String name; // Will be used internally for serialization, construction and so on
+      String displayName; // only used to display
+      String image;
+      String categoryName;
+      String description;
       NodeConstructor constructor;
     };
   }

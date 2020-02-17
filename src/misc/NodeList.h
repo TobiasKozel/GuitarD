@@ -7,14 +7,14 @@ namespace guitard {
   class Node;
 
   namespace NodeList {
-    typedef std::map<std::string, NodeInfo> NodeMap;
+    typedef std::map<String, NodeInfo> NodeMap;
 
     NodeMap nodelist; // This is a global variable!
 
     /**
      * All nodes except input and output will be constructed here
      */
-    inline Node* createNode(const std::string name) {
+    inline Node* createNode(const String& name) {
       if (nodelist.find(name) != nodelist.end()) {
         NodeInfo& info = nodelist.at(name);
         Node* n = info.constructor(&info);
@@ -24,7 +24,7 @@ namespace guitard {
       return nullptr;
     }
 
-    inline NodeInfo* getInfo(const std::string name) {
+    inline NodeInfo* getInfo(const String& name) {
       if (nodelist.find(name) != nodelist.end()) {
         return &(nodelist.find(name)->second);
       }
@@ -33,7 +33,7 @@ namespace guitard {
 
     inline void registerNode(NodeInfo info) {
       if (nodelist.find(info.name) == nodelist.end()) {
-        nodelist.insert(std::pair<std::string, NodeInfo>(info.name, info));
+        nodelist.insert(std::pair<String, NodeInfo>(info.name, info));
       }
     }
   };

@@ -207,8 +207,8 @@ namespace guitard {
       mIsProcessing = false;
     }
 
-    static std::string getLicense() {
-      std::string l = "Realtime Convolution by\n";
+    static String getLicense() {
+      String l = "Realtime Convolution by\n";
       l += "https://github.com/HiFi-LoFi\n";
       l += "https://github.com/HiFi-LoFi/FFTConvolver\n";
       l += "MIT License\n\n";

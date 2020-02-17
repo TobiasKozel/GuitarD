@@ -29,7 +29,7 @@ namespace guitard {
       IRECT header;
       ILayerPtr layer;
       IControl* tab = nullptr;
-      std::string name;
+      String name;
     };
 
     bool mBgCached = false;

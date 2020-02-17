@@ -52,6 +52,11 @@ namespace guitard {
   public:
     bool mDragging = false;
 
+    /**
+     * Conveniently map names to the parameter couples
+     * Const char* works for now since all the accessors are known at compile time, prolly a result of the header only thing
+     * TODOG provide a comparator or switch to strings
+     */
     std::map<const char*, ParameterCoupling*> mParamsByName;
 
     explicit NodeUi(NodeShared* pShared) :

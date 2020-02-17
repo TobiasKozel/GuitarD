@@ -8,7 +8,7 @@ namespace guitard {
   class GalleryCategory : public IControl, public ScrollViewChild {
     PointerList<GalleryElement> mElements;
     bool mOpen = false;
-    std::string mName;
+    String mName;
     MessageBus::Bus* mBus = nullptr;
     IRECT mTitleRect;
     float mColumns = 0;

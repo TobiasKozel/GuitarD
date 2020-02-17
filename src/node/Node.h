@@ -428,7 +428,7 @@ namespace guitard {
     /**
      * Function to retrieve the license/copyright info about the node
      */
-    virtual std::string getLicense() {
+    virtual String getLicense() {
       return "Not set";
     }
   };

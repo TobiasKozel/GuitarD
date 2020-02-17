@@ -1,5 +1,6 @@
 #pragma once
 #include "../../node/Node.h"
+#include "../../types/types.h"
 #include <map>
 
 #define TWO_YROOT_TWELVE 1.05946309435929526456f
@@ -7,7 +8,7 @@
 namespace guitard {
 #ifndef GUITARD_HEADLESS
   class TunerNodeUi : public NodeUi {
-    std::map<float, std::string> equalPitches;
+    std::map<float, String> equalPitches;
     const char* mNotes[12] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
     const char* mCurrentQuantizedPitch;
     int mTunerCentsOff;
@@ -34,8 +35,8 @@ namespace guitard {
 
   class TunerNode final : public Node {
   public:
-    TunerNode(const std::string pType) {
-      shared.type = pType;
+    TunerNode(const NodeList::NodeInfo* info) {
+      shared.info = info;
     }
 
 #ifndef GUITARD_HEADLESS

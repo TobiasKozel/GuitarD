@@ -34,7 +34,7 @@ namespace guitard {
     IPopupMenu mMenu{ "Choose IR", {"Clean", "Air", "From File"}, [&](IPopupMenu* pMenu) {
       IPopupMenu::Item* itemChosen = pMenu->GetChosenItem();
       if (itemChosen) {
-        const std::string text = itemChosen->GetText();
+        const String text = itemChosen->GetText();
         if (text == "From File") {
           this->openFileDialog();
         }
@@ -71,7 +71,7 @@ namespace guitard {
 
     void openFileDialog() const {
       const HWND handle = reinterpret_cast<HWND>(shared->graphics->GetWindow());
-      const std::string result = WDL_ChooseFileForOpen( // TODOG LEAK: the string might leak
+      const String result = WDL_ChooseFileForOpen( // TODOG LEAK: the string might leak
         handle, "Open IR", nullptr, nullptr,
         "Wave Files\0*.wav;*.WAV\0", "*.wav",
         true, false
@@ -241,7 +241,7 @@ namespace guitard {
     }
 #endif
 
-    std::string getLicense() override {
+    String getLicense() override {
       return WrappedConvolver::getLicense();
     }
   };

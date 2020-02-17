@@ -152,8 +152,6 @@ namespace guitard {
         this->byPassConnection(param);
       });
 
-
-
       mNodeCloneEvent.subscribe(mBus, MessageBus::CloneNode, [&](Node* node) {
         Node* clone = NodeList::createNode(node->shared.info->name);
         if (clone != nullptr) {
@@ -228,7 +226,7 @@ namespace guitard {
         if (e->set) {
           this->setBlockSize(e->blockSize);
         }
-        //else {
+        //else { TODOG have a look at this again
         //  e->blockSize = this->mMaxBlockSize;
         //}
       });

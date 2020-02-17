@@ -32,11 +32,11 @@ namespace guitard {
      * This will create all the categories and add the nodes to it
      */
     void init() {
-      std::map<std::string, GalleryCategory*> uniqueCat;
+      std::map<String, GalleryCategory*> uniqueCat;
       for (auto& i : NodeList::nodelist) {
         if (uniqueCat.find(i.second.categoryName) == uniqueCat.end()) {
           GalleryCategory* cat = new GalleryCategory(mBus);
-          uniqueCat.insert(std::pair<std::string, GalleryCategory*>(i.second.categoryName, cat));
+          uniqueCat.insert(std::pair<String, GalleryCategory*>(i.second.categoryName, cat));
           appendChild(cat);
         }
       }

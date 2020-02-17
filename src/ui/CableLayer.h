@@ -165,7 +165,7 @@ namespace guitard {
       });
     }
 
-    inline void DrawSocket(IGraphics& g, NodeSocket* s) const {
+    void DrawSocket(IGraphics& g, NodeSocket* s) const {
       const float x = s->mX + Theme::Sockets::RADIUS;
       const float y = s->mY + Theme::Sockets::RADIUS;
       g.FillCircle(

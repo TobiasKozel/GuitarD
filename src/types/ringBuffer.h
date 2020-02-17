@@ -1,6 +1,6 @@
 #pragma once
 /**
- * Based on the "circbuf.h" from Cockos WDL
+ * Based on the "circbuf.h" implementation from Cockos WDL
  */
 
 namespace guitard {

@@ -23,7 +23,7 @@ namespace guitard {
 
   struct NodeDragSpawnRequest {
     Coord2D pos;
-    std::string name;
+    String name;
   };
 
   struct NodeSpliceInPair {

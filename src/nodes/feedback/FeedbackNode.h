@@ -21,7 +21,7 @@ namespace guitard {
     FeedbackNodeUi(NodeShared* param) : NodeUi(param) {
       mMaxBlockSizeEvent.subscribe(param->bus, MessageBus::MaxBlockSizeEvent, [&](BlockSizeEvent* e) {
         if (e->set) {
-          std::string label = std::to_string(shared->maxBlockSize) + " Samples";
+          String label = std::to_string(shared->maxBlockSize) + " Samples";
           this->mBrowseButton->SetLabelStr(label.c_str());
           // refresh
         }

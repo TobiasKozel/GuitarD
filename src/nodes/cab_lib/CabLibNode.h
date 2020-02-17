@@ -24,29 +24,6 @@ namespace guitard {
       );
       mElements.add(mEditButton);
       GetUI()->AttachControl(mEditButton);
-      //test = new ScrollViewControl(mTargetRECT.GetPadded(-20));
-      //test->setDoDragScroll(false);
-      //mElements.Add(test);
-      //IVButtonControl* editButton = new IVButtonControl(IRECT(0, 0, 100, 30), [&](IControl* pCaller) {
-      //  SplashClickActionFunc(pCaller);
-      //  this->openSettings();
-      //}, "EDIT", DEFAULT_STYLE, true, false);
-      //test->appendChild(editButton);
-      //PlaceHolder* t = new PlaceHolder(IRECT(0, 0, 100, 20), "Element 1");
-      //test->appendChild(t);
-      //t = new PlaceHolder(IRECT(0, 0, 130, 60), "Element 2");
-      //test->appendChild(t);
-      //t = new PlaceHolder(IRECT(0, 0, 130, 40), "Element 3");
-      //test->appendChild(t);
-      //IVKnobControl* c = new IVKnobControl(
-      //  IRECT(0, 0, 120, 120), 3
-      //);
-      //test->appendChild(c);
-      //t = new PlaceHolder(IRECT(0, 0, 80, 80), "Element 4");
-      //test->appendChild(t);
-      //t = new PlaceHolder(IRECT(0, 0, 400, 20), "Element 5");
-      //test->appendChild(t);
-      //shared->graphics->AttachControl(test);
     }
 
     void openSettings() {
@@ -236,8 +213,8 @@ namespace guitard {
     }
 #endif
 
-    std::string getLicense() override {
-      std::string l = "\nDefault IRs provided by Soundwoofer\n";
+    String getLicense() override {
+      String l = "\nDefault IRs provided by Soundwoofer\n";
       l += "Public Domain\n\n";
       l += WrappedConvolver::getLicense();
       return l;

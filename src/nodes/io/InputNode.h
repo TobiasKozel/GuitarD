@@ -8,7 +8,7 @@ namespace guitard {
   class InputNodeUi final : public NodeUi {
 
     iplug::igraphics::IText mBlocksizeText;
-    std::string mInfo;
+    String mInfo;
   public:
     InputNodeUi(NodeShared* param) : NodeUi(param) {
       mInfo = "";
