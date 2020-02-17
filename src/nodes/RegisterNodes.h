@@ -35,190 +35,190 @@ namespace guitard {
   namespace NodeList {
     void registerNodes() {
       registerNode(NodeInfo {
-        []() { return new CombineNode("CombineNode"); },
         "CombineNode",
         "Combine",
         "asd",
-        "Signal Flow"
-        });
+        "Signal Flow",
+        [](NodeInfo info) { return new CombineNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new SplitNode("SplitNode"); },
         "SplitNode",
         "Split L/R",
         "asd",
-        "Signal Flow"
-        });
+        "Signal Flow",
+        [](NodeInfo info) { return new SplitNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new BandSplitNode("BandSplitNode"); },
         "BandSplitNode",
         "Band Split",
         "asd",
-        "Signal Flow"
-        });
+        "Signal Flow",
+        [](NodeInfo info) { return new BandSplitNode(info); }
+      });
 
 
       registerNode(NodeInfo {
-        []() { return new StereoToolNode("StereoToolNode"); },
         "StereoToolNode",
         "Stereo Tool",
         "asd",
-        "Tools"
-        });
+        "Tools",
+        [](NodeInfo info) { return new StereoToolNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new FeedbackNode("FeedbackNode"); },
         "FeedbackNode",
         "Feedback",
         "asd",
-        "Tools"
-        });
+        "Tools",
+        [](NodeInfo info) { return new FeedbackNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new PhaseToolNode("PhaseToolNode"); },
         "PhaseToolNode",
         "Phase Tool",
         "asd",
-        "Tools"
-        });
+        "Tools",
+        [](NodeInfo info) { return new PhaseToolNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new EnvelopeNode("EnvelopeNode"); },
         "EnvelopeNode",
         "Envelope Automation Tool",
         "asd",
-        "Automation"
-        });
+        "Automation",
+        [](NodeInfo info) { return new EnvelopeNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new SimpleDriveNode("SimpleDriveNode"); },
         "SimpleDriveNode",
         "Simple Drive",
         "asd",
-        "Distortion"
-        });
+        "Distortion",
+        [](NodeInfo info) { return new SimpleDriveNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new OverDriveNode("OverDriveNode"); },
           "OverDriveNode",
           "Overdrive",
           "asd",
-          "Distortion"
-        });
+          "Distortion",
+        [](NodeInfo info) { return new OverDriveNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new FuzzNode("FuzzNode"); },
         "FuzzNode",
         "Fuzz",
         "asd",
-        "Distortion"
-        });
+        "Distortion",
+        [](NodeInfo info) { return new FuzzNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new BitCrusherNode("BitCrusherNode"); },
         "BitCrusherNode",
         "Bitcrusher",
         "asd",
-        "Distortion"
-        });
+        "Distortion",
+        [](NodeInfo info) { return new BitCrusherNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new PowerSagNode("PowerSagNode"); },
         "PowerSagNode",
         "Power Sag",
         "asd",
-        "Distortion"
-        });
+        "Distortion",
+        [](NodeInfo info) { return new PowerSagNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new SimpleDelayNode("SimpleDelayNode"); },
         "SimpleDelayNode",
         "Mono Delay",
         "asd",
-        "Delays/Reverbs"
-        });
+        "Delays/Reverbs",
+        [](NodeInfo info) { return new SimpleDelayNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new SimpleReverbNode("SimpleReverbNode"); },
         "SimpleReverbNode",
         "Stereo Reverb",
         "asd",
-        "Delays/Reverbs"
-        });
+        "Delays/Reverbs",
+        [](NodeInfo info) { return new SimpleReverbNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new ReverseDelayNode("ReverseDelayNode"); },
         "ReverseDelayNode",
         "Reverse Reverb",
         "asd",
-        "Delays/Reverbs"
-        });
+        "Delays/Reverbs",
+        [](NodeInfo info) { return new ReverseDelayNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new SimpleCabNode("SimpleCabNode"); },
         "SimpleCabNode",
         "Simple Cabinet",
         "asd",
-        "Cabinets"
-        });
+        "Cabinets",
+        [](NodeInfo info) { return new SimpleCabNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new CabLibNode("CabLibNode"); },
         "CabLibNode",
         "Cabinet Library",
         "asd",
-        "Cabinets"
-        });
+        "Cabinets",
+        [](NodeInfo info) { return new CabLibNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new CryBabyNode("CryBabyNode"); },
         "CryBabyNode",
         "Crybaby",
         "asd",
-        "Filters"
-        });
+        "Filters",
+        [](NodeInfo info) { return new CryBabyNode(info); }
+      });
 
 
       registerNode(NodeInfo {
-        []() { return new FlangerNode("FlangerNode"); },
         "FlangerNode",
         "Flanger",
         "asd",
-        "Filters"
-        });
+        "Filters",
+        [](NodeInfo info) { return new FlangerNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new ParametricEqNode("ParametricEqNode"); },
         "ParametricEqNode",
         "Parametric Equalizer",
         "asd",
-        "Filters"
-        });
+        "Filters",
+        [](NodeInfo info) { return new ParametricEqNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new SimpleComressorNode("SimpleComressorNode"); },
         "SimpleComressorNode",
         "Simple Compressor",
         "asd",
-        "Dynamics"
-        });
+        "Dynamics",
+        [](NodeInfo info) { return new SimpleComressorNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new SimpleGateNode("SimpleGateNode"); },
         "SimpleGateNode",
         "Simple Gate",
         "asd",
-        "Dynamics"
-        });
+        "Dynamics",
+        [](NodeInfo info) { return new SimpleGateNode(info); }
+      });
 
       registerNode(NodeInfo {
-        []() { return new AutoGainNode("AutoGainNode"); },
         "AutoGainNode",
         "Auto Linear Gain",
         "asd",
-        "Dynamics"
-        });
+        "Dynamics",
+        [](NodeInfo info) { return new AutoGainNode(info); }
+      });
     }
   }
 }

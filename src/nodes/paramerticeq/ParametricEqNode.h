@@ -61,8 +61,8 @@ namespace guitard {
 
   class ParametricEqNode final : public FaustGenerated::ParametricEq {
   public:
-    ParametricEqNode(const std::string pType) {
-      shared.type = pType;
+    ParametricEqNode(NodeList::NodeInfo info) {
+      shared.info = info;
       shared.width = 400;
       shared.height = 200;
     }

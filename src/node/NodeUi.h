@@ -286,12 +286,16 @@ namespace guitard {
         mTargetRECT.L, mTargetRECT.T, mTargetRECT.R, mTargetRECT.T + Theme::Node::HEADER_SIZE
       );
       g.FillRect(mSelected ? Theme::Node::HEADER_SELECTED : Theme::Node::HEADER, bound);
-      g.DrawText(Theme::Node::HEADER_TEXT, shared->type.c_str(), bound);
+      g.DrawText(Theme::Node::HEADER_TEXT, shared->info.displayName.c_str(), bound);
     }
 
     virtual void DrawBg(IGraphics& g) {
       if (mUseSvgBg) {
+#ifdef IGRAPHICS_SKIA
+        g.DrawSVG(mSvgBg, mTargetRECT.GetTranslated(0, 90));
+#else
         g.DrawSVG(mSvgBg, mTargetRECT);
+#endif
       }
       else {
 #ifdef NODE_ROUNDED_CORNER
@@ -313,6 +317,18 @@ namespace guitard {
 #if defined(NODE_SHADOW) || defined(NODE_CACHE_BG)
         mCachedBgLayer = g.EndLayer();
 #ifdef NODE_SHADOW
+        if (mSelected) {
+          g.ApplyLayerDropShadow(mCachedBgLayer, iplug::igraphics::IShadow(
+            Theme::Node::HEADER_SELECTED, 0,
+            Theme::Node::SHADOW_DIST_X, Theme::Node::SHADOW_DIST_Y,
+            1.0, true
+          ));
+          g.ApplyLayerDropShadow(mCachedBgLayer, iplug::igraphics::IShadow(
+            Theme::Node::HEADER_SELECTED, 0,
+            -Theme::Node::SHADOW_DIST_X, Theme::Node::SHADOW_DIST_Y,
+            1.0, true
+          ));
+        }
         g.ApplyLayerDropShadow(mCachedBgLayer, iplug::igraphics::IShadow(
           Theme::Node::SHADOW_COLOR, Theme::Node::SHADOW_BLUR,
           Theme::Node::SHADOW_DIST_X, Theme::Node::SHADOW_DIST_Y,

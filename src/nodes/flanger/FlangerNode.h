@@ -4,8 +4,8 @@
 namespace guitard {
   class FlangerNode final : public FaustGenerated::Flanger {
   public:
-    FlangerNode(const std::string pType) {
-      shared.type = pType;
+    FlangerNode(NodeList::NodeInfo info) {
+      shared.info = info;
     }
 
 #ifndef GUITARD_HEADLESS

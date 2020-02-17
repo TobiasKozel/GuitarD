@@ -4,8 +4,8 @@
 namespace guitard {
   class CryBabyNode final : public FaustGenerated::CryBaby {
   public:
-    CryBabyNode(const std::string pType) {
-      shared.type = pType;
+    CryBabyNode(NodeList::NodeInfo info) {
+      shared.info = info;
     }
 
 #ifndef GUITARD_HEADLESS

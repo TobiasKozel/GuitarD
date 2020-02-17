@@ -4,8 +4,8 @@
 namespace guitard {
   class SimpleComressorNode final : public FaustGenerated::SimpleComressor {
   public:
-    SimpleComressorNode(const std::string pType) {
-      shared.type = pType;
+    SimpleComressorNode(NodeList::NodeInfo info) {
+      shared.info = info;
     }
 
 #ifndef GUITARD_HEADLESS

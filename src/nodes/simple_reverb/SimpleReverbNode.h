@@ -4,8 +4,8 @@
 namespace guitard {
   class SimpleReverbNode final : public FaustGenerated::SimpleReverb {
   public:
-    SimpleReverbNode(const std::string pType) {
-      shared.type = pType;
+    SimpleReverbNode(NodeList::NodeInfo info) {
+      shared.info = info;
     }
 
 #ifndef GUITARD_HEADLESS

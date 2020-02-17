@@ -6,7 +6,7 @@ namespace guitard {
    * Recursively resets all the positions of nodes to (0, 0)
    */
     static void resetBranchPos(Node* node) {
-      if (node == nullptr || node->shared.type == "FeedbackNode") { return; }
+      if (node == nullptr || node->shared.info.name == "FeedbackNode") { return; }
       node->mUi->setTranslation(0, 0);
       NodeSocket* socket = nullptr;
       for (int i = 0; i < node->shared.outputCount; i++) {
@@ -25,7 +25,7 @@ namespace guitard {
      * Recursively sorts nodes. I don't even know what's going on here, but it works. Sort of
      */
     Coord2D arrangeBranch(Node* node, Coord2D pos) {
-      if (node == nullptr || node->shared.type == "FeedbackNode") {
+      if (node == nullptr || node->shared.info.name == "FeedbackNode") {
         return pos;
       }
       const float halfWidth = node->shared.width * 0.5;

@@ -4,10 +4,10 @@
 namespace guitard {
   class BitCrusherNode final : public FaustGenerated::BitCrusher {
   public:
-    explicit BitCrusherNode(const std::string pType) {
+    explicit BitCrusherNode(NodeList::NodeInfo info) {
+      shared.info = info;
       shared.width = 250;
       shared.height = 240;
-      shared.type = pType;
     }
 
 #ifndef GUITARD_HEADLESS

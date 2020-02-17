@@ -15,7 +15,8 @@ namespace guitard {
   class OutputNode final : public Node {
   public:
     OutputNode(MessageBus::Bus* pBus) : Node() {
-      shared.type = "Output";
+      shared.info.name = "Output";
+      shared.info.displayName = "Output";
 #ifndef GUITARD_HEADLESS
       if (shared.X == shared.Y && shared.X == 0) {
         // Place it at the screen edge if no position is set

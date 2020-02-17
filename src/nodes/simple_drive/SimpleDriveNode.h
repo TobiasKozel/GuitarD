@@ -34,8 +34,8 @@ namespace guitard {
 
   class SimpleDriveNode final : public FaustGenerated::SimpleDrive {
   public:
-    SimpleDriveNode(const std::string pType) {
-      shared.type = pType;
+    SimpleDriveNode(NodeList::NodeInfo info) {
+      shared.info = info;
     }
 
 #ifndef GUITARD_HEADLESS

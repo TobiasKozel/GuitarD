@@ -11,8 +11,8 @@ namespace guitard {
     sample mAddMode = 0;
     sample** emptyBuffer;
   public:
-    CombineNode(const std::string pType) {
-      shared.type = pType;
+    CombineNode(NodeList::NodeInfo info) {
+      shared.info = info;
       shared.width = 200;
       shared.height = 150;
     }

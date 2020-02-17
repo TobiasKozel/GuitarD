@@ -3,8 +3,8 @@
 namespace guitard {
   class OverDriveNode final : public FaustGenerated::OverDrive {
   public:
-    OverDriveNode(const std::string pType) {
-      shared.type = pType;
+    OverDriveNode(NodeList::NodeInfo info) {
+      shared.info = info;
     }
 
 #ifndef GUITARD_HEADLESS

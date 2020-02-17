@@ -26,7 +26,8 @@ namespace guitard {
   class InputNode final : public Node {
   public:
     InputNode(MessageBus::Bus* pBus) : Node() {
-      shared.type = "Input";
+      shared.info.name = "Input";
+      shared.info.displayName = "Input";
       mLastBlockSize = -1;
 #ifndef GUITARD_HEADLESS
       if (shared.X == shared.Y && shared.X == 0) {

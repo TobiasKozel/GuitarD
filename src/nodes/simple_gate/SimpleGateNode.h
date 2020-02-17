@@ -4,8 +4,8 @@
 namespace guitard {
   class SimpleGateNode final : public FaustGenerated::SimpleGate {
   public:
-    SimpleGateNode(const std::string pType) {
-      shared.type = pType;
+    SimpleGateNode(NodeList::NodeInfo info) {
+      shared.info = info;
     }
 
 #ifndef GUITARD_HEADLESS

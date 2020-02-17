@@ -16,7 +16,8 @@ namespace guitard {
      */
     inline Node* createNode(const std::string name) {
       if (nodelist.find(name) != nodelist.end()) {
-        Node* n = nodelist.at(name).constructor();
+        NodeInfo& info = nodelist.at(name);
+        Node* n = info.constructor(info);
         WDBGMSG(n->getLicense().c_str());
         return n;
       }

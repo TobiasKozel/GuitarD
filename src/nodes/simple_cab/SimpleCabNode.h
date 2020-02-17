@@ -136,8 +136,8 @@ namespace guitard {
     };
 
   public:
-    SimpleCabNode(const std::string pType) {
-      shared.type = pType;
+    SimpleCabNode(NodeList::NodeInfo info) {
+      shared.info = info;
       mStereo = 0;
       addByPassParam();
       addStereoParam();

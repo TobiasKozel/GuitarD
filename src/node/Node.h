@@ -342,7 +342,7 @@ namespace guitard {
 
     /** Copies over the state of the given node if it's from the same type */
     void copyState(Node* n) {
-      if (shared.type != n->shared.type) {
+      if (shared.info.name != n->shared.info.name) {
         WDBGMSG("Trying to copy a state from a different node type!\n");
         assert(false);
         return;
@@ -410,7 +410,7 @@ namespace guitard {
 
 
     void moveAlong(const float x) {
-      if (shared.type == "FeedbackNode") { return; }
+      if (shared.info.name == "FeedbackNode") { return; }
       if (mUi != nullptr) {
         mUi->translate(x, 0);
       }

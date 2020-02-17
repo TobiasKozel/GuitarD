@@ -96,8 +96,9 @@ namespace guitard {
 
         buildUserInterface(&faustUi);
         init(pSamplerate);
-        if (shared.type == DEFAULT_NODE_NAME) {
-          shared.type = faustUi.name;
+
+        if (shared.info.name == DEFAULT_NODE_NAME) { // If a name wasn't set from outside, use the from faust
+          shared.info.name = faustUi.name;
         }
 
         const int perColumn = 2;

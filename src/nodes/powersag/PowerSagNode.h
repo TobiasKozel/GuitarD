@@ -41,14 +41,8 @@ namespace guitard {
     double controlR;
     int gcount;
   public:
-    PowerSagNode(const std::string pType) {
-      for (int count = 0; count < 8999; count++) { dL[count] = 0; dR[count] = 0; }
-      controlL = 0;
-      controlR = 0;
-      gcount = 0;
-      fpNShapeL = 0.0;
-      fpNShapeR = 0.0;
-      shared.type = pType;
+    PowerSagNode(NodeList::NodeInfo info) {
+      shared.info = info;
       shared.width = 200;
       shared.height = 100;
       addByPassParam();
@@ -64,6 +58,13 @@ namespace guitard {
       );
       shared.parameters[shared.parameterCount].x = 50;
       shared.parameterCount++;
+
+      for (int count = 0; count < 8999; count++) { dL[count] = 0; dR[count] = 0; }
+      controlL = 0;
+      controlR = 0;
+      gcount = 0;
+      fpNShapeL = 0.0;
+      fpNShapeR = 0.0;
     }
 
     void ProcessBlock(int nFrames) override {

@@ -4,8 +4,8 @@
 namespace guitard {
   class PhaseToolNode final : public FaustGenerated::PhaseTool {
   public:
-    PhaseToolNode(const std::string pType) {
-      shared.type = pType;
+    PhaseToolNode(NodeList::NodeInfo info) {
+      shared.info = info;
     }
 
 #ifndef GUITARD_HEADLESS

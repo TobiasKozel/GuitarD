@@ -155,7 +155,7 @@ namespace guitard {
 
 
       mNodeCloneEvent.subscribe(mBus, MessageBus::CloneNode, [&](Node* node) {
-        Node* clone = NodeList::createNode(node->shared.type);
+        Node* clone = NodeList::createNode(node->shared.info.name);
         if (clone != nullptr) {
           this->addNode(clone, nullptr, node->shared.X, node->shared.Y, 0, 0, node);
           clone->mUi->mDragging = true;

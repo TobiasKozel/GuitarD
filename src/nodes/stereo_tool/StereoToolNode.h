@@ -4,8 +4,8 @@
 namespace guitard {
   class StereoToolNode final : public FaustGenerated::StereoTool {
   public:
-    StereoToolNode(const std::string pType) {
-      shared.type = pType;
+    StereoToolNode(NodeList::NodeInfo info) {
+      shared.info = info;
     }
 
 #ifndef GUITARD_HEADLESS

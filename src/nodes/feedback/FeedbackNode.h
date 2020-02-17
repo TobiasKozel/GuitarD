@@ -57,8 +57,8 @@ namespace guitard {
     RingBuffer<sample> mPrevR;
 
   public:
-    FeedbackNode(const std::string pType) {
-      shared.type = pType;
+    FeedbackNode(NodeList::NodeInfo info) {
+      shared.info = info;
     }
 
     void setup(MessageBus::Bus* pBus, int pSamplerate, int pMaxBuffer, int pChannels = 2, int pInputs = 1, int pOutputs = 1) override {

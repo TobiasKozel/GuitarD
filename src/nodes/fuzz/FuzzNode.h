@@ -4,8 +4,8 @@
 namespace guitard {
   class FuzzNode final : public FaustGenerated::Fuzz {
   public:
-    FuzzNode(const std::string pType) {
-      shared.type = pType;
+    FuzzNode(NodeList::NodeInfo info) {
+      shared.info = info;
     }
 
 #ifndef GUITARD_HEADLESS

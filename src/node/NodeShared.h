@@ -3,13 +3,14 @@
 #include "../types/gstructs.h"
 #include "../parameter/MeterCoupling.h"
 #include "../parameter/ParameterCoupling.h"
+#include "NodeInfo.h"
 
 namespace guitard {
   /**
    * A struct of data that is shared between the node and its UI
    */
   struct NodeShared {
-    std::string type;
+    NodeList::NodeInfo info;
     MessageBus::Bus* bus = nullptr;
 #ifndef GUITARD_HEADLESS
     IGraphics* graphics = nullptr; // TODOG Get rid of this

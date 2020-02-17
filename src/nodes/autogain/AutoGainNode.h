@@ -10,8 +10,8 @@ namespace guitard {
     int samplesPassed = 0;
     int samplesTarget = 0;
   public:
-    AutoGainNode(const std::string pType) {
-      shared.type = pType;
+    AutoGainNode(NodeList::NodeInfo info) {
+      shared.info = info;
       shared.width = 100;
       shared.height = 100;
       addByPassParam();

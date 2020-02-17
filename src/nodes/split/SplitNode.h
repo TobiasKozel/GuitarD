@@ -4,8 +4,8 @@
 namespace guitard {
   class SplitNode final : public FaustGenerated::Split {
   public:
-    SplitNode(const std::string pType) {
-      shared.type = pType;
+    SplitNode(NodeList::NodeInfo info) {
+      shared.info = info;
     }
 
 #ifndef GUITARD_HEADLESS
