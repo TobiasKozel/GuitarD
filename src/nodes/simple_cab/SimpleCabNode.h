@@ -136,7 +136,7 @@ namespace guitard {
     };
 
   public:
-    SimpleCabNode(NodeList::NodeInfo info) {
+    SimpleCabNode(NodeList::NodeInfo* info) {
       shared.info = info;
       mStereo = 0;
       addByPassParam();

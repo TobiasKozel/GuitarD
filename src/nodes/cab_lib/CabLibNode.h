@@ -92,7 +92,7 @@ namespace guitard {
       },std::make_shared<soundwoofer::SWImpulse>()
     };
   public:
-    CabLibNode(NodeList::NodeInfo info) {
+    CabLibNode(NodeList::NodeInfo* info) {
       shared.info = info;
       mStereo = 0;
       addByPassParam();

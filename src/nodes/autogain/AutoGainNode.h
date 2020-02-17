@@ -10,7 +10,7 @@ namespace guitard {
     int samplesPassed = 0;
     int samplesTarget = 0;
   public:
-    AutoGainNode(NodeList::NodeInfo info) {
+    AutoGainNode(NodeList::NodeInfo* info) {
       shared.info = info;
       shared.width = 100;
       shared.height = 100;

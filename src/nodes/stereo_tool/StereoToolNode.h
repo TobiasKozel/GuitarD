@@ -4,7 +4,7 @@
 namespace guitard {
   class StereoToolNode final : public FaustGenerated::StereoTool {
   public:
-    StereoToolNode(NodeList::NodeInfo info) {
+    StereoToolNode(NodeList::NodeInfo* info) {
       shared.info = info;
     }
 

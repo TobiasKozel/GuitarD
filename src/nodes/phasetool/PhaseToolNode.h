@@ -4,7 +4,7 @@
 namespace guitard {
   class PhaseToolNode final : public FaustGenerated::PhaseTool {
   public:
-    PhaseToolNode(NodeList::NodeInfo info) {
+    PhaseToolNode(NodeList::NodeInfo* info) {
       shared.info = info;
     }
 

@@ -286,7 +286,7 @@ namespace guitard {
         mTargetRECT.L, mTargetRECT.T, mTargetRECT.R, mTargetRECT.T + Theme::Node::HEADER_SIZE
       );
       g.FillRect(mSelected ? Theme::Node::HEADER_SELECTED : Theme::Node::HEADER, bound);
-      g.DrawText(Theme::Node::HEADER_TEXT, shared->info.displayName.c_str(), bound);
+      g.DrawText(Theme::Node::HEADER_TEXT, shared->info->displayName.c_str(), bound);
     }
 
     virtual void DrawBg(IGraphics& g) {

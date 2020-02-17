@@ -4,7 +4,7 @@
 namespace guitard {
   class CryBabyNode final : public FaustGenerated::CryBaby {
   public:
-    CryBabyNode(NodeList::NodeInfo info) {
+    CryBabyNode(NodeList::NodeInfo* info) {
       shared.info = info;
     }
 

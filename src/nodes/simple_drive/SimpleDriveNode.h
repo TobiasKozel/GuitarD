@@ -34,7 +34,7 @@ namespace guitard {
 
   class SimpleDriveNode final : public FaustGenerated::SimpleDrive {
   public:
-    SimpleDriveNode(NodeList::NodeInfo info) {
+    SimpleDriveNode(NodeList::NodeInfo* info) {
       shared.info = info;
     }
 

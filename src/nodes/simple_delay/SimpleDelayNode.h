@@ -4,7 +4,7 @@
 namespace guitard {
   class SimpleDelayNode final : public FaustGenerated::SimpleDelay {
   public:
-    SimpleDelayNode(NodeList::NodeInfo info) {
+    SimpleDelayNode(NodeList::NodeInfo* info) {
       shared.info = info;
       shared.width = 300;
     }

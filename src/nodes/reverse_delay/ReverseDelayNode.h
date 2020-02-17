@@ -4,7 +4,7 @@
 namespace guitard {
   class ReverseDelayNode final : public FaustGenerated::ReverseDelay {
   public:
-    ReverseDelayNode(NodeList::NodeInfo info) {
+    ReverseDelayNode(NodeList::NodeInfo* info) {
       shared.info = info;
       shared.width = 300;
     }

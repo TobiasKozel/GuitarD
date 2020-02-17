@@ -10,7 +10,7 @@ namespace guitard {
    * A struct of data that is shared between the node and its UI
    */
   struct NodeShared {
-    NodeList::NodeInfo info;
+    NodeList::NodeInfo* info; // Only a pointer to the node info to avoid allocations
     MessageBus::Bus* bus = nullptr;
 #ifndef GUITARD_HEADLESS
     IGraphics* graphics = nullptr; // TODOG Get rid of this

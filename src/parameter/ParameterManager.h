@@ -43,7 +43,7 @@ namespace guitard {
      */
     bool claimNode(Node* node) {
       bool gotAllParams = true;
-      std::string prefix = node->shared.info.displayName;
+      std::string prefix = node->shared.info->displayName;
       for (int i = 0; i < node->shared.parameterCount; i++) {
         if (!claimParameter(&node->shared.parameters[i], prefix.c_str())) {
           /**

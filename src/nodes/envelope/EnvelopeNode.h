@@ -102,7 +102,7 @@ namespace guitard {
     sample avg = 0;
     sample current = 0;
   public:
-    explicit EnvelopeNode(NodeList::NodeInfo info) {
+    explicit EnvelopeNode(NodeList::NodeInfo* info) {
       shared.info = info;
       shared.meters[shared.meterCount] = new MeterCoupling{ &avg, "Value", 0, 1 };
       shared.meterCount++;

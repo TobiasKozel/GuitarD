@@ -4,7 +4,7 @@
 namespace guitard {
   class SimpleReverbNode final : public FaustGenerated::SimpleReverb {
   public:
-    SimpleReverbNode(NodeList::NodeInfo info) {
+    SimpleReverbNode(NodeList::NodeInfo* info) {
       shared.info = info;
     }
 

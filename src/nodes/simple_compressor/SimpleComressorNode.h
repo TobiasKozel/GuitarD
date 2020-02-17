@@ -4,7 +4,7 @@
 namespace guitard {
   class SimpleComressorNode final : public FaustGenerated::SimpleComressor {
   public:
-    SimpleComressorNode(NodeList::NodeInfo info) {
+    SimpleComressorNode(NodeList::NodeInfo* info) {
       shared.info = info;
     }
 

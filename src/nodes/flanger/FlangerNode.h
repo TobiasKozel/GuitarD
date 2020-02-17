@@ -4,7 +4,7 @@
 namespace guitard {
   class FlangerNode final : public FaustGenerated::Flanger {
   public:
-    FlangerNode(NodeList::NodeInfo info) {
+    FlangerNode(NodeList::NodeInfo* info) {
       shared.info = info;
     }
 

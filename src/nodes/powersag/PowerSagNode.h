@@ -41,7 +41,7 @@ namespace guitard {
     double controlR;
     int gcount;
   public:
-    PowerSagNode(NodeList::NodeInfo info) {
+    PowerSagNode(NodeList::NodeInfo* info) {
       shared.info = info;
       shared.width = 200;
       shared.height = 100;

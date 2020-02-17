@@ -4,7 +4,7 @@
 namespace guitard {
   class BandSplitNode final : public FaustGenerated::BandSplit {
   public:
-    BandSplitNode(NodeList::NodeInfo info) {
+    BandSplitNode(NodeList::NodeInfo* info) {
       shared.info = info;
     }
 

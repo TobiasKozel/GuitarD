@@ -3,7 +3,7 @@
 namespace guitard {
   class OverDriveNode final : public FaustGenerated::OverDrive {
   public:
-    OverDriveNode(NodeList::NodeInfo info) {
+    OverDriveNode(NodeList::NodeInfo* info) {
       shared.info = info;
     }
 

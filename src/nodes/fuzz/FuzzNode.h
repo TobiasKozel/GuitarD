@@ -4,7 +4,7 @@
 namespace guitard {
   class FuzzNode final : public FaustGenerated::Fuzz {
   public:
-    FuzzNode(NodeList::NodeInfo info) {
+    FuzzNode(NodeList::NodeInfo* info) {
       shared.info = info;
     }
 

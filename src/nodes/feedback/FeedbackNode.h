@@ -57,7 +57,7 @@ namespace guitard {
     RingBuffer<sample> mPrevR;
 
   public:
-    FeedbackNode(NodeList::NodeInfo info) {
+    FeedbackNode(NodeList::NodeInfo* info) {
       shared.info = info;
     }
 

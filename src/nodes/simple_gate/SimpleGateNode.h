@@ -4,7 +4,7 @@
 namespace guitard {
   class SimpleGateNode final : public FaustGenerated::SimpleGate {
   public:
-    SimpleGateNode(NodeList::NodeInfo info) {
+    SimpleGateNode(NodeList::NodeInfo* info) {
       shared.info = info;
     }
 
