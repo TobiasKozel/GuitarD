@@ -16,6 +16,7 @@ namespace guitard {
       String categoryName;
       String description;
       NodeConstructor constructor;
+      bool hidden = false;
     };
   }
 }

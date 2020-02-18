@@ -50,7 +50,7 @@ namespace soundwoofer {
   }
 
   namespace ir {
-    Status list(bool reset = false);
+    Status list(bool reset = true);
 
     Status load(SWImpulseShared ir, size_t sampleRate = 0, bool normalize = true);
 

@@ -75,7 +75,7 @@ namespace guitard {
         "FeedbackNode",
         "Feedback",
         "asd",
-        "Tools",
+        "Signal Flow",
         "Allows feeding back an output signal into an input socket (Unstable)",
         [](NodeInfo* info) { return new FeedbackNode(info); }
         });
@@ -122,7 +122,8 @@ namespace guitard {
         "asd",
         "Distortion",
         "Description",
-        [](NodeInfo* info) { return new FuzzNode(info); }
+        [](NodeInfo* info) { return new FuzzNode(info); },
+        true
         });
 
       registerNode(NodeInfo{
