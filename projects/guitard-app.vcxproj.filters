@@ -540,6 +540,9 @@
     <ClInclude Include="..\src\nodes\phaser\PhaseNode.h">
       <Filter>src\nodes\filters</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\lfo\LfoNode.h">
+      <Filter>src\nodes\automation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

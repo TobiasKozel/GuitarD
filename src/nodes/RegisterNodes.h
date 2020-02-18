@@ -32,6 +32,7 @@
 #include "./flanger/FlangerNode.h"
 #include "autowah/AutoWahNode.h"
 #include "phaser/PhaseNode.h"
+#include "lfo/LfoNode.h"
 
 namespace guitard {
   namespace NodeList {
@@ -98,6 +99,15 @@ namespace guitard {
         "Automation",
         "Description",
         [](NodeInfo* info) { return new EnvelopeNode(info); }
+        });
+
+      registerNode(NodeInfo{
+        "LfoNode",
+        "LFO Automation Tool",
+        "asd",
+        "Automation",
+        "Description",
+        [](NodeInfo* info) { return new LfoNode(info); }
         });
 
       registerNode(NodeInfo{

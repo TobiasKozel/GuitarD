@@ -3,6 +3,7 @@
 #include "../node/NodeUi.h"
 #include "../node/NodeSocket.h"
 #include "./NodeShared.h"
+#include "../types/types.h"
 
 namespace guitard {
   /**

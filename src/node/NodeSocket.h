@@ -1,5 +1,7 @@
 #pragma once
 #include "../misc/constants.h"
+#include "../types/types.h"
+
 namespace guitard {
   class Node;
   /**

@@ -364,6 +364,7 @@
     <ClInclude Include="..\src\nodes\fuzz\FuzzNode.h" />
     <ClInclude Include="..\src\nodes\io\InputNode.h" />
     <ClInclude Include="..\src\nodes\io\OutputNode.h" />
+    <ClInclude Include="..\src\nodes\lfo\LfoNode.h" />
     <ClInclude Include="..\src\nodes\overdrive\OverDriveNode.h" />
     <ClInclude Include="..\src\nodes\paramerticeq\ParametricEqNode.h" />
     <ClInclude Include="..\src\nodes\phaser\PhaseNode.h" />
