@@ -534,6 +534,12 @@
     <ClInclude Include="..\thirdparty\soundwoofer\soundwooferHttp.h">
       <Filter>thirdparty\soundwoofer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\autowah\AutoWahNode.h">
+      <Filter>src\nodes\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nodes\phaser\PhaseNode.h">
+      <Filter>src\nodes\filters</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

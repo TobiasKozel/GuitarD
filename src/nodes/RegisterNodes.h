@@ -30,6 +30,8 @@
 #include "./split/SplitNode.h"
 #include "./band_split/BandSplitNode.h"
 #include "./flanger/FlangerNode.h"
+#include "autowah/AutoWahNode.h"
+#include "phaser/PhaseNode.h"
 
 namespace guitard {
   namespace NodeList {
@@ -196,6 +198,24 @@ namespace guitard {
         "Filters",
         "Description",
         [](NodeInfo* info) { return new CryBabyNode(info); }
+        });
+
+      registerNode(NodeInfo{
+        "AutoWahNode",
+        "Auto Wah",
+        "asd",
+        "Filters",
+        "Description",
+        [](NodeInfo* info) { return new AutoWahNode(info); }
+        });
+
+      registerNode(NodeInfo{
+        "PhaserNode",
+        "Phaser",
+        "asd",
+        "Filters",
+        "Description",
+        [](NodeInfo* info) { return new PhaserNode(info); }
         });
 
 
