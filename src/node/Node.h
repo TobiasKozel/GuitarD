@@ -398,13 +398,13 @@ namespace guitard {
       for (int i = 0; i < shared.inputCount; i++) {
         NodeSocket* s = shared.socketsIn[i];
         s->mX = shared.X - shared.width * 0.5;
-        s->mY = i * 50.f + shared.Y;
+        s->mY = i * 50.f + shared.Y - (shared.inputCount / 2);
       }
 
       for (int i = 0; i < shared.outputCount; i++) {
         NodeSocket* s = shared.socketsOut[i];
         s->mX = shared.width * 0.5 + shared.X - 30;
-        s->mY = i * 50.f + shared.Y;
+        s->mY = i * 35.f + shared.Y - (shared.outputCount / 2) * 35;
       }
     }
 

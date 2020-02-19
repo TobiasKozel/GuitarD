@@ -6,8 +6,8 @@ namespace guitard {
   public:
     explicit AutoWahNode(NodeList::NodeInfo* info) {
       shared.info = info;
-      shared.width = 250;
-      shared.height = 240;
+      shared.width = 200;
+      shared.height = 200;
     }
 
 #ifndef GUITARD_HEADLESS

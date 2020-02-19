@@ -370,6 +370,7 @@
     <ClInclude Include="..\src\nodes\phaser\PhaseNode.h" />
     <ClInclude Include="..\src\nodes\phasetool\PhaseToolNode.h" />
     <ClInclude Include="..\src\nodes\powersag\PowerSagNode.h" />
+    <ClInclude Include="..\src\nodes\rectify\RectifyNode.h" />
     <ClInclude Include="..\src\nodes\RegisterNodes.h" />
     <ClInclude Include="..\src\nodes\reverse_delay\ReverseDelayNode.h" />
     <ClInclude Include="..\src\nodes\simple_cab\InternalIRs.h" />

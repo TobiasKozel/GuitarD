@@ -543,6 +543,9 @@
     <ClInclude Include="..\src\nodes\lfo\LfoNode.h">
       <Filter>src\nodes\automation</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\rectify\RectifyNode.h">
+      <Filter>src\nodes\distortion</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

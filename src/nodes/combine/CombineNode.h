@@ -106,7 +106,7 @@ namespace guitard {
         "Add mode", &mAddMode, 0, 0.0, 1.0, 1.0
       );
       shared.parameters[shared.parameterCount].x = 40;
-      shared.parameters[shared.parameterCount].y = 20;
+      shared.parameters[shared.parameterCount].y = 40;
       shared.parameters[shared.parameterCount].wantsDawParameter = false;
       shared.parameterCount++;
 

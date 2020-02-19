@@ -33,6 +33,7 @@
 #include "autowah/AutoWahNode.h"
 #include "phaser/PhaseNode.h"
 #include "lfo/LfoNode.h"
+#include "rectify/RectifyNode.h"
 
 namespace guitard {
   namespace NodeList {
@@ -126,6 +127,15 @@ namespace guitard {
           "Distortion",
           "Description",
         [](NodeInfo* info) { return new OverDriveNode(info); }
+        });
+
+        registerNode(NodeInfo{
+          "RectifyNode",
+          "Rectify",
+          "asd",
+          "Distortion",
+          "Description",
+        [](NodeInfo* info) { return new RectifyNode(info); }
         });
 
       registerNode(NodeInfo{
