@@ -318,6 +318,7 @@ namespace guitard {
       mDistanceDragged = 0;
       mCapturedControl = nullptr;
       mDirty = true;
+      mCapturedControl = nullptr;
     }
 
     void OnMouseOver(float x, float y, const IMouseMod& mod) override {

@@ -1,7 +1,11 @@
 // Wrap the debug message from iplug in the iplug namespace on windows
 // since using iplug::DBGMSG will exapnd to iplug::printf() and fail on linux/osx
-#ifdef GUITARD_HEADLESS
-  #define WDBGMSG(...) printf(__VA_ARGS__);
+#if defined (GUITARD_HEADLESS)
+  #ifdef NDEBUG
+    #define WDBGMSG(...) printf(__VA_ARGS__);
+  #else
+    #define WDBGMSG(...)
+  #endif
 #else
 #if defined(OS_MAC) || defined(OS_LINUX) || defined(OS_WEB) || defined(OS_IOS) || NDEBUG
   #define WDBGMSG(...) DBGMSG(__VA_ARGS__)

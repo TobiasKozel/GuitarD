@@ -75,6 +75,7 @@ namespace guitard {
       OnResize();
       mScrollview.Hide(!open);
       if (!mIsOpen) {
+        mScrollview.OnMouseOut();
         GetUI()->SetAllControlsDirty();
       }
     }

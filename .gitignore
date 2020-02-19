@@ -11,6 +11,9 @@
 *.layout
 *.mode1v3
 *.db
+*.obj
+*.pdb
+*.exe
 *.LSOverride
 *.xcuserdata
 *.xcschememanagement.plist

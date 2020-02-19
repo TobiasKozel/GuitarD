@@ -4,11 +4,21 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "msvc headless debug",
+            "type": "shell",
+            "command": "cl /DEBUG:FULL /ZI /I./ /I./thirdparty /I./src/faust/generated ./src/headless/headless.cpp /link /O./src/headless/headless.exe",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
             "label": "msvc headless",
             "type": "shell",
-            "command": "cl /DEBUG:FULL /ZI /I ../../ /I../../thirdparty /I../faust/generated headless.cpp",
+            "command": "cl /O2 /I./ /I./thirdparty /I./src/faust/generated ./src/headless/headless.cpp /link /OUT:./src/headless/headless.exe",
             "group": {
-                "kind": "build"
+                "kind": "build",
+                "isDefault": true
             }
         },
         {
