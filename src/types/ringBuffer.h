@@ -97,7 +97,7 @@ namespace guitard {
       return elements;
     }
 
-    int isFree() const {
+    int nFree() const {
       return mSize - mHead;
     }
 

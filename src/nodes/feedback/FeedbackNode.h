@@ -7,7 +7,7 @@ namespace guitard {
   class FeedbackNodeUi : public NodeUi {
     IVButtonControl* mBrowseButton = nullptr;
     MessageBus::Subscription<BlockSizeEvent*> mMaxBlockSizeEvent;
-    IPopupMenu mMenu{ "Delay", {"1", "8", "16", "32", "64", "128", "256", "512"},
+    IPopupMenu mMenu{ "Delay", {"1", "2", "4", "8", "16", "32", "64", "128", "256", "512"},
       [&](IPopupMenu* pMenu) {
       IPopupMenu::Item* itemChosen = pMenu->GetChosenItem();
       if (itemChosen) {
@@ -95,9 +95,9 @@ namespace guitard {
     void ProcessBlock(int nFrames) override {
       if (byPass()) { return; }
       if (mIsProcessed == false) {
-        shared.parameters[1].update();
-        sample val = ParameterCoupling::dbToLinear(gain);
-        if (mPrevL.inBuffer() > shared.maxBlockSize) { // nFrames can never been larger than mMaxBuffer
+        if (mPrevL.inBuffer() > shared.maxBlockSize && mPrevL.nFree() == 0) { // nFrames can never been larger than mMaxBuffer
+          shared.parameters[1].update();
+          sample val = ParameterCoupling::dbToLinear(gain);
           mPrevL.get(mBuffersOut[0][0], nFrames);
           mPrevR.get(mBuffersOut[0][1], nFrames);
           for (int i = 0; i < nFrames; i++) {
