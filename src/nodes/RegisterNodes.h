@@ -112,7 +112,7 @@ namespace guitard {
 
       registerNode(NodeInfo{
         "SimpleDriveNode",
-        "Simple Drive",
+        "Soft Clipper",
         "asd",
         "Distortion",
         "Description",
