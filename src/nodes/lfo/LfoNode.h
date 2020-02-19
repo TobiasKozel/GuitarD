@@ -8,8 +8,8 @@ namespace guitard {
     IVButtonControl* mPicker = nullptr;
     bool mPickerMode = false;
     int mHistoryIndex = 0;
-    const int mHistoryLength = PLUG_FPS * 2;
-    double mHistory[PLUG_FPS * 2] = { 0 };
+    static const int mHistoryLength = PLUG_FPS * 2;
+    double mHistory[mHistoryLength] = { 0 };
   public:
     LfoNodeUi(NodeShared* param) : NodeUi(param) {
     }
@@ -62,7 +62,7 @@ namespace guitard {
         mHistoryIndex = 0;
       }
 
-      mHistory[mHistoryIndex] = *(shared->meters[0]->value) * 50;
+      mHistory[mHistoryIndex] = *(shared->meters[0]->value) * 25;
 
       float x = mTargetRECT.L + 40;
       float y = mTargetRECT.T + 100;
@@ -130,7 +130,7 @@ namespace guitard {
       shared.parameterCount++;
 
       shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "Gain", &mGain, 1, -1, 1, 0.01
+        "Gain", &mGain, 1, -2, 2, 0.001
       );
       shared.parameters[shared.parameterCount].x = 80;
       shared.parameters[shared.parameterCount].y = top;
@@ -178,13 +178,20 @@ namespace guitard {
     void ProcessBlock(const int nFrames) override {
       if (mIsProcessed) { return; }
       shared.parameters[0].update();
-      if (mByPassed < 0.5) { return; } // Need to check bypass manually since there's no input
+      if (mByPassed > 0.5) {
+        for (int i = 0; i < mAutomationTargetCount; i++) {
+          ParameterCoupling* c = mAutomationTargets.get(i);
+          c->automation = 0.0;
+        }
+        mIsProcessed = true;
+        return;
+      }
       shared.parameters[1].update();
       shared.parameters[2].update();
       shared.parameters[3].update();
       mTime += (static_cast<sample>(nFrames) / static_cast<sample>(mSampleRate)) * mLfoF * 2.0 * PI;
 
-      mLfoVal = sin(mTime);
+      mLfoVal = sin(mTime) * 0.5 + 0.5;
       mLfoVal += sin(mTime * 1000.0) * mNoise;
       mLfoVal *= mGain;
       for (int i = 0; i < mAutomationTargetCount; i++) {
