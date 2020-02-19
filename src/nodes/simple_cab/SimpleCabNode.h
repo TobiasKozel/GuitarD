@@ -71,12 +71,14 @@ namespace guitard {
 
     void openFileDialog() const {
       const HWND handle = reinterpret_cast<HWND>(shared->graphics->GetWindow());
-      const String result = WDL_ChooseFileForOpen( // TODOG LEAK: the string might leak
+      char* path = WDL_ChooseFileForOpen( // TODOG LEAK: the string might leak
         handle, "Open IR", nullptr, nullptr,
         "Wave Files\0*.wav;*.WAV\0", "*.wav",
         true, false
       );
-      if (!result.empty()) {
+      if (path != nullptr) {
+        const String result = path;
+        free(path);
         WDBGMSG(result.c_str());
         soundwoofer::SWImpulseShared load(new soundwoofer::SWImpulse());
         load->file = result;
