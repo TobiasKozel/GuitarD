@@ -29,11 +29,10 @@ namespace guitard {
       homeDir = getenv("HOMEDRIVE");
       homeDir.append(getenv("HOMEPATH"));
 #endif
-      printf("\n%s\n", homeDir.get());
-      auto& sw = SoundWoofer::instance();
-      sw.setPluginName("GuitarD");
-      HOME_PATH = homeDir.get();
-      sw.setHomeDirectory(homeDir.get());
+      printf("\n%s\n", homeDir.c_str());
+      soundwoofer::setup::setPluginName("GuitarD");
+      HOME_PATH = homeDir;
+      soundwoofer::setup::setHomeDirectory(homeDir.c_str());
     }
 
     /**
