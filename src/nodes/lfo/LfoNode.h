@@ -176,7 +176,9 @@ namespace guitard {
     }
 
     void ProcessBlock(const int nFrames) override {
-      if (mIsProcessed || byPass()) { return; }
+      if (mIsProcessed) { return; }
+      shared.parameters[0].update();
+      if (mByPassed < 0.5) { return; } // Need to check bypass manually since there's no input
       shared.parameters[1].update();
       shared.parameters[2].update();
       shared.parameters[3].update();
