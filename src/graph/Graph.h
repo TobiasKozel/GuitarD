@@ -664,6 +664,9 @@ namespace guitard {
       }
       // Allocating the node is thread safe, but not the node list itself
       lockAudioThread();
+      if (mNodes.find(node) != -1) {
+        assert(false);
+      }
       mNodes.add(node);
       SortGraph::sortGraph(&mNodes, mInputNode, mOutputNode);
       // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
@@ -685,9 +688,17 @@ namespace guitard {
           for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) { // Gather all the sockets connected to the output of this node
             NodeSocket* nextSock = outSock->mConnectedTo[i];
             if (nextSock != nullptr) {
+              bool duplicate = false;
+              for (int j = 0; j < nextSocketCount; j++) {
+                if (nextSockets[j] == nextSock) {
+                  duplicate = true;
+                }
+              }
+              if (!duplicate) {
               nextSockets[nextSocketCount] = nextSock;
               nextSocketCount++;
             }
+          }
           }
 
           outSock->disconnectAll();
@@ -760,6 +771,9 @@ namespace guitard {
       mParamManager->releaseNode(node);
       node->cleanUp();
       mNodes.remove(node);
+      if (mNodes.find(node) != -1) {
+        assert(false);
+      }
       delete node;
 #ifndef GUITARD_HEADLESS
       SortGraph::sortGraph(&mNodes, mInputNode, mOutputNode);

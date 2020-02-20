@@ -47,6 +47,13 @@ namespace guitard {
       for (int i = 0; i < sorted.size(); i++) {
         Node* n = sorted[i];
         if (n == outNode) { continue; }
+        bool dupli = false;
+        for (int j = 0; j < nodes->size(); j++) {
+          if (nodes->get(j) == n) {
+            dupli = true;
+          }
+        }
+        if (dupli) { continue; } // TODOG there shouldn't be any dupes, but it happens for some reason
         nodes->add(n);
       }
     }
