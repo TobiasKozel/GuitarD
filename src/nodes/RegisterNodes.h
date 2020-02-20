@@ -30,10 +30,11 @@
 #include "./split/SplitNode.h"
 #include "./band_split/BandSplitNode.h"
 #include "./flanger/FlangerNode.h"
-#include "autowah/AutoWahNode.h"
-#include "phaser/PhaseNode.h"
-#include "lfo/LfoNode.h"
-#include "rectify/RectifyNode.h"
+#include "./autowah/AutoWahNode.h"
+#include "./phaser/PhaseNode.h"
+#include "./lfo/LfoNode.h"
+#include "./rectify/RectifyNode.h"
+#include "./transpose/TransposeNode.h"
 
 namespace guitard {
   namespace NodeList {
@@ -227,6 +228,15 @@ namespace guitard {
         "Filters",
         "Description",
         [](NodeInfo* info) { return new AutoWahNode(info); }
+        });
+
+      registerNode(NodeInfo{
+        "TransposeNode",
+        "Transpose",
+        "asd",
+        "Filters",
+        "Description",
+        [](NodeInfo* info) { return new TransposeNode(info); }
         });
 
       registerNode(NodeInfo{

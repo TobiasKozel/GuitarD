@@ -546,6 +546,9 @@
     <ClInclude Include="..\src\nodes\rectify\RectifyNode.h">
       <Filter>src\nodes\distortion</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\transpose\TransposeNode.h">
+      <Filter>src\nodes\filters</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

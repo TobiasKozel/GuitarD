@@ -383,6 +383,7 @@
     <ClInclude Include="..\src\nodes\simple_reverb\SimpleReverbNode.h" />
     <ClInclude Include="..\src\nodes\split\SplitNode.h" />
     <ClInclude Include="..\src\nodes\stereo_tool\StereoToolNode.h" />
+    <ClInclude Include="..\src\nodes\transpose\TransposeNode.h" />
     <ClInclude Include="..\src\nodes\tuner\TunerNode.h" />
     <ClInclude Include="..\src\node\Node.h" />
     <ClInclude Include="..\src\node\NodeInfo.h" />
