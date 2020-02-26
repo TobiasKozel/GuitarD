@@ -12,17 +12,8 @@ GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::M
    */
   soundwoofer::setup::setPluginName(PLUG_NAME);
   WDL_String path;
-  iplug::UserHomePath(path);
-  guitard::HOME_PATH = path.Get();
+  UserHomePath(path);
   soundwoofer::setup::setHomeDirectory(path.Get());
-
-  //SoundWoofer::Status status;
-  //status = sw.fetchIRs();
-  //status = sw.loadIR(sw.getIRs().at(0));
-  //sw.flushIRs();
-  //status = sw.loadIR(sw.getIRs().at(0));
-  //status = sw.sendPreset("presetname", "somedata2", 9);
-  //status = sw.fetchPresets();
 
   guitard::NodeList::registerNodes();
   mParamManager = new guitard::ParameterManager(&mBus);
@@ -43,8 +34,8 @@ GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::M
   });
 
   /**
-   * Distributed UI won't work since the editor doesn't only afftect IParams
-   * Syncing them up and seperatinh the gui from the main classes would require some work and 
+   * Distributed UI won't work since the editor doesn't only affect IParams
+   * Syncing them up and separating the gui from the main classes would require some work
    */
 #if IPLUG_EDITOR
   mMakeGraphicsFunc = [&]() {
@@ -58,7 +49,8 @@ GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::M
     pGraphics->SetSizeConstraints(PLUG_MIN_WIDTH, PLUG_MAX_WIDTH, PLUG_MIN_HEIGHT, PLUG_MAX_HEIGHT);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     pGraphics->LoadFont("ForkAwesome", ICON_FN);
-    mGraph->setupUi(pGraphics);
+    mGraphUi = new guitard::GraphUi(&mBus, pGraphics);
+    mGraphUi->setGraph(mGraph);
   };
 #endif
 }
@@ -88,7 +80,8 @@ void GuitarD::OnUIClose() {
    * however doing this manually will be safer and make sure all the nodes can clean up
    * after them selves and set the control in the ParameterCoupling to a nullptr
    */
-  mGraph->cleanupUi();
+  delete mGraphUi;
+  mGraphUi = nullptr;
 }
 
 bool GuitarD::SerializeState(iplug::IByteChunk& chunk) const {

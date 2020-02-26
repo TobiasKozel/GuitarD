@@ -25,7 +25,6 @@ namespace guitard {
    */
   class NodeUi : public IControl {
   protected:
-    NodeShared* shared;
     MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
     MessageBus::Subscription<QuickConnectRequest> mNodeQuickConnectEvent;
 
@@ -50,6 +49,7 @@ namespace guitard {
 
 
   public:
+    NodeShared* shared; // TODO this is only temporary
     bool mDragging = false;
 
     /**

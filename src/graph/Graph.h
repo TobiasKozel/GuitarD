@@ -11,15 +11,6 @@
 #include "./Serializer.h"
 #include "../parameter/ParameterManager.h"
 
-#ifndef GUITARD_HEADLESS
-#include "src/ui/GraphBackground.h"
-#include "SortGraph.h" 
-#include "src/ui/CableLayer.h"
-#include "src/ui/SideBar.h"
-#include "src/misc/HistoryStack.h"
-#include "FormatGraph.h"
-#endif
-
 namespace guitard {
   /**
    * This is the "god object" which will handle all the nodes
@@ -29,46 +20,6 @@ namespace guitard {
   class Graph {
     MessageBus::Bus* mBus = nullptr;
 
-
-#ifndef GUITARD_HEADLESS
-    /**
-     * Whole lot of subscriptions needed for the graph
-     */
-    MessageBus::Subscription<Node*> mNodeDelSub;
-    MessageBus::Subscription<Node*> mNodeBypassEvent;
-    MessageBus::Subscription<Node*> mNodeCloneEvent;
-    MessageBus::Subscription<NodeDragSpawnRequest> mNodeDragSpawn;
-    MessageBus::Subscription<Node*> mNodeSpliceCombineEvent;
-    MessageBus::Subscription<NodeList::NodeInfo> mNodeAddEvent;
-    MessageBus::Subscription<bool> mAwaitAudioMutexEvent;
-    MessageBus::Subscription<bool> mPushUndoState;
-    MessageBus::Subscription<bool> mPopUndoState;
-    MessageBus::Subscription<GraphStats**> mReturnStats;
-    MessageBus::Subscription<AutomationAttachRequest> mAutomationRequest;
-    MessageBus::Subscription<const char*> mLoadPresetEvent;
-    MessageBus::Subscription<WDL_String*> mSavePresetEvent;
-    MessageBus::Subscription<BlockSizeEvent*> mMaxBlockSizeEvent;
-    MessageBus::Subscription<NodeSelectionChanged> mSelectionChagedEvent;
-    MessageBus::Subscription<Drag> mNodeDragged;
-    IGraphics* mGraphics = nullptr;
-
-    /**
-     * Control elements
-     */
-    GraphBackground* mBackground = nullptr; // Always at the bottom
-    CableLayer* mCableLayer = nullptr; // Always below the Gallery
-    SideBar* mSideBar = nullptr; // Always top most
-
-    HistoryStack mHistoryStack;
-
-    /**
-     * Editor window properties
-     * Kept around for the serialization
-     */
-    int mWindowWidth = 0;
-    int mWindowHeight = 0;
-    float mWindowScale = 0;
-#endif
 
     ParameterManager* mParamManager = nullptr;
 
@@ -114,166 +65,25 @@ namespace guitard {
      */
     int mMaxBlockSize = MAX_BUFFER;
 
-    PointerList<NodeUi> mSelectedNodes;
-
     GraphStats mStats;
 
     /**
      * Used to slice the dsp block in smaller slices
+     * Only does stereo for now
      */
     sample** mSliceBuffer[2] = { nullptr };
+
+    float mScale = 1.0; // This is the zoom level of the graph
 
   public:
 
     explicit Graph(MessageBus::Bus* pBus, ParameterManager* pParamManager) {
-      mBus = pBus;
-      mParamManager = pParamManager;
+      mBus = pBus; // Goal is to get this out of all the non UI classes
+      mParamManager = pParamManager; // we'll keep this around to let nodes register parameters
 
       mInputNode = new InputNode(mBus);
       mOutputNode = new OutputNode(mBus);
       mOutputNode->connectInput(mInputNode->shared.socketsOut[0]);
-
-#ifndef GUITARD_HEADLESS
-      /**
-       * All the events the Graph is subscribed to, they're only needed with a gui
-       */
-      mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo& info) {
-        MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
-        this->addNode(NodeList::createNode(info.name), nullptr, 300, 300);
-      });
-
-      mNodeDelSub.subscribe(mBus, MessageBus::NodeDeleted, [&](Node* param) {
-        MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
-        this->removeNode(param, true);
-      });
-
-      mNodeBypassEvent.subscribe(mBus, MessageBus::BypassNodeConnection, [&](Node* param) {
-        MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
-        this->byPassConnection(param);
-      });
-
-      mNodeCloneEvent.subscribe(mBus, MessageBus::CloneNode, [&](Node* node) {
-        Node* clone = NodeList::createNode(node->shared.info->name);
-        if (clone != nullptr) {
-          this->addNode(clone, nullptr, node->shared.X, node->shared.Y, 0, 0, node);
-          clone->mUi->mDragging = true;
-          mGraphics->SetCapturedControl(clone->mUi);
-          MessageBus::fireEvent<NodeSelectionChanged>(
-            mBus, MessageBus::NodeSelectionChange, { clone->mUi, true }
-          );
-        }
-      });
-
-      mNodeDragSpawn.subscribe(mBus, MessageBus::NodeDragSpawn, [&](NodeDragSpawnRequest req) {
-        Node* node = NodeList::createNode(req.name);
-        if (node != nullptr) {
-          this->addNode(node, nullptr, req.pos.x, req.pos.y, 0, 0);
-          node->mUi->mDragging = true;
-          mGraphics->SetCapturedControl(node->mUi);
-          MessageBus::fireEvent<NodeSelectionChanged>(
-            mBus, MessageBus::NodeSelectionChange, { node->mUi, true }
-          );
-        }
-      });
-
-      mPushUndoState.subscribe(mBus, MessageBus::PushUndoState, [&](bool) {
-        WDBGMSG("PushState");
-        this->serialize(*(mHistoryStack.pushState()));
-      });
-
-      mPopUndoState.subscribe(mBus, MessageBus::PopUndoState, [&](const bool redo) {
-        nlohmann::json* state = mHistoryStack.popState(redo);
-        if (state != nullptr) {
-          WDBGMSG("PopState");
-          this->deserialize(*state);
-        }
-      });
-
-      mReturnStats.subscribe(mBus, MessageBus::GetGraphStats, [&](GraphStats** stats) {
-        *stats = &mStats;
-      });
-
-      mNodeSpliceCombineEvent.subscribe(mBus, MessageBus::NodeSpliceInCombine, [&](Node* node) {
-        this->spliceInCombine(node);
-      });
-
-      mLoadPresetEvent.subscribe(mBus, MessageBus::LoadPresetFromString, [&](const char* data) {
-        this->deserialize(data);
-      });
-
-      mSavePresetEvent.subscribe(mBus, MessageBus::SavePresetToSring, [&](WDL_String* data) {
-        this->serialize(*data);
-      });
-
-      mAutomationRequest.subscribe(mBus, MessageBus::AttachAutomation, [&](AutomationAttachRequest r) {
-        MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
-        PointerList<Node>& n = this->mNodes;
-        for (int i = 0; i < n.size(); i++) {
-          Node* node = n[i];
-          if (node == nullptr) { continue; }
-          for (int p = 0; p < node->shared.parameterCount; p++) {
-            if (node->shared.parameters[p].control == r.targetControl) {
-              if (node != r.automationNode) {
-                // Don't allow automation on self
-                node->attachAutomation(r.automationNode, p);
-              }
-            }
-          }
-        }
-      });
-
-      mMaxBlockSizeEvent.subscribe(mBus, MessageBus::MaxBlockSizeEvent, [&](BlockSizeEvent* e) {
-        if (e->set) {
-          this->setBlockSize(e->blockSize);
-        }
-        //else { TODOG have a look at this again
-        //  e->blockSize = this->mMaxBlockSize;
-        //}
-      });
-
-      mAwaitAudioMutexEvent.subscribe(mBus, MessageBus::AwaitAudioMutex, [&](const bool doPause) {
-        if (doPause) {
-          this->lockAudioThread();
-        }
-        else {
-          this->unlockAudioThread();
-        }
-      });
-
-      mSelectionChagedEvent.subscribe(mBus, MessageBus::NodeSelectionChange, [&](NodeSelectionChanged event) {
-        if (event.remove) {
-          event.node->setSelected(false);
-          mSelectedNodes.remove(event.node);
-          return;
-        }
-        if (event.replace) { // replace whole selection
-          for (size_t i = 0; i < mSelectedNodes.size(); i++) {
-            mSelectedNodes[i]->setSelected(false);
-          }
-          mSelectedNodes.clear();
-          if (event.node != nullptr) { // clear it completly
-            event.node->setSelected(true);
-            mSelectedNodes.add(event.node); // Replace Selection
-          }
-        }
-        else { // toggle selection
-          if (mSelectedNodes.find(event.node) == -1) {
-            event.node->setSelected(true);
-            mSelectedNodes.add(event.node); // Wasn't selected, add now
-          }
-          else {
-            event.node->setSelected(false);
-            mSelectedNodes.remove(event.node); // Was selected, remove now
-          }
-        }
-      });
-
-      mNodeDragged.subscribe(mBus, MessageBus::NodeDragged, [&](const Drag drag) {
-        for (int i = 0; i < mSelectedNodes.size(); i++) {
-          mSelectedNodes[i]->translate(drag.delta.x, drag.delta.y);
-        }
-      });
-#endif
     }
 
     ~Graph() {
@@ -333,16 +143,22 @@ namespace guitard {
       }
     }
 
+    /**
+     * Will clear all the DSP buffers to kill reverbs and so on
+     */
     void OnTransport() {
       lockAudioThread();
       mInputNode->OnTransport();
       mOutputNode->OnTransport();
-      for (int i = 0; i < mNodes.size(); i++) {
+      for (size_t i = 0; i < mNodes.size(); i++) {
         mNodes[i]->OnTransport();
       }
       unlockAudioThread();
     }
 
+    /**
+     * Will set the max blocksize to change roundtrip delay inside the graph
+     */
     void setBlockSize(const int size) {
       if (size == mMaxBlockSize || size > MAX_BUFFER) { return; }
       lockAudioThread();
@@ -388,43 +204,7 @@ namespace guitard {
       const int nodeCount = mNodes.size();
       const int maxAttempts = 10;
 
-      /**
-       * Do a version without mutex and stats if there's no gui
-       * since there is no need for locking if the graph can't be altered
-       */
-#ifndef GUITARD_HEADLESS
-      if (mGraphics == nullptr)
-#endif
       {
-        mInputNode->CopyIn(in, nFrames);
-        for (int n = 0; n < nodeCount; n++) {
-          mNodes[n]->BlockStart();
-        }
-        mOutputNode->BlockStart();
-
-        // The List is pre sorted so the attempts are only needed to catch circular dependencies and other edge cases
-
-        int attempts = 0;
-        while (!mOutputNode->mIsProcessed && attempts < maxAttempts) {
-          for (int n = 0; n < nodeCount; n++) {
-            mNodes[n]->ProcessBlock(nFrames);
-          }
-          mOutputNode->ProcessBlock(nFrames);
-          attempts++;
-        }
-
-        if (attempts < maxAttempts) {
-          for (int n = 0; n < nodeCount; n++) {
-            mNodes[n]->ProcessBlock(nFrames);
-          }
-        }
-        mOutputNode->CopyOut(out, nFrames);
-        return;
-      }
-      {
-        /**
-         * The version with mutex locking
-         */
         if (mPauseAudio > 0) {
           /**
            * Skip the block if the mutex is locked, waiting will most likely result in an under-run anyways
@@ -480,196 +260,37 @@ namespace guitard {
       }
     }
 
-#ifndef GUITARD_HEADLESS
-    /**
-     * The graph needs to know about the graphics context to add and remove the controls for the nodes
-     * It also handles keystrokes globally
-     */
-    void setupUi(iplug::igraphics::IGraphics* pGraphics = nullptr) {
-      if (pGraphics != nullptr && pGraphics != mGraphics) {
-        WDBGMSG("Graphics context changed");
-        mGraphics = pGraphics;
-      }
-      pGraphics->AttachCornerResizer(iplug::igraphics::EUIResizerMode::Size, true);
-      pGraphics->EnableMouseOver(true);
-      pGraphics->AttachTextEntryControl();
-      pGraphics->AttachPopupMenuControl(iplug::igraphics::DEFAULT_LABEL_TEXT);
-
-      mGraphics->SetKeyHandlerFunc([&](const IKeyPress& key, const bool isUp) {
-        // Gets the keystrokes in the standalone app
-        if (!isUp) { // Only handle key down
-          if (key.S) { // Check modifiers like shift first
-            if (key.VK == iplug::kVK_Z) {
-              MessageBus::fireEvent<bool>(this->mBus, MessageBus::PopUndoState, false);
-              return true;
-            }
-            if (key.VK == iplug::kVK_C) {
-              WDL_String data;
-              this->serialize(data);
-              this->mGraphics->SetTextInClipboard(data);
-              return true;
-            }
-            if (key.VK == iplug::kVK_V) {
-              WDL_String data;
-              this->mGraphics->GetTextFromClipboard(data);
-              this->deserialize(data.Get());
-              return true;
-            }
-          }
-          if (key.VK == iplug::kVK_F) {
-            this->arrangeNodes();
-            return true;
-          }
-          if (key.VK == iplug::kVK_C) {
-            this->centerGraph();
-            return true;
-          }
-          if (key.VK == iplug::kVK_Q) {
-            this->centerNode(mInputNode);
-            return true;
-          }
-          if (key.VK == iplug::kVK_E) {
-            this->centerNode(mOutputNode);
-            return true;
-          }
-          if (key.VK == iplug::kVK_S) {
-            this->lockAudioThread();
-            SortGraph::sortGraph(&mNodes, mInputNode, mOutputNode);
-            this->unlockAudioThread();
-            return true;
-          }
-        }
-        return false;
-      });
-
-      mBackground = new GraphBackground(mBus, mGraphics, [&](float x, float y, float scale) {
-        this->onViewPortChange(x, y, scale);
-      });
-      mGraphics->AttachControl(mBackground);
-
-      for (int n = 0; n < mNodes.size(); n++) {
-        mNodes[n]->setupUi(mGraphics);
-      }
-      mInputNode->setupUi(mGraphics);
-      mOutputNode->setupUi(mGraphics);
-
-      mCableLayer = new CableLayer(mBus, mGraphics, &mNodes, mOutputNode, mInputNode);
-      mCableLayer->SetRenderPriority(10);
-      mGraphics->AttachControl(mCableLayer);
-
-      mSideBar = new SideBar(mBus, mGraphics);
-      mGraphics->AttachControl(mSideBar);
-
-      scaleUi();
-#ifndef NDEBUG
-      testadd();
-#endif
-    }
-
-    /**
-     * Updates the scale in the background layer and scales the UI according to
-     * mWindowWidth, mWindowHeight, mWindowScale
-     */
-    void scaleUi() const {
-      if (mWindowWidth != 0 && mWindowHeight != 0 && mWindowScale != 0 && mGraphics != nullptr) {
-        mBackground->mScale = mWindowScale;
-        mGraphics->Resize(mWindowWidth, mWindowHeight, mWindowScale);
-      }
-    }
-
-    void cleanupUi() {
-      soundwoofer::async::cancelAll(true);
-      mSelectedNodes.clear();
-      mWindowWidth = mGraphics->Width();
-      mWindowHeight = mGraphics->Height();
-      mWindowScale = mGraphics->GetDrawScale();
-      for (int n = 0; n < mNodes.size(); n++) {
-        mNodes[n]->cleanupUi(mGraphics);
-      }
-
-      mGraphics->RemoveControl(mSideBar);
-      mSideBar = nullptr;
-
-      mGraphics->RemoveControl(mBackground);
-      mBackground = nullptr;
-
-      mGraphics->RemoveControl(mCableLayer);
-      mCableLayer = nullptr;
-
-      mInputNode->cleanupUi(mGraphics);
-      mOutputNode->cleanupUi(mGraphics);
-      mGraphics->RemoveAllControls();
-      mGraphics = nullptr;
-    }
-
-    /**
-     * Called via a callback from the background to move around all the nodes
-     * creating the illusion of a viewport
-     */
-    void onViewPortChange(const float dX = 0, const float dY = 0, float scale = 1) const {
-      for (int i = 0; i < mNodes.size(); i++) {
-        mNodes[i]->mUi->translate(dX, dY);
-      }
-      mOutputNode->mUi->translate(dX, dY);
-      mInputNode->mUi->translate(dX, dY);
-      // WDBGMSG("x %f y %f s %f\n", x, y, scale);
-    }
-
-    /**
-     * Centers the viewport around a specific node
-     */
-    void centerNode(Node* node) const {
-      IRECT center = mGraphics->GetBounds().GetScaledAboutCentre(0);
-      center.L -= node->shared.X;
-      center.T -= node->shared.Y;
-      onViewPortChange(center.L, center.T);
-    }
-
-    /**
-     * Averages all node positions and moves the viewport to that point
-     * Bound to the C key
-     */
-    void centerGraph() const {
-      Coord2D avg{ 0, 0 };
-      const int count = mNodes.size();
-      for (int i = 0; i < count; i++) {
-        const Node* n = mNodes[i];
-        avg.x += n->shared.X;
-        avg.y += n->shared.Y;
-      }
-      float countf = count + 2;
-      avg.x += mInputNode->shared.X + mOutputNode->shared.X;
-      avg.y += mInputNode->shared.Y + mOutputNode->shared.Y;
-      // We want that point to be in the center of the screen
-      const IRECT center = mGraphics->GetBounds().GetScaledAboutCentre(0);
-      avg.x = center.L - avg.x / countf;
-      avg.y = center.T - avg.y / countf;
-      onViewPortChange(avg.x, avg.y);
-    }
-
     /**
      * Used to add nodes and pause the audio thread
      */
-    void addNode(Node* node, Node* pInput = nullptr, const float x = 0, const float y = 0, const int outputIndex = 0, const int inputIndex = 0, Node* clone = nullptr) {
+    void addNode(
+        Node* node, Node* pInput = nullptr, const float x = 0, const float y = 0,
+        const int outputIndex = 0, const int inputIndex = 0, Node* clone = nullptr
+    ) {
+      if (mNodes.find(node) != -1) {
+        assert(false); // In case node is already in the list
+        return;
+      }
       node->shared.X = x;
       node->shared.Y = y;
       node->setup(mBus, mSampleRate, mMaxBlockSize);
+
       if (clone != nullptr) {
         node->copyState(clone);
       }
-      mParamManager->claimNode(node);
-      node->setupUi(mGraphics);
+
+      if (mParamManager != nullptr) {
+        mParamManager->claimNode(node);
+      }
+
       if (pInput != nullptr) {
         node->connectInput(pInput->shared.socketsOut[outputIndex], inputIndex);
       }
-      // Allocating the node is thread safe, but not the node list itself
+
       lockAudioThread();
-      if (mNodes.find(node) != -1) {
-        assert(false);
-      }
+      // Allocating the node is thread safe, but not the node list itself
       mNodes.add(node);
-      SortGraph::sortGraph(&mNodes, mInputNode, mOutputNode);
-      // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
+      sortGraphWithoutLock();
       unlockAudioThread();
     }
 
@@ -711,14 +332,18 @@ namespace guitard {
       }
     }
 
-    void spliceInCombine(Node* node) {
+    /**
+     * Adds a combine node after provided node to act as a dry wet mix
+     * and returns a pointer to the new combine
+     */
+    Node* spliceInCombine(Node* node) {
       if (node->shared.inputCount > 0 && node->shared.outputCount > 0) {
         NodeSocket* inSock = node->shared.socketsIn[0];
         NodeSocket* outSock = node->shared.socketsOut[0];
         NodeSocket* source = inSock->mConnectedTo[0];
         NodeSocket* target = outSock->mConnectedTo[0];
         if (target == nullptr || source == nullptr) {
-          return;
+          return nullptr;
         }
         Node* combine = NodeList::createNode("CombineNode");
         addNode(combine, nullptr, node->shared.X, node->shared.Y);
@@ -730,20 +355,10 @@ namespace guitard {
         }
         combine->shared.socketsIn[0]->connect(outSock);
         combine->shared.socketsIn[1]->connect(source);
-        combine->mUi->mDragging = true;
-        mGraphics->SetCapturedControl(combine->mUi);
+        return combine;
       }
+      return nullptr;
     }
-
-    /**
-     * Will try to tidy up the node graph, bound to the F key
-     */
-    void arrangeNodes() const {
-      FormatGraph::resetBranchPos(mInputNode);
-      FormatGraph::arrangeBranch(mInputNode, Coord2D{ mInputNode->shared.Y, mInputNode->shared.X });
-      centerGraph();
-    }
-#endif
 
     void removeAllNodes() {
       while (mNodes.size()) {
@@ -758,26 +373,21 @@ namespace guitard {
     void removeNode(Node* node, const bool reconnect = false) {
       if (node == mInputNode || node == mOutputNode) { return; }
       lockAudioThread();
-#ifndef GUITARD_HEADLESS
       if (reconnect) {
-        /**
-         * Since the cleanup will sever all connections to a node, it will have to be done before the
-         * connection is bridged, or else the bridged connection will be severed again
-         */
         byPassConnection(node);
       }
-      node->cleanupUi(mGraphics);
-#endif
-      mParamManager->releaseNode(node);
+
+      if (mParamManager != nullptr) {
+        mParamManager->releaseNode(node);
+      }
+      
       node->cleanUp();
       mNodes.remove(node);
       if (mNodes.find(node) != -1) {
         assert(false);
       }
       delete node;
-#ifndef GUITARD_HEADLESS
-      SortGraph::sortGraph(&mNodes, mInputNode, mOutputNode);
-#endif
+      sortGraphWithoutLock();
       // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
       unlockAudioThread();
     }
@@ -786,9 +396,6 @@ namespace guitard {
       removeNode(mNodes[index]);
     }
 
-
-
-#ifndef GUITARD_HEADLESS
     void serialize(WDL_String& serialized) {
       nlohmann::json json;
       serialize(json);
@@ -805,14 +412,6 @@ namespace guitard {
         json = {
           { "version", PLUG_VERSION_HEX },
         };
-        if (mGraphics != nullptr) {
-          mWindowWidth = mGraphics->Width();
-          mWindowHeight = mGraphics->Height();
-          mWindowScale = mGraphics->GetDrawScale();
-        }
-        json["scale"] = mWindowScale;
-        json["width"] = mWindowWidth;
-        json["height"] = mWindowHeight;
         json["maxBlockSize"] = mMaxBlockSize;
         Serializer::serialize(json, &mNodes, mInputNode, mOutputNode);
       }
@@ -820,7 +419,6 @@ namespace guitard {
         assert(false); // Failed to serialize json
       }
     }
-#endif
 
     void deserialize(const char* data) {
       try {
@@ -836,27 +434,20 @@ namespace guitard {
     void deserialize(nlohmann::json& json) {
       try {
         removeAllNodes();
-        if (json.contains("scale")) {
-          // mWindowScale = json["scale"];
-          // mWindowWidth = json["width"]; // Probably no point in changing the window size since it's confusing
-          // mWindowHeight = json["height"];
-        }
         if (json.contains("maxBlockSize")) {
           mMaxBlockSize = json["maxBlockSize"];
         }
         lockAudioThread();
         Serializer::deserialize(json, &mNodes, mOutputNode, mInputNode, mSampleRate, mMaxBlockSize, mParamManager, mBus);
 #ifndef GUITARD_HEADLESS
-        if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
-          for (int i = 0; i < mNodes.size(); i++) {
-            mNodes[i]->setupUi(mGraphics);
-          }
-          scaleUi();
-        }
-#endif
-        //if (json.contains("maxBlockSize")) {
-        //  setBlockSize(json["maxBlockSize"]);
+        //if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
+        //  for (int i = 0; i < mNodes.size(); i++) {
+        //    mNodes[i]->setupUi(mGraphics);
+        //  }
+        //  scaleUi();
         //}
+#endif
+        sortGraphWithoutLock();
         unlockAudioThread();
       }
       catch (...) {
@@ -864,48 +455,86 @@ namespace guitard {
       }
     }
 
-  private:
-#ifndef GUITARD_HEADLESS
-    /**
-     * Test Setups
-     */
-    void testadd() {
-      return;
-      // formatTest();
-      Node* test = NodeList::createNode("CabLibNode");
-      addNode(test, nullptr, 0, 500);
-      // mOutputNode->connectInput(test->shared.socketsOut[0]);
+    float getScale() const {
+      return mScale;
     }
 
-    void formatTest() {
-      /**
-       *                            ------------
-       *                            |          |
-       *                --> test2 --|          |--> test5 --
-       *                |           |          |           |
-       *  in -> test1 --|           --> test4 --           |--> test7 --> out
-       *                |                                  |
-       *                --> test3 ----> test6 --------------
-       */
-      Node* test1 = NodeList::createNode("StereoToolNode");
-      addNode(test1, mInputNode, 200, 0);
-      Node* test2 = NodeList::createNode("StereoToolNode");
-      addNode(test2, test1, 400, -100);
-      Node* test3 = NodeList::createNode("StereoToolNode");
-      addNode(test3, test1, 400, +100);
-      Node* test4 = NodeList::createNode("StereoToolNode");
-      addNode(test4, test2, 600, 0);
-      Node* test5 = NodeList::createNode("CombineNode");
-      addNode(test5, test2, 800, +100);
-      test5->connectInput(test4->shared.socketsOut[0], 1);
-      Node* test6 = NodeList::createNode("StereoToolNode");
-      addNode(test6, test3, 400, +100);
-      Node* test7 = NodeList::createNode("CombineNode");
-      addNode(test7, test5, 1000, 0);
-      test7->connectInput(test6->shared.socketsOut[0], 1);
-      mOutputNode->shared.socketsIn[0]->disconnectAll();
-      mOutputNode->connectInput(test7->shared.socketsOut[0]);
+    void setScale(float scale) {
+      mScale = scale;
     }
-#endif
+
+    PointerList<Node> getNodes() const {
+      return mNodes;
+    }
+
+    Node* getInputNode() const {
+      return mInputNode;
+    }
+
+    Node* getOutputNode() const {
+      return mOutputNode;
+    }
+
+    void sortGraph() {
+      lockAudioThread();
+      sortGraphWithoutLock();
+      unlockAudioThread();
+    }
+
+  private:
+    /**
+     * Does some sorting on the mNodes list so the graph can be computed with fewer attempts
+     * Does not touch the positions of the nodes
+     */
+    void sortGraphWithoutLock() {
+      PointerList<Node> sorted;
+      for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+        // Put in the nodes which directly follow the input node
+        NodeSocket* con = mInputNode->shared.socketsOut[0]->mConnectedTo[i];
+        if (con != nullptr) {
+          sorted.add(con->mParentNode);
+        }
+      }
+
+      // Arbitrary depth
+      for (int tries = 0; tries < 100; tries++) {
+        for (int i = 0; i < sorted.size(); i++) {
+          Node* node = sorted[i];
+          for (int out = 0; out < node->shared.outputCount; out++) {
+            NodeSocket* outSocket = node->shared.socketsOut[out];
+            if (outSocket == nullptr) { continue; }
+            for (int next = 0; next < MAX_SOCKET_CONNECTIONS; next++) {
+              NodeSocket* nextSocket = outSocket->mConnectedTo[next];
+              if (nextSocket == nullptr) { continue; }
+              Node* nextNode = nextSocket->mParentNode;
+              // Don't want to add duplicates or the output node
+              if (sorted.find(nextNode) != -1) { continue; }
+              sorted.add(nextNode);
+            }
+          }
+        }
+      }
+
+      // Add in all the nodes which might not be connected or were missed because of the depth limit
+      for (int i = 0; i < mNodes.size(); i++) {
+        Node* nextNode = mNodes[i];
+        if (sorted.find(nextNode) != -1) { continue; }
+        sorted.add(nextNode);
+      }
+
+      mNodes.clear();
+      for (int i = 0; i < sorted.size(); i++) {
+        Node* n = sorted[i];
+        if (n == mOutputNode) { continue; }
+        bool dupli = false;
+        for (int j = 0; j < mNodes.size(); j++) {
+          if (mNodes[j] == n) {
+            dupli = true;
+          }
+        }
+        if (dupli) { continue; } // TODOG there shouldn't be any dupes, but it happens for some reason
+        mNodes.add(n);
+      }
+    }
   };
 }

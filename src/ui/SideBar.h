@@ -126,12 +126,12 @@ namespace guitard {
       g.FillRect(iplug::igraphics::COLOR_WHITE, IRECT(
                    x1, y1, x1 + Theme::Gallery::BUTTON_ICON_SIZE, y1 + Theme::Gallery::BUTTON_SIZE
                  ));
-      GraphStats* stats;
-      MessageBus::fireEvent<GraphStats**>(mBus, MessageBus::GetGraphStats, &stats);
-      avgExecutionTime = static_cast<long long> ((59 * avgExecutionTime + stats->executionTime) / 60.0);
-      const std::string time = std::to_string(avgExecutionTime);
-      g.DrawText(mStats, time.c_str(), mRECT);
-      mDirty = true;
+      //GraphStats* stats;
+      //MessageBus::fireEvent<GraphStats**>(mBus, MessageBus::GetGraphStats, &stats);
+      //avgExecutionTime = static_cast<long long> ((59 * avgExecutionTime + stats->executionTime) / 60.0);
+      //const std::string time = std::to_string(avgExecutionTime);
+      //g.DrawText(mStats, time.c_str(), mRECT);
+      //mDirty = true;
     }
 
     void OnResize() override {

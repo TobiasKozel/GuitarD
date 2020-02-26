@@ -426,12 +426,6 @@
     <ClInclude Include="..\src\nodes\reverse_delay\ReverseDelayNode.h">
       <Filter>src\nodes\reverb</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\SortGraph.h">
-      <Filter>src\graph</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\graph\FormatGraph.h">
-      <Filter>src\graph</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\ui\CustomKnob.h">
       <Filter>src\ui</Filter>
     </ClInclude>

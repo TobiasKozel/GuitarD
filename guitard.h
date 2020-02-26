@@ -5,6 +5,7 @@ const int kNumPrograms = 2;
 #include "IPlug_include_in_plug_hdr.h"
 
 #include "./src/graph/Graph.h"
+#include "./src/ui/GraphUi.h"
 #include "./src/parameter/ParameterManager.h"
 
 class GuitarD : public iplug::Plugin
@@ -15,6 +16,7 @@ class GuitarD : public iplug::Plugin
   /** Is true when the plugin is ready to process samples (Knows the sample rate and in out channel count) */
   bool mReady = false;
   guitard::Graph* mGraph = nullptr;
+  guitard::GraphUi* mGraphUi = nullptr;
   guitard::ParameterManager* mParamManager = nullptr;
 public:
   GuitarD(const iplug::InstanceInfo& info);
