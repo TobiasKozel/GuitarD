@@ -408,6 +408,7 @@
     <ClInclude Include="..\src\ui\gallery\NodeGalleryCategory.h" />
     <ClInclude Include="..\src\ui\gallery\NodeGalleryElement.h" />
     <ClInclude Include="..\src\ui\GraphBackground.h" />
+    <ClInclude Include="..\src\ui\GraphUi.h" />
     <ClInclude Include="..\src\ui\preset\PresetBrowser.h" />
     <ClInclude Include="..\src\ui\preset\PresetEntryControl.h" />
     <ClInclude Include="..\src\ui\ScrollViewChild.h" />

@@ -549,6 +549,9 @@
     <ClInclude Include="..\src\nodes\transpose\TransposeNode.h">
       <Filter>src\nodes\filters</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\ui\GraphUi.h">
+      <Filter>src\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
