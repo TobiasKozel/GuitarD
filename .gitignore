@@ -21,6 +21,7 @@ build-*
 ipch/*
 gui/*
 .vs/*
+html/
 
 Icon?
 .DS_Stor*
