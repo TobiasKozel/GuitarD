@@ -15,7 +15,7 @@ namespace guitard {
    */
   class CableLayer : public IControl {
     IGraphics* mGraphics = nullptr;
-    PointerList<Node>* mNodes;
+    PointerList<NodeUi>* mNodes;
     Node* mOutNode = nullptr;
     Node* mInNode = nullptr;
 
@@ -49,14 +49,12 @@ namespace guitard {
 
     GraphStats* mStats = nullptr;
   public:
-    CableLayer(MessageBus::Bus* pBus, IGraphics* g, PointerList<Node>* pNodes, Node* pOutNode, Node* pInNode) :
+    CableLayer(MessageBus::Bus* pBus, IGraphics* g, PointerList<NodeUi>* pNodes) :
       IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
     {
       mBus = pBus;
       SetTargetRECT(IRECT(0, 0, 0, 0));
       mNodes = pNodes;
-      mOutNode = pOutNode;
-      mInNode = pInNode;
       mGraphics = g;
       mBlend = EBlend::Default;
 
@@ -104,7 +102,8 @@ namespace guitard {
       mPreviewSocketEvent.subscribe(mBus, MessageBus::PreviewSocket, [&](NodeSocket* socket) {
         // WDBGMSG(socket->mParentNode->mType.c_str());
         // TODOG this is kinda shady and does not use the MessageBus::SocketConnect event
-        NodeSocket* outSocket = this->mOutNode->shared.socketsIn[0];
+        if (mOutNode == nullptr) { return; }
+        NodeSocket* outSocket = mOutNode->shared.socketsIn[0];
         if (socket == this->mPreviewSocketPrev || socket == this->mPreviewSocket) {
           // If the socket clicked is the current preview socket, connect the original socket again
           if (this->mPreviewSocketPrev != nullptr) {
@@ -165,6 +164,11 @@ namespace guitard {
       });
     }
 
+    void setInOutNodes(Node* in, Node* out) {
+      mInNode = in;
+      mOutNode = out;
+    }
+
     void DrawSocket(IGraphics& g, NodeSocket* s) const {
       const float x = s->mX + Theme::Sockets::RADIUS;
       const float y = s->mY + Theme::Sockets::RADIUS;
@@ -179,15 +183,16 @@ namespace guitard {
     }
 
     void reverseDraw(IGraphics& g) {
+      // if (mInNode == nullptr) { return; }
       const float socketRadius = Theme::Sockets::DIAMETER / 2;
-      for (int n = 0; n < mNodes->size() + 1; n++) {
-        Node* curNode = mNodes->get(n);
-        if (curNode == nullptr) {
-          // only happens for the last node
-          curNode = mInNode;
-        }
-        for (int i = 0; i < curNode->shared.outputCount; i++) {
-          NodeSocket* curSock = curNode->shared.socketsOut[i];
+      for (int n = 0; n < mNodes->size(); n++) {
+        NodeUi* curNode = mNodes->get(n);
+        //if (curNode == nullptr) {
+        //  // only happens for the last node
+        //  curNode = mInNode;
+        //}
+        for (int i = 0; i < curNode->shared->outputCount; i++) {
+          NodeSocket* curSock = curNode->shared->socketsOut[i];
           for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
             if (curSock->mConnectedTo[j] != nullptr) {
               NodeSocket* tarSock = curSock->mConnectedTo[j];
@@ -204,16 +209,17 @@ namespace guitard {
     }
 
     void Draw(IGraphics& g) override {
+      if (mOutNode == nullptr) { return; }
       const float socketRadius = Theme::Sockets::DIAMETER / 2;
       // Draw all the connections between nodes
-      for (int n = 0; n < mNodes->size() + 1; n++) {
-        Node* curNode = mNodes->get(n);
-        if (curNode == nullptr) {
-          // only happens for the last node
-          curNode = mOutNode;
-        }
-        for (int i = 0; i < curNode->shared.inputCount; i++) {
-          NodeSocket* curSock = curNode->shared.socketsIn[i];
+      for (int n = 0; n < mNodes->size(); n++) {
+        NodeUi* curNode = mNodes->get(n);
+        //if (curNode == nullptr) {
+        //  // only happens for the last node
+        //  curNode = mOutNode;
+        //}
+        for (int i = 0; i < curNode->shared->inputCount; i++) {
+          NodeSocket* curSock = curNode->shared->socketsIn[i];
           if (curSock->mConnectedTo[0] != nullptr) {
             NodeSocket* tarSock = curSock->mConnectedTo[0];
             if (tarSock == mPreviewSocket && curSock == mOutNode->shared.socketsIn[0]) {
@@ -256,22 +262,22 @@ namespace guitard {
 
       // Draw all the sockets
       for (int n = 0; n < mNodes->size(); n++) {
-        Node* curNode = mNodes->get(n);
-        for (int i = 0; i < curNode->shared.outputCount; i++) {
-          NodeSocket* curSock = curNode->shared.socketsOut[i];
+        NodeUi* curNode = mNodes->get(n);
+        for (int i = 0; i < curNode->shared->outputCount; i++) {
+          NodeSocket* curSock = curNode->shared->socketsOut[i];
           if (curSock != nullptr) {
             DrawSocket(g, curSock);
           }
         }
-        for (int i = 0; i < curNode->shared.inputCount; i++) {
-          NodeSocket* curSock = curNode->shared.socketsIn[i];
+        for (int i = 0; i < curNode->shared->inputCount; i++) {
+          NodeSocket* curSock = curNode->shared->socketsIn[i];
           if (curSock != nullptr) {
             DrawSocket(g, curSock);
           }
         }
       }
-      DrawSocket(g, mOutNode->shared.socketsIn[0]);
-      DrawSocket(g, mInNode->shared.socketsOut[0]);
+      //DrawSocket(g, mOutNode->shared.socketsIn[0]);
+      //DrawSocket(g, mInNode->shared.socketsOut[0]);
 
       // Visualizes the automation target node of each control attached to it
       Node* automation = mVisualizeAutomation;
@@ -280,9 +286,9 @@ namespace guitard {
       }
       if (automation != nullptr) {
         for (int n = 0; n < mNodes->size(); n++) {
-          Node* curNode = mNodes->get(n);
-          for (int p = 0; p < curNode->shared.parameterCount; p++) {
-            ParameterCoupling* pc = &curNode->shared.parameters[p];
+          NodeUi* curNode = mNodes->get(n);
+          for (int p = 0; p < curNode->shared->parameterCount; p++) {
+            ParameterCoupling* pc = &curNode->shared->parameters[p];
             if (pc->automationDependency == automation) {
               const IRECT pos = pc->control->GetRECT();
               g.DrawLine(
@@ -340,14 +346,14 @@ namespace guitard {
   private:
     NodeSocket* getClosestToConnection(const Coord2D pos) const {
       const float socketRadius = Theme::Sockets::DIAMETER / 2;
-      for (int n = 0; n < mNodes->size() + 1; n++) {
-        Node* curNode = mNodes->get(n);
-        if (curNode == nullptr) {
-          // only happens for the last node
-          curNode = mOutNode;
-        }
-        for (int i = 0; i < curNode->shared.inputCount; i++) {
-          NodeSocket* curSock = curNode->shared.socketsIn[i];
+      for (int n = 0; n < mNodes->size(); n++) {
+        NodeUi* curNode = mNodes->get(n);
+        //if (curNode == nullptr) {
+        //  // only happens for the last node
+        //  curNode = mOutNode;
+        //}
+        for (int i = 0; i < curNode->shared->inputCount; i++) {
+          NodeSocket* curSock = curNode->shared->socketsIn[i];
           NodeSocket* tarSock = curSock->mConnectedTo[0];
           if (tarSock != nullptr) {
             float x1 = tarSock->mX + socketRadius;

@@ -76,9 +76,9 @@ namespace guitard {
       mSideBar = new SideBar(mBus, mGraphics);
       mGraphics->AttachControl(mSideBar);
 
-      //mCableLayer = new CableLayer(mBus, mGraphics, &mNodes, mOutputNode, mInputNode);
-      //mCableLayer->SetRenderPriority(10);
-      //mGraphics->AttachControl(mCableLayer);
+      mCableLayer = new CableLayer(mBus, mGraphics, &mNodeUis);
+      mCableLayer->SetRenderPriority(10);
+      mGraphics->AttachControl(mCableLayer);
     }
 
     ~GraphUi() {
@@ -106,6 +106,7 @@ namespace guitard {
      * Sets the graph provided and returns the scale the graph should be drawn with
      */
     float setGraph(Graph* graph) {
+      mCableLayer->setInOutNodes(nullptr, nullptr);
       for (int i = 0; i < mNodeUis.size(); i++) {
         cleanUpNodeUi(mNodeUis[i]->shared->node);
       }
@@ -116,6 +117,7 @@ namespace guitard {
       }
       mInputNodeUi = setUpNodeUi(mGraph->getInputNode());
       moutputNodeUi = setUpNodeUi(mGraph->getOutputNode());
+      mCableLayer->setInOutNodes(mInputNodeUi->shared->node, moutputNodeUi->shared->node);
 
       const float scale = mGraph->getScale();
       mBackground->mScale = scale;
