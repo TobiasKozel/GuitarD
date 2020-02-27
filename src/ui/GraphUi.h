@@ -102,14 +102,18 @@ namespace guitard {
       mGraphics = nullptr;
     }
 
+    void cleanUpAllNodeUis() {
+      mCableLayer->setInOutNodes(nullptr, nullptr);
+      while (mNodeUis.size()) {
+        cleanUpNodeUi(mNodeUis[0]->shared->node);
+      }
+    }
+
     /**
      * Sets the graph provided and returns the scale the graph should be drawn with
      */
     float setGraph(Graph* graph) {
-      mCableLayer->setInOutNodes(nullptr, nullptr);
-      for (int i = 0; i < mNodeUis.size(); i++) {
-        cleanUpNodeUi(mNodeUis[i]->shared->node);
-      }
+      cleanUpAllNodeUis();
       mGraph = graph;
       PointerList<Node> nodes = mGraph->getNodes();
       for (int n = 0; n < nodes.size(); n++) {
@@ -154,16 +158,16 @@ namespace guitard {
       return node->mUi;
     }
 
-    void serialize(WDL_String& serialized) {
-    }
-
-    void serialize(nlohmann::json& json) {
-    }
-
     void deserialize(const char* data) {
+      cleanUpAllNodeUis();
+      mGraph->deserialize(data);
+      setGraph(mGraph);
     }
 
     void deserialize(nlohmann::json& json) {
+      cleanUpAllNodeUis();
+      mGraph->deserialize(json);
+      setGraph(mGraph);
     }
 
   private:
@@ -258,7 +262,7 @@ namespace guitard {
 
       mPushUndoState.subscribe(mBus, MessageBus::PushUndoState, [&](bool) {
         WDBGMSG("PushState");
-        serialize(*(mHistoryStack.pushState()));
+        mGraph->serialize(*(mHistoryStack.pushState()));
       });
 
       mPopUndoState.subscribe(mBus, MessageBus::PopUndoState, [&](const bool redo) {
@@ -277,6 +281,7 @@ namespace guitard {
         // this->spliceInCombine(node);
         Node* combine = mGraph->spliceInCombine(node);
         if (combine != nullptr) {
+          setUpNodeUi(combine);
           combine->mUi->mDragging = true;
           mGraphics->SetCapturedControl(combine->mUi);
         }
@@ -287,7 +292,7 @@ namespace guitard {
       });
 
       mSavePresetEvent.subscribe(mBus, MessageBus::SavePresetToSring, [&](WDL_String* data) {
-        serialize(*data);
+        mGraph->serialize(*data);
       });
 
       mAutomationRequest.subscribe(mBus, MessageBus::AttachAutomation, [&](AutomationAttachRequest r) {
@@ -368,7 +373,7 @@ namespace guitard {
           }
           if (key.VK == iplug::kVK_C) {
             WDL_String data;
-            serialize(data);
+            mGraph->serialize(data);
             mGraphics->SetTextInClipboard(data);
             return true;
           }

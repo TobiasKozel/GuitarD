@@ -16,10 +16,10 @@
     <LocalDebuggerCommandArguments>$(VST3_32_COMMAND_ARGS)</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommand>$(FL_PATH)</LocalDebuggerCommand>
+    <LocalDebuggerCommand>C:\Program Files\Steinberg\VST3PluginTestHost\VST3PluginTestHost.exe</LocalDebuggerCommand>
     <LocalDebuggerCommandArguments>$(VST3_64_COMMAND_ARGS)</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerAttach>true</LocalDebuggerAttach>
+    <LocalDebuggerAttach>false</LocalDebuggerAttach>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerCommand>$(VST3_64_HOST_PATH)</LocalDebuggerCommand>

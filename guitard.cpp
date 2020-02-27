@@ -97,7 +97,12 @@ bool GuitarD::SerializeState(iplug::IByteChunk& chunk) const {
 int GuitarD::UnserializeState(const iplug::IByteChunk& chunk, int startPos) {
   WDL_String json_string;
   const int pos = chunk.GetStr(json_string, startPos);
-  mGraph->deserialize(json_string.Get());
+  if (mGraphUi == nullptr) {
+    mGraph->deserialize(json_string.Get());
+  }
+  else {
+    mGraphUi->deserialize(json_string.Get());
+  }
   return pos;
 }
 
