@@ -61,15 +61,15 @@ namespace guitard {
       mChannelCount = p_channels;
     }
 
-#ifndef GUITARD_HEADLESS
-    void setupUi(IGraphics* pGrahics) override {
-      shared.graphics = pGrahics;
-      mUi = new OutputNodeUi(&shared);
-      mUi->setColor(IColor(255, 100, 150, 100));
-      pGrahics->AttachControl(mUi);
-      mUi->setUp();
-      mUiReady = true;
-    }
-#endif
+//#ifndef GUITARD_HEADLESS
+//    void setupUi(IGraphics* pGrahics) override {
+//      shared.graphics = pGrahics;
+//      mUi = new OutputNodeUi(&shared);
+//      mUi->setColor(IColor(255, 100, 150, 100));
+//      pGrahics->AttachControl(mUi);
+//      mUi->setUp();
+//      mUiReady = true;
+//    }
+//#endif
   };
 }

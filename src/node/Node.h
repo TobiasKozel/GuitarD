@@ -10,17 +10,14 @@ namespace guitard {
    * Virtual class which all nodes will derive from
    */
   class Node {
-  protected:
-    bool mUiReady = false;
   public:
     NodeShared shared;
-
     // Flag to skip automation if there's none
     bool mIsAutomated = false;
     // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
     sample*** mBuffersOut = nullptr;
     // The UI element representing this node instance visually
-    NodeUi* mUi = nullptr;
+    // NodeUi* mUi = nullptr;
     bool mIsProcessed = false;
 
     int mSampleRate = 0;
@@ -46,7 +43,6 @@ namespace guitard {
       shared.inputCount = pInputs;
       shared.outputCount = pOutputs;
       mIsProcessed = false;
-      mUiReady = false;
       // Setup the sockets for the node connections
       for (int i = 0; i < shared.inputCount; i++) {
         shared.socketsIn[i] = new NodeSocketIn(this, i);
@@ -58,11 +54,6 @@ namespace guitard {
 
       // This will create all the needed buffers
       OnReset(pSamplerate, pChannles);
-
-
-#ifndef GUITARD_HEADLESS
-      positionSockets();
-#endif
     }
 
     /**
@@ -111,10 +102,6 @@ namespace guitard {
      */
     virtual void cleanUp() {
       deleteBuffers();
-
-      if (mUiReady || mUi != nullptr) {
-        WDBGMSG("Warning, UI of node was not cleaned up!\n");
-      }
 
       for (int i = 0; i < shared.parameterCount; i++) {
         detachAutomation(&shared.parameters[i]);
@@ -374,56 +361,56 @@ namespace guitard {
     /**
      * Generic setup of the parameters to get something on the screen
      */
-    virtual void setupUi(IGraphics* pGrahics) {
-      shared.graphics = pGrahics;
-      mUi = new NodeUi(&shared);
-      mUi->setColor(IColor(255, 100, 100, 100));
-      pGrahics->AttachControl(mUi);
-      mUi->setUp();
-      mUiReady = true;
-    }
+    //virtual void setupUi(IGraphics* pGrahics) {
+    //  shared.graphics = pGrahics;
+    //  mUi = new NodeUi(&shared);
+    //  mUi->setColor(IColor(255, 100, 100, 100));
+    //  pGrahics->AttachControl(mUi);
+    //  mUi->setUp();
+    //  mUiReady = true;
+    //}
 
-    /**
-     * Cleans up the IControls for all the parameters
-     */
-    virtual void cleanupUi(IGraphics* pGraphics) {
-      if (mUi != nullptr) {
-        pGraphics->RemoveControl(mUi);
-        mUi = nullptr;
-      }
-      mUiReady = false;
-    }
+    ///**
+    // * Cleans up the IControls for all the parameters
+    // */
+    //virtual void cleanupUi(IGraphics* pGraphics) {
+    //  if (mUi != nullptr) {
+    //    pGraphics->RemoveControl(mUi);
+    //    mUi = nullptr;
+    //  }
+    //  mUiReady = false;
+    //}
 
-    virtual void positionSockets() {
-      for (int i = 0; i < shared.inputCount; i++) {
-        NodeSocket* s = shared.socketsIn[i];
-        s->mX = shared.X - shared.width * 0.5;
-        s->mY = i * 50.f + shared.Y - (shared.inputCount / 2);
-      }
+    //virtual void positionSockets() {
+    //  for (int i = 0; i < shared.inputCount; i++) {
+    //    NodeSocket* s = shared.socketsIn[i];
+    //    s->mX = shared.X - shared.width * 0.5;
+    //    s->mY = i * 50.f + shared.Y - (shared.inputCount / 2);
+    //  }
 
-      for (int i = 0; i < shared.outputCount; i++) {
-        NodeSocket* s = shared.socketsOut[i];
-        s->mX = shared.width * 0.5 + shared.X - 30;
-        s->mY = i * 35.f + shared.Y - (shared.outputCount / 2) * 35;
-      }
-    }
+    //  for (int i = 0; i < shared.outputCount; i++) {
+    //    NodeSocket* s = shared.socketsOut[i];
+    //    s->mX = shared.width * 0.5 + shared.X - 30;
+    //    s->mY = i * 35.f + shared.Y - (shared.outputCount / 2) * 35;
+    //  }
+    //}
 
 
 
-    void moveAlong(const float x) {
-      if (shared.info->name == "FeedbackNode") { return; }
-      if (mUi != nullptr) {
-        mUi->translate(x, 0);
-      }
-      for (int i = 0; i < shared.outputCount; i++) {
-        NodeSocket* socket = shared.socketsOut[i];
-        for (int s = 0; s < MAX_SOCKET_CONNECTIONS; s++) {
-          if (socket->mConnectedTo[s] != nullptr) {
-            socket->mConnectedTo[s]->mParentNode->moveAlong(x);
-          }
-        }
-      }
-    }
+    //void moveAlong(const float x) {
+    //  if (shared.info->name == "FeedbackNode") { return; }
+    //  if (mUi != nullptr) {
+    //    mUi->translate(x, 0);
+    //  }
+    //  for (int i = 0; i < shared.outputCount; i++) {
+    //    NodeSocket* socket = shared.socketsOut[i];
+    //    for (int s = 0; s < MAX_SOCKET_CONNECTIONS; s++) {
+    //      if (socket->mConnectedTo[s] != nullptr) {
+    //        socket->mConnectedTo[s]->mParentNode->moveAlong(x);
+    //      }
+    //    }
+    //  }
+    //}
 #endif
 
     /**

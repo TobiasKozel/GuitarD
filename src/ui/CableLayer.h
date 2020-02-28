@@ -94,7 +94,7 @@ namespace guitard {
           MessageBus::fireEvent<NodeSpliceInPair>(this->mBus, MessageBus::NodeSpliceIn, NodeSpliceInPair{ node, target });
           const float distance = abs(node->shared.X - targetNode->shared.X);
           if (distance < (node->shared.width + 80)) {
-            targetNode->moveAlong(node->shared.width - distance + 200);
+            // targetNode->moveAlong(node->shared.width - distance + 200);
           }
         }
       });

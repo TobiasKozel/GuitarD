@@ -68,16 +68,16 @@ namespace guitard {
       mIsProcessed = true;
     }
 
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      shared.graphics = pGrahics;
-      mUi = new InputNodeUi(&shared);
-      mUi->setColor(IColor(255, 100, 150, 100));
-      pGrahics->AttachControl(mUi);
-      mUi->setUp();
-      mUiReady = true;
-    }
-#endif
+//#ifndef GUITARD_HEADLESS
+//    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+//      shared.graphics = pGrahics;
+//      mUi = new InputNodeUi(&shared);
+//      mUi->setColor(IColor(255, 100, 150, 100));
+//      pGrahics->AttachControl(mUi);
+//      mUi->setUp();
+//      mUiReady = true;
+//    }
+//#endif
   private:
     int mInputChannels = 2;
   };

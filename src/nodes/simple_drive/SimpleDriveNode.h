@@ -2,12 +2,46 @@
 #include "../../faust/generated/SimpleDrive.h"
 
 namespace guitard {
+
+
+  class SimpleDriveNode final : public FaustGenerated::SimpleDrive {
+  public:
+    SimpleDriveNode(NodeList::NodeInfo* info) {
+      shared.info = info;
+    }
+
+#ifndef GUITARD_HEADLESS
+    //void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+    //  shared.graphics = pGrahics;
+    //  mUi = new SimpleDriveNodeUi(&shared);
+    //  mUi->setColor(Theme::Categories::DISTORTION);
+    //  const float size = 60;
+    //  const float left1 = shared.width * 0.26 - shared.width / 2.f;
+    //  const float left2 = shared.width * 0.75 - shared.width / 2.f;
+    //  // const float center = (left1 + left2) / 2.f;
+    //  const float top1 = -35;
+    //  const float top2 = 40;
+    //  mUi->mParamsByName.at("Drive")->setPos(left1, top1, size);
+    //  mUi->mParamsByName.at("Offset")->setPos(left2, top1, size);
+    //  mUi->mParamsByName.at("Post gain")->setPos(left2, top2, size);
+    //  mUi->mParamsByName.at("Bass")->setPos(left1, top2, size);
+    //  pGrahics->AttachControl(mUi);
+    //  mUi->setUp();
+    //  mUiReady = true;
+    //}
+#endif
+  };
+
+  GUITARD_REGISTER_NODE(SimpleDriveNode,
+    "Soft Clipper", "Distortion", "Description, with a commma to test", "image"
+  )
+
 #ifndef GUITARD_HEADLESS
   class SimpleDriveNodeUi final : public NodeUi {
     double last = 0;
     const double speed = 0.2;
   public:
-    SimpleDriveNodeUi(NodeShared* param) : NodeUi(param) {
+    SimpleDriveNodeUi(Node* param) : NodeUi(param) {
     }
 
     void Draw(IGraphics& g) override {
@@ -30,33 +64,7 @@ namespace guitard {
     }
 
   };
-#endif
 
-  class SimpleDriveNode final : public FaustGenerated::SimpleDrive {
-  public:
-    SimpleDriveNode(NodeList::NodeInfo* info) {
-      shared.info = info;
-    }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      shared.graphics = pGrahics;
-      mUi = new SimpleDriveNodeUi(&shared);
-      mUi->setColor(Theme::Categories::DISTORTION);
-      const float size = 60;
-      const float left1 = shared.width * 0.26 - shared.width / 2.f;
-      const float left2 = shared.width * 0.75 - shared.width / 2.f;
-      // const float center = (left1 + left2) / 2.f;
-      const float top1 = -35;
-      const float top2 = 40;
-      mUi->mParamsByName.at("Drive")->setPos(left1, top1, size);
-      mUi->mParamsByName.at("Offset")->setPos(left2, top1, size);
-      mUi->mParamsByName.at("Post gain")->setPos(left2, top2, size);
-      mUi->mParamsByName.at("Bass")->setPos(left1, top2, size);
-      pGrahics->AttachControl(mUi);
-      mUi->setUp();
-      mUiReady = true;
-    }
+  GUITARD_REGISTER_NODE_UI(SimpleDriveNode, SimpleDriveNodeUi)
 #endif
-  };
 }

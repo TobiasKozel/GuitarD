@@ -9,7 +9,7 @@
 #include "../misc/NodeList.h"
 //#include "./stereo_tool/StereoToolNode.h"
 #include "./simple_drive/SimpleDriveNode.h"
-//#include "./simple_delay/SimpleDelayNode.h"
+#include "./simple_delay/SimpleDelayNode.h"
 //#include "./simple_cab/SimpleCabNode.h"
 //#include "./crybaby/CryBabyNode.h"
 //#include "./combine/CombineNode.h"
@@ -36,6 +36,27 @@
 //#include "./rectify/RectifyNode.h"
 //#include "./transpose/TransposeNode.h"
 
+//registerNode(NodeInfo{
+//  "SimpleDelayNode",
+//  "Basic Delay",
+//  "asd",
+//  "Delays/Reverbs",
+//  "A very simple delay effect",
+//  [](NodeInfo* info) { return new SimpleDelayNode(info); }
+//  });
+    //RegisterProxy<SimpleDriveNode> registerSimpleDriveNode({
+    //  "SimpleDriveNode", "Soft Clipper",
+    //  "asd", "Distortion", "Description"
+    //});
+
+      //registerNode(NodeInfo{
+      //  "SimpleDriveNode",
+      //  "Soft Clipper",
+      //  "asd",
+      //  "Distortion",
+      //  "Description",
+      //  [](NodeInfo* info) { return new SimpleDriveNode(info); }
+      //  });
 namespace guitard {
   namespace NodeList {
     void registerNodes() {
@@ -112,14 +133,14 @@ namespace guitard {
       //  [](NodeInfo* info) { return new LfoNode(info); }
       //  });
 
-      registerNode(NodeInfo{
-        "SimpleDriveNode",
-        "Soft Clipper",
-        "asd",
-        "Distortion",
-        "Description",
-        [](NodeInfo* info) { return new SimpleDriveNode(info); }
-        });
+      //registerNode(NodeInfo{
+      //  "SimpleDriveNode",
+      //  "Soft Clipper",
+      //  "asd",
+      //  "Distortion",
+      //  "Description",
+      //  [](NodeInfo* info) { return new SimpleDriveNode(info); }
+      //  });
 
       //registerNode(NodeInfo{
       //    "OverDriveNode",

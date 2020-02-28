@@ -49,7 +49,7 @@ namespace guitard {
 
 
   public:
-    NodeShared* shared; // TODO this is only temporary
+    Node* mNode = nullptr; 
     bool mDragging = false;
 
     /**
@@ -59,10 +59,10 @@ namespace guitard {
      */
     std::map<const char*, ParameterCoupling*> mParamsByName;
 
-    explicit NodeUi(NodeShared* pShared) :
+    explicit NodeUi(Node* node) :
       IControl(IRECT(0, 0, 0, 0), kNoParameter)
     {
-      shared = pShared;
+      mNode = node;
 
       NodeUi::setUpDimensions(shared->width, shared->height);
 

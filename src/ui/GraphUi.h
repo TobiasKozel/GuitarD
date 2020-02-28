@@ -121,7 +121,7 @@ namespace guitard {
       }
       mInputNodeUi = setUpNodeUi(mGraph->getInputNode());
       moutputNodeUi = setUpNodeUi(mGraph->getOutputNode());
-      mCableLayer->setInOutNodes(mInputNodeUi->shared->node, moutputNodeUi->shared->node);
+      // mCableLayer->setInOutNodes(mInputNodeUi->shared->node, moutputNodeUi->shared->node);
 
       const float scale = mGraph->getScale();
       mBackground->mScale = scale;
@@ -129,33 +129,19 @@ namespace guitard {
       return scale;
     }
 
-    void addNode(
-      Node* node, Node* pInput = nullptr, const float x = 0, const float y = 0,
-      const int outputIndex = 0, const int inputIndex = 0, Node* clone = nullptr
-    ) {
-      mGraph->addNode(node, pInput, x, y, outputIndex, inputIndex, clone);
-      setUpNodeUi(node);
-    }
-
-    void removeNode(Node* node, const bool reconnect = false) {
-      cleanUpNodeUi(node);
-      mGraph->removeNode(node, reconnect);
-    }
-
     void cleanUpNodeUi(Node* node) {
-      for (size_t i = 0; i < mNodeUis.size(); i++) {
-        if (mNodeUis[i] == node->mUi) {
-          node->cleanupUi(mGraphics);
-          mNodeUis.remove(i);
-          return;
-        }
+      NodeUi* ui = getUiFromNode(node);
+      if (ui != nullptr) {
+        mNodeUis.remove(ui);
+        mGraphics->RemoveControl(ui);
       }
     }
 
     NodeUi* setUpNodeUi(Node* node) {
-      node->setupUi(mGraphics);
-      mNodeUis.add(node->mUi);
-      return node->mUi;
+      //node->setupUi(mGraphics);
+      //mNodeUis.add(node->mUi);
+      //return node->mUi;
+      return nullptr;
     }
 
     void deserialize(const char* data) {
@@ -171,6 +157,18 @@ namespace guitard {
     }
 
   private:
+    Node* getNodeFromUi(NodeUi* ui) const {
+      return ui->shared->node;
+    }
+
+    NodeUi* getUiFromNode(Node* node) const {
+      for (size_t i = 0; i < mNodeUis.size(); i++) {
+        if (mNodeUis[i]->shared->node == node) {
+          return mNodeUis[i];
+        }
+      }
+      return nullptr;
+    }
 
     /**
      * Called via a callback from the background to move around all the nodes
@@ -223,12 +221,15 @@ namespace guitard {
        */
       mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo& info) {
         MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
-        this->addNode(NodeList::createNode(info.name), nullptr, 300, 300);
+        Node* node = NodeList::createNode(info.name);
+        mGraph->addNode(node, nullptr, 300, 300);
+        setUpNodeUi(node);
       });
 
       mNodeDelSub.subscribe(mBus, MessageBus::NodeDeleted, [&](Node* param) {
         MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
-        this->removeNode(param, true);
+        cleanUpNodeUi(param);
+        mGraph->removeNode(param, true);
       });
 
       mNodeBypassEvent.subscribe(mBus, MessageBus::BypassNodeConnection, [&](Node* param) {
@@ -239,11 +240,12 @@ namespace guitard {
       mNodeCloneEvent.subscribe(mBus, MessageBus::CloneNode, [&](Node* node) {
         Node* clone = NodeList::createNode(node->shared.info->name);
         if (clone != nullptr) {
-          this->addNode(clone, nullptr, node->shared.X, node->shared.Y, 0, 0, node);
-          clone->mUi->mDragging = true;
-          mGraphics->SetCapturedControl(clone->mUi);
+          mGraph->addNode(clone, nullptr, node->shared.X, node->shared.Y, 0, 0, node);
+          NodeUi* ui = setUpNodeUi(clone);
+          ui->mDragging = true;
+          mGraphics->SetCapturedControl(ui);
           MessageBus::fireEvent<NodeSelectionChanged>(
-            mBus, MessageBus::NodeSelectionChange, { clone->mUi, true }
+            mBus, MessageBus::NodeSelectionChange, { ui, true }
           );
         }
       });
@@ -251,11 +253,12 @@ namespace guitard {
       mNodeDragSpawn.subscribe(mBus, MessageBus::NodeDragSpawn, [&](NodeDragSpawnRequest req) {
         Node* node = NodeList::createNode(req.name);
         if (node != nullptr) {
-          this->addNode(node, nullptr, req.pos.x, req.pos.y, 0, 0);
-          node->mUi->mDragging = true;
-          mGraphics->SetCapturedControl(node->mUi);
+          mGraph->addNode(node, nullptr, req.pos.x, req.pos.y, 0, 0);
+          NodeUi* ui = setUpNodeUi(node);
+          ui->mDragging = true;
+          mGraphics->SetCapturedControl(ui);
           MessageBus::fireEvent<NodeSelectionChanged>(
-            mBus, MessageBus::NodeSelectionChange, { node->mUi, true }
+            mBus, MessageBus::NodeSelectionChange, { ui, true }
           );
         }
       });
@@ -281,9 +284,9 @@ namespace guitard {
         // this->spliceInCombine(node);
         Node* combine = mGraph->spliceInCombine(node);
         if (combine != nullptr) {
-          setUpNodeUi(combine);
-          combine->mUi->mDragging = true;
-          mGraphics->SetCapturedControl(combine->mUi);
+          NodeUi* ui = setUpNodeUi(combine);
+          ui->mDragging = true;
+          mGraphics->SetCapturedControl(ui);
         }
       });
 
@@ -416,9 +419,9 @@ namespace guitard {
     /**
      * Recursively resets all the positions of nodes to (0, 0)
      */
-    static void resetBranchPos(Node* node) {
+    void resetBranchPos(Node* node) {
       if (node == nullptr || node->shared.info->name == "FeedbackNode") { return; }
-      node->mUi->setTranslation(0, 0);
+      getUiFromNode(node)->setTranslation(0, 0);
       NodeSocket* socket = nullptr;
       for (int i = 0; i < node->shared.outputCount; i++) {
         socket = node->shared.socketsOut[i];
@@ -435,7 +438,7 @@ namespace guitard {
     /**
      * Recursively sorts nodes. I don't even know what's going on here, but it works. Sort of
      */
-    static Coord2D arrangeBranch(Node* node, Coord2D pos) {
+    Coord2D arrangeBranch(Node* node, Coord2D pos) {
       if (node == nullptr || node->shared.info->name == "FeedbackNode") {
         return pos;
       }
@@ -443,7 +446,7 @@ namespace guitard {
       // const float halfHeight = node->shared.height * 0.5;
       const float padding = 50;
       pos.x += halfWidth + padding;
-      node->mUi->setTranslation(pos.x, pos.y);
+      getUiFromNode(node)->setTranslation(pos.x, pos.y);
       pos.x += halfWidth + padding;
       float nextX = 0;
       NodeSocket* socket = nullptr;
