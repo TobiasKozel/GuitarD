@@ -1,16 +1,15 @@
 #pragma once
 #ifndef GUITARD_HEADLESS
+#include "../types/gstructs.h"
 #include "IControls.h"
+#include "./Node.h"
 #include "../types/iplugTypes.h"
 #include "../node/NodeSocket.h"
 #include "../node/NodeSocketUi.h"
 #include "../misc/MessageBus.h"
-#include "../types/gstructs.h"
 #include "./NodeShared.h"
 
 namespace guitard {
-  class Node;
-
   struct NodeUiHeader {
     bool hasByPass = false;
     bool hasRemove = true;
@@ -34,7 +33,7 @@ namespace guitard {
     NodeUiHeader mHeader;
     PointerList<IControl> mElements;
 
-    ILayerPtr mCachedBgLayer;
+    ILayerPtr mCachedBgLayer; // The layer the backround is rendered on if enabled
     bool mBgIsCached = false;
     bool mUseSvgBg = false;
     IBlend mBlend = { EBlend::Default, 1 };
@@ -48,8 +47,10 @@ namespace guitard {
     bool mSelectPressed = false;
 
 
+
+
   public:
-    Node* mNode = nullptr; 
+    Node* mNode = nullptr; // The node which this ui controls
     bool mDragging = false;
 
     /**

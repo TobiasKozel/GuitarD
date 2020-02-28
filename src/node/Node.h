@@ -1,59 +1,73 @@
 #pragma once
 
-#include "../node/NodeUi.h"
 #include "../node/NodeSocket.h"
-#include "./NodeShared.h"
+#include "../parameter/ParameterCoupling.h"
+#include "../parameter/MeterCoupling.h"
+#include "../types/gstructs.h"
 #include "../types/types.h"
+#include "../misc/NodeList.h" // We'll need the list to register the nodes to it
 
 namespace guitard {
   /**
    * Virtual class which all nodes will derive from
+   * It's the DSP part of the node
+   * You'll need to implement
    */
   class Node {
   public:
-    NodeShared shared;
-    // Flag to skip automation if there's none
-    bool mIsAutomated = false;
+    bool mIsAutomated = false; // Flag to skip automation if there's none
     // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
     sample*** mBuffersOut = nullptr;
-    // The UI element representing this node instance visually
-    // NodeUi* mUi = nullptr;
     bool mIsProcessed = false;
 
     int mSampleRate = 0;
-    int mChannelCount = 0;
     int mLastBlockSize = 0;
+    // This size will be used to allocate the dsp buffer, the actual samples per block can be lowe
+    int mMaxBlockSize = 0; 
+    int mChannelCount = 0;
 
     sample mByPassed = 0;
     sample mStereo = 1;
+
+    int mParameterCount = 0;
+    ParameterCoupling mParameters[MAX_NODE_PARAMETERS];
+    int mMeterCount = 0;
+    MeterCoupling* mMeters[MAX_NODE_METERS] = { nullptr };
+
+    int mInputCount = 0;
+    NodeSocket* mSocketsIn[MAX_NODE_SOCKETS] = { nullptr };
+    int mOutputCount = 0;
+    NodeSocket* mSocketsOut[MAX_NODE_SOCKETS] = { nullptr };
+
+    Coord2D mPos = { 0, 0 };
+    Coord2D mDimensions = { 200, 200 }; // Size in Pixels
+    NodeList::NodeInfo* mInfo;
 
     /**
      * This is basically a delayed constructor with the only disadvantage: derived methods have to have the same parameters
      * The derived class will call this with the desired parameters, except for the samplerate
      */
-    virtual void setup(MessageBus::Bus* pBus, const int pSamplerate,
-      const int pMaxBuffer, const int pChannles = 2,
-      const int pInputs = 1, const int pOutputs = 1)
-    {
-      shared.bus = pBus;
-      shared.node = this;
+    virtual void setup(
+        const int pSamplerate, const int pMaxBuffer, const int pInputs = 1,
+        const int pOutputs = 1, const int pChannels = 2
+    ) {
       mSampleRate = 0;
-      mChannelCount = 0;
-      shared.maxBlockSize = pMaxBuffer;
-      shared.inputCount = pInputs;
-      shared.outputCount = pOutputs;
+      mMaxBlockSize = pMaxBuffer;
+      mInputCount = pInputs;
+      mOutputCount = pOutputs;
       mIsProcessed = false;
-      // Setup the sockets for the node connections
-      for (int i = 0; i < shared.inputCount; i++) {
-        shared.socketsIn[i] = new NodeSocketIn(this, i);
+      mChannelCount = pChannels;
+
+      for (int i = 0; i < mInputCount; i++) { // Setup the sockets for the node connections
+        mSocketsIn[i] = new NodeSocketIn(this, i); 
       }
 
-      for (int i = 0; i < shared.outputCount; i++) {
-        shared.socketsOut[i] = new NodeSocketOut(this, i);
+      for (int i = 0; i < mOutputCount; i++) {
+        mSocketsOut[i] = new NodeSocketOut(this, i);
       }
 
       // This will create all the needed buffers
-      OnReset(pSamplerate, pChannles);
+      OnReset(pSamplerate, pChannels);
     }
 
     /**
@@ -65,27 +79,27 @@ namespace guitard {
         WDBGMSG("Trying to create a new dsp buffer without cleanung up the old one");
         assert(false);
       }
-      mBuffersOut = new sample** [shared.outputCount];
-      for (int i = 0; i < shared.outputCount; i++) {
+      mBuffersOut = new sample** [mOutputCount];
+      for (int i = 0; i < mOutputCount; i++) {
         mBuffersOut[i] = new sample* [mChannelCount];
         for (int c = 0; c < mChannelCount; c++) {
-          mBuffersOut[i][c] = new sample[shared.maxBlockSize];
+          mBuffersOut[i][c] = new sample[mMaxBlockSize];
         }
-        shared.socketsOut[i]->mParentBuffer = mBuffersOut[i]; // Need to inform the outputs about the buffer
+        mSocketsOut[i]->mParentBuffer = mBuffersOut[i]; // Need to inform the outputs about the buffer
       }
     }
 
     /**
-     * Deletes all the allocated buffers
+     * Deletes all the allocated audio buffers
      */
     virtual void deleteBuffers() {
       if (mBuffersOut != nullptr) {
-        for (int i = 0; i < shared.outputCount; i++) {
+        for (int i = 0; i < mOutputCount; i++) {
           for (int c = 0; c < mChannelCount; c++) {
             delete mBuffersOut[i][c];
           }
           delete mBuffersOut[i];
-          shared.socketsOut[i]->mParentBuffer = nullptr;
+          mSocketsOut[i]->mParentBuffer = nullptr;
         }
         delete mBuffersOut;
         mBuffersOut = nullptr;
@@ -102,23 +116,22 @@ namespace guitard {
      */
     virtual void cleanUp() {
       deleteBuffers();
-
-      for (int i = 0; i < shared.parameterCount; i++) {
-        detachAutomation(&shared.parameters[i]);
+      for (int i = 0; i < mParameterCount; i++) {
+        detachAutomation(&mParameters[i]); // Make sure no automation is attached
       }
 
-      for (int i = 0; i < shared.meterCount; i++) {
-        delete shared.meters[i];
+      for (int i = 0; i < mMeterCount; i++) {
+        delete mMeters[i];
       }
 
-      for (int i = 0; i < shared.inputCount; i++) {
-        shared.socketsIn[i]->disconnectAll();
-        delete shared.socketsIn[i];
+      for (int i = 0; i < mInputCount; i++) {
+        mSocketsIn[i]->disconnectAll();
+        delete mSocketsIn[i];
       }
 
-      for (int i = 0; i < shared.outputCount; i++) {
-        shared.socketsOut[i]->disconnectAll();
-        delete shared.socketsOut[i];
+      for (int i = 0; i < mOutputCount; i++) {
+        mSocketsOut[i]->disconnectAll();
+        delete mSocketsOut[i];
       }
     }
 
@@ -126,9 +139,9 @@ namespace guitard {
      * Will fill all the output buffers with silence and set the processed flag to true
      */
     void outputSilence() {
-      for (int o = 0; o < shared.outputCount; o++) {
+      for (int o = 0; o < mOutputCount; o++) {
         for (int c = 0; c < mChannelCount; c++) {
-          for (int i = 0; i < shared.maxBlockSize; i++) {
+          for (int i = 0; i < mMaxBlockSize; i++) {
             mBuffersOut[o][c][i] = 0;
           }
         }
@@ -140,13 +153,12 @@ namespace guitard {
      * Will return true if the node is bypassed and also do the bypassing of buffers
      */
     bool byPass() {
-      // The first param will always be bypass
-      shared.parameters[0].update();
+      mParameters[0].update(); // The first param will always be bypass
       if (mByPassed < 0.5) { return false; }
-      sample** in = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
-      for (int o = 0; o < shared.outputCount; o++) {
+      sample** in = mSocketsIn[0]->mConnectedTo[0]->mParentBuffer;
+      for (int o = 0; o < mOutputCount; o++) {
         for (int c = 0; c < mChannelCount; c++) {
-          for (int i = 0; i < shared.maxBlockSize; i++) {
+          for (int i = 0; i < mMaxBlockSize; i++) {
             mBuffersOut[o][c][i] = in[c][i];
           }
         }
@@ -165,8 +177,8 @@ namespace guitard {
        * If one input isn't connected, skip the processing and output silence
        * If that's not desired, this function has to be overriden
        */
-      for (int i = 0; i < shared.inputCount; i++) {
-        if (shared.socketsIn[i]->mConnectedTo[0] == nullptr) {
+      for (int i = 0; i < mInputCount; i++) {
+        if (mSocketsIn[i]->mConnectedTo[0] == nullptr) {
           outputSilence();
           return false;
         }
@@ -175,19 +187,18 @@ namespace guitard {
       /**
        * Check for inputs which are connected to unprocessed nodes
        */
-      for (int i = 0; i < shared.inputCount; i++) {
-        if (!shared.socketsIn[i]->mConnectedTo[0]->mParentNode->mIsProcessed) {
-          // A node isn't ready so return false
-          return false;
+      for (int i = 0; i < mInputCount; i++) {
+        if (!mSocketsIn[i]->mConnectedTo[0]->mParentNode->mIsProcessed) {
+          return false; // A node isn't ready so return false
         }
       }
 
       /**
-       * Check for automation
+       * Check for automation since it needs to be ready as well
        */
       if (mIsAutomated) {
-        for (int i = 0; i < shared.parameterCount; i++) {
-          Node* n = shared.parameters[i].automationDependency;
+        for (int i = 0; i < mParameterCount; i++) {
+          Node* n = mParameters[i].automationDependency;
           if (n != nullptr && !n->mIsProcessed) {
             return false;
           }
@@ -197,9 +208,12 @@ namespace guitard {
       return true;
     }
 
+    /**
+     * Updates the internal mIsAutomated state
+     */
     void checkIsAutomated() {
-      for (int i = 0; i < shared.parameterCount; i++) {
-        if (shared.parameters[i].automationDependency != nullptr) {
+      for (int i = 0; i < mParameterCount; i++) {
+        if (mParameters[i].automationDependency != nullptr) {
           mIsAutomated = true;
           return;
         }
@@ -207,19 +221,24 @@ namespace guitard {
       mIsAutomated = false;
     }
 
-    /** Main Processing, only takes a blocksize since it knows its inputs */
+    /**
+     * Main Processing, only takes a blocksize since it knows its inputs
+     */
     virtual void ProcessBlock(int nFrames) = 0;
-
 
 
     /**                  Signals from outside                  */
 
-    /** Signals a new audio block is about to processed */
+    /**
+     * Signals a new audio block is about to processed
+     */
     virtual void BlockStart() {
       mIsProcessed = false;
     }
 
-    /** Called if the daw changed the channelcount*/
+    /**
+     * Called if the daw changed the channel count
+     */
     virtual void OnChannelsChanged(const int pChannels) {
       deleteBuffers();
       mChannelCount = pChannels;
@@ -251,7 +270,7 @@ namespace guitard {
      * Connects a given socket to a input at a given index of this node
      */
     virtual void connectInput(NodeSocket* out, const int inputNumber = 0) {
-      NodeSocket* inSocket = shared.socketsIn[inputNumber];
+      NodeSocket* inSocket = mSocketsIn[inputNumber];
       if (inSocket != nullptr) {
         if (out == nullptr) {
           inSocket->disconnect();
@@ -263,13 +282,12 @@ namespace guitard {
     }
 
     /**
-     * In order for automations to keep in sync inside a audio block
-     * the automation node responsible for the automation has to be added to a
-     * dependency list.
-     * The requested ParameterCoupling is returned to be used in the automation node
+     * This is called from the CableLayer
+     * @param n The Node which is the automation source since it needs to be added to the list of nodes it depends on
+     * @param index Is the index of the ParameterCoupling to attach the automation to
      */
     virtual void attachAutomation(Node* n, const int index) {
-      ParameterCoupling* p = &shared.parameters[index];
+      ParameterCoupling* p = &mParameters[index];
       if (p != nullptr) {
         n->addAutomationTarget(p);
       }
@@ -308,36 +326,51 @@ namespace guitard {
      * Generic function to call when the node can be bypassed
      */
     void addByPassParam() {
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
+      if (mParameterCount != 0) {
+        assert(false);
+        return ;
+      }
+      mParameters[mParameterCount] = ParameterCoupling(
         "Bypass", &mByPassed, 0.0, 0.0, 1.0, 1
       );
-      shared.parameterCount++;
+      mParameterCount++;
     }
 
-    /** Generic function to call when the node can switch between mono/stereo */
+    /**
+     * Generic function to call when the node can switch between mono/stereo
+     */
     void addStereoParam(ParameterCoupling* p = nullptr) {
       if (p == nullptr) {
-        shared.parameters[shared.parameterCount] = ParameterCoupling(
+        mParameters[mParameterCount] = ParameterCoupling(
           "Stereo", &mStereo, 0.0, 0.0, 1.0, 1
         );
       }
       else {
-        shared.parameters[shared.parameterCount] = *p;
+        mParameters[mParameterCount] = *p;
       }
 
-      shared.parameterCount++;
+      mParameterCount++;
     }
 
-    /** Copies over the state of the given node if it's from the same type */
+    void addParameter() {
+      
+    }
+
+    /**
+     * Copies over the state of the given node if it's from the same type
+     */
     void copyState(Node* n) {
-      if (shared.info->name != n->shared.info->name) {
+      if (mInfo->name != n->mInfo->name) { // Check the type
         WDBGMSG("Trying to copy a state from a different node type!\n");
         assert(false);
         return;
       }
-      for (int i = 0; i < shared.parameterCount; i++) {
-        shared.parameters[i].setValue(n->shared.parameters[i].getValue());
+
+      for (int i = 0; i < mParameterCount; i++) { // Synchronize all the parameters
+        mParameters[i].setValue(n->mParameters[i].getValue());
       }
+
+      // Carry over the additional data
       nlohmann::json temp;
       n->serializeAdditional(temp);
       deserializeAdditional(temp);

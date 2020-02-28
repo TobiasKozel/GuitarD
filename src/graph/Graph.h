@@ -83,7 +83,7 @@ namespace guitard {
 
       mInputNode = new InputNode(mBus);
       mOutputNode = new OutputNode(mBus);
-      mOutputNode->connectInput(mInputNode->shared.socketsOut[0]);
+      mOutputNode->connectInput(mInputNode->mSocketsOut[0]);
     }
 
     ~Graph() {
@@ -105,6 +105,9 @@ namespace guitard {
       mPauseAudio--;
     }
 
+    /**
+     * Called from outside to update samplerate, an channel configs
+     */
     void OnReset(const int pSampleRate, const int pOutputChannels = 2, const int pInputChannels = 2) {
       if (pSampleRate != mSampleRate || pOutputChannels != mChannelCount || pInputChannels != mInPutChannelCount) {
         lockAudioThread();
@@ -165,7 +168,7 @@ namespace guitard {
       mMaxBlockSize = size;
       for (int i = 0; i < mNodes.size(); i++) {
         Node* n = mNodes[i];
-        n->shared.maxBlockSize = size;
+        n->mMaxBlockSize = size;
         n->OnReset(mSampleRate, mChannelCount, true);
       }
       unlockAudioThread();
@@ -200,80 +203,76 @@ namespace guitard {
         }
       }
 
-
       const int nodeCount = mNodes.size();
       const int maxAttempts = 10;
 
-      {
-        if (mPauseAudio > 0) {
-          /**
-           * Skip the block if the mutex is locked, waiting will most likely result in an under-run anyways
-           */
-          for (int c = 0; c < mChannelCount; c++) {
-            for (int i = 0; i < nFrames; i++) {
-              out[c][i] = 0;
-            }
-          }
-          return;
-        }
-
-        const auto start = std::chrono::high_resolution_clock::now();
-        LockGuard lock(mAudioMutex);
-        mInputNode->CopyIn(in, nFrames);
-        for (int n = 0; n < nodeCount; n++) {
-          mNodes[n]->BlockStart();
-        }
-        mOutputNode->BlockStart();
-        // The List is pre sorted so the attempts are only needed to catch circular dependencies and other edge cases
-        int attempts = 0;
-        while (!mOutputNode->mIsProcessed && attempts < maxAttempts) {
-          for (int n = 0; n < nodeCount; n++) {
-            mNodes[n]->ProcessBlock(nFrames);
-          }
-          mOutputNode->ProcessBlock(nFrames);
-          attempts++;
-        }
-
-        // This extra iteration makes sure the feedback loops get data from their previous nodes
-        if (attempts < maxAttempts) {
-          for (int n = 0; n < nodeCount; n++) {
-            mNodes[n]->ProcessBlock(nFrames);
-          }
-          if (!mStats.valid) {
-            mStats.valid = true;
-            MessageBus::fireEvent(mBus, MessageBus::GraphStatsChanged, &mStats);
+      if (mPauseAudio > 0) {
+        /**
+         * Skip the block if the mutex is locked, waiting will most likely result in an under-run anyways
+         */
+        for (int c = 0; c < mChannelCount; c++) {
+          for (int i = 0; i < nFrames; i++) {
+            out[c][i] = 0;
           }
         }
-        else {
-          // failed processing
-          if (mStats.valid) {
-            mStats.valid = false;
-            MessageBus::fireEvent(mBus, MessageBus::GraphStatsChanged, &mStats);
-          }
-        }
-
-        mOutputNode->CopyOut(out, nFrames);
-        const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
-          std::chrono::high_resolution_clock::now() - start
-          );
-        mStats.executionTime = duration.count();
+        return;
       }
+
+      const auto start = std::chrono::high_resolution_clock::now();
+      LockGuard lock(mAudioMutex);
+      mInputNode->CopyIn(in, nFrames);
+      for (int n = 0; n < nodeCount; n++) {
+        mNodes[n]->BlockStart();
+      }
+      mOutputNode->BlockStart();
+      // The List is pre sorted so the attempts are only needed to catch circular dependencies and other edge cases
+      int attempts = 0;
+      while (!mOutputNode->mIsProcessed && attempts < maxAttempts) {
+        for (int n = 0; n < nodeCount; n++) {
+          mNodes[n]->ProcessBlock(nFrames);
+        }
+        mOutputNode->ProcessBlock(nFrames);
+        attempts++;
+      }
+
+      // This extra iteration makes sure the feedback loops get data from their previous nodes
+      if (attempts < maxAttempts) {
+        for (int n = 0; n < nodeCount; n++) {
+          mNodes[n]->ProcessBlock(nFrames);
+        }
+        if (!mStats.valid) {
+          mStats.valid = true;
+          MessageBus::fireEvent(mBus, MessageBus::GraphStatsChanged, &mStats);
+        }
+      }
+      else {
+        // failed processing
+        if (mStats.valid) {
+          mStats.valid = false;
+          MessageBus::fireEvent(mBus, MessageBus::GraphStatsChanged, &mStats);
+        }
+      }
+
+      mOutputNode->CopyOut(out, nFrames);
+      const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now() - start
+        );
+      mStats.executionTime = duration.count();
     }
 
     /**
      * Used to add nodes and pause the audio thread
      */
     void addNode(
-        Node* node, Node* pInput = nullptr, const float x = 0, const float y = 0,
+      Node* node, Node* pInput = nullptr, const Coord2D pos = {0, 0},
         const int outputIndex = 0, const int inputIndex = 0, Node* clone = nullptr
     ) {
       if (mNodes.find(node) != -1) {
         assert(false); // In case node is already in the list
         return;
       }
-      node->shared.X = x;
-      node->shared.Y = y;
-      node->setup(mBus, mSampleRate, mMaxBlockSize);
+      node->mPos = pos;
+      node->setup(mSampleRate, mMaxBlockSize);
 
       if (clone != nullptr) {
         node->copyState(clone);
@@ -284,7 +283,7 @@ namespace guitard {
       }
 
       if (pInput != nullptr) {
-        node->connectInput(pInput->shared.socketsOut[outputIndex], inputIndex);
+        node->connectInput(pInput->mSocketsOut[outputIndex], inputIndex);
       }
 
       lockAudioThread();
@@ -299,9 +298,9 @@ namespace guitard {
      * Only takes care of the first input and first output
      */
     void byPassConnection(Node* node) const {
-      if (node->shared.inputCount > 0 && node->shared.outputCount > 0) {
-        NodeSocket* inSock = node->shared.socketsIn[0];
-        NodeSocket* outSock = node->shared.socketsOut[0];
+      if (node->mInputCount > 0 && node->mOutputCount > 0) {
+        NodeSocket* inSock = node->mSocketsIn[0];
+        NodeSocket* outSock = node->mSocketsOut[0];
         NodeSocket* prevSock = inSock->mConnectedTo[0];
         if (prevSock != nullptr) { // make sure there's a previous node
           int nextSocketCount = 0;
@@ -337,24 +336,24 @@ namespace guitard {
      * and returns a pointer to the new combine
      */
     Node* spliceInCombine(Node* node) {
-      if (node->shared.inputCount > 0 && node->shared.outputCount > 0) {
-        NodeSocket* inSock = node->shared.socketsIn[0];
-        NodeSocket* outSock = node->shared.socketsOut[0];
+      if (node->mInputCount > 0 && node->mOutputCount > 0) {
+        NodeSocket* inSock = node->mSocketsIn[0];
+        NodeSocket* outSock = node->mSocketsOut[0];
         NodeSocket* source = inSock->mConnectedTo[0];
         NodeSocket* target = outSock->mConnectedTo[0];
         if (target == nullptr || source == nullptr) {
           return nullptr;
         }
         Node* combine = NodeList::createNode("CombineNode");
-        addNode(combine, nullptr, node->shared.X, node->shared.Y);
+        addNode(combine, nullptr, node->mPos);
 
         for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
           if (outSock->mConnectedTo[i] != nullptr) {
-            combine->shared.socketsOut[0]->connect(outSock->mConnectedTo[i]);
+            combine->mSocketsOut[0]->connect(outSock->mConnectedTo[i]);
           }
         }
-        combine->shared.socketsIn[0]->connect(outSock);
-        combine->shared.socketsIn[1]->connect(source);
+        combine->mSocketsIn[0]->connect(outSock);
+        combine->mSocketsIn[1]->connect(source);
         return combine;
       }
       return nullptr;
@@ -485,12 +484,13 @@ namespace guitard {
     /**
      * Does some sorting on the mNodes list so the graph can be computed with fewer attempts
      * Does not touch the positions of the nodes
+     * TODO this needs to be looked at to wirk with feedback and automation deps
      */
     void sortGraphWithoutLock() {
       PointerList<Node> sorted;
       for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
         // Put in the nodes which directly follow the input node
-        NodeSocket* con = mInputNode->shared.socketsOut[0]->mConnectedTo[i];
+        NodeSocket* con = mInputNode->mSocketsOut[0]->mConnectedTo[i];
         if (con != nullptr) {
           sorted.add(con->mParentNode);
         }
@@ -500,8 +500,8 @@ namespace guitard {
       for (int tries = 0; tries < 100; tries++) {
         for (int i = 0; i < sorted.size(); i++) {
           Node* node = sorted[i];
-          for (int out = 0; out < node->shared.outputCount; out++) {
-            NodeSocket* outSocket = node->shared.socketsOut[out];
+          for (int out = 0; out < node->mOutputCount; out++) {
+            NodeSocket* outSocket = node->mSocketsOut[out];
             if (outSocket == nullptr) { continue; }
             for (int next = 0; next < MAX_SOCKET_CONNECTIONS; next++) {
               NodeSocket* nextSocket = outSocket->mConnectedTo[next];

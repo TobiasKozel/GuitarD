@@ -20,11 +20,34 @@ class GuitarD : public iplug::Plugin
   guitard::ParameterManager* mParamManager = nullptr;
 public:
   GuitarD(const iplug::InstanceInfo& info);
+
+  /**
+   * Called when the window closes to free all the resources allocated by the GUI
+   * The gui open function will be defined as a lambda inside the constructor of this class
+   * by setting mMakeGraphicsFunc
+   */
   void OnUIClose() override;
+
+  /**
+   * Called from the outside on a transport
+   * At least I think it will?
+   */
   void OnReset() override;
+
+  /**
+   * Called from outside when activated or deactivated
+   * This doesn't work the same on all DAWs
+   */
   void OnActivate(bool active) override;
 
+  /**
+   * Called from outside when a state needs to be saved
+   */
   bool SerializeState(iplug::IByteChunk& chunk) const override;
+
+  /**
+   * Called from outside with a byte chunk to load
+   */
   int UnserializeState(const iplug::IByteChunk& chunk, int startPos) override;
 
 /**

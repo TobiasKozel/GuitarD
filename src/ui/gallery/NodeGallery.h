@@ -33,7 +33,7 @@ namespace guitard {
      */
     void init() {
       std::map<String, GalleryCategory*> uniqueCat;
-      for (auto& i : NodeList::nodelist) {
+      for (auto& i : NodeList::nodeList) {
         if (i.second.hidden) { continue; }
         if (uniqueCat.find(i.second.categoryName) == uniqueCat.end()) {
           GalleryCategory* cat = new GalleryCategory(mBus);
@@ -41,7 +41,7 @@ namespace guitard {
           appendChild(cat);
         }
       }
-      for (auto& i : NodeList::nodelist) {
+      for (auto& i : NodeList::nodeList) {
         if (i.second.hidden) { continue; }
         uniqueCat.at(i.second.categoryName)->addNode(&i.second);
       }

@@ -14,18 +14,18 @@ namespace guitard {
     inline void serialize(nlohmann::json& serialized, PointerList<Node>* nodes, Node* input, Node* output) {
       serialized["input"]["gain"] = 1.0;
       serialized["input"]["position"] = {
-        input->shared.X, input->shared.Y
+        input->mPos.x, input->mPos.y
       };
       serialized["nodes"] = nlohmann::json::array();
       for (int i = 0; i < nodes->size(); i++) {
         Node* node = nodes->get(i);
-        serialized["nodes"][i]["position"] = { node->shared.X, node->shared.Y };
+        serialized["nodes"][i]["position"] = { node->mPos.x, node->mPos.y };
         // The index shouldn't really matter since they're all in order
         serialized["nodes"][i]["idx"] = i;
-        serialized["nodes"][i]["type"] = node->shared.info->name;
+        serialized["nodes"][i]["type"] = node->mInfo->name;
         serialized["nodes"][i]["inputs"] = nlohmann::json::array();
-        for (int prev = 0; prev < node->shared.inputCount; prev++) {
-          Node* cNode = node->shared.socketsIn[prev]->getConnectedNode();
+        for (int prev = 0; prev < node->mInputCount; prev++) {
+          Node* cNode = node->mSocketsIn[prev]->getConnectedNode();
           if (cNode == nullptr) {
             serialized["nodes"][i]["inputs"][prev] = { NoNode, 0 };
           }
@@ -35,13 +35,13 @@ namespace guitard {
           else {
             serialized["nodes"][i]["inputs"][prev] = {
               nodes->find(cNode),
-              node->shared.socketsIn[prev]->getConnectedSocketIndex()
+              node->mSocketsIn[prev]->getConnectedSocketIndex()
             };
           }
         }
         serialized["nodes"][i]["parameters"] = nlohmann::json::array();
-        for (int p = 0; p < node->shared.parameterCount; p++) {
-          ParameterCoupling* para = &node->shared.parameters[p];
+        for (int p = 0; p < node->mParameterCount; p++) {
+          ParameterCoupling* para = &node->mParameters[p];
           const char* name = para->name;
           double val = para->getValue();
           int idx = para->parameterIdx;
@@ -58,9 +58,9 @@ namespace guitard {
       // Handle the output node
       serialized["output"]["gain"] = 1.0;
       serialized["output"]["position"] = {
-        output->shared.X, output->shared.Y
+        output->mPos.x, output->mPos.y
       };
-      Node* lastNode = output->shared.socketsIn[0]->getConnectedNode();
+      Node* lastNode = output->mSocketsIn[0]->getConnectedNode();
       int lastNodeIndex = NoNode;
       if (lastNode == input) {
         lastNodeIndex = InputNode;
@@ -70,7 +70,7 @@ namespace guitard {
       }
       serialized["output"]["inputs"][0] = {
         lastNodeIndex,
-        output->shared.socketsIn[0]->getConnectedSocketIndex()
+        output->mSocketsIn[0]->getConnectedSocketIndex()
       };
     }
 
@@ -101,9 +101,9 @@ namespace guitard {
         const std::string className = sNode["type"];
         Node* node = NodeList::createNode(className);
         if (node == nullptr) { continue; }
-        node->shared.X = sNode["position"][0];
-        node->shared.Y = sNode["position"][1];
-        node->setup(pBus, sampleRate, maxBuffer);
+        node->mPos.x = sNode["position"][0];
+        node->mPos.y = sNode["position"][1];
+        node->setup(sampleRate, maxBuffer); // TODO use the add node function
         if (expectedIndex != sNode["idx"]) {
           WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
         }

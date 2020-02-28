@@ -4,8 +4,7 @@
 #include "../node/NodeInfo.h"
 
 namespace guitard {
-  class Node;
-
+  class Node; // The Node isn't known at this point, we'll only need a pointer
   namespace NodeList {
     typedef std::map<String, NodeInfo> NodeMap;
     typedef std::map<String, NodeUiInfo> NodeUiMap;
@@ -29,8 +28,7 @@ namespace guitard {
       return nullptr;
     }
 
-    inline NodeUi* createNodeUi(Node* node) {
-      String name = node->shared.info->name;
+    inline NodeUi* createNodeUi(const String name, Node* node) {
       if (nodeUiList.find(name) != nodeUiList.end()) {
         return nodeUiList.at(name).constructor(node);
       }

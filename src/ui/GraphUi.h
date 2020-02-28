@@ -86,7 +86,7 @@ namespace guitard {
       mGraph->setScale(mGraphics->GetDrawScale());
 
       for (int n = 0; n < mNodeUis.size(); n++) {
-        cleanUpNodeUi(mNodeUis[n]->shared->node);
+        cleanUpNodeUi(mNodeUis[n]->mNode);
       }
 
       mGraphics->RemoveControl(mSideBar);
@@ -105,7 +105,7 @@ namespace guitard {
     void cleanUpAllNodeUis() {
       mCableLayer->setInOutNodes(nullptr, nullptr);
       while (mNodeUis.size()) {
-        cleanUpNodeUi(mNodeUis[0]->shared->node);
+        cleanUpNodeUi(mNodeUis[0]->mNode);
       }
     }
 
@@ -158,12 +158,12 @@ namespace guitard {
 
   private:
     Node* getNodeFromUi(NodeUi* ui) const {
-      return ui->shared->node;
+      return ui->mNode;
     }
 
     NodeUi* getUiFromNode(Node* node) const {
       for (size_t i = 0; i < mNodeUis.size(); i++) {
-        if (mNodeUis[i]->shared->node == node) {
+        if (mNodeUis[i]->mNode == node) {
           return mNodeUis[i];
         }
       }
@@ -188,8 +188,8 @@ namespace guitard {
      */
     void centerNode(NodeUi* node) const {
       IRECT center = mGraphics->GetBounds().GetScaledAboutCentre(0);
-      center.L -= node->shared->X;
-      center.T -= node->shared->Y;
+      center.L -= node->mNode->mPos.x;
+      center.T -= node->mNode->mPos.y;
       onViewPortChange(center.L, center.T);
     }
 
@@ -202,8 +202,8 @@ namespace guitard {
       const int count = mNodeUis.size();
       for (int i = 0; i < count; i++) {
         const NodeUi* n = mNodeUis[i];
-        avg.x += n->shared->X;
-        avg.y += n->shared->Y;
+        avg.x += n->mNode->mPos.x;
+        avg.y += n->mNode->mPos.y;
       }
       float countf = count /** + 2 */;
       //avg.x += mInputNode->shared.X + mOutputNode->shared.X;
@@ -222,7 +222,7 @@ namespace guitard {
       mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo& info) {
         MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
         Node* node = NodeList::createNode(info.name);
-        mGraph->addNode(node, nullptr, 300, 300);
+        mGraph->addNode(node, nullptr, { 300, 300 });
         setUpNodeUi(node);
       });
 
@@ -238,9 +238,9 @@ namespace guitard {
       });
 
       mNodeCloneEvent.subscribe(mBus, MessageBus::CloneNode, [&](Node* node) {
-        Node* clone = NodeList::createNode(node->shared.info->name);
+        Node* clone = NodeList::createNode(node->mInfo->name);
         if (clone != nullptr) {
-          mGraph->addNode(clone, nullptr, node->shared.X, node->shared.Y, 0, 0, node);
+          mGraph->addNode(clone, nullptr, node->mPos, 0, 0, node);
           NodeUi* ui = setUpNodeUi(clone);
           ui->mDragging = true;
           mGraphics->SetCapturedControl(ui);
@@ -253,7 +253,7 @@ namespace guitard {
       mNodeDragSpawn.subscribe(mBus, MessageBus::NodeDragSpawn, [&](NodeDragSpawnRequest req) {
         Node* node = NodeList::createNode(req.name);
         if (node != nullptr) {
-          mGraph->addNode(node, nullptr, req.pos.x, req.pos.y, 0, 0);
+          mGraph->addNode(node, nullptr, req.pos, 0, 0);
           NodeUi* ui = setUpNodeUi(node);
           ui->mDragging = true;
           mGraphics->SetCapturedControl(ui);
@@ -301,9 +301,9 @@ namespace guitard {
       mAutomationRequest.subscribe(mBus, MessageBus::AttachAutomation, [&](AutomationAttachRequest r) {
         MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
         for (int i = 0; i < mNodeUis.size(); i++) {
-          Node* node = mNodeUis[i]->shared->node;
-          for (int p = 0; p < node->shared.parameterCount; p++) {
-            if (node->shared.parameters[p].control == r.targetControl) {
+          Node* node = mNodeUis[i]->mNode;
+          for (int p = 0; p < node->mParameterCount; p++) {
+            if (node->mParameters[p].control == r.targetControl) {
               if (node != r.automationNode) {
                 // Don't allow automation on self
                 node->attachAutomation(r.automationNode, p);
@@ -388,9 +388,9 @@ namespace guitard {
           }
         }
         if (key.VK == iplug::kVK_F) {
-          Node* in = mInputNodeUi->shared->node;
+          Node* in = mInputNodeUi->mNode;
           resetBranchPos(in);
-          arrangeBranch(in, Coord2D{ in->shared.Y, in->shared.X });
+          arrangeBranch(in, in->mPos);
           centerGraph();
           return true;
         }
@@ -420,11 +420,11 @@ namespace guitard {
      * Recursively resets all the positions of nodes to (0, 0)
      */
     void resetBranchPos(Node* node) {
-      if (node == nullptr || node->shared.info->name == "FeedbackNode") { return; }
+      if (node == nullptr || node->mInfo->name == "FeedbackNode") { return; }
       getUiFromNode(node)->setTranslation(0, 0);
       NodeSocket* socket = nullptr;
-      for (int i = 0; i < node->shared.outputCount; i++) {
-        socket = node->shared.socketsOut[i];
+      for (int i = 0; i < node->mOutputCount; i++) {
+        socket = node->mSocketsOut[i];
         for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
           if (socket->mConnectedTo[j] != nullptr) {
             if (socket->mConnectedTo[j]->mIndex == 0) {
@@ -439,10 +439,10 @@ namespace guitard {
      * Recursively sorts nodes. I don't even know what's going on here, but it works. Sort of
      */
     Coord2D arrangeBranch(Node* node, Coord2D pos) {
-      if (node == nullptr || node->shared.info->name == "FeedbackNode") {
+      if (node == nullptr || node->mInfo->name == "FeedbackNode") {
         return pos;
       }
-      const float halfWidth = node->shared.width * 0.5;
+      const float halfWidth = node->mDimensions.x * 0.5;
       // const float halfHeight = node->shared.height * 0.5;
       const float padding = 50;
       pos.x += halfWidth + padding;
@@ -450,13 +450,13 @@ namespace guitard {
       pos.x += halfWidth + padding;
       float nextX = 0;
       NodeSocket* socket = nullptr;
-      for (int i = 0; i < node->shared.outputCount; i++) {
-        socket = node->shared.socketsOut[i];
+      for (int i = 0; i < node->mOutputCount; i++) {
+        socket = node->mSocketsOut[i];
         for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
           if (socket->mConnectedTo[j] != nullptr) {
             if (socket->mConnectedTo[j]->mIndex == 0) {
               Coord2D branch = arrangeBranch(socket->mConnectedTo[j]->mParentNode, pos);
-              pos.y += node->shared.height + padding;
+              pos.y += node->mDimensions.y + padding;
               if (pos.y < branch.y) {
                 pos.y = branch.y;
               }

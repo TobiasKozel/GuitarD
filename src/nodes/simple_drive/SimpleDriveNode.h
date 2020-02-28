@@ -7,7 +7,7 @@ namespace guitard {
   class SimpleDriveNode final : public FaustGenerated::SimpleDrive {
   public:
     SimpleDriveNode(NodeList::NodeInfo* info) {
-      shared.info = info;
+      mInfo = info;
     }
 
 #ifndef GUITARD_HEADLESS
@@ -45,7 +45,7 @@ namespace guitard {
     }
 
     void Draw(IGraphics& g) override {
-      double val = iplug::AmpToDB(*(shared->meters[0]->value));
+      double val = iplug::AmpToDB(*(mNode->mMeters[0]->value));
       val = val * 10 + 255;
       int bright = 0;
       NodeUi::Draw(g);

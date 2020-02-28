@@ -1,15 +1,9 @@
-/**
- * All the nodes need to be included here
- * registerNodes() will be called when the plugin is constructed
- * and will register all nodes in a global list which will
- * be shared across plugin instances if they are in the same process
- */
-
 #pragma once
 #include "../misc/NodeList.h"
-//#include "./stereo_tool/StereoToolNode.h"
 #include "./simple_drive/SimpleDriveNode.h"
-#include "./simple_delay/SimpleDelayNode.h"
+
+//#include "./stereo_tool/StereoToolNode.h"
+// #include "./simple_delay/SimpleDelayNode.h"
 //#include "./simple_cab/SimpleCabNode.h"
 //#include "./crybaby/CryBabyNode.h"
 //#include "./combine/CombineNode.h"
@@ -57,9 +51,6 @@
       //  "Description",
       //  [](NodeInfo* info) { return new SimpleDriveNode(info); }
       //  });
-namespace guitard {
-  namespace NodeList {
-    void registerNodes() {
       //registerNode(NodeInfo{
       //  "CombineNode",
       //  "Combine",
@@ -314,6 +305,3 @@ namespace guitard {
       //  "Description",
       //  [](NodeInfo* info) { return new AutoGainNode(info); }
       //  });
-    }
-  }
-}

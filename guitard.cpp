@@ -15,7 +15,6 @@ GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::M
   UserHomePath(path);
   soundwoofer::setup::setHomeDirectory(path.Get());
 
-  guitard::NodeList::registerNodes();
   mParamManager = new guitard::ParameterManager(&mBus);
 
   for (int i = 0; i < MAX_DAW_PARAMS; i++) {
@@ -61,7 +60,10 @@ void GuitarD::OnReset() {
     const int outputChannels = NOutChansConnected();
     const int inputChannels = NInChansConnected();
     if (sr > 0 && outputChannels > 0 && inputChannels > 0) {
-      // DAWs seem to
+      /**
+       * Depending on the DAW we might not be getting valid values just yet
+       * So we check them and then inform the Graph
+       */
       mGraph->OnReset(sr, outputChannels, inputChannels);
       mReady = true;
     }
@@ -75,11 +77,6 @@ void GuitarD::OnActivate(bool active) {
 }
 
 void GuitarD::OnUIClose() {
-  /**
-   * The gui will be cleaned up when the Iplug window is destructed
-   * however doing this manually will be safer and make sure all the nodes can clean up
-   * after them selves and set the control in the ParameterCoupling to a nullptr
-   */
   delete mGraphUi;
   mGraphUi = nullptr;
 }
