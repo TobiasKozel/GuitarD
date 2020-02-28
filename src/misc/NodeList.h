@@ -113,3 +113,4 @@ namespace NodeList { \
 namespace NodeList { \
   RegisterProxy<ui> register##ui(NodeUiInfo{ GUITARD_STR(type) });\
 }\
+

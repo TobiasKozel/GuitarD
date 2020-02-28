@@ -27,7 +27,7 @@ namespace guitard {
   };
 
   struct NodeSpliceInPair {
-    Node* node = nullptr;
+    Node* node = nullptr; // The Node that needs to be spliced in
     NodeSocket* socket = nullptr;
   };
 

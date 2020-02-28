@@ -10,7 +10,7 @@
 #include "./NodeShared.h"
 
 namespace guitard {
-  struct NodeUiHeader {
+  struct NodeUiHeader { // TODO get rid of this 
     bool hasByPass = false;
     bool hasRemove = true;
     IControl* bypass;
@@ -24,6 +24,8 @@ namespace guitard {
    */
   class NodeUi : public IControl {
   protected:
+    MessageBus::Bus* mBus = nullptr;
+
     MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
     MessageBus::Subscription<QuickConnectRequest> mNodeQuickConnectEvent;
 
@@ -36,7 +38,7 @@ namespace guitard {
     ILayerPtr mCachedBgLayer; // The layer the backround is rendered on if enabled
     bool mBgIsCached = false;
     bool mUseSvgBg = false;
-    IBlend mBlend = { EBlend::Default, 1 };
+    IBlend mBlend = { EBlend::Default, 1 }; // TODO this might not be needed 
     bool mNoScale = false;
 
     IColor mColor;
@@ -60,29 +62,28 @@ namespace guitard {
      */
     std::map<const char*, ParameterCoupling*> mParamsByName;
 
-    explicit NodeUi(Node* node) :
-      IControl(IRECT(0, 0, 0, 0), kNoParameter)
-    {
+    explicit NodeUi(Node* node, MessageBus::Bus* bus) : IControl(IRECT(0, 0, 0, 0), kNoParameter) {
       mNode = node;
+      mBus = bus;
+      NodeUi::setUpDimensions(mNode->mDimensions);
 
-      NodeUi::setUpDimensions(shared->width, shared->height);
-
-      for (int i = 0; i < shared->parameterCount; i++) {
+      for (int i = 0; i < mNode->mParameterCount; i++) {
         /**
          * Keep them around in a map for convenient use
          * Only do this in the UI though
          */
-        ParameterCoupling* p = &shared->parameters[i];
+        ParameterCoupling* p = &mNode->mParameters[i];
         mParamsByName.insert(std::pair<const char*, ParameterCoupling*>(p->name, p));
       }
 
-      mNodeSpliceInEvent.subscribe(shared->bus, MessageBus::NodeSpliceIn, [&](NodeSpliceInPair pair) {
-        if (shared->node != pair.node) { return; }
+      mNodeSpliceInEvent.subscribe(bus, MessageBus::NodeSpliceIn, [&](NodeSpliceInPair pair) {
+        // All UIs will get this event, so check if this is the one meant to respond
+        if (mNode != pair.node) { return; }
         /**
          * Splice in only works on nodes with at least one in and output
          */
         NodeSocket* in = getQuickConnectSocket(false);
-        NodeSocket* out = shared->socketsOut[0];
+        NodeSocket* out = getQuickConnectSocket(true);
         NodeSocket* prev = pair.socket->mConnectedTo[0];
         if (in != nullptr && out != nullptr) {
           pair.socket->disconnect();
@@ -91,7 +92,7 @@ namespace guitard {
         }
       });
 
-      mNodeQuickConnectEvent.subscribe(shared->bus, MessageBus::QuickConnectSocket, [&](QuickConnectRequest req) {
+      mNodeQuickConnectEvent.subscribe(bus, MessageBus::QuickConnectSocket, [&](QuickConnectRequest req) {
         if (mTargetRECT.Contains(IRECT{ req.pos.x, req.pos.y, req.pos.x, req.pos.y })) {
           NodeSocket* socket = getQuickConnectSocket(req.from->mIsInput);
           if (socket != nullptr) {
@@ -109,17 +110,18 @@ namespace guitard {
     /**
      * Tries to return a unconnected input or output socket
      * Will return a connected one if no unconnected one is found
+     * @param output If true will return a output socket
      */
     virtual NodeSocket* getQuickConnectSocket(const bool output = false) {
       for (int i = 0; i < MAX_NODE_SOCKETS; i++) {
-        NodeSocket* socket = output ? shared->socketsOut[i] : shared->socketsIn[i];
+        NodeSocket* socket = output ? mNode->mSocketsOut[i] : mNode->mSocketsIn[i];
         if (socket != nullptr && !socket->mConnected) {
           // Look for the first unconnected socket
           return socket;
         }
       }
       for (int i = 0; i < MAX_NODE_SOCKETS; i++) {
-        NodeSocket* socket = output ? shared->socketsOut[i] : shared->socketsIn[i];
+        NodeSocket* socket = output ? mNode->mSocketsOut[i] : mNode->mSocketsIn[i];
         if (socket != nullptr) {
           // Use a socket even if it is connected
           return socket;
@@ -128,12 +130,12 @@ namespace guitard {
       return nullptr;
     }
 
-    virtual void setUpDimensions(float w, float h) {
+    virtual void setUpDimensions(Coord2D dim) {
       IRECT rect;
-      rect.L = shared->X - w / 2;
-      rect.R = shared->X + w / 2;
-      rect.T = shared->Y - h / 2;
-      rect.B = shared->Y + h / 2;
+      rect.L = mNode->mPos.x - dim.x / 2;
+      rect.R = mNode->mPos.x + dim.x / 2;
+      rect.T = mNode->mPos.y - dim.y / 2;
+      rect.B = mNode->mPos.y + dim.y / 2;
       SetTargetAndDrawRECTs(rect);
 #ifdef NODE_SHADOW
       // The RECT needs to be bigger to allow the shadow
@@ -148,7 +150,7 @@ namespace guitard {
     }
 
     virtual void setSvg(const char* path) {
-      mSvgBg = shared->graphics->LoadSVG(path);
+      mSvgBg = GetUI()->LoadSVG(path);
       if (mSvgBg.IsValid()) {
         mUseSvgBg = true;
       }
@@ -164,12 +166,12 @@ namespace guitard {
           m.L + Theme::Node::HEADER_BYPASS_LEFT + Theme::Node::HEADER_BYPASS_SIZE,
           m.T + Theme::Node::HEADER_BYPASS_TOP + Theme::Node::HEADER_BYPASS_SIZE
         ), [&](IControl* pCaller) {
-          ParameterCoupling* p = &this->shared->parameters[0];
+          ParameterCoupling* p = &this->mNode->mParameters[0];
           const bool bypassed = static_cast<bool>(p->control->GetValue());
           p->control->SetValueFromUserInput(bypassed ? 0.0 : 1.0);
         }, u8"\uf056", u8"\uf011", mIconFont);
         mElements.add(mHeader.bypass);
-        shared->graphics->AttachControl(mHeader.bypass);
+        GetUI()->AttachControl(mHeader.bypass);
       }
 
       mHeader.remove = new IVButtonControl(IRECT(
@@ -177,34 +179,34 @@ namespace guitard {
         m.T + Theme::Node::HEADER_DISCONNECT_TOP, m.R - Theme::Node::HEADER_REMOVE_RIGHT,
         m.T + Theme::Node::HEADER_DISCONNECT_TOP + Theme::Node::HEADER_DISCONNECT_SIZE
       ), [&](IControl* pCaller) {
-        MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDeleted, this->shared->node);
+        MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDeleted, this->mNode);
       });
       mElements.add(mHeader.remove);
-      shared->graphics->AttachControl(mHeader.remove);
+      GetUI()->AttachControl(mHeader.remove);
     }
 
 
     virtual void setUpSockets() {
-      for (int i = 0; i < shared->inputCount; i++) {
-        NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsIn[i]);
-        shared->graphics->AttachControl(socket);
+      for (int i = 0; i < mNode->mInputCount; i++) {
+        NodeSocketUi* socket = new NodeSocketUi(mNode->mSocketsIn[i], mBus);
+        GetUI()->AttachControl(socket);
         mInSocketsUi[i] = socket;
         mElements.add(socket);
       }
 
-      for (int i = 0; i < shared->outputCount; i++) {
-        NodeSocketUi* socket = new NodeSocketUi(shared, shared->socketsOut[i]);
-        shared->graphics->AttachControl(socket);
+      for (int i = 0; i < mNode->mOutputCount; i++) {
+        NodeSocketUi* socket = new NodeSocketUi(mNode->mSocketsOut[i], mBus);
+        GetUI()->AttachControl(socket);
         mOutSocketsUi[i] = socket;
         mElements.add(socket);
       }
     }
 
     virtual void setUpControls() {
-      for (int i = 0; i < shared->parameterCount; i++) {
-        ParameterCoupling* couple = &shared->parameters[i];
-        const float px = shared->X + couple->x - (couple->w * 0.5f);
-        const float py = shared->Y + couple->y - (couple->h * 0.5f);
+      for (int i = 0; i < mNode->mParameterCount; i++) {
+        ParameterCoupling* couple = &mNode->mParameters[i];
+        const float px = mNode->mPos.x + couple->x - (couple->w * 0.5f);
+        const float py = mNode->mPos.y + couple->y - (couple->h * 0.5f);
         IRECT controlPos(px, py, px + couple->w, py + couple->h);
         // use the daw parameter to sync the values if possible
         if (couple->parameterIdx != kNoParameter) {
@@ -230,7 +232,7 @@ namespace guitard {
           couple->control->SetValue(couple->getNormalized());
           couple->control->SetDirty();
         }
-        shared->graphics->AttachControl(couple->control);
+        GetUI()->AttachControl(couple->control);
         mElements.add(couple->control);
         if (i == 0 && mHeader.hasByPass) { couple->control->Hide(true); }
 
@@ -244,8 +246,8 @@ namespace guitard {
     }
 
     virtual void setUp() {
-      for (int i = 0; i < shared->parameterCount; i++) {
-        ParameterCoupling* p = &shared->parameters[i];
+      for (int i = 0; i < mNode->mParameterCount; i++) {
+        ParameterCoupling* p = &mNode->mParameters[i];
         if (strncmp(p->name, "Bypass", 10) == 0) {
           mHeader.hasByPass = true;
           break;
@@ -260,31 +262,31 @@ namespace guitard {
 
     void OnDetached() override {
       MessageBus::fireEvent<NodeSelectionChanged>(
-        shared->bus, MessageBus::NodeSelectionChange, { this, false, true }
+        mBus, MessageBus::NodeSelectionChange, { this, false, true }
       );
       mDirty = false;
       mDoRender = false;
-      for (int i = 0; i < shared->parameterCount; i++) {
-        ParameterCoupling* param = &shared->parameters[i];
+      for (int i = 0; i < mNode->mParameterCount; i++) {
+        ParameterCoupling* param = &mNode->mParameters[i];
         if (param->control != nullptr) {
           // this also destroys the object
-          shared->graphics->RemoveControl(param->control);
+          GetUI()->RemoveControl(param->control);
           param->control = nullptr;
         }
       }
 
-      for (int i = 0; i < shared->inputCount; i++) {
-        shared->graphics->RemoveControl(mInSocketsUi[i]);
+      for (int i = 0; i < mNode->mInputCount; i++) {
+        GetUI()->RemoveControl(mInSocketsUi[i]);
       }
 
-      for (int i = 0; i < shared->outputCount; i++) {
-        shared->graphics->RemoveControl(mOutSocketsUi[i]);
+      for (int i = 0; i < mNode->mOutputCount; i++) {
+        GetUI()->RemoveControl(mOutSocketsUi[i]);
       }
 
       if (mHeader.hasByPass) {
-        shared->graphics->RemoveControl(mHeader.bypass);
+        GetUI()->RemoveControl(mHeader.bypass);
       }
-      shared->graphics->RemoveControl(mHeader.remove);
+      GetUI()->RemoveControl(mHeader.remove);
     }
 
     virtual void DrawHeader(IGraphics& g) {
@@ -292,7 +294,7 @@ namespace guitard {
         mTargetRECT.L, mTargetRECT.T, mTargetRECT.R, mTargetRECT.T + Theme::Node::HEADER_SIZE
       );
       g.FillRect(mSelected ? Theme::Node::HEADER_SELECTED : Theme::Node::HEADER, bound);
-      g.DrawText(Theme::Node::HEADER_TEXT, shared->info->displayName.c_str(), bound);
+      g.DrawText(Theme::Node::HEADER_TEXT, mNode->mInfo->displayName.c_str(), bound);
     }
 
     virtual void DrawBg(IGraphics& g) {
@@ -352,12 +354,12 @@ namespace guitard {
       mSelectPressed = (!mod.A && mod.C && !mod.S);
       if (!mSelected) {
         MessageBus::fireEvent<NodeSelectionChanged>(
-          shared->bus, MessageBus::NodeSelectionChange, { this, !mSelectPressed }
+          mBus, MessageBus::NodeSelectionChange, { this, !mSelectPressed }
         );
       }
       else if (mSelectPressed) {
         MessageBus::fireEvent<NodeSelectionChanged>(
-          shared->bus, MessageBus::NodeSelectionChange, { this, false }
+          mBus, MessageBus::NodeSelectionChange, { this, false }
         );
       }
     }
@@ -368,19 +370,19 @@ namespace guitard {
        * Delete on alt double click
        */
       if (mod.A && !mod.C && !mod.S) {
-        MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDeleted, shared->node);
+        MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDeleted, mNode);
       }
     }
 
     void OnMouseUp(float x, float y, const IMouseMod& mod) override {
       if (mDragging) {
         mDragging = false;
-        MessageBus::fireEvent<NodeDragEndData>(shared->bus, MessageBus::NodeDraggedEnd, { shared->node, !mod.A && mod.C && mod.S });
+        MessageBus::fireEvent<NodeDragEndData>(mBus, MessageBus::NodeDraggedEnd, { mNode, !mod.A && mod.C && mod.S });
       }
       else {
         if (!mSelected && !mSelectPressed) {
           MessageBus::fireEvent<NodeSelectionChanged>(
-            shared->bus, MessageBus::NodeSelectionChange, { this, false }
+            mBus, MessageBus::NodeSelectionChange, { this, false }
           );
         }
       }
@@ -394,7 +396,7 @@ namespace guitard {
            * Alt and Control
            * Disconnect all the connections of a node
            */
-          MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeDisconnectAll, shared->node);
+          MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeDisconnectAll, mNode);
           mDragging = true;
           return;
         }
@@ -403,7 +405,7 @@ namespace guitard {
            * Alt drag
            * Bypass all connections of a node
            */
-          MessageBus::fireEvent<Node*>(shared->bus, MessageBus::BypassNodeConnection, shared->node);
+          MessageBus::fireEvent<Node*>(mBus, MessageBus::BypassNodeConnection, mNode);
           mDragging = true;
           return;
         }
@@ -412,7 +414,7 @@ namespace guitard {
            * Control drag
            * Duplicate the node
            */
-          MessageBus::fireEvent<Node*>(shared->bus, MessageBus::CloneNode, shared->node);
+          MessageBus::fireEvent<Node*>(mBus, MessageBus::CloneNode, mNode);
           return;
         }
         if (!mod.A && !mod.C && !mod.S && mod.R) {
@@ -424,7 +426,7 @@ namespace guitard {
           if (socket != nullptr) {
             socket->OnMouseDown(x, y, mod);
             // swap the captured control to be the outsocket now
-            shared->graphics->SetCapturedControl(socket);
+            GetUI()->SetCapturedControl(socket);
           }
           return;
         }
@@ -433,7 +435,7 @@ namespace guitard {
            * Shift drag
            * Combine the original signal with output of the node
            */
-          MessageBus::fireEvent<Node*>(shared->bus, MessageBus::NodeSpliceInCombine, shared->node);
+          MessageBus::fireEvent<Node*>(mBus, MessageBus::NodeSpliceInCombine, mNode);
           return;
         }
         if (!mod.A && mod.C && mod.S) {
@@ -448,7 +450,7 @@ namespace guitard {
        * Default case is simple drag
        */
       mDragging = true;
-      MessageBus::fireEvent<Drag>(shared->bus, MessageBus::NodeDragged, Drag{ {x, y}, {dX, dY } });
+      MessageBus::fireEvent<Drag>(mBus, MessageBus::NodeDragged, Drag{ {x, y}, {dX, dY } });
       // translate(dX, dY);
     }
 
@@ -458,20 +460,19 @@ namespace guitard {
         moveControl(mElements[i], dX, dY);
       }
 
-      for (int i = 0; i < shared->inputCount; i++) {
-        shared->socketsIn[i]->mX += dX;
-        shared->socketsIn[i]->mY += dY;
+      for (int i = 0; i < mNode->mInputCount; i++) {
+        mNode->mSocketsIn[i]->mX += dX;
+        mNode->mSocketsIn[i]->mY += dY;
       }
 
-      for (int i = 0; i < shared->outputCount; i++) {
-        shared->socketsOut[i]->mX += dX;
-        shared->socketsOut[i]->mY += dY;
+      for (int i = 0; i < mNode->mOutputCount; i++) {
+        mNode->mSocketsOut[i]->mX += dX;
+        mNode->mSocketsOut[i]->mY += dY;
       }
+      mNode->mPos.x += dX;
+      mNode->mPos.y += dY;
 
-      shared->X += dX;
-      shared->Y += dY;
-
-      shared->graphics->SetAllControlsDirty();
+      GetUI()->SetAllControlsDirty();
     }
 
     void OnResize() override {
@@ -482,8 +483,8 @@ namespace guitard {
     }
 
     void setTranslation(const float x, const float y) {
-      const float dX = x - shared->X;
-      const float dY = y - shared->Y;
+      const float dX = x - mNode->mPos.x;
+      const float dY = y - mNode->mPos.y;
       translate(dX, dY);
     }
 

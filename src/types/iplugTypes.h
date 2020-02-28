@@ -6,6 +6,7 @@
  * so the most used IPlug types will be typedef'd here
  */
 #ifndef GUITARD_HEADLESS
+#include "IControls.h"
 
 namespace guitard {
   typedef iplug::IParam IParam;

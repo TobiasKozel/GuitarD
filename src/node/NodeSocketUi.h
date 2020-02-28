@@ -12,9 +12,8 @@ namespace guitard {
     MessageBus::Subscription<Node*> mOnDisconnectAllEvent;
     IMouseMod mMouseDown;
   protected:
-    NodeShared* mShared = nullptr;
+    // NodeShared* mShared = nullptr;
     ConnectionDragData mDragData;
-    IGraphics* mGraphics = nullptr;
     NodeSocket* mSocket = nullptr;
     MessageBus::Bus* mBus = nullptr;
     IBlend mBlend;
@@ -23,12 +22,10 @@ namespace guitard {
     int mIndex = -1;
     bool mOut = false;
   public:
-    NodeSocketUi(NodeShared* shared, NodeSocket* socket) :
+    NodeSocketUi(NodeSocket* socket, MessageBus::Bus* bus) :
       IControl(IRECT(0, 0, 0, 0), kNoParameter)
     {
-      mShared = shared;
-      mBus = shared->bus;
-      mGraphics = shared->graphics;
+      mBus = bus;
       mSocket = socket;
       mDiameter = Theme::Sockets::DIAMETER;
       mRadius = Theme::Sockets::DIAMETER * 0.5f;
@@ -103,9 +100,9 @@ namespace guitard {
       }
 
       SetRECT(mTargetRECT);
-      mGraphics->SetAllControlsDirty();
-      IControl* target = mGraphics->GetControl(
-        mGraphics->GetMouseControlIdx(x, y, false)
+      GetUI()->SetAllControlsDirty();
+      IControl* target = GetUI()->GetControl(
+        GetUI()->GetMouseControlIdx(x, y, false)
       );
       if (target != nullptr) {
         NodeSocketUi* targetUi = dynamic_cast<NodeSocketUi*>(target);
@@ -133,7 +130,7 @@ namespace guitard {
     void OnMouseDrag(const float x, const float y, float dX, float dY, const IMouseMod& mod) override {
       if (mMouseDown.C) { return; }
       if (!mDragData.dragging) {
-        SetRECT(mGraphics->GetBounds());
+        SetRECT(GetUI()->GetBounds());
         mDragData.dragging = true;
       }
       mDragData.currentX = x;
@@ -148,7 +145,7 @@ namespace guitard {
      */
     void OnMouseDblClick(float x, float y, const IMouseMod& mod) override {
       mSocket->disconnectAll();
-      mGraphics->SetAllControlsDirty();
+      GetUI()->SetAllControlsDirty();
     }
   };
 #else

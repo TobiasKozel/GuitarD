@@ -10,20 +10,20 @@
 
 namespace guitard {
   /**
+   * Oh boy, this ones a burning mess I probably should be sorry for
    * This control is a non clickable overlay over the whole plugin window to draw all the node connections
    * It also handles the splice in logic
    */
   class CableLayer : public IControl {
-    IGraphics* mGraphics = nullptr;
-    PointerList<NodeUi>* mNodes;
-    Node* mOutNode = nullptr;
+    PointerList<NodeUi>* mNodes; // Pointer to all the node UIs
+    Node* mOutNode = nullptr; // Out node needs some special treatment for quick preview
     Node* mInNode = nullptr;
 
-    Node* mVisualizeAutomation = nullptr;
+    Node* mVisualizeAutomation = nullptr; // The node to visualize all the automation targets for
 
-    Node* mPickAutomationTarget = nullptr;
+    Node* mPickAutomationTarget = nullptr; // The node for which the target picker mode is activated
 
-    IBlend mBlend;
+    IBlend mBlend; // TODO might not be needed
 
     MessageBus::Bus* mBus = nullptr;
     MessageBus::Subscription<Node*> mDisconnectAllEvent;
@@ -49,17 +49,16 @@ namespace guitard {
 
     GraphStats* mStats = nullptr;
   public:
-    CableLayer(MessageBus::Bus* pBus, IGraphics* g, PointerList<NodeUi>* pNodes) :
-      IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
+    CableLayer(MessageBus::Bus* pBus, PointerList<NodeUi>* pNodes) :
+        IControl(IRECT(0, 0, GetUI()->Width(), GetUI()->Height()), kNoParameter)
     {
       mBus = pBus;
       SetTargetRECT(IRECT(0, 0, 0, 0));
       mNodes = pNodes;
-      mGraphics = g;
       mBlend = EBlend::Default;
 
       mDisconnectAllEvent.subscribe(mBus, MessageBus::NodeDisconnectAll, [&](Node*) {
-        this->mDirty = true;
+        mDirty = true;
       });
 
       mNodeDraggedEvent.subscribe(mBus, MessageBus::NodeDragged, [&](const Drag drag) {
@@ -79,22 +78,22 @@ namespace guitard {
         NodeSocket* target = mHighlightSocket;
         mHighlightSocket = nullptr;
         mDirty = true;
-        if (node->shared.inputCount == 0 || node->shared.outputCount == 0) { return; }
+        if (node->mInputCount == 0 || node->mOutputCount == 0) { return; }
         if (target != nullptr) {
           if (target->mParentNode == node) {
             return;
           }
           Node* targetNode = target->mParentNode;
-          for (int i = 0; i < targetNode->shared.inputCount; i++) {
-            if (targetNode->shared.socketsIn[i]->mConnectedTo[0] != nullptr &&
-              targetNode->shared.socketsIn[i]->mConnectedTo[0]->mParentNode == node) {
+          for (int i = 0; i < targetNode->mInputCount; i++) {
+            if (targetNode->mSocketsIn[i]->mConnectedTo[0] != nullptr &&
+              targetNode->mSocketsIn[i]->mConnectedTo[0]->mParentNode == node) {
               return;
             }
           }
           MessageBus::fireEvent<NodeSpliceInPair>(this->mBus, MessageBus::NodeSpliceIn, NodeSpliceInPair{ node, target });
-          const float distance = abs(node->shared.X - targetNode->shared.X);
-          if (distance < (node->shared.width + 80)) {
-            // targetNode->moveAlong(node->shared.width - distance + 200);
+          const float distance = abs(node->mPos.x - targetNode->mPos.x);
+          if (distance < (node->mDimensions.x + 80)) {
+            // targetNode->moveAlong(node->shared.width - distance + 200); // TODO reenable this once move along works again
           }
         }
       });
@@ -103,7 +102,7 @@ namespace guitard {
         // WDBGMSG(socket->mParentNode->mType.c_str());
         // TODOG this is kinda shady and does not use the MessageBus::SocketConnect event
         if (mOutNode == nullptr) { return; }
-        NodeSocket* outSocket = mOutNode->shared.socketsIn[0];
+        NodeSocket* outSocket = mOutNode->mSocketsIn[0];
         if (socket == this->mPreviewSocketPrev || socket == this->mPreviewSocket) {
           // If the socket clicked is the current preview socket, connect the original socket again
           if (this->mPreviewSocketPrev != nullptr) {
@@ -154,7 +153,7 @@ namespace guitard {
 
       mPickAutomationTargetEvent.subscribe(mBus, MessageBus::PickAutomationTarget, [&](Node* n) {
         this->mPickAutomationTarget = n;
-        SetTargetRECT(mGraphics->GetBounds());
+        SetTargetRECT(GetUI()->GetBounds());
         this->mDirty = true;
       });
 
@@ -183,16 +182,11 @@ namespace guitard {
     }
 
     void reverseDraw(IGraphics& g) {
-      // if (mInNode == nullptr) { return; }
       const float socketRadius = Theme::Sockets::DIAMETER / 2;
       for (int n = 0; n < mNodes->size(); n++) {
         NodeUi* curNode = mNodes->get(n);
-        //if (curNode == nullptr) {
-        //  // only happens for the last node
-        //  curNode = mInNode;
-        //}
-        for (int i = 0; i < curNode->shared->outputCount; i++) {
-          NodeSocket* curSock = curNode->shared->socketsOut[i];
+        for (int i = 0; i < curNode->mNode->mOutputCount; i++) {
+          NodeSocket* curSock = curNode->mNode->mSocketsOut[i];
           for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
             if (curSock->mConnectedTo[j] != nullptr) {
               NodeSocket* tarSock = curSock->mConnectedTo[j];
@@ -214,15 +208,11 @@ namespace guitard {
       // Draw all the connections between nodes
       for (int n = 0; n < mNodes->size(); n++) {
         NodeUi* curNode = mNodes->get(n);
-        //if (curNode == nullptr) {
-        //  // only happens for the last node
-        //  curNode = mOutNode;
-        //}
-        for (int i = 0; i < curNode->shared->inputCount; i++) {
-          NodeSocket* curSock = curNode->shared->socketsIn[i];
+        for (int i = 0; i < curNode->mNode->mInputCount; i++) {
+          NodeSocket* curSock = curNode->mNode->mSocketsIn[i];
           if (curSock->mConnectedTo[0] != nullptr) {
             NodeSocket* tarSock = curSock->mConnectedTo[0];
-            if (tarSock == mPreviewSocket && curSock == mOutNode->shared.socketsIn[0]) {
+            if (tarSock == mPreviewSocket && curSock == mOutNode->mSocketsIn[0]) {
               // Draw the temporary bypass
               g.DrawDottedLine(
                 curSock == mHighlightSocket ? Theme::Cables::COLOR_SPLICE_IN : Theme::Cables::COLOR,
@@ -263,20 +253,20 @@ namespace guitard {
       // Draw all the sockets
       for (int n = 0; n < mNodes->size(); n++) {
         NodeUi* curNode = mNodes->get(n);
-        for (int i = 0; i < curNode->shared->outputCount; i++) {
-          NodeSocket* curSock = curNode->shared->socketsOut[i];
+        for (int i = 0; i < curNode->mNode->mOutputCount; i++) {
+          NodeSocket* curSock = curNode->mNode->mSocketsOut[i];
           if (curSock != nullptr) {
             DrawSocket(g, curSock);
           }
         }
-        for (int i = 0; i < curNode->shared->inputCount; i++) {
-          NodeSocket* curSock = curNode->shared->socketsIn[i];
+        for (int i = 0; i < curNode->mNode->mInputCount; i++) {
+          NodeSocket* curSock = curNode->mNode->mSocketsIn[i];
           if (curSock != nullptr) {
             DrawSocket(g, curSock);
           }
         }
       }
-      //DrawSocket(g, mOutNode->shared.socketsIn[0]);
+      //DrawSocket(g, mOutNode->mSocketsIn[0]);
       //DrawSocket(g, mInNode->shared.socketsOut[0]);
 
       // Visualizes the automation target node of each control attached to it
@@ -287,13 +277,13 @@ namespace guitard {
       if (automation != nullptr) {
         for (int n = 0; n < mNodes->size(); n++) {
           NodeUi* curNode = mNodes->get(n);
-          for (int p = 0; p < curNode->shared->parameterCount; p++) {
-            ParameterCoupling* pc = &curNode->shared->parameters[p];
+          for (int p = 0; p < curNode->mNode->mParameterCount; p++) {
+            ParameterCoupling* pc = &curNode->mNode->mParameters[p];
             if (pc->automationDependency == automation) {
               const IRECT pos = pc->control->GetRECT();
               g.DrawLine(
                 Theme::Cables::AUTOMATION, pos.MW(), pos.MH(),
-                pc->automationDependency->shared.X, pc->automationDependency->shared.Y,
+                pc->automationDependency->mPos.x, pc->automationDependency->mPos.y,
                 &mBlend, Theme::Cables::THICKNESS
               );
             }
@@ -318,8 +308,8 @@ namespace guitard {
     void OnMouseDown(const float x, const float y, const IMouseMod& mod) override {
       if (mPickAutomationTarget != nullptr) {
         SetTargetRECT(IRECT(0, 0, 0, 0));
-        IControl* target = mGraphics->GetControl(
-          mGraphics->GetMouseControlIdx(x, y, false)
+        IControl* target = GetUI()->GetControl(
+          GetUI()->GetMouseControlIdx(x, y, false)
         );
         if (target != nullptr) {
           MessageBus::fireEvent<AutomationAttachRequest>(
@@ -339,8 +329,8 @@ namespace guitard {
 
 
     void OnResize() override {
-      mRECT.R = mGraphics->Width();
-      mRECT.B = mGraphics->Height();
+      mRECT.R = GetUI()->Width();
+      mRECT.B = GetUI()->Height();
     }
 
   private:
@@ -348,12 +338,8 @@ namespace guitard {
       const float socketRadius = Theme::Sockets::DIAMETER / 2;
       for (int n = 0; n < mNodes->size(); n++) {
         NodeUi* curNode = mNodes->get(n);
-        //if (curNode == nullptr) {
-        //  // only happens for the last node
-        //  curNode = mOutNode;
-        //}
-        for (int i = 0; i < curNode->shared->inputCount; i++) {
-          NodeSocket* curSock = curNode->shared->socketsIn[i];
+        for (int i = 0; i < curNode->mNode->mInputCount; i++) {
+          NodeSocket* curSock = curNode->mNode->mSocketsIn[i];
           NodeSocket* tarSock = curSock->mConnectedTo[0];
           if (tarSock != nullptr) {
             float x1 = tarSock->mX + socketRadius;
