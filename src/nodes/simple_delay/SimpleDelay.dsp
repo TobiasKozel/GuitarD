@@ -13,5 +13,5 @@ resonance = vslider( "Resonance", 1, 0.1, 2, 0.01);
 pitch = vslider( "Pitch", 0, -1, 1, 0.01);
 
 delayLine = de.delay(ma.SR, time) : fi.resonlp(lowpass, resonance, decay) : ef.transpose(64, 32, pitch);
-singleDelay = _<: _ * dry , (_ : delayLine + delayLine ~ _) * wet :> _;
+singleDelay = _ <: _ * dry, (+~delayLine) * wet :> + : _;
 process = singleDelay, singleDelay;
