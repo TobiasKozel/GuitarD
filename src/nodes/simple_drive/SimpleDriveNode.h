@@ -37,15 +37,14 @@ namespace guitard {
   )
 
 #ifndef GUITARD_HEADLESS
-  class SimpleDriveNodeUi final : public NodeUi {
+  class SimpleDriveNodeUi : public NodeUi {
     double last = 0;
     const double speed = 0.2;
   public:
-    SimpleDriveNodeUi(Node* param) : NodeUi(param) {
-    }
+    SimpleDriveNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) { }
 
     void Draw(IGraphics& g) override {
-      double val = iplug::AmpToDB(*(mNode->mMeters[0]->value));
+      double val = iplug::AmpToDB(*(mNode->mMeters[0].value));
       val = val * 10 + 255;
       int bright = 0;
       NodeUi::Draw(g);

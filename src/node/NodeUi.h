@@ -471,7 +471,6 @@ namespace guitard {
       }
       mNode->mPos.x += dX;
       mNode->mPos.y += dY;
-
       GetUI()->SetAllControlsDirty();
     }
 

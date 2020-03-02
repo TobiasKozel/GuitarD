@@ -9,9 +9,7 @@ namespace guitard {
     MessageBus::Bus* mBus = nullptr;
   public:
 
-    NodeGallery(MessageBus::Bus* pBus, IGraphics* g) :
-      ScrollViewControl(IRECT())
-    {
+    NodeGallery(MessageBus::Bus* pBus) : ScrollViewControl(IRECT()) {
       mBus = pBus;
     }
 

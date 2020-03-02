@@ -81,8 +81,8 @@ namespace guitard {
       mBus = pBus; // Goal is to get this out of all the non UI classes
       mParamManager = pParamManager; // we'll keep this around to let nodes register parameters
 
-      mInputNode = new InputNode(mBus);
-      mOutputNode = new OutputNode(mBus);
+      mInputNode = new InputNode();
+      mOutputNode = new OutputNode();
       mOutputNode->connectInput(mInputNode->mSocketsOut[0]);
     }
 

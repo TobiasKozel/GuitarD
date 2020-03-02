@@ -111,8 +111,8 @@ namespace guitard {
         for (auto param : sNode["parameters"]) {
           std::string name = param["name"];
           int found = 0;
-          for (int i = 0; i < node->shared.parameterCount; i++) {
-            ParameterCoupling* para = &node->shared.parameters[i];
+          for (int i = 0; i < node->mParameterCount; i++) {
+            ParameterCoupling* para = &node->mParameters[i];
             if (para->name == name) {
               found++;
               para->parameterIdx = param["idx"];
@@ -120,8 +120,8 @@ namespace guitard {
               para->setValue(val);
             }
           }
-          for (int i = 0; i < node->shared.parameterCount; i++) {
-            ParameterCoupling* para = &node->shared.parameters[i];
+          for (int i = 0; i < node->mParameterCount; i++) {
+            ParameterCoupling* para = &node->mParameters[i];
             if (para->parameterIdx == -1) {
               /**
                * Rare case that happens when a node has more parameters in the current version of the plugin
@@ -146,14 +146,14 @@ namespace guitard {
           const int inBufferIdx = connection[1];
           if (inNodeIdx >= 0 && nodes->get(inNodeIdx) != nullptr) {
             node->connectInput(
-              nodes->get(inNodeIdx)->shared.socketsOut[inBufferIdx],
+              nodes->get(inNodeIdx)->mSocketsOut[inBufferIdx],
               currentInputIdx
             );
           }
           else if (inNodeIdx == InputNode) {
             // if it's NoNode it's not connected at all and we'll just leave it at a nullptr
             node->connectInput(
-              input->shared.socketsOut[0],
+              input->mSocketsOut[0],
               currentInputIdx
             );
           }
@@ -163,8 +163,8 @@ namespace guitard {
         // Link up the automation
         for (auto param : sNode["parameters"]) {
           std::string name = param["name"];
-          for (int i = 0; i < node->shared.parameterCount; i++) {
-            ParameterCoupling* para = &node->shared.parameters[i];
+          for (int i = 0; i < node->mParameterCount; i++) {
+            ParameterCoupling* para = &node->mParameters[i];
             if (para->name == name) {
               // TODOG no need to check on up to date presets
               if (param.contains("automation")) {
@@ -185,11 +185,11 @@ namespace guitard {
       const int outConnectionIndex = serialized["output"]["inputs"][0][1];
       if (nodes->get(outNodeIndex) != nullptr) {
         output->connectInput(
-          nodes->get(outNodeIndex)->shared.socketsOut[outConnectionIndex]
+          nodes->get(outNodeIndex)->mSocketsOut[outConnectionIndex]
         );
       }
       else if (outNodeIndex == InputNode) {
-        output->connectInput(input->shared.socketsOut[0]);
+        output->connectInput(input->mSocketsOut[0]);
       }
 
       //output->X = serialized["output"]["position"][0];

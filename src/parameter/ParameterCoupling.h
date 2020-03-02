@@ -64,8 +64,6 @@ namespace guitard {
 
     // name which may be used in the UI
     const char* name;
-    // custom image or something, prolly doesn't belong here
-    const char* asset = nullptr;
 
     bool showLabel = true;
     bool showValue = true;

@@ -4,38 +4,24 @@
 #include "../../node/NodeUi.h"
 
 namespace guitard {
-#ifndef GUITARD_HEADLESS
-  class InputNodeUi final : public NodeUi {
-
-    iplug::igraphics::IText mBlocksizeText;
-    String mInfo;
-  public:
-    InputNodeUi(NodeShared* param) : NodeUi(param) {
-      mInfo = "";
-      mBlocksizeText = DEBUG_FONT;
-    }
-
-    void Draw(IGraphics& g) override {
-      NodeUi::Draw(g);
-      mInfo = "Blocksize: " + std::to_string(shared->node->mLastBlockSize) + " Sample-Rate: " + std::to_string(shared->node->mSampleRate);
-      g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
-    }
-  };
-#endif
 
   class InputNode final : public Node {
   public:
-    InputNode(MessageBus::Bus* pBus) : Node() {
-      shared.info = new NodeList::NodeInfo{ "Input", "Input" };
+    InputNode() : Node() {
+      mInfo = new NodeList::NodeInfo{ "InputNode", "Input" };
       mLastBlockSize = -1;
 #ifndef GUITARD_HEADLESS
-      if (shared.X == shared.Y && shared.X == 0) {
+      if (mPos.x == mPos.x && mPos.x == 0) {
         // Place it at the screen edge if no position is set
-        shared.Y = PLUG_HEIGHT * 0.5;
-        shared.X = shared.width * 0.3;
+        mPos.y = PLUG_HEIGHT * 0.5;
+        mPos.x = mDimensions.x * 0.3;
       }
 #endif
-      setup(pBus, 48000, MAX_BUFFER, 2, 0, 1);
+      setup(48000, MAX_BUFFER, 0, 1, 2);
+    }
+
+    ~InputNode() {
+      delete mInfo;
     }
 
     void ProcessBlock(int) override {}
@@ -81,5 +67,26 @@ namespace guitard {
   private:
     int mInputChannels = 2;
   };
+
+#ifndef GUITARD_HEADLESS
+  class InputNodeUi final : public NodeUi {
+
+    iplug::igraphics::IText mBlocksizeText;
+    String mInfo;
+  public:
+    InputNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) {
+      mInfo = "";
+      mBlocksizeText = DEBUG_FONT;
+    }
+
+    void Draw(IGraphics& g) override {
+      NodeUi::Draw(g);
+      mInfo = "Blocksize: " + std::to_string(mNode->mLastBlockSize) + " Sample-Rate: " + std::to_string(mNode->mSampleRate);
+      g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
+    }
+  };
+
+  GUITARD_REGISTER_NODE_UI(InputNode, InputNodeUi)
+#endif
 
 }

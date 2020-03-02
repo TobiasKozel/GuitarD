@@ -50,7 +50,7 @@ namespace guitard {
     GraphStats* mStats = nullptr;
   public:
     CableLayer(MessageBus::Bus* pBus, PointerList<NodeUi>* pNodes) :
-        IControl(IRECT(0, 0, GetUI()->Width(), GetUI()->Height()), kNoParameter)
+        IControl(IRECT(), kNoParameter)
     {
       mBus = pBus;
       SetTargetRECT(IRECT(0, 0, 0, 0));
@@ -326,7 +326,6 @@ namespace guitard {
         SetTargetRECT(IRECT(0, 0, 0, 0));
       }
     }
-
 
     void OnResize() override {
       mRECT.R = GetUI()->Width();

@@ -1,17 +1,16 @@
 #pragma once
 
+#include "../misc/NodeList.h" // We'll need the list to register the nodes to it
 #include "../node/NodeSocket.h"
 #include "../parameter/ParameterCoupling.h"
 #include "../parameter/MeterCoupling.h"
 #include "../types/gstructs.h"
 #include "../types/types.h"
-#include "../misc/NodeList.h" // We'll need the list to register the nodes to it
 
 namespace guitard {
   /**
    * Virtual class which all nodes will derive from
    * It's the DSP part of the node
-   * You'll need to implement
    */
   class Node {
   public:
@@ -32,14 +31,14 @@ namespace guitard {
     int mParameterCount = 0;
     ParameterCoupling mParameters[MAX_NODE_PARAMETERS];
     int mMeterCount = 0;
-    MeterCoupling* mMeters[MAX_NODE_METERS] = { nullptr };
+    MeterCoupling mMeters[MAX_NODE_METERS];
 
     int mInputCount = 0;
     NodeSocket* mSocketsIn[MAX_NODE_SOCKETS] = { nullptr };
     int mOutputCount = 0;
     NodeSocket* mSocketsOut[MAX_NODE_SOCKETS] = { nullptr };
 
-    Coord2D mPos = { 0, 0 };
+    Coord2D mPos = { 0, 0 }; // Position on the canvas in pixels
     Coord2D mDimensions = { 200, 200 }; // Size in Pixels
     NodeList::NodeInfo* mInfo;
 
@@ -51,14 +50,14 @@ namespace guitard {
         const int pSamplerate, const int pMaxBuffer, const int pInputs = 1,
         const int pOutputs = 1, const int pChannels = 2
     ) {
-      mSampleRate = 0;
       mMaxBlockSize = pMaxBuffer;
       mInputCount = pInputs;
       mOutputCount = pOutputs;
       mIsProcessed = false;
       mChannelCount = pChannels;
 
-      for (int i = 0; i < mInputCount; i++) { // Setup the sockets for the node connections
+      // Setup the sockets for the node connections
+      for (int i = 0; i < mInputCount; i++) {
         mSocketsIn[i] = new NodeSocketIn(this, i); 
       }
 
@@ -67,12 +66,12 @@ namespace guitard {
       }
 
       // This will create all the needed buffers
-      OnReset(pSamplerate, pChannels);
+      OnReset(pSamplerate, pChannels, true);
     }
 
     /**
      * Create all the needed buffers for the dsp
-     * Called from on reset when the channelcount changes
+     * Called from on reset when the channel count changes
      */
     virtual void createBuffers() {
       if (mBuffersOut != nullptr) {
@@ -113,15 +112,12 @@ namespace guitard {
 
     /**
      * Called right before the node is destroyed
+     * will get rid of the automations, audio buffers and sockets
      */
     virtual void cleanUp() {
       deleteBuffers();
       for (int i = 0; i < mParameterCount; i++) {
         detachAutomation(&mParameters[i]); // Make sure no automation is attached
-      }
-
-      for (int i = 0; i < mMeterCount; i++) {
-        delete mMeters[i];
       }
 
       for (int i = 0; i < mInputCount; i++) {
@@ -222,12 +218,10 @@ namespace guitard {
     }
 
     /**
-     * Main Processing, only takes a blocksize since it knows its inputs
+     * Main Processing, only takes a blocksize since the node knows its inputs
      */
     virtual void ProcessBlock(int nFrames) = 0;
 
-
-    /**                  Signals from outside                  */
 
     /**
      * Signals a new audio block is about to processed
@@ -245,6 +239,11 @@ namespace guitard {
       createBuffers();
     }
 
+    /**
+     * React to a change in sample rate
+     * since it won't affect the buffers and the dsp usually needs
+     * to change some internal values, we can't deal with it here
+     */
     virtual void OnSamplerateChanged(const int pSampleRate) {
       mSampleRate = pSampleRate;
     }
@@ -268,6 +267,8 @@ namespace guitard {
 
     /**
      * Connects a given socket to a input at a given index of this node
+     * @param out The output socket to connect
+     * @param inputNumber The index of the input socket to connect the out socket to
      */
     virtual void connectInput(NodeSocket* out, const int inputNumber = 0) {
       NodeSocket* inSocket = mSocketsIn[inputNumber];
@@ -287,20 +288,19 @@ namespace guitard {
      * @param index Is the index of the ParameterCoupling to attach the automation to
      */
     virtual void attachAutomation(Node* n, const int index) {
+      if (index >= mParameterCount) { return; }
       ParameterCoupling* p = &mParameters[index];
-      if (p != nullptr) {
-        n->addAutomationTarget(p);
-      }
+      n->addAutomationTarget(p);
       checkIsAutomated();
     }
 
     /**
      * Removes the node from the dependency list and removes all the automation targets
      * from the automation node
+     * @param p The ParameterCouple to remove the automation from
      */
     virtual void detachAutomation(ParameterCoupling* p) {
-      // ParameterCoupling* p = mParameters.Get(index);
-      if (p != nullptr) {
+      if (p != nullptr) {// TODO check whether a p is actually part of mParameters
         if (p->automationDependency != nullptr) {
           p->automationDependency->removeAutomationTarget(p);
         }
@@ -312,11 +312,13 @@ namespace guitard {
      * This is for nodes that can provide automation for other nodes
      * They will keep track of all the ParameterCouplings and update them accordingly
      * These should only be called from the attach/detachAutomation functions
+     * @param c The ParameterCouple to control
      */
     virtual void addAutomationTarget(ParameterCoupling* c) { }
 
     /**
      * Also for nodes which provide automation, see above
+     * @param c The ParameterCouple to control
      */
     virtual void removeAutomationTarget(ParameterCoupling* c) { }
 
@@ -338,26 +340,49 @@ namespace guitard {
 
     /**
      * Generic function to call when the node can switch between mono/stereo
+     * @param p a Coupling from outside to use. If none is provided a new one will be used
      */
     void addStereoParam(ParameterCoupling* p = nullptr) {
       if (p == nullptr) {
-        mParameters[mParameterCount] = ParameterCoupling(
-          "Stereo", &mStereo, 0.0, 0.0, 1.0, 1
-        );
+        addParameter("Stereo", &mStereo, 0.0, 0.0, 1.0, 1);
       }
       else {
-        mParameters[mParameterCount] = *p;
+        addParameter(*p);
       }
 
+    }
+
+    /**
+     * Adds a Parameter
+     * @name Parameter name used for serialization and display
+     * @prop A pointer to the float/double value controlled by it
+     * @propo def The default value
+     * @prop min Minimum value
+     * @prop max Maximum value
+     * @prop Stepsize for the gui precision
+     */
+    void addParameter(const char* name, sample* prop, sample def, sample min, sample max, sample stepSize) {
+      addParameter(ParameterCoupling(name, prop, def, min, max, stepSize));
+    }
+
+    /**
+     * Adds a parametercoupling
+     */
+    void addParameter(const ParameterCoupling p) {
+      if (mParameterCount >= MAX_NODE_PARAMETERS) { return; }
+      mParameters[mParameterCount] = p;
       mParameterCount++;
     }
 
-    void addParameter() {
-      
+    void addMeter(const char* name, sample* prop, sample min, sample max) {
+      *prop = 0; // They never get initialized in the Faust code
+      mMeters[mMeterCount] = MeterCoupling{ prop, name, min, max };
+      mMeterCount++;
     }
 
     /**
      * Copies over the state of the given node if it's from the same type
+     * @param n The node to copy the state from
      */
     void copyState(Node* n) {
       if (mInfo->name != n->mInfo->name) { // Check the type
@@ -388,7 +413,7 @@ namespace guitard {
 
 
     /**                 UI STUFF                */
-
+    // TODO this has to go
 
 #ifndef GUITARD_HEADLESS
     /**
@@ -450,7 +475,7 @@ namespace guitard {
      * Function to retrieve the license/copyright info about the node
      */
     virtual String getLicense() {
-      return "Not set";
+      return "No copyright info provided.";
     }
   };
 }

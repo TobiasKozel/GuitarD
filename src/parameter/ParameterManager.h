@@ -43,9 +43,9 @@ namespace guitard {
      */
     bool claimNode(Node* node) {
       bool gotAllParams = true;
-      String prefix = node->shared.info->displayName;
-      for (int i = 0; i < node->shared.parameterCount; i++) {
-        if (!claimParameter(&node->shared.parameters[i], prefix.c_str())) {
+      String prefix = node->mInfo->displayName;
+      for (int i = 0; i < node->mParameterCount; i++) {
+        if (!claimParameter(&node->mParameters[i], prefix.c_str())) {
           /**
            * this means the manager has no free parameters left and the control cannot be automated from the daw
            */
@@ -107,8 +107,8 @@ namespace guitard {
     }
 
     void releaseNode(Node* node) {
-      for (int i = 0; i < node->shared.parameterCount; i++) {
-        releaseParameter(&node->shared.parameters[i]);
+      for (int i = 0; i < node->mParameterCount; i++) {
+        releaseParameter(&node->mParameters[i]);
       }
       MessageBus::fireEvent<bool>(mBus, MessageBus::ParametersChanged, false);
     }

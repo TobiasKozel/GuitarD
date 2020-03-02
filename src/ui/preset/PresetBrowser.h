@@ -18,9 +18,7 @@ namespace guitard {
     );
   public:
 
-    PresetBrowser(MessageBus::Bus* pBus, IGraphics* g) :
-      ScrollViewControl(IRECT())
-    {
+    PresetBrowser(MessageBus::Bus* pBus) : ScrollViewControl(IRECT()) {
       mBus = pBus;
     }
 

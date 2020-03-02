@@ -28,9 +28,9 @@ namespace guitard {
       return nullptr;
     }
 
-    inline NodeUi* createNodeUi(const String name, Node* node) {
+    inline NodeUi* createNodeUi(const String& name, Node* node, MessageBus::Bus* bus) {
       if (nodeUiList.find(name) != nodeUiList.end()) {
-        return nodeUiList.at(name).constructor(node);
+        return nodeUiList.at(name).constructor(node, bus);
       }
 
       // Check if there's a Node with the name and create a generic UI
@@ -72,13 +72,16 @@ namespace guitard {
         }
         registerNode(pInfo);
       }
+    };
 
+    template <class T>
+    struct RegisterProxyUi {
       /**
        * Will be called when the UI to a node is registered
        */
-      RegisterProxy(NodeUiInfo pInfo) {
-        pInfo.constructor = [](Node* node) {
-          return new T(node);
+      RegisterProxyUi(NodeUiInfo pInfo) {
+        pInfo.constructor = [](Node* node, MessageBus::Bus* bus) {
+          return new T(node, bus);
         };
         registerNodeUi(pInfo);
       }
@@ -95,6 +98,7 @@ namespace guitard {
 #define GUITARD_STRX(a) str(a)
 #define GUITARD_STR(a) #a
 
+
 /**
  * The first argument has to be the node class itself
  * the following arguments will be displayName,categoryName, description, image and hidden
@@ -102,15 +106,14 @@ namespace guitard {
  */
 #define GUITARD_REGISTER_NODE(type, ...) \
 namespace NodeList { \
-  RegisterProxy<type> register##type(NodeInfo{ GUITARD_STR(type), __VA_ARGS__ });\
-}\
+  RegisterProxy<type> reg##type(NodeInfo{ GUITARD_STR(type), __VA_ARGS__ });\
+}
 
 /**
- * First argument is the class name of the node the UI is for
- * second one is the classname of the ui
- */
+* First argument is the class name of the node the UI is for
+* second one is the classname of the ui
+*/
 #define GUITARD_REGISTER_NODE_UI(type, ui) \
 namespace NodeList { \
-  RegisterProxy<ui> register##ui(NodeUiInfo{ GUITARD_STR(type) });\
-}\
-
+  RegisterProxyUi<ui> reg##ui(NodeUiInfo{ GUITARD_STR(type) });\
+}

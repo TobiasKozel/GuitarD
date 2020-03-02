@@ -4,11 +4,15 @@
 
 namespace guitard {
   class Node;
+  class NodeUi;
+  namespace MessageBus {
+    class Bus;
+  }
   namespace NodeList {
     struct NodeInfo;
 
     typedef std::function<Node* (NodeInfo*)> NodeConstructor;
-    typedef std::function<NodeUi* (Node*)> NodeUiConstructor;
+    typedef std::function<NodeUi* (Node*, MessageBus::Bus*)> NodeUiConstructor;
 
     struct NodeInfo {
       String name; // Will be used internally for serialization, construction and so on

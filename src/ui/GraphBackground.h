@@ -9,7 +9,6 @@ typedef std::function<void(float x, float y, float scale)> BackgroundMoveCallbac
 namespace guitard {
   class GraphBackground : public IControl {
     MessageBus::Bus* mBus;
-    IGraphics* mGraphics;
     Coord2D mOffset;
     Coord2D mMouseDown;
     float lastWidth;
@@ -19,13 +18,11 @@ namespace guitard {
     BackgroundMoveCallback mCallback;
   public:
     float mScale = 1;
-    GraphBackground(MessageBus::Bus* pBus, IGraphics* g, BackgroundMoveCallback pCallback) :
-      IControl(IRECT(0, 0, g->Width(), g->Height()), kNoParameter)
+    GraphBackground(MessageBus::Bus* pBus, BackgroundMoveCallback pCallback) :
+      IControl(IRECT(), kNoParameter)
     {
       mBus = pBus;
-      mGraphics = g;
       mCallback = pCallback;
-      storeSize();
       triggeredScale = false;
     }
 
@@ -66,7 +63,7 @@ namespace guitard {
           return;
         }
         translate(dX, dY);
-        mGraphics->SetAllControlsDirty();
+        GetUI()->SetAllControlsDirty();
       }
     }
 
@@ -114,19 +111,19 @@ namespace guitard {
 
         triggeredScale = true;
 
-        mGraphics->Resize(ceil(lastWidth), ceil(lastHeight), newScale, true);
+        GetUI()->Resize(ceil(lastWidth), ceil(lastHeight), newScale, true);
         translate(dX, dY);
         mScale = newScale;
       }
     }
 
     void OnResize() override {
-      if (mGraphics != nullptr) {
+      if (true) {
         if (!triggeredScale) {
           storeSize();
         }
         triggeredScale = false;
-        IRECT bounds = mGraphics->GetBounds();
+        IRECT bounds = GetUI()->GetBounds();
         mRECT = bounds;
         mTargetRECT = bounds;
       }
@@ -140,8 +137,8 @@ namespace guitard {
     }
 
     void storeSize() {
-      lastHeight = mGraphics->Height();
-      lastWidth = mGraphics->Width();
+      lastHeight = GetUI()->Height();
+      lastWidth = GetUI()->Width();
     }
   };
 }

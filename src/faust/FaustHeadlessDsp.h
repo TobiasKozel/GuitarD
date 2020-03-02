@@ -21,11 +21,10 @@ namespace guitard {
      * This is a shim to collect pointers to all the properties/parameters from the faust DSP code
      */
     struct UI {
-      NodeShared* shared;
       const char* name;
-
-      UI(NodeShared* data) {
-        shared = data;
+      Node* node = nullptr;
+      UI(Node* n) {
+        node = n;
         name = DEFAULT_NODE_NAME;
       }
 
@@ -37,13 +36,13 @@ namespace guitard {
         }
         name = key;
       };
+
       static void openHorizontalBox(const char* key) {};
       static void closeBox() {};
       static void declare(FAUSTFLOAT*, const char*, const char*) {};
 
       void addHorizontalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT pDefault, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) const {
-        shared->parameters[shared->parameterCount] = ParameterCoupling(name, prop, pDefault, min, max, stepSize);
-        shared->parameterCount++;
+        node->addParameter(name, prop, pDefault, min, max, stepSize);
       }
 
       void addVerticalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT pDefault, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) const {
@@ -55,10 +54,7 @@ namespace guitard {
       }
 
       void addVerticalBargraph(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT min, FAUSTFLOAT max) const {
-        // They never get initialized in the Faust code
-        *prop = 0;
-        shared->meters[shared->meterCount] = new MeterCoupling{ prop, name, min, max };
-        shared->meterCount++;
+        node->addMeter(name, prop, min, max);
       };
 
       void addHorizontalBargraph(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT min, FAUSTFLOAT max) const {
@@ -71,7 +67,10 @@ namespace guitard {
      * The faust DSP code will derive from this
      */
     class FaustHeadlessDsp : public Node {
-      FAUSTFLOAT** mBuffersOutAlligned = nullptr;
+      /**
+       * The realigned output buffers the faust dsp will write to
+       */
+      FAUSTFLOAT** mBuffersOutAligned = nullptr;
     public:
       // These three will be overridden by the generated faust code
       virtual void init(int samplingFreq) = 0;
@@ -83,8 +82,15 @@ namespace guitard {
       virtual void instanceClear() = 0;
       virtual void metadata(Meta* m) = 0;
 
-      void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, const int pMaxBuffer = MAX_BUFFER, const int pChannels = 2, int pInputs = 1, int pOutputs = 1) override {
-        Node::setup(pBus, pSamplerate, pMaxBuffer, pChannels, getNumInputs() / pChannels, getNumOutputs() / pChannels);
+      void setup(
+          const int pSamplerate, const int pMaxBuffer = MAX_BUFFER,
+          int pInputs = 1, int pOutputs = 1, const int pChannels = 2
+      ) override {
+
+        Node::setup(
+          pSamplerate, pMaxBuffer, getNumInputs() / pChannels,
+          getNumOutputs() / pChannels, pChannels
+        );
 
         addByPassParam();
         /**
@@ -92,30 +98,33 @@ namespace guitard {
          * However they will not be registered to the daw yet, since loading a preset will need them to claim
          * the right ones so the automation will affect the correct parameters
          */
-        UI faustUi(&shared);
+        UI faustUi(this);
 
         buildUserInterface(&faustUi);
         init(pSamplerate);
 
-        if (shared.info->name == DEFAULT_NODE_NAME) { // If a name wasn't set from outside, use the from faust
-          shared.info->name = faustUi.name;
+        if (mInfo->name == DEFAULT_NODE_NAME) { // If a name wasn't set from outside, use the from faust
+          mInfo->name = faustUi.name;
         }
 
         const int perColumn = 2;
         // const int columns = ceil(shared.parameterCount / static_cast<float>(perColumn));
 
-        for (int i = 0, pos = 0; i < shared.parameterCount; i++) {
+        for (int i = 0, pos = 0; i < mParameterCount; i++) {
           const int column = pos / perColumn;
-          ParameterCoupling* p = &shared.parameters[i];
+          ParameterCoupling* p = &mParameters[i];
           if (strncmp(p->name, "Bypass", 32) == 0) {
             continue;
           }
-          p->x = column * 60 + 50 - shared.width * 0.5;
+          p->x = column * 60 + 50 - mDimensions.x * 0.5;
           p->y = 60 * (pos % perColumn) - 40;
           pos++;
         }
       }
 
+      /**
+       * Faust code can't handle changing channel counts as easily
+       */
       void OnChannelsChanged(const int pChannels) override {
         if (pChannels != 2) {
           WDBGMSG("Fuast code only works with 2 channels!");
@@ -132,32 +141,41 @@ namespace guitard {
         instanceClear();
       }
 
+      /**
+       * Delete the realigned buffers
+       */
       void deleteBuffers() override {
         Node::deleteBuffers();
-        delete[] mBuffersOutAlligned;
+        delete[] mBuffersOutAligned;
       }
 
+      /**
+       * Faust uses a different way to handle channels
+       * Nodes use stereo pairs, while faust channels will all be in a single array
+       * this doesn't work for inputs as easily though since inputs are
+       * only known after a node is connected
+       */
       void createBuffers() override {
         Node::createBuffers();
-        mBuffersOutAlligned = new FAUSTFLOAT * [shared.outputCount * mChannelCount];
-        for (int i = 0; i < shared.outputCount; i++) {
+        mBuffersOutAligned = new FAUSTFLOAT * [mOutputCount * mChannelCount];
+        for (int i = 0; i < mOutputCount; i++) {
           for (int c = 0; c < mChannelCount; c++) {
-            mBuffersOutAlligned[i * mChannelCount + c] = mBuffersOut[i][c];
+            mBuffersOutAligned[i * mChannelCount + c] = mBuffersOut[i][c];
           }
         }
         instanceClear();
       }
 
       /**
-       * The faust uses a fairly similar way of processing blocks, however
-       * A node might have multiple inputs so the right ones have to be forwarded
+       * The faust uses a fairly similar way of processing blocks,
+       * so this just wraps the call and updates the parameters
        */
       void ProcessBlock(const int nFrames) override {
         if (!inputsReady() || mIsProcessed || byPass()) { return; }
-        for (int i = 1; i < shared.parameterCount; i++) {
-          shared.parameters[i].update();
+        for (int i = 1; i < mParameterCount; i++) {
+          mParameters[i].update();
         }
-        compute(nFrames, shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOutAlligned);
+        compute(nFrames, mSocketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOutAligned);
         mIsProcessed = true;
       }
 

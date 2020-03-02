@@ -17,7 +17,7 @@ namespace guitard {
    */
   class GraphUi {
     MessageBus::Bus* mBus = nullptr;
-    IGraphics* mGraphics = nullptr;
+    IGraphics* mGraphics = nullptr; // Since this is not a UI element, well need to keep the graphics around
     Graph* mGraph = nullptr; // This is the Graph object which will be manipulated from this UI object
     PointerList<NodeUi> mNodeUis; // Keep around all the node UIs
 
@@ -68,15 +68,15 @@ namespace guitard {
         return handleKeyEvent(key, isUp);
       });
 
-      mBackground = new GraphBackground(mBus, mGraphics, [&](float x, float y, float scale) {
+      mBackground = new GraphBackground(mBus, [&](float x, float y, float scale) {
         this->onViewPortChange(x, y, scale);
       });
       mGraphics->AttachControl(mBackground);
 
-      mSideBar = new SideBar(mBus, mGraphics);
+      mSideBar = new SideBar(mBus);
       mGraphics->AttachControl(mSideBar);
 
-      mCableLayer = new CableLayer(mBus, mGraphics, &mNodeUis);
+      mCableLayer = new CableLayer(mBus, &mNodeUis);
       mCableLayer->SetRenderPriority(10);
       mGraphics->AttachControl(mCableLayer);
     }
@@ -121,7 +121,7 @@ namespace guitard {
       }
       mInputNodeUi = setUpNodeUi(mGraph->getInputNode());
       moutputNodeUi = setUpNodeUi(mGraph->getOutputNode());
-      // mCableLayer->setInOutNodes(mInputNodeUi->shared->node, moutputNodeUi->shared->node);
+      mCableLayer->setInOutNodes(mInputNodeUi->mNode, moutputNodeUi->mNode);
 
       const float scale = mGraph->getScale();
       mBackground->mScale = scale;
@@ -138,10 +138,13 @@ namespace guitard {
     }
 
     NodeUi* setUpNodeUi(Node* node) {
-      //node->setupUi(mGraphics);
-      //mNodeUis.add(node->mUi);
-      //return node->mUi;
-      return nullptr;
+      NodeUi* ui = NodeList::createNodeUi(node->mInfo->name, node, mBus);
+      if (ui != nullptr) {
+        mGraphics->AttachControl(ui);
+        mNodeUis.add(ui);
+        ui->setUp();
+      }
+      return ui;
     }
 
     void deserialize(const char* data) {
@@ -176,7 +179,8 @@ namespace guitard {
      */
     void onViewPortChange(const float dX = 0, const float dY = 0, float scale = 1) const {
       for (int i = 0; i < mNodeUis.size(); i++) {
-        mNodeUis[i]->translate(dX, dY);
+        NodeUi* ui = mNodeUis[i];
+        ui->translate(dX, dY);
       }
       // mOutputNode->mUi->translate(dX, dY);
       //mInputNode->mUi->translate(dX, dY);

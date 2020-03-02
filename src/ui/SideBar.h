@@ -36,8 +36,8 @@ namespace guitard {
 
     Tab mTabs[mTabCount];
 
-    SideBar(MessageBus::Bus* pBus, IGraphics* g) :
-      IControl(IRECT(), kNoParameter), mNodeGallery(pBus, g), mPresetBrowser(pBus, g)
+    SideBar(MessageBus::Bus* pBus) :
+      IControl(IRECT(), kNoParameter), mNodeGallery(pBus), mPresetBrowser(pBus)
     {
       mBus = pBus;
       mOpenGalleryEvent.subscribe(mBus, MessageBus::OpenGallery, [&](bool open) {
