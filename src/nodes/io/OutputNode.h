@@ -8,13 +8,13 @@ namespace guitard {
     OutputNode() : Node() {
       mInfo = new NodeList::NodeInfo{ "OutputNode", "Output" };
 #ifndef GUITARD_HEADLESS
-      if (mPos.x == mPos.x && mPos.x == 0) {
+      if (mPos.x == mPos.y && mPos.x == 0) {
         // Place it at the screen edge if no position is set
-        mPos.y = PLUG_HEIGHT * 0.5;
-        mPos.x = PLUG_WIDTH - mDimensions.x * 0.3;
+        mPos.y = PLUG_HEIGHT * 0.5f;
+        mPos.x = PLUG_WIDTH - mDimensions.x * 0.3f;
       }
 #endif
-      setup(0, MAX_BUFFER, 1, 0, 2);
+      Node::setup(0, MAX_BUFFER, 1, 0, 2);
     }
 
     void ProcessBlock(int) override {

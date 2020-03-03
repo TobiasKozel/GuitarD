@@ -2,15 +2,14 @@
 #include "../node/NodeSocket.h"
 #include "../misc/MessageBus.h"
 #include "../ui/theme.h"
-#include "../node/NodeShared.h"
 
 namespace guitard {
-#ifndef GUITARD_HEADLESS
   class NodeSocketUi : public IControl {
     MessageBus::Subscription<SocketConnectRequest> mOnConnectionEvent;
     MessageBus::Subscription<SocketConnectRequest> mOnConnectionRedirectEvent;
     MessageBus::Subscription<Node*> mOnDisconnectAllEvent;
     IMouseMod mMouseDown;
+
   protected:
     // NodeShared* mShared = nullptr;
     ConnectionDragData mDragData;
@@ -21,20 +20,21 @@ namespace guitard {
     float mRadius = 0;
     int mIndex = -1;
     bool mOut = false;
+  	
   public:
-    NodeSocketUi(NodeSocket* socket, MessageBus::Bus* bus) :
-      IControl(IRECT(0, 0, 0, 0), kNoParameter)
-    {
+    NodeSocketUi(Coord2D parent, NodeSocket* socket, MessageBus::Bus* bus) : IControl({}, kNoParameter) {
       mBus = bus;
       mSocket = socket;
       mDiameter = Theme::Sockets::DIAMETER;
       mRadius = Theme::Sockets::DIAMETER * 0.5f;
-      mRECT.L = socket->mX;
-      mRECT.T = socket->mY;
+      mBlend = EBlend::Default;
+      mSocket->mAbs.x = mSocket->mRel.x + parent.x - mRadius;
+      mSocket->mAbs.y = mSocket->mRel.y + parent.y - mRadius;
+      mRECT.L = mSocket->mAbs.x;
+      mRECT.T = mSocket->mAbs.y;
       mRECT.R = mRECT.L + mDiameter;
       mRECT.B = mRECT.T + mDiameter;
       SetTargetAndDrawRECTs(mRECT);
-      mBlend = EBlend::Default;
 
       socket->callback = [&](bool doLock) {
         MessageBus::fireEvent(this->mBus, MessageBus::AwaitAudioMutex, doLock);
@@ -60,6 +60,10 @@ namespace guitard {
 
     }
 
+    void OnAttached() override {
+      IRECT test = GetRECT();
+    }
+
     virtual ~NodeSocketUi() {
       mSocket->callback = nullptr;
     }
@@ -74,7 +78,6 @@ namespace guitard {
         );
       }
     }
-
 
     void OnMouseDown(float x, float y, const IMouseMod& mod) override {
       mMouseDown = mod;
@@ -148,7 +151,4 @@ namespace guitard {
       GetUI()->SetAllControlsDirty();
     }
   };
-#else
-  class NodeSocketUi;
-#endif
 }

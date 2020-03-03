@@ -169,8 +169,8 @@ namespace guitard {
     }
 
     void DrawSocket(IGraphics& g, NodeSocket* s) const {
-      const float x = s->mX + Theme::Sockets::RADIUS;
-      const float y = s->mY + Theme::Sockets::RADIUS;
+      const float x = s->mAbs.x + Theme::Sockets::RADIUS;
+      const float y = s->mAbs.y + Theme::Sockets::RADIUS;
       g.FillCircle(
         Theme::Sockets::COLOR, x, y,
         Theme::Sockets::RADIUS * 0.5 * Theme::Sockets::OUTLINE_SIZE, &mBlend
@@ -191,8 +191,8 @@ namespace guitard {
             if (curSock->mConnectedTo[j] != nullptr) {
               NodeSocket* tarSock = curSock->mConnectedTo[j];
               g.DrawLine(iplug::igraphics::COLOR_RED,
-                curSock->mX + socketRadius, curSock->mY + socketRadius,
-                tarSock->mX + socketRadius, tarSock->mY + socketRadius,
+                curSock->mAbs.x + socketRadius, curSock->mAbs.y + socketRadius,
+                tarSock->mAbs.x + socketRadius, tarSock->mAbs.y + socketRadius,
                 &mBlend, 2
               );
             }
@@ -216,16 +216,16 @@ namespace guitard {
               // Draw the temporary bypass
               g.DrawDottedLine(
                 curSock == mHighlightSocket ? Theme::Cables::COLOR_SPLICE_IN : Theme::Cables::COLOR,
-                curSock->mX + socketRadius, curSock->mY + socketRadius,
-                tarSock->mX + socketRadius, tarSock->mY + socketRadius,
+                curSock->mAbs.x + socketRadius, curSock->mAbs.y + socketRadius,
+                tarSock->mAbs.x + socketRadius, tarSock->mAbs.y + socketRadius,
                 &mBlend, Theme::Cables::THICKNESS, Theme::Cables::PREVIEW_DASH_DIST
               );
               if (mPreviewSocketPrev != nullptr) {
                 // draw the original connection slightly transparent
                 g.DrawLine(
                   curSock == mHighlightSocket ? Theme::Cables::COLOR_SPLICE_IN : Theme::Cables::COLOR_PREVIEW,
-                  curSock->mX + socketRadius, curSock->mY + socketRadius,
-                  mPreviewSocketPrev->mX + socketRadius, mPreviewSocketPrev->mY + socketRadius,
+                  curSock->mAbs.x + socketRadius, curSock->mAbs.y + socketRadius,
+                  mPreviewSocketPrev->mAbs.x + socketRadius, mPreviewSocketPrev->mAbs.y + socketRadius,
                   &mBlend, Theme::Cables::THICKNESS
                 );
               }
@@ -233,8 +233,8 @@ namespace guitard {
             else {
               g.DrawLine(
                 curSock == mHighlightSocket ? Theme::Cables::COLOR_SPLICE_IN : Theme::Cables::COLOR,
-                curSock->mX + socketRadius, curSock->mY + socketRadius,
-                tarSock->mX + socketRadius, tarSock->mY + socketRadius,
+                curSock->mAbs.x + socketRadius, curSock->mAbs.y + socketRadius,
+                tarSock->mAbs.x + socketRadius, tarSock->mAbs.y + socketRadius,
                 &mBlend, Theme::Cables::THICKNESS
               );
             }
@@ -341,10 +341,10 @@ namespace guitard {
           NodeSocket* curSock = curNode->mNode->mSocketsIn[i];
           NodeSocket* tarSock = curSock->mConnectedTo[0];
           if (tarSock != nullptr) {
-            float x1 = tarSock->mX + socketRadius;
-            float x2 = curSock->mX + socketRadius;
-            float y1 = tarSock->mY + socketRadius;
-            float y2 = curSock->mY + socketRadius;
+            float x1 = tarSock->mAbs.x + socketRadius;
+            float x2 = curSock->mAbs.x + socketRadius;
+            float y1 = tarSock->mAbs.y + socketRadius;
+            float y2 = curSock->mAbs.y + socketRadius;
             IRECT box;
             box.L = std::min(x1, x2) - SPLICEIN_DISTANCE;
             box.R = std::max(x1, x2) + SPLICEIN_DISTANCE;

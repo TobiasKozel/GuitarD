@@ -5,7 +5,7 @@
 #include "./SideBar.h"
 #include "../misc/HistoryStack.h"
 #include "../graph/Graph.h"
-#include "../node/NodeUi.h"
+#include "./NodeUi.h"
 
 namespace guitard {
   /**
@@ -129,6 +129,10 @@ namespace guitard {
       return scale;
     }
 
+    /**
+     * Remove the Ui element responsible for a node
+     * @param node The node to which the UI should be destructed
+     */
     void cleanUpNodeUi(Node* node) {
       NodeUi* ui = getUiFromNode(node);
       if (ui != nullptr) {
@@ -137,7 +141,16 @@ namespace guitard {
       }
     }
 
+    /**
+     * Creates the UI for a node and makes it visible
+     * @param node The node for which the UI should be created
+     */
     NodeUi* setUpNodeUi(Node* node) {
+      if (getUiFromNode(node) != nullptr) {
+        WDBGMSG("Trying to create a ui for a node which already has one!");
+        assert(false);
+        return nullptr;
+      }
       NodeUi* ui = NodeList::createNodeUi(node->mInfo->name, node, mBus);
       if (ui != nullptr) {
         mGraphics->AttachControl(ui);
@@ -160,10 +173,18 @@ namespace guitard {
     }
 
   private:
-    Node* getNodeFromUi(NodeUi* ui) const {
+    /**
+     * Will return the node managed by the UI
+     * @param ui The object to return the Node for
+     */
+    static Node* getNodeFromUi(NodeUi* ui) {
       return ui->mNode;
     }
 
+    /**
+     * Will return the NodeUi responsible for a node if there is one
+     * @param node The node to lookup the Ui for
+     */
     NodeUi* getUiFromNode(Node* node) const {
       for (size_t i = 0; i < mNodeUis.size(); i++) {
         if (mNodeUis[i]->mNode == node) {
@@ -173,10 +194,6 @@ namespace guitard {
       return nullptr;
     }
 
-    /**
-     * Called via a callback from the background to move around all the nodes
-     * creating the illusion of a viewport
-     */
     void onViewPortChange(const float dX = 0, const float dY = 0, float scale = 1) const {
       for (int i = 0; i < mNodeUis.size(); i++) {
         NodeUi* ui = mNodeUis[i];
@@ -216,6 +233,9 @@ namespace guitard {
       onViewPortChange(avg.x, avg.y);
     }
 
+    /**
+     * Subscribe to all the events needed for the UI
+     */
     void initSubscriptions() {
       /**
        * All the events the Graph is subscribed to
@@ -277,12 +297,7 @@ namespace guitard {
         }
       });
 
-      //mReturnStats.subscribe(mBus, MessageBus::GetGraphStats, [&](GraphStats** stats) {
-      //  *stats = &mStats;
-      //});
-
       mNodeSpliceCombineEvent.subscribe(mBus, MessageBus::NodeSpliceInCombine, [&](Node* node) {
-        // this->spliceInCombine(node);
         Node* combine = mGraph->spliceInCombine(node);
         if (combine != nullptr) {
           NodeUi* ui = setUpNodeUi(combine);
@@ -414,8 +429,6 @@ namespace guitard {
       }
       return false;
     }
-
-    // void spliceInCombine
 
     /**
      * Recursively resets all the positions of nodes to (0, 0)

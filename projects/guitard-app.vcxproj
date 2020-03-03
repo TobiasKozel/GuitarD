@@ -342,7 +342,6 @@
     <ClInclude Include="..\resources\resource.h" />
     <ClInclude Include="..\src\faust\FaustHeadlessDsp.h" />
     <ClInclude Include="..\src\graph\Graph.h" />
-    <ClInclude Include="..\src\graph\Serializer.h" />
     <ClInclude Include="..\src\misc\constants.h" />
     <ClInclude Include="..\src\misc\EventList.h" />
     <ClInclude Include="..\src\misc\HistoryStack.h" />
@@ -385,10 +384,7 @@
     <ClInclude Include="..\src\nodes\tuner\TunerNode.h" />
     <ClInclude Include="..\src\node\Node.h" />
     <ClInclude Include="..\src\node\NodeInfo.h" />
-    <ClInclude Include="..\src\node\NodeShared.h" />
     <ClInclude Include="..\src\node\NodeSocket.h" />
-    <ClInclude Include="..\src\node\NodeSocketUi.h" />
-    <ClInclude Include="..\src\node\NodeUi.h" />
     <ClInclude Include="..\src\parameter\MeterCoupling.h" />
     <ClInclude Include="..\src\parameter\ParameterCoupling.h" />
     <ClInclude Include="..\src\parameter\ParameterManager.h" />
@@ -407,6 +403,8 @@
     <ClInclude Include="..\src\ui\gallery\NodeGalleryElement.h" />
     <ClInclude Include="..\src\ui\GraphBackground.h" />
     <ClInclude Include="..\src\ui\GraphUi.h" />
+    <ClInclude Include="..\src\ui\NodeSocketUi.h" />
+    <ClInclude Include="..\src\ui\NodeUi.h" />
     <ClInclude Include="..\src\ui\preset\PresetBrowser.h" />
     <ClInclude Include="..\src\ui\preset\PresetEntryControl.h" />
     <ClInclude Include="..\src\ui\ScrollViewChild.h" />

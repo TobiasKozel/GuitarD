@@ -345,9 +345,6 @@
     <ClInclude Include="..\src\graph\Graph.h">
       <Filter>src\graph</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\graph\Serializer.h">
-      <Filter>src\graph</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\misc\MessageBus.h">
       <Filter>src\misc</Filter>
     </ClInclude>
@@ -361,12 +358,6 @@
       <Filter>src\node</Filter>
     </ClInclude>
     <ClInclude Include="..\src\node\NodeSocket.h">
-      <Filter>src\node</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\node\NodeSocketUi.h">
-      <Filter>src\node</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\node\NodeUi.h">
       <Filter>src\node</Filter>
     </ClInclude>
     <ClInclude Include="..\src\node\Node.h">
@@ -410,9 +401,6 @@
     </ClInclude>
     <ClInclude Include="..\src\parameter\MeterCoupling.h">
       <Filter>src\parameter</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\node\NodeShared.h">
-      <Filter>src\node</Filter>
     </ClInclude>
     <ClInclude Include="..\src\nodes\tuner\TunerNode.h">
       <Filter>src\nodes\tools</Filter>
@@ -544,6 +532,12 @@
       <Filter>src\nodes\filters</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ui\GraphUi.h">
+      <Filter>src\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\NodeSocketUi.h">
+      <Filter>src\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\NodeUi.h">
       <Filter>src\ui</Filter>
     </ClInclude>
   </ItemGroup>

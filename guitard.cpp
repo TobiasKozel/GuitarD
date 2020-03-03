@@ -6,7 +6,7 @@ using namespace iplug;
 
 
 
-GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::MakeConfig(MAX_DAW_PARAMS, kNumPrograms)) {
+GuitarD::GuitarD(const InstanceInfo& info) : iplug::Plugin(info, MakeConfig(MAX_DAW_PARAMS, kNumPrograms)) {
   /**
    * Setup the soundwoofer lib
    */
@@ -38,10 +38,10 @@ GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::M
    */
 #if IPLUG_EDITOR
   mMakeGraphicsFunc = [&]() {
-    return iplug::igraphics::MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, 1.);
+    return igraphics::MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, 1.);
   };
   
-  mLayoutFunc = [&](iplug::igraphics::IGraphics* pGraphics) {
+  mLayoutFunc = [&](igraphics::IGraphics* pGraphics) {
     if (pGraphics->NControls()) {
       return;
     }

@@ -44,7 +44,12 @@ namespace guitard {
 
     /**
      * This is basically a delayed constructor with the only disadvantage: derived methods have to have the same parameters
-     * The derived class will call this with the desired parameters, except for the samplerate
+     * The derived class will call this with the desired parameters, so they can ignore pInputs, pOutputs and pOutputs
+     * @param pSamplerate Sampling rate the node will operate at
+     * @param pMaxBuffer The maximum Buffer size the ProcessBlock will be called
+     * @param pInputs Number of Input sockets the node should have
+     * @param pOutputs Number of Output sockets the node should have, will create buffer for them
+     * @param pChannels Channel count per socket, has to be 2 for now
      */
     virtual void setup(
         const int pSamplerate, const int pMaxBuffer, const int pInputs = 1,

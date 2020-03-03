@@ -1,6 +1,7 @@
 #pragma once
 #include "../misc/constants.h"
 #include "../types/types.h"
+#include "../types/gstructs.h"
 
 namespace guitard {
   class Node;
@@ -10,8 +11,8 @@ namespace guitard {
    */
   struct NodeSocket {
     bool mIsInput = false;
-    float mX = 0;
-    float mY = 0;
+    Coord2D mRel; // Relative position
+    Coord2D mAbs;
     Node* mParentNode = nullptr;
     int mIndex = -1;
     bool mConnected = false;

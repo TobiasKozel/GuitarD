@@ -1,13 +1,11 @@
 #pragma once
-#ifndef GUITARD_HEADLESS
 #include "../types/gstructs.h"
 #include "IControls.h"
-#include "./Node.h"
+#include "../node/Node.h"
 #include "../types/iplugTypes.h"
 #include "../node/NodeSocket.h"
-#include "../node/NodeSocketUi.h"
+#include "./NodeSocketUi.h"
 #include "../misc/MessageBus.h"
-#include "./NodeShared.h"
 
 namespace guitard {
   struct NodeUiHeader { // TODO get rid of this 
@@ -130,7 +128,7 @@ namespace guitard {
       return nullptr;
     }
 
-    virtual void setUpDimensions(Coord2D dim) {
+    void setUpDimensions(Coord2D dim) {
       IRECT rect;
       rect.L = mNode->mPos.x - dim.x / 2;
       rect.R = mNode->mPos.x + dim.x / 2;
@@ -144,12 +142,12 @@ namespace guitard {
 
     }
 
-    virtual void setColor(IColor c) {
+    void setColor(IColor c) {
       mUseSvgBg = false;
       mColor = c;
     }
 
-    virtual void setSvg(const char* path) {
+    void setSvg(const char* path) {
       mSvgBg = GetUI()->LoadSVG(path);
       if (mSvgBg.IsValid()) {
         mUseSvgBg = true;
@@ -185,23 +183,53 @@ namespace guitard {
       GetUI()->AttachControl(mHeader.remove);
     }
 
-
-    virtual void setUpSockets() {
+    /**
+     * Creates the NodeSocketUi for each NodeSocket
+     * and attaches them to the UI
+     */
+    void setUpSockets() {
       for (int i = 0; i < mNode->mInputCount; i++) {
-        NodeSocketUi* socket = new NodeSocketUi(mNode->mSocketsIn[i], mBus);
-        GetUI()->AttachControl(socket);
-        mInSocketsUi[i] = socket;
-        mElements.add(socket);
+        NodeSocketUi* s = new NodeSocketUi(mNode->mPos, mNode->mSocketsIn[i], mBus);
+        GetUI()->AttachControl(s);
+        mInSocketsUi[i] = s;
+        mElements.add(s);
       }
 
       for (int i = 0; i < mNode->mOutputCount; i++) {
-        NodeSocketUi* socket = new NodeSocketUi(mNode->mSocketsOut[i], mBus);
+        NodeSocketUi* socket = new NodeSocketUi(mNode->mPos, mNode->mSocketsOut[i], mBus);
         GetUI()->AttachControl(socket);
         mOutSocketsUi[i] = socket;
         mElements.add(socket);
       }
     }
 
+    /**
+     * Places sockets which have mRel at 0 generically based on the node dimensions
+     */
+    virtual void placeSockets() const {
+      for (int i = 0; i < mNode->mInputCount; i++) {
+        NodeSocket* s = mNode->mSocketsIn[i];
+        if (s->mRel.x == 0 && s->mRel.y == 0) {
+          s->mRel.x = mNode->mDimensions.x * -0.5 + Theme::Node::SHADOW_BOUNDS;
+          s->mRel.y = i * 50.f - (mNode->mInputCount / 2);
+        }
+      }
+
+      for (int i = 0; i < mNode->mOutputCount; i++) {
+        NodeSocket* s = mNode->mSocketsOut[i];
+        if (s->mRel.x == 0 && s->mRel.y == 0) {
+          s->mRel.x = mNode->mDimensions.x * 0.5 - Theme::Node::SHADOW_BOUNDS;
+          s->mRel.y = i * 35.f - (mNode->mOutputCount / 2) * 35;
+        }
+      }
+
+    }
+
+  	/**
+  	 * Creates IControls according to the mParameters
+  	 * Attaches the to the UI and places them according to the
+  	 * coordinates in ParameterCoupling
+  	 */
     virtual void setUpControls() {
       for (int i = 0; i < mNode->mParameterCount; i++) {
         ParameterCoupling* couple = &mNode->mParameters[i];
@@ -217,7 +245,7 @@ namespace guitard {
           couple->control->SetValue(couple->getNormalized());
         }
         else {
-          // use the callback to get the value to the dsp, won't allow automation though
+          // use the callback to get the value to the dsp, won't allow automation from the DAW though
           couple->control = new IVKnobControl(
             controlPos, [couple](IControl* pCaller) {
             // TODOG Add a label with the current value
@@ -255,6 +283,7 @@ namespace guitard {
       }
       mElements.add(this);
       setUpControls();
+      placeSockets();
       setUpSockets();
       setUpHeader();
       translate(0, 0);
@@ -461,13 +490,13 @@ namespace guitard {
       }
 
       for (int i = 0; i < mNode->mInputCount; i++) {
-        mNode->mSocketsIn[i]->mX += dX;
-        mNode->mSocketsIn[i]->mY += dY;
+        mNode->mSocketsIn[i]->mAbs.x += dX;
+        mNode->mSocketsIn[i]->mAbs.y += dY;
       }
 
       for (int i = 0; i < mNode->mOutputCount; i++) {
-        mNode->mSocketsOut[i]->mX += dX;
-        mNode->mSocketsOut[i]->mY += dY;
+        mNode->mSocketsOut[i]->mAbs.x += dX;
+        mNode->mSocketsOut[i]->mAbs.y += dY;
       }
       mNode->mPos.x += dX;
       mNode->mPos.y += dY;
@@ -493,9 +522,6 @@ namespace guitard {
       mDirty = true;
     }
 
-
-
-
   private:
     static void moveControl(IControl* control, const float x, const float y) {
       IRECT rect = control->GetTargetRECT();
@@ -513,9 +539,3 @@ namespace guitard {
     }
   };
 }
-
-#else
-namespace guitard {
-  class NodeUi;
-}
-#endif

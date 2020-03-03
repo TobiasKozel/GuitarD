@@ -59,7 +59,6 @@ namespace guitard {
      */
     int mMaxBlockSize = MAX_BUFFER;
 
-    GraphStats mStats;
 
     /**
      * Used to slice the dsp block in smaller slices
@@ -79,6 +78,7 @@ namespace guitard {
     bool mIsProcessing = false;
 
   public:
+    GraphStats mStats;
 
     explicit Graph(ParameterManager* pParamManager) {
       mParamManager = pParamManager; // we'll keep this around to let nodes register parameters
@@ -286,7 +286,7 @@ namespace guitard {
       lockAudioThread();
       // Allocating the node is thread safe, but not the node list itself
       mNodes.add(node);
-      sortGraphWithoutLock();
+      sortGraph();
       unlockAudioThread();
     }
 
@@ -383,7 +383,7 @@ namespace guitard {
         assert(false);
       }
       delete node;
-      sortGraphWithoutLock();
+      sortGraph();
       // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
       unlockAudioThread();
     }
@@ -608,7 +608,7 @@ namespace guitard {
           mOutputNode->connectInput(mInputNode->mSocketsOut[0]);
         }
 
-        sortGraphWithoutLock();
+        sortGraph();
         unlockAudioThread();
       }
       catch (...) {
@@ -639,17 +639,6 @@ namespace guitard {
 
     void sortGraph() {
       lockAudioThread();
-      sortGraphWithoutLock();
-      unlockAudioThread();
-    }
-
-  private:
-    /**
-     * Does some sorting on the mNodes list so the graph can be computed with fewer attempts
-     * Does not touch the positions of the nodes
-     * TODO this needs to be looked at to wirk with feedback and automation deps
-     */
-    void sortGraphWithoutLock() {
       PointerList<Node> sorted;
       for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
         // Put in the nodes which directly follow the input node
@@ -698,6 +687,7 @@ namespace guitard {
         if (dupli) { continue; } // TODOG there shouldn't be any dupes, but it happens for some reason
         mNodes.add(n);
       }
+      unlockAudioThread();
     }
   };
 }
