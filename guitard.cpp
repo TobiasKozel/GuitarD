@@ -22,7 +22,7 @@ GuitarD::GuitarD(const iplug::InstanceInfo& info) : iplug::Plugin(info, iplug::M
     mParamManager->addParameter(GetParam(i));
   }
 
-  mGraph = new guitard::Graph(&mBus, mParamManager);
+  mGraph = new guitard::Graph(mParamManager);
 
   /**
    * The DAW needs to be informed if the assignments for parameters have changed

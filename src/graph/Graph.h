@@ -8,19 +8,13 @@
 #include "../misc/MessageBus.h"
 #include "../nodes/io/InputNode.h"
 #include "../nodes/io/OutputNode.h"
-#include "./Serializer.h"
 #include "../parameter/ParameterManager.h"
 
 namespace guitard {
   /**
-   * This is the "god object" which will handle all the nodes
-   * and interactions with the graph
-   * It's not a IControl itself but owns a few which make up the GUI
+   * A object of this class will hold a bunch of Nodes and can process them
    */
   class Graph {
-    MessageBus::Bus* mBus = nullptr;
-
-
     ParameterManager* mParamManager = nullptr;
 
     /**
@@ -73,12 +67,20 @@ namespace guitard {
      */
     sample** mSliceBuffer[2] = { nullptr };
 
-    float mScale = 1.0; // This is the zoom level of the graph
+    /**
+     * This is the zoom level of the graph, it's here since the gui
+     * may be able to handle several graphs at some point
+     */
+    float mScale = 1.0;
+
+    /**
+     * True if a thread is in the ProcessBlock right now
+     */
+    bool mIsProcessing = false;
 
   public:
 
-    explicit Graph(MessageBus::Bus* pBus, ParameterManager* pParamManager) {
-      mBus = pBus; // Goal is to get this out of all the non UI classes
+    explicit Graph(ParameterManager* pParamManager) {
       mParamManager = pParamManager; // we'll keep this around to let nodes register parameters
 
       mInputNode = new InputNode();
@@ -219,7 +221,8 @@ namespace guitard {
       }
 
       const auto start = std::chrono::high_resolution_clock::now();
-      LockGuard lock(mAudioMutex);
+      LockGuard lock(mAudioMutex); // TODOG might not need a lock if the gui has to wait
+      mIsProcessing = true;
       mInputNode->CopyIn(in, nFrames);
       for (int n = 0; n < nodeCount; n++) {
         mNodes[n]->BlockStart();
@@ -240,20 +243,14 @@ namespace guitard {
         for (int n = 0; n < nodeCount; n++) {
           mNodes[n]->ProcessBlock(nFrames);
         }
-        if (!mStats.valid) {
-          mStats.valid = true;
-          MessageBus::fireEvent(mBus, MessageBus::GraphStatsChanged, &mStats);
-        }
+        mStats.valid = true;
       }
       else {
-        // failed processing
-        if (mStats.valid) {
-          mStats.valid = false;
-          MessageBus::fireEvent(mBus, MessageBus::GraphStatsChanged, &mStats);
-        }
+        mStats.valid = false;
       }
 
       mOutputNode->CopyOut(out, nFrames);
+      mIsProcessing = false;
       const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::high_resolution_clock::now() - start
         );
@@ -407,12 +404,74 @@ namespace guitard {
     }
 
     void serialize(nlohmann::json& json) {
+      const int NoNode = -2;
+      const int InNode = -1;
       try {
-        json = {
-          { "version", PLUG_VERSION_HEX },
-        };
+        json = { { "version", PLUG_VERSION_HEX } };
         json["maxBlockSize"] = mMaxBlockSize;
-        Serializer::serialize(json, &mNodes, mInputNode, mOutputNode);
+
+        json["input"]["gain"] = 1.0;
+        json["input"]["position"] = {
+          mInputNode->mPos.x, mInputNode->mPos.y
+        };
+
+        json["nodes"] = nlohmann::json::array();
+        for (int i = 0; i < mNodes.size(); i++) {
+          Node* node = mNodes[i];
+          json["nodes"][i]["position"] = { node->mPos.x, node->mPos.y };
+          // The index shouldn't really matter since they're all in order
+          json["nodes"][i]["idx"] = i;
+          json["nodes"][i]["type"] = node->mInfo->name;
+          json["nodes"][i]["inputs"] = nlohmann::json::array();
+          for (int prev = 0; prev < node->mInputCount; prev++) {
+            Node* cNode = node->mSocketsIn[prev]->getConnectedNode();
+            if (cNode == nullptr) {
+              json["nodes"][i]["inputs"][prev] = { NoNode, 0 };
+            }
+            else if (cNode == mInputNode) {
+              json["nodes"][i]["inputs"][prev] = { InNode, 0 };
+            }
+            else {
+              json["nodes"][i]["inputs"][prev] = {
+                mNodes.find(cNode),
+                node->mSocketsIn[prev]->getConnectedSocketIndex()
+              };
+            }
+          }
+          json["nodes"][i]["parameters"] = nlohmann::json::array();
+          for (int p = 0; p < node->mParameterCount; p++) {
+            ParameterCoupling* para = &node->mParameters[p];
+            const char* name = para->name;
+            double val = para->getValue();
+            int idx = para->parameterIdx;
+            int automation = mNodes.find(para->automationDependency);
+            json["nodes"][i]["parameters"][p] = {
+              { "name", name },
+              { "idx", idx},
+              { "value", val },
+              { "automation", automation }
+            };
+          }
+          node->serializeAdditional(json["nodes"][i]);
+        }
+
+        // Handle the output node
+        json["output"]["gain"] = 1.0;
+        json["output"]["position"] = { mOutputNode->mPos.x, mOutputNode->mPos.y };
+        Node* lastNode = mOutputNode->mSocketsIn[0]->getConnectedNode();
+        int lastNodeIndex = NoNode;
+        if (lastNode == mInputNode) {
+          lastNodeIndex = InNode;
+        }
+        else if (lastNode != nullptr) {
+          lastNodeIndex = mNodes.find(lastNode);
+        }
+
+        json["output"]["inputs"][0] = {
+          lastNodeIndex,
+          mOutputNode->mSocketsIn[0]->getConnectedSocketIndex()
+        };
+
       }
       catch (...) {
         assert(false); // Failed to serialize json
@@ -432,24 +491,128 @@ namespace guitard {
 
     void deserialize(nlohmann::json& json) {
       try {
+        const int NoNode = -2;
+        const int InNode = -1;
+
+        lockAudioThread();
+
         removeAllNodes();
+
         if (json.contains("maxBlockSize")) {
           mMaxBlockSize = json["maxBlockSize"];
         }
-        lockAudioThread();
-        Serializer::deserialize(json, &mNodes, mOutputNode, mInputNode, mSampleRate, mMaxBlockSize, mParamManager, mBus);
-#ifndef GUITARD_HEADLESS
-        //if (mGraphics != nullptr && mGraphics->WindowIsOpen()) {
-        //  for (int i = 0; i < mNodes.size(); i++) {
-        //    mNodes[i]->setupUi(mGraphics);
-        //  }
-        //  scaleUi();
-        //}
-#endif
+        mOutputNode->connectInput(nullptr, 0);
+
+        int expectedIndex = 0;
+        int paramBack = MAX_DAW_PARAMS - 1;
+
+        // create all the nodes and setup the parameters in the first pass
+        for (auto sNode : json["nodes"]) {
+          const std::string className = sNode["type"];
+          Node* node = NodeList::createNode(className);
+          if (node == nullptr) { continue; }
+          if (expectedIndex != sNode["idx"]) {
+            WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
+          }
+
+          addNode(node, nullptr, { sNode["position"][0], sNode["position"][1] });
+
+          // Set the parameter values
+          for (auto param : sNode["parameters"]) {
+            std::string name = param["name"];
+            int found = 0;
+            for (int i = 0; i < node->mParameterCount; i++) {
+              ParameterCoupling* para = &node->mParameters[i];
+              if (para->name == name) {
+                found++;
+                para->parameterIdx = param["idx"];
+                sample val = param["value"];
+                para->setValue(val);
+              }
+            }
+
+            for (int i = 0; i < node->mParameterCount; i++) {
+              ParameterCoupling* para = &node->mParameters[i];
+              if (para->parameterIdx == -1) {
+                /**
+                 * Rare case that happens when a node has more parameters in the current version of the plugin
+                 * In order to not steal a parameter from the following nodes we need to assign it from the back
+                 */
+                para->parameterIdx = paramBack;
+                paramBack--;
+              }
+            }
+          }
+          if (mParamManager != nullptr) {
+            mParamManager->claimNode(node);
+          }
+          expectedIndex++;
+        }
+
+        // link the nodes all up accordingly in the second pass
+        int currentNodeIdx = 0;
+        for (auto sNode : json["nodes"]) {
+          Node* node = mNodes[currentNodeIdx];
+          int currentInputIdx = 0;
+          for (auto connection : sNode["inputs"]) {
+            const int inNodeIdx = connection[0];
+            const int inBufferIdx = connection[1];
+            if (inNodeIdx >= 0 && mNodes[inNodeIdx] != nullptr) {
+              node->connectInput(
+                mNodes[inNodeIdx]->mSocketsOut[inBufferIdx],
+                currentInputIdx
+              );
+            }
+            else if (inNodeIdx == InNode) {
+              // if it's NoNode it's not connected at all and we'll just leave it at a nullptr
+              node->connectInput(
+                mInputNode->mSocketsOut[0],
+                currentInputIdx
+              );
+            }
+            currentInputIdx++;
+          }
+
+          // Link up the automation
+          for (auto param : sNode["parameters"]) {
+            std::string name = param["name"];
+            for (int i = 0; i < node->mParameterCount; i++) {
+              ParameterCoupling* para = &node->mParameters[i];
+              if (para->name == name) {
+                // TODOG no need to check on up to date presets
+                if (param.contains("automation")) {
+                  const int automationIndex = param.at("automation");
+                  if (automationIndex != -1) {
+                    node->attachAutomation(mNodes[automationIndex], i);
+                  }
+                }
+              }
+            }
+          }
+
+          // pass the additional info to the node
+          node->deserializeAdditional(sNode);
+          currentNodeIdx++;
+        }
+
+        // connect the output nodes to the global output
+        const int outNodeIndex = json["output"]["inputs"][0][0];
+        const int outConnectionIndex = json["output"]["inputs"][0][1];
+        if (mNodes[outNodeIndex] != nullptr) {
+          mOutputNode->connectInput(
+            mNodes[outNodeIndex]->mSocketsOut[outConnectionIndex]
+          );
+        }
+        else if (outNodeIndex == InNode) {
+          // In case the output goes straight to the input
+          mOutputNode->connectInput(mInputNode->mSocketsOut[0]);
+        }
+
         sortGraphWithoutLock();
         unlockAudioThread();
       }
       catch (...) {
+        WDBGMSG("Failed loading preset!");
         // assert(false); // To load graph with json
       }
     }

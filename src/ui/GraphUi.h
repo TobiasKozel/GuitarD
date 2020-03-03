@@ -182,9 +182,6 @@ namespace guitard {
         NodeUi* ui = mNodeUis[i];
         ui->translate(dX, dY);
       }
-      // mOutputNode->mUi->translate(dX, dY);
-      //mInputNode->mUi->translate(dX, dY);
-      // WDBGMSG("x %f y %f s %f\n", x, y, scale);
     }
 
     /**

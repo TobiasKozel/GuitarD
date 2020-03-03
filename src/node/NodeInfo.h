@@ -6,7 +6,7 @@ namespace guitard {
   class Node;
   class NodeUi;
   namespace MessageBus {
-    class Bus;
+    struct Bus;
   }
   namespace NodeList {
     struct NodeInfo;
