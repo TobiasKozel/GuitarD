@@ -5,7 +5,6 @@
 #include "../types/gmutex.h"
 #include "../types/types.h"
 #include "../types/pointerList.h"
-#include "../misc/MessageBus.h"
 #include "../nodes/io/InputNode.h"
 #include "../nodes/io/OutputNode.h"
 #include "../parameter/ParameterManager.h"
@@ -510,7 +509,7 @@ namespace guitard {
         for (auto sNode : json["nodes"]) {
           const std::string className = sNode["type"];
           Node* node = NodeList::createNode(className);
-          if (node == nullptr) { continue; }
+          if (node == nullptr) { continue; } // we might not actually be able to provide a node with the name
           if (expectedIndex != sNode["idx"]) {
             WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
           }
@@ -553,6 +552,7 @@ namespace guitard {
         int currentNodeIdx = 0;
         for (auto sNode : json["nodes"]) {
           Node* node = mNodes[currentNodeIdx];
+          if (node == nullptr) { continue; }
           int currentInputIdx = 0;
           for (auto connection : sNode["inputs"]) {
             const int inNodeIdx = connection[0];

@@ -16,9 +16,12 @@
 
 #include "../../../thirdparty/convolver/twoStageConvolver.h"
 #include "../../../thirdparty/threadpool.h"
-#include "../../types/resampler.h"
 
 namespace guitard {
+  /**
+   * Wraps up the FttConvolver to do easy stereo convolution
+   * and also deal with the buffers
+   */
   class WrappedConvolver {
     const int CONV_BLOCK_SIZE = 128;
     const int CONV_TAIL_BLOCK_SIZE = 1024 * 4;

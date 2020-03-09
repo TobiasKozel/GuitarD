@@ -6,6 +6,7 @@
 #include "../parameter/MeterCoupling.h"
 #include "../types/gstructs.h"
 #include "../types/types.h"
+#include "Oversampler.h"
 
 namespace guitard {
   /**
@@ -13,12 +14,14 @@ namespace guitard {
    * It's the DSP part of the node
    */
   class Node {
-  public:
+    iplug::OverSampler<sample>* mOverSampler = nullptr;
+  public: // Everything is public since it most of it needs to be accessible from the graph and the NodeUi
     bool mIsAutomated = false; // Flag to skip automation if there's none
     // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
     sample*** mBuffersOut = nullptr;
     bool mIsProcessed = false;
 
+    int mOverSamplingFactor = 1;
     int mSampleRate = 0;
     int mLastBlockSize = 0;
     // This size will be used to allocate the dsp buffer, the actual samples per block can be lowe
@@ -39,7 +42,7 @@ namespace guitard {
     NodeSocket* mSocketsOut[MAX_NODE_SOCKETS] = { nullptr };
 
     Coord2D mPos = { 0, 0 }; // Position on the canvas in pixels
-    Coord2D mDimensions = { 200, 200 }; // Size in Pixels
+    Coord2D mDimensions = { 250, 200 }; // Size in Pixels
     NodeList::NodeInfo* mInfo;
 
     /**
@@ -244,6 +247,14 @@ namespace guitard {
       createBuffers();
     }
 
+    void setOverSampling(int fac) {
+      if (mOverSampler != nullptr && mOverSamplingFactor != fac) {
+        mOverSampler->SetOverSampling(iplug::OverSampler<sample>::RateToFactor(fac));
+        OnSamplerateChanged((mSampleRate / mOverSamplingFactor) * fac);
+        mOverSamplingFactor = fac;
+      }
+    }
+
     /**
      * React to a change in sample rate
      * since it won't affect the buffers and the dsp usually needs
@@ -421,45 +432,6 @@ namespace guitard {
     // TODO this has to go
 
 #ifndef GUITARD_HEADLESS
-    /**
-     * Generic setup of the parameters to get something on the screen
-     */
-    //virtual void setupUi(IGraphics* pGrahics) {
-    //  shared.graphics = pGrahics;
-    //  mUi = new NodeUi(&shared);
-    //  mUi->setColor(IColor(255, 100, 100, 100));
-    //  pGrahics->AttachControl(mUi);
-    //  mUi->setUp();
-    //  mUiReady = true;
-    //}
-
-    ///**
-    // * Cleans up the IControls for all the parameters
-    // */
-    //virtual void cleanupUi(IGraphics* pGraphics) {
-    //  if (mUi != nullptr) {
-    //    pGraphics->RemoveControl(mUi);
-    //    mUi = nullptr;
-    //  }
-    //  mUiReady = false;
-    //}
-
-    //virtual void positionSockets() {
-    //  for (int i = 0; i < shared.inputCount; i++) {
-    //    NodeSocket* s = shared.socketsIn[i];
-    //    s->mX = shared.X - shared.width * 0.5;
-    //    s->mY = i * 50.f + shared.Y - (shared.inputCount / 2);
-    //  }
-
-    //  for (int i = 0; i < shared.outputCount; i++) {
-    //    NodeSocket* s = shared.socketsOut[i];
-    //    s->mX = shared.width * 0.5 + shared.X - 30;
-    //    s->mY = i * 35.f + shared.Y - (shared.outputCount / 2) * 35;
-    //  }
-    //}
-
-
-
     //void moveAlong(const float x) {
     //  if (shared.info->name == "FeedbackNode") { return; }
     //  if (mUi != nullptr) {

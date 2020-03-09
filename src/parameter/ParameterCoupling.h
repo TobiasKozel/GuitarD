@@ -50,10 +50,8 @@ namespace guitard {
     IControl* control = nullptr;
 #endif
     // UI position and size
-    float x = 0;
-    float y = 0;
-    float w = 60;
-    float h = 60;
+    Coord2D pos;
+    Coord2D dim = { 90, 60 };
     float centerAngle = -135.f;
     float lowAngle = -135.f;
     float highAngle = 135.f;
@@ -250,10 +248,10 @@ namespace guitard {
      * Sets the visual properties used when setting up a IControl based on this Coupling
      */
     void setPos(const float pX, const float pY, const float size = -1, const bool pShowLabel = true, const bool pShowValue = true) {
-      x = pX;
-      y = pY;
+      pos.x = pX;
+      pos.y = pY;
       if (size > 0) {
-        w = h = size;
+        dim.x = dim.y = size;
       }
       showLabel = pShowLabel;
       showValue = pShowValue;

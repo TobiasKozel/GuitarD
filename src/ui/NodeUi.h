@@ -39,7 +39,7 @@ namespace guitard {
     IBlend mBlend = { EBlend::Default, 1 }; // TODO this might not be needed 
     bool mNoScale = false;
 
-    IColor mColor;
+    IColor mColor = {255, 128, 128, 128 };
     ISVG mSvgBg = ISVG(nullptr);
     IText mIconFont;
     bool mDoRender = true;
@@ -60,10 +60,10 @@ namespace guitard {
      */
     std::map<const char*, ParameterCoupling*> mParamsByName;
 
-    explicit NodeUi(Node* node, MessageBus::Bus* bus) : IControl(IRECT(0, 0, 0, 0), kNoParameter) {
+    explicit NodeUi(Node* node, MessageBus::Bus* bus) : IControl(IRECT(), kNoParameter) {
       mNode = node;
       mBus = bus;
-      NodeUi::setUpDimensions(mNode->mDimensions);
+      setUpDimensions(mNode->mDimensions);
 
       for (int i = 0; i < mNode->mParameterCount; i++) {
         /**
@@ -222,7 +222,27 @@ namespace guitard {
           s->mRel.y = i * 35.f - (mNode->mOutputCount / 2) * 35;
         }
       }
+    }
 
+    virtual void placeControls() {
+      for (int i = 0; i < mNode->mParameterCount; i++) {
+        ParameterCoupling* p = &mNode->mParameters[i];
+        if (p->pos.x != 0 || p->pos.y != 0) {
+          return;
+        }
+      }
+
+      Coord2D pos{ mNode->mDimensions.x * -0.5f, mNode->mDimensions.y * -0.5f };
+      const Coord2D pad = { 0, 10 };
+      for (int i = 0; i < mNode->mParameterCount; i++) {
+        ParameterCoupling* p = &mNode->mParameters[i];
+        p->pos = pos;
+        pos.x += p->dim.x + pad.x;
+        //if (pos.x > mNode->mDimensions.x) {
+        //  pos.x = 0;
+        //  pos.y += p->dim.y + pad.y;
+        //}
+      }
     }
 
   	/**
@@ -233,9 +253,9 @@ namespace guitard {
     virtual void setUpControls() {
       for (int i = 0; i < mNode->mParameterCount; i++) {
         ParameterCoupling* couple = &mNode->mParameters[i];
-        const float px = mNode->mPos.x + couple->x - (couple->w * 0.5f);
-        const float py = mNode->mPos.y + couple->y - (couple->h * 0.5f);
-        IRECT controlPos(px, py, px + couple->w, py + couple->h);
+        const float px = mNode->mPos.x + couple->pos.x - (couple->dim.x * 0.5f);
+        const float py = mNode->mPos.y + couple->pos.y - (couple->dim.y * 0.5f);
+        IRECT controlPos(px, py, px + couple->dim.x, py + couple->dim.y);
         // use the daw parameter to sync the values if possible
         if (couple->parameterIdx != kNoParameter) {
           couple->control = new IVKnobControl(
@@ -282,6 +302,7 @@ namespace guitard {
         }
       }
       mElements.add(this);
+      placeControls();
       setUpControls();
       placeSockets();
       setUpSockets();

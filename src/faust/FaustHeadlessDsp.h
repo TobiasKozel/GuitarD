@@ -41,11 +41,17 @@ namespace guitard {
       static void closeBox() {};
       static void declare(FAUSTFLOAT*, const char*, const char*) {};
 
-      void addHorizontalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT pDefault, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) const {
+      void addHorizontalSlider(
+          const char* name, FAUSTFLOAT* prop, FAUSTFLOAT pDefault,
+          FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize
+      ) const {
         node->addParameter(name, prop, pDefault, min, max, stepSize);
       }
 
-      void addVerticalSlider(const char* name, FAUSTFLOAT* prop, FAUSTFLOAT pDefault, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize) const {
+      void addVerticalSlider(
+          const char* name, FAUSTFLOAT* prop, FAUSTFLOAT pDefault,
+          FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT stepSize
+      ) const {
         addHorizontalSlider(name, prop, pDefault, min, max, stepSize);
       }
 
@@ -116,8 +122,8 @@ namespace guitard {
           if (strncmp(p->name, "Bypass", 32) == 0) {
             continue;
           }
-          p->x = column * 60 + 50 - mDimensions.x * 0.5;
-          p->y = 60 * (pos % perColumn) - 40;
+          //p->pos.x = column * 60 + 50 - mDimensions.x * 0.5;
+          //p->pos.y = 60 * (pos % perColumn) - 40;
           pos++;
         }
       }
