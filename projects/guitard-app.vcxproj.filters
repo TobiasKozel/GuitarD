@@ -540,6 +540,9 @@
     <ClInclude Include="..\src\ui\NodeUi.h">
       <Filter>src\ui</Filter>
     </ClInclude>
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwooferResampler.h">
+      <Filter>thirdparty\soundwoofer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

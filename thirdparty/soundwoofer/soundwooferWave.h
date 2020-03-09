@@ -9,53 +9,10 @@
 #include <cmath>
 #include "./soundwooferFile.h"
 #include "./soundwooferTypes.h"
+#include "./soundwooferResampler.h"
 
 namespace soundwoofer {
   namespace wave {
-    template <typename Tin, typename Tout>
-    /**
-     * Simple since resampler, still needs a lowpass to avoid aliasing
-     * Based on https://math.stackexchange.com/a/1723679
-     */
-    class WindowedSincResampler {
-      double mStepSize = 0;
-      size_t mWindowSize = 0;
-    public:
-      WindowedSincResampler(const double inFreq, const double outFreq, const size_t windowSize = 24) {
-        mStepSize = inFreq / outFreq; // the step size in the input signal
-        if (mStepSize < 0.1 || 10 < mStepSize) { // Limit to 10x resampling factor
-          mStepSize = 1.0;
-          assert(false);
-        }
-        mWindowSize = windowSize;
-      }
-
-      size_t resample(Tin* in, const size_t length, Tout** out) {
-        const size_t outSamples = length / mStepSize;
-        if (outSamples <= 0) { return 0; }
-        const Tout amplitude = static_cast<Tout>(mStepSize); // need to compensate for change in amplitude
-        (*out) = new Tout[outSamples];
-        double j = 0.0; // The position at which the sinc interpolation of the input signal should be evaluated
-        for (size_t k = 0; k < outSamples; k++, j += mStepSize) {
-          Tout interpolated = 0;
-          const size_t lower = std::max(0.0, j - (mWindowSize / 2.0)); // It's important these are done on floats and rounded the same way
-          const size_t upper = std::min(length * 1.0, j + mWindowSize / 2.0); // Or else we might not get the same number of points each time
-          for (size_t i = lower; i < upper; i++) {
-            interpolated += in[i] * sinc(j - i);
-          }
-          (*out)[k] = interpolated * amplitude;
-        }
-        return outSamples;
-      }
-
-      static Tout sinc(const double i) {
-        if (std::abs(i) < 0.00001) {
-          return 1.0;
-        }
-        return (sin(PI * i) / (PI * i));
-      }
-    };
-
     template <typename Tin, typename Tout>
     class SincResampler {
       double mStepSize = 0;
@@ -159,7 +116,7 @@ namespace soundwoofer {
 
       // Do resampling if desired
       if (0 < sampleRate && ir->sampleRate != sampleRate) {
-        WindowedSincResampler<float, float> resampler(ir->sampleRate, sampleRate);
+        Resampler resampler(ir->sampleRate, sampleRate);
         float** resampled = new float* [ir->channels];
         size_t sampleCount = 0;
         const size_t channelCount = ir->channels;
@@ -190,6 +147,7 @@ namespace soundwoofer {
         }
         return WAV_ERROR; // Means the wave is probably not there and there's not way to get it
         // TODO try looking for it by using the hash
+
       }
 
       if (ir->source == USER_SRC) {

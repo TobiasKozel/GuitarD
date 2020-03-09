@@ -419,6 +419,7 @@
     <ClInclude Include="..\thirdparty\soundwoofer\soundwooferAsync.h" />
     <ClInclude Include="..\thirdparty\soundwoofer\soundwooferFile.h" />
     <ClInclude Include="..\thirdparty\soundwoofer\soundwooferHttp.h" />
+    <ClInclude Include="..\thirdparty\soundwoofer\soundwooferResampler.h" />
     <ClInclude Include="..\thirdparty\soundwoofer\soundwooferSerialize.h" />
     <ClInclude Include="..\thirdparty\soundwoofer\soundwooferTypes.h" />
     <ClInclude Include="..\thirdparty\soundwoofer\soundwooferWave.h" />
