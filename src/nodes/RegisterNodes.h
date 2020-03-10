@@ -1,7 +1,7 @@
 #pragma once
 #include "../misc/NodeList.h"
 #include "./simple_drive/SimpleDriveNode.h"
-
+#include "./bitcrusher/BitCrusherNode.h"
 //#include "./stereo_tool/StereoToolNode.h"
 // #include "./simple_delay/SimpleDelayNode.h"
 //#include "./simple_cab/SimpleCabNode.h"
@@ -12,7 +12,7 @@
 //#include "./simple_gate/SimpleGateNode.h"
 //#include "./simple_compressor/SimpleComressorNode.h"
 //#include "./fuzz/FuzzNode.h"
-//#include "./bitcrusher/BitCrusherNode.h"
+
 //#include "./overdrive/OverDriveNode.h"
 //#include "./paramerticeq/ParametricEqNode.h"
 //#include "./phasetool/PhaseToolNode.h"

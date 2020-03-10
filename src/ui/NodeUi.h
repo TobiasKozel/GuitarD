@@ -40,6 +40,7 @@ namespace guitard {
     bool mNoScale = false;
 
     IColor mColor = {255, 128, 128, 128 };
+    char* mSvgPath = nullptr;
     ISVG mSvgBg = ISVG(nullptr);
     IText mIconFont;
     bool mDoRender = true;
@@ -147,11 +148,8 @@ namespace guitard {
       mColor = c;
     }
 
-    void setSvg(const char* path) {
-      mSvgBg = GetUI()->LoadSVG(path);
-      if (mSvgBg.IsValid()) {
-        mUseSvgBg = true;
-      }
+    void setSvg(char* path) {
+      mSvgPath = path;
     }
 
     virtual void setUpHeader() {
@@ -164,7 +162,7 @@ namespace guitard {
           m.L + Theme::Node::HEADER_BYPASS_LEFT + Theme::Node::HEADER_BYPASS_SIZE,
           m.T + Theme::Node::HEADER_BYPASS_TOP + Theme::Node::HEADER_BYPASS_SIZE
         ), [&](IControl* pCaller) {
-          ParameterCoupling* p = &this->mNode->mParameters[0];
+          ParameterCoupling* p = &this->mNode->mParameters[this->mNode->mByPassedIndex];
           const bool bypassed = static_cast<bool>(p->control->GetValue());
           p->control->SetValueFromUserInput(bypassed ? 0.0 : 1.0);
         }, u8"\uf056", u8"\uf011", mIconFont);
@@ -224,6 +222,9 @@ namespace guitard {
       }
     }
 
+    /**
+     * Function to calculate the positions of controls on a node
+     */
     virtual void placeControls() {
       for (int i = 0; i < mNode->mParameterCount; i++) {
         ParameterCoupling* p = &mNode->mParameters[i];
@@ -235,6 +236,7 @@ namespace guitard {
       Coord2D pos{ mNode->mDimensions.x * -0.5f, mNode->mDimensions.y * -0.5f };
       const Coord2D pad = { 0, 10 };
       for (int i = 0; i < mNode->mParameterCount; i++) {
+        if (i == mNode->mByPassedIndex) { continue; }
         ParameterCoupling* p = &mNode->mParameters[i];
         p->pos = pos;
         pos.x += p->dim.x + pad.x;
@@ -282,7 +284,8 @@ namespace guitard {
         }
         GetUI()->AttachControl(couple->control);
         mElements.add(couple->control);
-        if (i == 0 && mHeader.hasByPass) { couple->control->Hide(true); }
+
+        if (i == mNode->mByPassedIndex) { couple->control->Hide(true); } // Hide the bypass since it has it's own control in the header
 
         // optionally hide the lables etc
         IVectorBase* vcontrol = dynamic_cast<IVectorBase*>(couple->control);
@@ -293,12 +296,19 @@ namespace guitard {
       }
     }
 
-    virtual void setUp() {
+    void OnAttached() override {
       for (int i = 0; i < mNode->mParameterCount; i++) {
         ParameterCoupling* p = &mNode->mParameters[i];
         if (strncmp(p->name, "Bypass", 10) == 0) {
           mHeader.hasByPass = true;
           break;
+        }
+      }
+
+      if (mSvgPath != nullptr) { // Load a svg if there's one
+        mSvgBg = GetUI()->LoadSVG(mSvgPath);
+        if (mSvgBg.IsValid()) {
+          mUseSvgBg = true;
         }
       }
       mElements.add(this);

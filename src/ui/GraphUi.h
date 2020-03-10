@@ -155,7 +155,6 @@ namespace guitard {
       if (ui != nullptr) {
         mGraphics->AttachControl(ui);
         mNodeUis.add(ui);
-        ui->setUp();
       }
       return ui;
     }

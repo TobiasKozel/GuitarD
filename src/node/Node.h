@@ -14,6 +14,7 @@ namespace guitard {
    * It's the DSP part of the node
    */
   class Node {
+  protected:
     iplug::OverSampler<sample>* mOverSampler = nullptr;
   public: // Everything is public since it most of it needs to be accessible from the graph and the NodeUi
     bool mIsAutomated = false; // Flag to skip automation if there's none
@@ -21,7 +22,9 @@ namespace guitard {
     sample*** mBuffersOut = nullptr;
     bool mIsProcessed = false;
 
-    int mOverSamplingFactor = 1;
+    sample mOverSamplingFactor = 1.0;
+    sample mOverSamplingFactorCurrent = 1.0;
+    int mOverSamplingIndex = -1;
     int mSampleRate = 0;
     int mLastBlockSize = 0;
     // This size will be used to allocate the dsp buffer, the actual samples per block can be lowe
@@ -29,6 +32,7 @@ namespace guitard {
     int mChannelCount = 0;
 
     sample mByPassed = 0;
+    int mByPassedIndex = -1;
     sample mStereo = 1;
 
     int mParameterCount = 0;
@@ -137,6 +141,8 @@ namespace guitard {
         mSocketsOut[i]->disconnectAll();
         delete mSocketsOut[i];
       }
+
+      delete mOverSampler;
     }
 
     /**
@@ -157,7 +163,7 @@ namespace guitard {
      * Will return true if the node is bypassed and also do the bypassing of buffers
      */
     bool byPass() {
-      mParameters[0].update(); // The first param will always be bypass
+      mParameters[mByPassedIndex].update(); // The first param will always be bypass
       if (mByPassed < 0.5) { return false; }
       sample** in = mSocketsIn[0]->mConnectedTo[0]->mParentBuffer;
       for (int o = 0; o < mOutputCount; o++) {
@@ -247,11 +253,24 @@ namespace guitard {
       createBuffers();
     }
 
-    void setOverSampling(int fac) {
-      if (mOverSampler != nullptr && mOverSamplingFactor != fac) {
-        mOverSampler->SetOverSampling(iplug::OverSampler<sample>::RateToFactor(fac));
-        OnSamplerateChanged((mSampleRate / mOverSamplingFactor) * fac);
-        mOverSamplingFactor = fac;
+    void updateOversampling() {
+      if (mOverSampler != nullptr) {
+        mParameters[mOverSamplingIndex].update();
+        if (mOverSamplingFactor != mOverSamplingFactorCurrent && mSampleRate > 0) {
+          mOverSampler->SetOverSampling(iplug::OverSampler<sample>::RateToFactor(int(mOverSamplingFactor)));
+          OnSamplerateChanged((mSampleRate / mOverSamplingFactorCurrent) * mOverSamplingFactor);
+          mOverSamplingFactorCurrent = mOverSamplingFactor;
+        }
+      }
+    }
+
+    void enableOversampling(int channels = 0) {
+      if (channels == 0) { channels = mChannelCount; }
+      if (mOverSampler == nullptr) {
+        mOverSamplingFactorCurrent = 1;
+        mOverSamplingFactor = 1;
+        mOverSampler = new iplug::OverSampler<sample>(iplug::OverSampler<sample>::RateToFactor(1), true, channels);
+        mOverSamplingIndex = addParameter("OverSampling", &mOverSamplingFactor, 1.0, 1, 16, 1);
       }
     }
 
@@ -344,14 +363,11 @@ namespace guitard {
      * Generic function to call when the node can be bypassed
      */
     void addByPassParam() {
-      if (mParameterCount != 0) {
+      if (mByPassedIndex != -1) {
         assert(false);
-        return ;
+        return;
       }
-      mParameters[mParameterCount] = ParameterCoupling(
-        "Bypass", &mByPassed, 0.0, 0.0, 1.0, 1
-      );
-      mParameterCount++;
+      mByPassedIndex = addParameter("Bypass", &mByPassed, 0.0, 0.0, 1.0, 1);
     }
 
     /**
@@ -377,17 +393,18 @@ namespace guitard {
      * @prop max Maximum value
      * @prop Stepsize for the gui precision
      */
-    void addParameter(const char* name, sample* prop, sample def, sample min, sample max, sample stepSize) {
-      addParameter(ParameterCoupling(name, prop, def, min, max, stepSize));
+    int addParameter(const char* name, sample* prop, sample def, sample min, sample max, sample stepSize) {
+      return addParameter(ParameterCoupling(name, prop, def, min, max, stepSize));
     }
 
     /**
      * Adds a parametercoupling
      */
-    void addParameter(const ParameterCoupling p) {
-      if (mParameterCount >= MAX_NODE_PARAMETERS) { return; }
+    int addParameter(const ParameterCoupling p) {
+      if (mParameterCount >= MAX_NODE_PARAMETERS) { return -1; }
       mParameters[mParameterCount] = p;
       mParameterCount++;
+      return mParameterCount - 1;
     }
 
     void addMeter(const char* name, sample* prop, sample min, sample max) {
