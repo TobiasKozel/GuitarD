@@ -59,10 +59,10 @@
  * Cab stuff
  */
 #include "./simple_cab/SimpleCabNode.h"
+#include "./cab_lib/CabLibNode.h"
 
 
 //#include "./envelope/EnvelopeNode.h"
-//#include "./cab_lib/CabLibNode.h"
 //#include "./lfo/LfoNode.h"
 
 //registerNode(NodeInfo{
@@ -82,22 +82,4 @@
       //  "Automation",
       //  "Description",
       //  [](NodeInfo* info) { return new LfoNode(info); }
-      //});
-
-      //registerNode(NodeInfo{
-      //  "SimpleCabNode",
-      //  "Simple Cabinet",
-      //  "asd",
-      //  "Cabinets",
-      //  "Provides a few IRs and allow loading .wav IRs up to 10 seconds",
-      //  [](NodeInfo* info) { return new SimpleCabNode(info); }
-      //});
-
-      //registerNode(NodeInfo{
-      //  "CabLibNode",
-      //  "Cabinet Library",
-      //  "asd",
-      //  "Cabinets",
-      //  "Allows flipping through IRs quickly. Offline and Online (Soundwoofer) IR database",
-      //  [](NodeInfo* info) { return new CabLibNode(info); }
       //});

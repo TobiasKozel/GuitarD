@@ -1,21 +1,14 @@
 #pragma once
 
-#ifndef GUITARD_HEADLESS
+#include "../../types/pointerList.h"
 #include "IControl.h"
 #include "../../../thirdparty/soundwoofer/soundwoofer.h"
 #include "../../ui/ScrollViewControl.h"
 #include "../../ui/theme.h"
-#endif
 #include <functional>
-#include "../../types/gstructs.h"
 
 namespace guitard {
 
-  struct CabLibNodeSharedData {
-    std::function<void(soundwoofer::SWImpulseShared)> callback;
-    soundwoofer::SWImpulseShared loadedIr;
-  };
-#ifndef GUITARD_HEADLESS
   class LibIr : public IControl {
   public:
     typedef std::function<void(LibIr * c)> IrCallback;
@@ -129,7 +122,7 @@ namespace guitard {
 
 
   class CabLibPopUp : public IControl {
-    CabLibNodeSharedData* mCabShared = nullptr;
+    CabLibNode* mNode = nullptr;
     IRECT mCloseButton;
     IRECT mPathTitle;
     ScrollViewControl* mScrollView[3] = { nullptr };
@@ -180,8 +173,7 @@ namespace guitard {
 
       mSelectedIr->mSelected = true;
       mScrollView[2]->SetDirty();
-
-      mCabShared->callback(mSelectedIr->mIr);
+      mNode->loadIr(mSelectedIr->mIr);
     }
 
     void changeMic(LibMic* newMic) {
@@ -292,7 +284,7 @@ namespace guitard {
           LibRig* rig = mRigs[r];
           for (int i = 0; i < rig->mIrs.size(); i++) {
             LibIr* ir = rig->mIrs[i];
-            if (ir->mIr->file == mCabShared->loadedIr->file) { // Found the ir
+            if (ir->mIr->file == mNode->mLoadedIr->file) { // Found the ir
               for (int m = 0; m < rig->mMics.size(); m++) {
                 LibMic* mic = rig->mMics[m];
                 if (ir->mIr->micId == mic->mMic->id) { // Found the mic
@@ -310,9 +302,9 @@ namespace guitard {
     );
 
   public:
-    CabLibPopUp(CabLibNodeSharedData* shared) : IControl({}) {
+    CabLibPopUp(CabLibNode* node) : IControl({}) {
       mRenderPriority = 15;
-      mCabShared = shared;
+      mNode = node;
     }
 
     void OnInit() override {
@@ -369,5 +361,4 @@ namespace guitard {
       }
     }
   };
-#endif
 }

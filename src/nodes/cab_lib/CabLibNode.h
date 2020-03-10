@@ -1,48 +1,13 @@
 #pragma once
 #include "../../node/Node.h"
-
-#include "./CabLibPopUp.h"
+#include "../simple_cab/WrappedConvolver.h"
 
 namespace guitard {
-#ifndef GUITARD_HEADLESS
-  class CabLibNodeUi : public NodeUi {
-    // ScrollViewControl* test = nullptr;
-    CabLibNodeSharedData* mCabShared = nullptr;
-    CabLibPopUp* mPopUp = nullptr;
-    IVButtonControl* mEditButton = nullptr;
-  public:
-    CabLibNodeUi(NodeShared* param) : NodeUi(param) {
-    }
-
-    void setUpControls() override {
-      NodeUi::setUpControls();
-      mEditButton = new IVButtonControl({ mTargetRECT.L + 50, mTargetRECT.T + 130, mTargetRECT.R - 50, mTargetRECT.B - 20 },
-        [&](IControl* pCaller) {
-        SplashClickActionFunc(pCaller);
-        this->openSettings();
-      }, "Browse", DEFAULT_STYLE, true, false
-      );
-      mElements.add(mEditButton);
-      GetUI()->AttachControl(mEditButton);
-    }
-
-    void openSettings() {
-      mPopUp = new CabLibPopUp(mCabShared);
-      GetUI()->AttachControl(mPopUp);
-    }
-
-    void OnDetached() override {
-      GetUI()->RemoveControl(mEditButton);
-      GetUI()->RemoveControl(mPopUp);
-      NodeUi::OnDetached();
-    }
-
-    void registerSharedData(CabLibNodeSharedData* data) {
-      mCabShared = data;
-    }
-  };
-#endif
-
+  /**
+   * Fairly similar to SimpleCabNode
+   * Has a more complex UI in CabLibPopUp.h which uses the soundwoofer API
+   * Also does fading between 2 Convolvers to reduce popping sounds when flipping through IRs
+   */
   class CabLibNode final : public Node {
     /** Time in seconds to use for blending between convolvers */
     const sample mTransitionTime = 0.1;
@@ -56,55 +21,60 @@ namespace guitard {
 
     soundwoofer::async::Callback mCallback;
 
+
     bool mIsBlending = false;
 
-    CabLibNodeSharedData mCabShared = {
-      [&](soundwoofer::SWImpulseShared ir) { // Callback for the UI to change IRs
-        if (mCabShared.loadedIr->file != ir->file) {
-          // don't load if the Ir is the same
-          mCabShared.loadedIr = ir;
-          soundwoofer::async::ir::load(ir, mCallback, mSampleRate);
-          // soundwoofer::ir::load(ir, mSampleRate);
-        }
-      },std::make_shared<soundwoofer::SWImpulse>()
-    };
   public:
+    soundwoofer::SWImpulseShared mLoadedIr = InternalIRs[0]; // So we got some kind of ir going
     CabLibNode(NodeList::NodeInfo* info) {
-      shared.info = info;
+      mInfo = info;
       mStereo = 0;
       addByPassParam();
       addStereoParam();
-      shared.parameters[1].y = -30;
+
+      // This is the main function called when changing the IR
       mCallback = std::make_shared<soundwoofer::async::CallbackFunc>(
         [&](soundwoofer::Status s) {
-        
         mConvolver2->loadIR(
-          mCabShared.loadedIr->samples,
-          mCabShared.loadedIr->length,
-          mCabShared.loadedIr->channels
+          mLoadedIr->samples,
+          mLoadedIr->length,
+          mLoadedIr->channels
         );
         mBlendPos = 0;
         mIsBlending = true;
-        }
+      }
       );
+    }
+
+    /**
+     * Will be called from the UI to start loading an ir
+     */
+    void loadIr(soundwoofer::SWImpulseShared ir) {
+      if (mLoadedIr->file != ir->file) {
+        // don't load if the Ir is the same
+        mLoadedIr = ir;
+        soundwoofer::async::ir::load(ir, mCallback, mSampleRate);
+
+        // (*mCallback)(soundwoofer::ir::load(ir, mSampleRate)); // non async version
+      }
     }
 
 
     void serializeAdditional(nlohmann::json& serialized) override {
-      serialized["path"] = mCabShared.loadedIr->file;
-      serialized["id"] = mCabShared.loadedIr->id;
+      serialized["path"] = mLoadedIr->file;
+      serialized["id"] = mLoadedIr->id;
     }
     void deserializeAdditional(nlohmann::json& serialized) override {
       try {
         if (!serialized.contains("path")) {
           return;
         }
-        mCabShared.loadedIr = std::make_shared<soundwoofer::SWImpulse>();
-        mCabShared.loadedIr->file = serialized.at("path").get<std::string>();
+        mLoadedIr = std::make_shared<soundwoofer::SWImpulse>();
+        mLoadedIr->file = serialized.at("path").get<std::string>();
         if (serialized.contains("id")) {
-          mCabShared.loadedIr->id = serialized.at("id").get<std::string>();
+          mLoadedIr->id = serialized.at("id").get<std::string>();
         }
-        soundwoofer::async::ir::loadUnknown(&mCabShared.loadedIr, mCallback, mSampleRate);
+        soundwoofer::async::ir::loadUnknown(&mLoadedIr, mCallback, mSampleRate);
       }
       catch (...) {
         WDBGMSG("Failed to load Cab node data!\n");
@@ -113,13 +83,13 @@ namespace guitard {
 
     void createBuffers() override {
       Node::createBuffers();
-      mConvolver = new WrappedConvolver(mSampleRate, shared.maxBlockSize);
-      mConvolver2 = new WrappedConvolver(mSampleRate, shared.maxBlockSize);
+      mConvolver = new WrappedConvolver(mSampleRate, mMaxBlockSize);
+      mConvolver2 = new WrappedConvolver(mSampleRate, mMaxBlockSize);
       mBlendBuffer = new sample * [mChannelCount];
       for (int c = 0; c < mChannelCount; c++) {
-        mBlendBuffer[c] = new sample[shared.maxBlockSize];
+        mBlendBuffer[c] = new sample[mMaxBlockSize];
       }
-      soundwoofer::SWImpulseShared& ir = mCabShared.loadedIr;
+      soundwoofer::SWImpulseShared& ir = mLoadedIr;
       WDBGMSG("Load ir");
       soundwoofer::ir::load(ir, mSampleRate);
       WDBGMSG("Load done load");
@@ -139,10 +109,12 @@ namespace guitard {
       delete mConvolver2;
       mConvolver = nullptr;
       mConvolver2 = nullptr;
-      for (int c = 0; c < mChannelCount; c++) {
-        delete[] mBlendBuffer[c];
+      if (mBlendBuffer != nullptr) {
+        for (int c = 0; c < mChannelCount; c++) {
+          delete[] mBlendBuffer[c];
+        }
+        delete[] mBlendBuffer;
       }
-      delete[] mBlendBuffer;
     }
 
     /**
@@ -165,16 +137,16 @@ namespace guitard {
         outputSilence();
         return;
       }
-      shared.parameters[1].update(); // this is the stereo param
+      mParameters[1].update(); // this is the stereo param
       mConvolver->mStereo = mStereo > 0.5 ? true : false;
 
       if (mIsBlending) { // Means we'll need to take care of 2 convolvers
         mConvolver2->mStereo = mConvolver->mStereo; // Sync the stereo flag
         mConvolver->ProcessBlock(
-          shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0], nFrames
+          mSocketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0], nFrames
         );
         mConvolver2->ProcessBlock(
-          shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBlendBuffer, nFrames
+          mSocketsIn[0]->mConnectedTo[0]->mParentBuffer, mBlendBuffer, nFrames
         );
         for (int i = 0; i < nFrames; i++) {
           if (mBlendPos < 1.0) {
@@ -194,24 +166,11 @@ namespace guitard {
       }
       else { // Normal processing
         mConvolver->ProcessBlock(
-          shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0], nFrames
+          mSocketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0], nFrames
         );
       }
       mIsProcessed = true;
     }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(IGraphics* pGraphics) override {
-      shared.graphics = pGraphics;
-      CabLibNodeUi* ui = new CabLibNodeUi(&shared);
-      ui->registerSharedData(&mCabShared);
-      mUi = ui;
-      pGraphics->AttachControl(mUi);
-      mUi->setColor(IColor(255, 150, 100, 100));
-      mUi->setUp();
-      mUiReady = true;
-    }
-#endif
 
     String getLicense() override {
       String l = "\nDefault IRs provided by Soundwoofer\n";
@@ -220,4 +179,50 @@ namespace guitard {
       return l;
     }
   };
+
+  GUITARD_REGISTER_NODE(
+    CabLibNode, "Cabinet Library", "Cabinets", "Cabinet library for quick browsing through IRs", "image"
+  )
 }
+
+#ifndef GUITARD_HEADLESS
+#include "./CabLibPopUp.h"
+
+namespace guitard {
+  /**
+   * Most of the logic is in the popup
+   */
+  class CabLibNodeUi : public NodeUi {
+    CabLibPopUp* mPopUp = nullptr;
+    IVButtonControl* mEditButton = nullptr;
+  public:
+    CabLibNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) {
+    }
+
+    void setUpControls() override {
+      NodeUi::setUpControls();
+      mEditButton = new IVButtonControl({ mTargetRECT.L + 50, mTargetRECT.T + 130, mTargetRECT.R - 50, mTargetRECT.B - 20 },
+        [&](IControl* pCaller) {
+        SplashClickActionFunc(pCaller);
+        this->openSettings();
+      }, "Browse", DEFAULT_STYLE, true, false
+      );
+      mElements.add(mEditButton);
+      GetUI()->AttachControl(mEditButton);
+    }
+
+    void openSettings() {
+      mPopUp = new CabLibPopUp(dynamic_cast<CabLibNode*>(mNode));
+      GetUI()->AttachControl(mPopUp);
+    }
+
+    void OnDetached() override {
+      GetUI()->RemoveControl(mEditButton);
+      GetUI()->RemoveControl(mPopUp);
+      NodeUi::OnDetached();
+    }
+  };
+
+  GUITARD_REGISTER_NODE_UI(CabLibNode, CabLibNodeUi)
+}
+#endif

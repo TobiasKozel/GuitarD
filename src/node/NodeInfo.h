@@ -20,7 +20,7 @@ namespace guitard {
       String categoryName;
       String description;
       String image;
-      bool hidden = false;
+      bool hidden = false; // Hides the node in the sidebar, so only loading a preset can construct it
       NodeConstructor constructor;
     };
 

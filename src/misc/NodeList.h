@@ -4,7 +4,6 @@
 #include "../node/NodeInfo.h"
 
 namespace guitard {
-  class Node; // The Node isn't known at this point, we'll only need a pointer
   namespace NodeList {
     typedef std::map<String, NodeInfo> NodeMap;
     typedef std::map<String, NodeUiInfo> NodeUiMap;
@@ -94,6 +93,12 @@ namespace guitard {
  * Below lies some macro magic to define global variables of the RegisterProxy type
  * inside of the constructor of the class the registerNode function will be called
  * and the node registered. Not sure if I like this, but it works
+ * According to godbolt the Objects will be optimized away, so this seems to be an
+ * alright way to get some code to run before main()
+ */
+
+/**
+ * Turns argument into a string which allows getting the class name for serialization
  */
 #define GUITARD_STRX(a) str(a)
 #define GUITARD_STR(a) #a
