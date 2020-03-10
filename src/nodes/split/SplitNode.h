@@ -5,14 +5,11 @@ namespace guitard {
   class SplitNode final : public FaustGenerated::Split {
   public:
     SplitNode(NodeList::NodeInfo* info) {
-      shared.info = info;
+      mInfo = info;
     }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      Node::setupUi(pGrahics);
-      mUi->setColor(Theme::Categories::TOOLS);
-    }
-#endif
   };
+
+  GUITARD_REGISTER_NODE(SplitNode,
+    "Split L/R", "Signal Flow", "Splits a signal into Left/Right and Mid/Side channels", "image"
+  )
 }

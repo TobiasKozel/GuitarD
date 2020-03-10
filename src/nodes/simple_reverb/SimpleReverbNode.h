@@ -5,14 +5,12 @@ namespace guitard {
   class SimpleReverbNode final : public FaustGenerated::SimpleReverb {
   public:
     SimpleReverbNode(NodeList::NodeInfo* info) {
-      shared.info = info;
+      mInfo = info;
     }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      Node::setupUi(pGrahics);
-      mUi->setColor(Theme::Categories::SPATIAL);
-    }
-#endif
   };
+
+  GUITARD_REGISTER_NODE(SimpleReverbNode,
+    "Stereo Reverb", "Delays/Reverbs",
+    "Zika Reverb", "image"
+  )
 }

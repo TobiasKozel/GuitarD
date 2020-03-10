@@ -5,14 +5,11 @@ namespace guitard {
   class PhaseToolNode final : public FaustGenerated::PhaseTool {
   public:
     PhaseToolNode(NodeList::NodeInfo* info) {
-      shared.info = info;
+      mInfo = info;
     }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      Node::setupUi(pGrahics);
-      mUi->setColor(Theme::Categories::TOOLS);
-    }
-#endif
   };
+
+  GUITARD_REGISTER_NODE(PhaseToolNode,
+    "Phase Tool", "Tools", "Delays a signal", "image"
+  )
 }

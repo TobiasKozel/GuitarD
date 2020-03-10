@@ -5,14 +5,13 @@ namespace guitard {
   class BandSplitNode final : public FaustGenerated::BandSplit {
   public:
     BandSplitNode(NodeList::NodeInfo* info) {
-      shared.info = info;
+      mInfo = info;
     }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      Node::setupUi(pGrahics);
-      mUi->setColor(Theme::Categories::TOOLS);
-    }
-#endif
   };
+
+  GUITARD_REGISTER_NODE(BandSplitNode,
+    "Band Split", "Signal Flow",
+    "Splits up a signal into three frequency bands with Butterworth High/Lowpass filters",
+    "image"
+  )
 }

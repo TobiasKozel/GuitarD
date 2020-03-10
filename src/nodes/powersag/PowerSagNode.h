@@ -42,22 +42,13 @@ namespace guitard {
     int gcount;
   public:
     PowerSagNode(NodeList::NodeInfo* info) {
-      shared.info = info;
-      shared.width = 200;
-      shared.height = 100;
+      mInfo = info;
+      mDimensions.x = 200;
+      mDimensions.y = 100;
       addByPassParam();
 
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "Depth", &mIntensity, 0.0, 0, 1.0, 0.01
-      );
-      shared.parameters[shared.parameterCount].x = -50;
-      shared.parameterCount++;
-
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "Speed", &mDepth, 0.3, 0.0, 1.0, 0.01
-      );
-      shared.parameters[shared.parameterCount].x = 50;
-      shared.parameterCount++;
+      addParameter("Depth", &mIntensity, 0.0, 0, 1.0, 0.01, {-50, 0});
+      addParameter("Speed", &mDepth, 0.3, 0.0, 1.0, 0.01, {50, 0});
 
       for (int count = 0; count < 8999; count++) { dL[count] = 0; dR[count] = 0; }
       controlL = 0;
@@ -69,14 +60,14 @@ namespace guitard {
 
     void ProcessBlock(int nFrames) override {
       if (!inputsReady() || mIsProcessed || byPass()) { return; }
-      sample** buffer = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
+      sample** buffer = mSocketsIn[0]->mConnectedTo[0]->mParentBuffer;
       sample* in1 = buffer[0];
       sample* in2 = buffer[1];
       sample* out1 = mBuffersOut[0][0];
       sample* out2 = mBuffersOut[0][1];
 
-      shared.parameters[1].update();
-      shared.parameters[2].update();
+      mParameters[1].update();
+      mParameters[2].update();
 
       const double intensity = pow(mIntensity, 5) * 80.0;
       const double depthA = pow(mDepth, 2);
@@ -200,13 +191,6 @@ namespace guitard {
       mIsProcessed = true;
     }
 
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      Node::setupUi(pGrahics);
-      mUi->setColor(Theme::Categories::DISTORTION);
-    }
-#endif
-
     String getLicense() override {
       String l = "\nAll of the DSP Copyright(c) 2018 Chris Johnson\n";
       l += "https://github.com/airwindows\n";
@@ -215,4 +199,8 @@ namespace guitard {
       return l;
     }
   };
+  GUITARD_REGISTER_NODE(
+    PowerSagNode, "Power Sag", "Distortion",
+    "Emulates amp sag effect caused by overloading it", "image"
+  )
 }

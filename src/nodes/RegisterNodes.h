@@ -5,6 +5,7 @@
  * Tools
  */
 #include "./stereo_tool/StereoToolNode.h"
+#include "./phasetool/PhaseToolNode.h"
 
 /**
  * Distortions
@@ -14,11 +15,14 @@
 #include "./rectify/RectifyNode.h"
 #include "./fuzz/FuzzNode.h"
 #include "./overdrive/OverDriveNode.h"
+#include "./powersag/PowerSagNode.h"
+
 
 /**
  * Delay/Reverbs
  */
 #include "./simple_delay/SimpleDelayNode.h"
+#include "./simple_reverb/SimpleReverbNode.h"
 
 /**
  * Filters
@@ -31,25 +35,22 @@
  */
 #include "./combine/CombineNode.h"
 #include "./feedback/FeedbackNode.h"
+#include "./split/SplitNode.h"
+#include "./band_split/BandSplitNode.h"
 
 
 //#include "./simple_cab/SimpleCabNode.h"
 
-//#include "./simple_reverb/SimpleReverbNode.h"
 //#include "./simple_gate/SimpleGateNode.h"
 //#include "./simple_compressor/SimpleComressorNode.h"
 
 
 
 //#include "./paramerticeq/ParametricEqNode.h"
-//#include "./phasetool/PhaseToolNode.h"
 //#include "./envelope/EnvelopeNode.h"
 //#include "./autogain/AutoGainNode.h"
-//#include "./powersag/PowerSagNode.h"
 //#include "./reverse_delay/ReverseDelayNode.h"
 //#include "./cab_lib/CabLibNode.h"
-//#include "./split/SplitNode.h"
-//#include "./band_split/BandSplitNode.h"
 //#include "./flanger/FlangerNode.h"
 //#include "./autowah/AutoWahNode.h"
 //#include "./phaser/PhaseNode.h"
@@ -58,53 +59,6 @@
 //#include "./transpose/TransposeNode.h"
 
 //registerNode(NodeInfo{
-
-      //registerNode(NodeInfo{
-      //  "CombineNode",
-      //  "Combine",
-      //  "asd",
-      //  "Signal Flow",
-      //  "Will combine two signals",
-      //  [](NodeInfo* info) { return new CombineNode(info); }
-      //  });
-
-      //registerNode(NodeInfo{
-      //  "SplitNode",
-      //  "Split L/R",
-      //  "asd",
-      //  "Signal Flow",
-      //  "Splits a signal into Left/Right and Mid/Side channels",
-      //  [](NodeInfo* info) { return new SplitNode(info); }
-      //  });
-
-      //registerNode(NodeInfo{
-      //  "BandSplitNode",
-      //  "Band Split",
-      //  "asd",
-      //  "Signal Flow",
-      //  "Splits up a signal into three frequency bands with Butterworth High/Lowpass filters",
-      //  [](NodeInfo* info) { return new BandSplitNode(info); }
-      //  });
-
-
-      //registerNode(NodeInfo{
-      //  "FeedbackNode",
-      //  "Feedback",
-      //  "asd",
-      //  "Signal Flow",
-      //  "Allows feeding back an output signal into an input socket (Unstable)",
-      //  [](NodeInfo* info) { return new FeedbackNode(info); }
-      //  });
-
-      //registerNode(NodeInfo{
-      //  "PhaseToolNode",
-      //  "Phase Tool",
-      //  "asd",
-      //  "Tools",
-      //  "Delays a signal",
-      //  [](NodeInfo* info) { return new PhaseToolNode(info); }
-      //  });
-
       //registerNode(NodeInfo{
       //  "EnvelopeNode",
       //  "Envelope Automation Tool",
@@ -121,15 +75,6 @@
       //  "Automation",
       //  "Description",
       //  [](NodeInfo* info) { return new LfoNode(info); }
-      //  });
-
-      //registerNode(NodeInfo{
-      //  "SimpleDriveNode",
-      //  "Soft Clipper",
-      //  "asd",
-      //  "Distortion",
-      //  "Description",
-      //  [](NodeInfo* info) { return new SimpleDriveNode(info); }
       //  });
 
       //  registerNode(NodeInfo{
@@ -161,30 +106,12 @@
       //  });
 
       //registerNode(NodeInfo{
-      //  "PowerSagNode",
-      //  "Power Sag",
-      //  "asd",
-      //  "Distortion",
-      //  "Emulates amp sag effect",
-      //  [](NodeInfo* info) { return new PowerSagNode(info); }
-      //  });
-
-      //registerNode(NodeInfo{
       //  "SimpleDelayNode",
       //  "Basic Delay",
       //  "asd",
       //  "Delays/Reverbs",
       //  "A very simple delay effect",
       //  [](NodeInfo* info) { return new SimpleDelayNode(info); }
-      //  });
-
-      //registerNode(NodeInfo{
-      //  "SimpleReverbNode",
-      //  "Stereo Reverb",
-      //  "asd",
-      //  "Delays/Reverbs",
-      //  "Zika Reverb",
-      //  [](NodeInfo* info) { return new SimpleReverbNode(info); }
       //  });
 
       //registerNode(NodeInfo{
