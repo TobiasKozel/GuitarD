@@ -5,14 +5,9 @@ namespace guitard {
   class TransposeNode final : public FaustGenerated::Transpose {
   public:
     TransposeNode(NodeList::NodeInfo* info) {
-      shared.info = info;
+      mInfo = info;
     }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      Node::setupUi(pGrahics);
-      mUi->setColor(Theme::Categories::FILTER);
-    }
-#endif
   };
+
+  GUITARD_REGISTER_NODE(TransposeNode, "Transpose", "Filters", "Simple Transposed", "image")
 }

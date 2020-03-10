@@ -11,16 +11,14 @@ namespace guitard {
     int samplesTarget = 0;
   public:
     AutoGainNode(NodeList::NodeInfo* info) {
-      shared.info = info;
-      shared.width = 100;
-      shared.height = 100;
+      mInfo = info;
+      mDimensions.x = 100;
+      mDimensions.y = 100;
       addByPassParam();
 
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "Gain", &gain, 0.0, -90.0, 40.0, 0.1
-      );
-      shared.parameters[shared.parameterCount].type = ParameterCoupling::Gain;
-      shared.parameterCount++;
+      mParameters[
+        addParameter("Gain", &gain, 0.0, -90.0, 40.0, 0.1)
+      ].type = ParameterCoupling::Gain;
     }
 
     void startDetectMode() {
@@ -35,7 +33,7 @@ namespace guitard {
 
     void ProcessBlock(const int nFrames) override {
       if (!inputsReady() || mIsProcessed || byPass()) { return; }
-      sample** buffer = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
+      sample** buffer = mSocketsIn[0]->mConnectedTo[0]->mParentBuffer;
       double avg = 0;
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
@@ -50,7 +48,7 @@ namespace guitard {
         }
         else {
 #ifndef GUITARD_HEADLESS
-          if (shared.parameters[1].control != nullptr) {
+          if (mParameters[1].control != nullptr) {
 
           }
           else {
@@ -63,7 +61,7 @@ namespace guitard {
         }
       }
 
-      shared.parameters[1].update();
+      mParameters[1].update();
       sample val = ParameterCoupling::dbToLinear(gain);
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
@@ -72,12 +70,9 @@ namespace guitard {
       }
       mIsProcessed = true;
     }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      Node::setupUi(pGrahics);
-      mUi->setColor(Theme::Categories::DYNAMICS);
-    }
-#endif
   };
+
+  GUITARD_REGISTER_NODE(
+    AutoGainNode, "Auto Level", "Dynamics", "Intends to set the level automatically"
+  )
 }

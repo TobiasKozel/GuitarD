@@ -5,14 +5,9 @@ namespace guitard {
   class SimpleGateNode final : public FaustGenerated::SimpleGate {
   public:
     SimpleGateNode(NodeList::NodeInfo* info) {
-      shared.info = info;
+      mInfo = info;
     }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      Node::setupUi(pGrahics);
-      mUi->setColor(Theme::Categories::DYNAMICS);
-    }
-#endif
   };
+
+  GUITARD_REGISTER_NODE(SimpleGateNode, "Basic Noise Gate", "Dynamics", "A nois gate", "image")
 }

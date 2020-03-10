@@ -5,16 +5,9 @@ namespace guitard {
   class ReverseDelayNode final : public FaustGenerated::ReverseDelay {
   public:
     ReverseDelayNode(NodeList::NodeInfo* info) {
-      shared.info = info;
-      shared.width = 300;
+      mInfo = info;
+      mDimensions.x = 300;
     }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      Node::setupUi(pGrahics);
-      mUi->setColor(Theme::Categories::SPATIAL);
-    }
-#endif
 
     String getLicense() override {
       String l = "Code from https://gist.github.com/tomoyanonymous\n";
@@ -24,4 +17,9 @@ namespace guitard {
       return l;
     }
   };
+
+  GUITARD_REGISTER_NODE(
+    ReverseDelayNode, "Reverse Delay", "Delays/Reverbs",
+    "Reversed Delay effect (Kinda Clicky)", "image"
+  )
 }

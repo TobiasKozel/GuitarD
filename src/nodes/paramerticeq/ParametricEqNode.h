@@ -2,16 +2,42 @@
 #include "../../faust/generated/ParametricEq.h"
 
 namespace guitard {
+  class ParametricEqNode final : public FaustGenerated::ParametricEq {
+  public:
+    ParametricEqNode(NodeList::NodeInfo* info) {
+      mInfo = info;
+      mDimensions.x = 400;
+      mDimensions.y = 200;
+    }
+
+//#ifndef GUITARD_HEADLESS
+//    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
+//      shared.graphics = pGrahics;
+//      mUi = new ParametricEqNodeUi(&shared);
+//      mUi->setColor(Theme::Categories::FILTER);
+
+//      pGrahics->AttachControl(mUi);
+//      mUi->setUp();
+//      mUiReady = true;
+//    }
+//#endif
+  };
+
+  GUITARD_REGISTER_NODE(ParametricEqNode,
+    "Parametric Equalizer", "Filters",
+    "Probably the worst eq in the history of eqs", "image"
+  )
+
 #ifndef GUITARD_HEADLESS
   class ParametricEqNodeUi final : public NodeUi {
   public:
-    ParametricEqNodeUi(NodeShared* param) : NodeUi(param) {
+    ParametricEqNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) {
     }
 
     void setUpControls() override {
       NodeUi::setUpControls();
-      for (int i = 0; i < shared->parameterCount; i++) {
-        IControl* c = shared->parameters[i].control;
+      for (int i = 0; i < mNode->mParameterCount; i++) {
+        IControl* c = mNode->mParameters[i].control;
         if (c != nullptr) {
           ////c->Hide(true);
         }
@@ -56,49 +82,34 @@ namespace guitard {
     void OnMouseOver(float x, float y, const IMouseMod& mod) override {
       IControl::OnMouseOver(x, y, mod);
     }
-  };
-#endif
 
-  class ParametricEqNode final : public FaustGenerated::ParametricEq {
-  public:
-    ParametricEqNode(NodeList::NodeInfo* info) {
-      shared.info = info;
-      shared.width = 400;
-      shared.height = 200;
-    }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      shared.graphics = pGrahics;
-      mUi = new ParametricEqNodeUi(&shared);
-      mUi->setColor(Theme::Categories::FILTER);
+    void placeControls() override {
       const float size = 60;
       const float padX = 32;
       const float padY = 0;
-      const float left = -shared.width * 0.5 + 60;
+      const float left = -mNode->mDimensions.x * 0.5 + 60;
       const float left2 = left + size + padX;
       const float left3 = left2 + size + padX;
       const float left4 = left3 + size + padX;
-      const float top = -shared.height * 0.5 + 50;
+      const float top = -mNode->mDimensions.y * 0.5 + 50;
       const float top2 = top + padY + size;
       const float top3 = top2 + padY + size;
-      mUi->mParamsByName.at("highF")->setPos(left, top, size);
-      mUi->mParamsByName.at("highQ")->setPos(left, top2, size);
+      mParamsByName.at("highF")->setPos(left, top, size);
+      mParamsByName.at("highQ")->setPos(left, top2, size);
 
-      mUi->mParamsByName.at("f1")->setPos(left2, top, size);
-      mUi->mParamsByName.at("peak1")->setPos(left2, top2, size);
-      mUi->mParamsByName.at("q1")->setPos(left2, top3, size);
+      mParamsByName.at("f1")->setPos(left2, top, size);
+      mParamsByName.at("peak1")->setPos(left2, top2, size);
+      mParamsByName.at("q1")->setPos(left2, top3, size);
 
-      mUi->mParamsByName.at("f2")->setPos(left3, top, size);
-      mUi->mParamsByName.at("peak2")->setPos(left3, top2, size);
-      mUi->mParamsByName.at("q2")->setPos(left3, top3, size);
+      mParamsByName.at("f2")->setPos(left3, top, size);
+      mParamsByName.at("peak2")->setPos(left3, top2, size);
+      mParamsByName.at("q2")->setPos(left3, top3, size);
 
-      mUi->mParamsByName.at("lowF")->setPos(left4, top, size);
-      mUi->mParamsByName.at("lowQ")->setPos(left4, top2, size);
-      pGrahics->AttachControl(mUi);
-      mUi->setUp();
-      mUiReady = true;
+      mParamsByName.at("lowF")->setPos(left4, top, size);
+      mParamsByName.at("lowQ")->setPos(left4, top2, size);
     }
-#endif
   };
+
+  GUITARD_REGISTER_NODE_UI(ParametricEqNode, ParametricEqNodeUi)
+#endif
 }
