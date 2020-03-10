@@ -12,14 +12,11 @@ namespace guitard {
       mInfo = info;
     }
 
-    void setup(int pSamplerate, int pMaxBuffer, int pInputs = 1, int pOutputs = 1, int pChannels = 2) override {
-      Node::setup(pSamplerate, pMaxBuffer, pInputs, pOutputs, pChannels);
+    void setup(int pSamplerate, int pMaxBuffer, int, int, int) override {
+      Node::setup(pSamplerate, pMaxBuffer, 1, 1, 2);
       addByPassParam();
-      addParameter("Up", &mGainUp, 1.0, -2.0, 2.0, 0.01);
-      mParameters[mParameterCount].pos.x = -50;
-
-      addParameter("Down", &mGainDown, 1.0, -2.0, 2.0, 0.01);
-      mParameters[mParameterCount].pos.x = 50;
+      addParameter("Up", &mGainUp, 1.0, -2.0, 2.0, 0.01, {-50, 0});
+      addParameter("Down", &mGainDown, 1.0, -2.0, 2.0, 0.01, { 50, 0 });
     }
 
     void ProcessBlock(int nFrames) override {

@@ -61,25 +61,8 @@
 #include "./simple_cab/SimpleCabNode.h"
 #include "./cab_lib/CabLibNode.h"
 
-
-//#include "./envelope/EnvelopeNode.h"
-//#include "./lfo/LfoNode.h"
-
-//registerNode(NodeInfo{
-      //registerNode(NodeInfo{
-      //  "EnvelopeNode",
-      //  "Envelope Automation Tool",
-      //  "asd",
-      //  "Automation",
-      //  "Description",
-      //  [](NodeInfo* info) { return new EnvelopeNode(info); }
-      //});
-
-      //registerNode(NodeInfo{
-      //  "LfoNode",
-      //  "LFO Automation Tool",
-      //  "asd",
-      //  "Automation",
-      //  "Description",
-      //  [](NodeInfo* info) { return new LfoNode(info); }
-      //});
+/**
+ * Automation
+ */
+#include "./envelope/EnvelopeNode.h"
+#include "./lfo/LfoNode.h"

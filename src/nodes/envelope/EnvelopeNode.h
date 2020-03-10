@@ -1,96 +1,6 @@
 #pragma once
 #include "../../node/Node.h"
 namespace guitard {
-
-#ifndef GUITARD_HEADLESS
-  class EnvelopeNodeUi final : public NodeUi {
-    IVButtonControl* mPicker = nullptr;
-    bool mPickerMode = false;
-    int mHistoryIndex = 0;
-    const int mHistoryLength = PLUG_FPS * 2;
-    double mHistory[PLUG_FPS * 2] = { 0 };
-  public:
-    EnvelopeNodeUi(NodeShared* param) : NodeUi(param) {
-    }
-
-    void setUpControls() override {
-      NodeUi::setUpControls();
-      IRECT button{ mTargetRECT.L + 30, mTargetRECT.T + 240, mTargetRECT.R - 30, mTargetRECT.B - 20 };
-      mPicker = new IVButtonControl(button, [&](IControl* pCaller) {
-        this->mPickerMode = true;
-        MessageBus::fireEvent<Node*>(
-          shared->bus, MessageBus::PickAutomationTarget, shared->node
-          );
-      }, "Pick Automation Target", DEFAULT_STYLE, true);
-      mElements.add(mPicker);
-      shared->graphics->AttachControl(mPicker);
-    }
-
-    void OnDetached() override {
-      shared->graphics->RemoveControl(mPicker);
-      NodeUi::OnDetached();
-    }
-
-    void OnMouseDown(const float x, const float y, const IMouseMod& mod) override {
-      IControl::OnMouseDown(x, y, mod);
-      if (mPickerMode) {
-        mPickerMode = false;
-
-      }
-      mDirty = true;
-    }
-
-    void OnMouseOver(float x, float y, const IMouseMod& mod) override {
-      mMouseIsOver = true;
-      MessageBus::fireEvent<Node*>(
-        shared->bus, MessageBus::VisualizeAutomationTargets, shared->node
-        );
-    }
-
-    void OnMouseOut() override {
-      mMouseIsOver = false;
-      MessageBus::fireEvent<Node*>(
-        shared->bus, MessageBus::VisualizeAutomationTargets, nullptr
-        );
-    }
-
-    void Draw(IGraphics& g) override {
-      NodeUi::Draw(g);
-      if (!mDoRender) { return; }
-      mHistoryIndex++;
-      if (mHistoryIndex >= mHistoryLength) {
-        mHistoryIndex = 0;
-      }
-
-      mHistory[mHistoryIndex] = *(shared->meters[0]->value);
-
-      float x = mTargetRECT.L + 40;
-      float y = mTargetRECT.T + 100;
-      g.FillRect(iplug::igraphics::COLOR_GRAY, IRECT(x, y, x + mHistoryLength, y + 100));
-      const int stride = 1;
-      for (int i = 0; i < mHistoryLength; i += stride) {
-        int index = mHistoryIndex - i;
-        if (index < 0) {
-          index += mHistoryLength;
-        }
-        g.DrawLine(
-          iplug::igraphics::COLOR_WHITE,
-          mHistoryLength - i - stride + x,
-          y - mHistory[
-            (index - stride < 0) ? index - stride + mHistoryLength :
-              index - stride
-          ] * 5000 + 100,
-          mHistoryLength - i + x,
-              y - mHistory[index] * 5000 + 100,
-              0, 2
-        );
-      }
-      mDirty = true;
-    }
-
-  };
-#endif
-
   /**
    * This will take a signal and allow internal modulation for any other parameters
    */
@@ -104,40 +14,21 @@ namespace guitard {
     sample current = 0;
   public:
     explicit EnvelopeNode(NodeList::NodeInfo* info) {
-      shared.info = info;
-      shared.meters[shared.meterCount] = new MeterCoupling{ &avg, "Value", 0, 1 };
-      shared.meterCount++;
+      mInfo = info;
+      addMeter("Value", &avg, 0, 1);
     }
 
-    void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, int pMaxBuffer = MAX_BUFFER, int pChannles = 2, int pInputs = 1, int pOutputs = 1) override {
-      Node::setup(pBus, pSamplerate, pMaxBuffer, 2, 1, 0);
+    void setup(const int pSamplerate, int pMaxBuffer, int, int, int) override {
+      Node::setup(pSamplerate, pMaxBuffer, 1, 0, 2);
+      mDimensions.y = 300;
+
       addByPassParam();
-
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "Gain", &gain, 0.0, 0.0, 50.0, 0.01
-      );
-
-      shared.height = 300;
       const int top = -100;
-      shared.parameters[shared.parameterCount].x = -80;
-      shared.parameters[shared.parameterCount].y = top;
-      shared.parameterCount++;
-
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "Filter", &filter, 0, 0, 1, 0.01
-      );
-      shared.parameters[shared.parameterCount].type = ParameterCoupling::Frequency;
-      shared.parameters[shared.parameterCount].x = 0;
-      shared.parameters[shared.parameterCount].y = top;
-      shared.parameterCount++;
-
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "Offset", &offset, 0, -1, 1, 0.01
-      );
-      shared.parameters[shared.parameterCount].x = 80;
-      shared.parameters[shared.parameterCount].y = top;
-      shared.parameterCount++;
-
+      addParameter("Gain", &gain, 3.0, 0.0, 50.0, 0.01, { -80 , top});
+      mParameters[
+        addParameter("Filter", &filter, 0.9, 0, 1, 0.01, { 0 , top })
+      ].type = ParameterCoupling::Frequency;
+      addParameter("Offset", &offset, 0, -1, 1, 0.01, { 80 , top });
     }
 
     void cleanUp() override {
@@ -180,10 +71,10 @@ namespace guitard {
 
     void ProcessBlock(const int nFrames) override {
       if (!inputsReady() || mIsProcessed || byPass()) { return; }
-      sample** buffer = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
-      shared.parameters[1].update();
-      shared.parameters[2].update();
-      shared.parameters[3].update();
+      sample** buffer = mSocketsIn[0]->mConnectedTo[0]->mParentBuffer;
+      mParameters[1].update();
+      mParameters[2].update();
+      mParameters[3].update();
       double value = 0;
       for (int i = 0; i < nFrames; i++) {
         value += abs(buffer[0][i]);
@@ -199,16 +90,104 @@ namespace guitard {
       }
       mIsProcessed = true;
     }
+  };
+
+  GUITARD_REGISTER_NODE(EnvelopeNode,
+    "Envelope Automation Tool", "Automation",
+    "Allows automating other parameters bades on the volume of the input signal", "image"
+  )
 
 #ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      shared.graphics = pGrahics;
-      mUi = new EnvelopeNodeUi(&shared);
-      pGrahics->AttachControl(mUi);
-      mUi->setColor(Theme::Categories::AUTOMATION);
-      mUi->setUp();
-      mUiReady = true;
+  class EnvelopeNodeUi final : public NodeUi {
+    IVButtonControl* mPicker = nullptr;
+    bool mPickerMode = false;
+    int mHistoryIndex = 0;
+    const int mHistoryLength = PLUG_FPS * 2;
+    double mHistory[PLUG_FPS * 2] = { 0 };
+  public:
+    EnvelopeNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) { }
+
+    void setUpControls() override {
+      NodeUi::setUpControls();
+      IRECT button{
+        mTargetRECT.L + 30, mTargetRECT.T + 240,
+        mTargetRECT.R - 30, mTargetRECT.B - 20
+      };
+
+      mPicker = new IVButtonControl(button, [&](IControl* pCaller) {
+        this->mPickerMode = true;
+        MessageBus::fireEvent<Node*>(
+          mBus, MessageBus::PickAutomationTarget, mNode
+        );
+      }, "Pick Automation Target", DEFAULT_STYLE, true);
+
+      mElements.add(mPicker);
+      GetUI()->AttachControl(mPicker);
     }
-#endif
+
+    void OnDetached() override {
+      GetUI()->RemoveControl(mPicker);
+      NodeUi::OnDetached();
+    }
+
+    void OnMouseDown(const float x, const float y, const IMouseMod& mod) override {
+      IControl::OnMouseDown(x, y, mod);
+      if (mPickerMode) {
+        mPickerMode = false;
+
+      }
+      mDirty = true;
+    }
+
+    void OnMouseOver(float x, float y, const IMouseMod& mod) override {
+      mMouseIsOver = true;
+      MessageBus::fireEvent<Node*>(
+        mBus, MessageBus::VisualizeAutomationTargets, mNode
+      );
+    }
+
+    void OnMouseOut() override {
+      mMouseIsOver = false;
+      MessageBus::fireEvent<Node*>(
+        mBus, MessageBus::VisualizeAutomationTargets, nullptr
+      );
+    }
+
+    void Draw(IGraphics& g) override {
+      NodeUi::Draw(g);
+      if (!mDoRender) { return; }
+      mHistoryIndex++;
+      if (mHistoryIndex >= mHistoryLength) {
+        mHistoryIndex = 0;
+      }
+
+      mHistory[mHistoryIndex] = *(mNode->mMeters[0].value);
+
+      float x = mTargetRECT.L + 40;
+      float y = mTargetRECT.T + 100;
+      g.FillRect(iplug::igraphics::COLOR_GRAY, IRECT(x, y, x + mHistoryLength, y + 100));
+      const int stride = 1;
+      for (int i = 0; i < mHistoryLength; i += stride) {
+        int index = mHistoryIndex - i;
+        if (index < 0) {
+          index += mHistoryLength;
+        }
+        g.DrawLine(
+          iplug::igraphics::COLOR_WHITE,
+          mHistoryLength - i - stride + x,
+          y - mHistory[
+            (index - stride < 0) ? index - stride + mHistoryLength :
+              index - stride
+          ] * 5000 + 100,
+          mHistoryLength - i + x,
+              y - mHistory[index] * 5000 + 100,
+              0, 2
+              );
+      }
+      mDirty = true;
+    }
   };
+
+  GUITARD_REGISTER_NODE_UI(EnvelopeNode, EnvelopeNodeUi)
+#endif
 }
