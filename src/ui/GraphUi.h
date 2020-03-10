@@ -152,10 +152,11 @@ namespace guitard {
         return nullptr;
       }
       NodeUi* ui = NodeList::createNodeUi(node->mInfo->name, node, mBus);
-      if (ui != nullptr) {
-        mGraphics->AttachControl(ui);
-        mNodeUis.add(ui);
+      if (ui == nullptr) {
+        ui = new NodeUi(node, mBus);
       }
+      mGraphics->AttachControl(ui);
+      mNodeUis.add(ui);
       return ui;
     }
 

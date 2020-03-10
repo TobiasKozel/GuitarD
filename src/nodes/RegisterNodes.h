@@ -2,6 +2,8 @@
 #include "../misc/NodeList.h"
 #include "./simple_drive/SimpleDriveNode.h"
 #include "./bitcrusher/BitCrusherNode.h"
+#include "./rectify/RectifyNode.h"
+
 //#include "./stereo_tool/StereoToolNode.h"
 // #include "./simple_delay/SimpleDelayNode.h"
 //#include "./simple_cab/SimpleCabNode.h"

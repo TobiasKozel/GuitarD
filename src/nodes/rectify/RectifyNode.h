@@ -9,30 +9,24 @@ namespace guitard {
 
   public:
     RectifyNode(NodeList::NodeInfo* info) {
-      shared.info = info;
+      mInfo = info;
     }
 
-    void setup(MessageBus::Bus* pBus, int pSamplerate, int pMaxBuffer, int pChannels = 2, int pInputs = 1, int pOutputs = 1) override {
-      Node::setup(pBus, pSamplerate, pMaxBuffer, pChannels, pInputs, pOutputs);
+    void setup(int pSamplerate, int pMaxBuffer, int pInputs = 1, int pOutputs = 1, int pChannels = 2) override {
+      Node::setup(pSamplerate, pMaxBuffer, pInputs, pOutputs, pChannels);
       addByPassParam();
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "Up", &mGainUp,1.0, -2.0, 2.0, 0.01
-      );
-      shared.parameters[shared.parameterCount].x = -50;
-      shared.parameterCount++;
+      addParameter("Up", &mGainUp, 1.0, -2.0, 2.0, 0.01);
+      mParameters[mParameterCount].pos.x = -50;
 
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "Down", &mGainDown, 1.0, -2.0, 2.0, 0.01
-      );
-      shared.parameters[shared.parameterCount].x = 50;
-      shared.parameterCount++;
+      addParameter("Down", &mGainDown, 1.0, -2.0, 2.0, 0.01);
+      mParameters[mParameterCount].pos.x = 50;
     }
 
     void ProcessBlock(int nFrames) override {
       if (!inputsReady() || mIsProcessed || byPass()) { return; }
-      sample** in = shared.socketsIn[0]->mConnectedTo[0]->mParentBuffer;
-      shared.parameters[1].update();
-      shared.parameters[2].update();
+      sample** in = mSocketsIn[0]->mConnectedTo[0]->mParentBuffer;
+      mParameters[1].update();
+      mParameters[2].update();
       for (int i = 0; i < nFrames; i++) {
         for (int c = 0; c < mChannelCount; c++) {
           const sample val = in[c][i];
@@ -42,4 +36,6 @@ namespace guitard {
       mIsProcessed = true;
     }
   };
+
+  GUITARD_REGISTER_NODE(RectifyNode, "Rectifier", "Distortion", "adasdsa", "image")
 }
