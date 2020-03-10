@@ -1,6 +1,10 @@
 #pragma once
 #include "../misc/NodeList.h"
 
+/**
+ *      All nodes should be included in here to avoid any
+ *      problems with this header only stuff
+ */
 
 /**
  * Dynamics
@@ -40,7 +44,8 @@
 #include "./autowah/AutoWahNode.h"
 #include "./transpose/TransposeNode.h"
 #include "./phaser/PhaseNode.h"
-
+#include "./paramerticeq/ParametricEqNode.h"
+#include "./flanger/FlangerNode.h"
 
 /**
  * Routing
@@ -50,15 +55,14 @@
 #include "./split/SplitNode.h"
 #include "./band_split/BandSplitNode.h"
 
+/**
+ * Cab stuff
+ */
+#include "./simple_cab/SimpleCabNode.h"
 
-//#include "./simple_cab/SimpleCabNode.h"
 
-
-
-#include "./paramerticeq/ParametricEqNode.h"
 //#include "./envelope/EnvelopeNode.h"
 //#include "./cab_lib/CabLibNode.h"
-//#include "./flanger/FlangerNode.h"
 //#include "./lfo/LfoNode.h"
 
 //registerNode(NodeInfo{
@@ -69,7 +73,7 @@
       //  "Automation",
       //  "Description",
       //  [](NodeInfo* info) { return new EnvelopeNode(info); }
-      //  });
+      //});
 
       //registerNode(NodeInfo{
       //  "LfoNode",
@@ -78,7 +82,7 @@
       //  "Automation",
       //  "Description",
       //  [](NodeInfo* info) { return new LfoNode(info); }
-      //  });
+      //});
 
       //registerNode(NodeInfo{
       //  "SimpleCabNode",
@@ -87,7 +91,7 @@
       //  "Cabinets",
       //  "Provides a few IRs and allow loading .wav IRs up to 10 seconds",
       //  [](NodeInfo* info) { return new SimpleCabNode(info); }
-      //  });
+      //});
 
       //registerNode(NodeInfo{
       //  "CabLibNode",
@@ -96,13 +100,4 @@
       //  "Cabinets",
       //  "Allows flipping through IRs quickly. Offline and Online (Soundwoofer) IR database",
       //  [](NodeInfo* info) { return new CabLibNode(info); }
-      //  });
-
-      //registerNode(NodeInfo{
-      //  "FlangerNode",
-      //  "Flanger",
-      //  "asd",
-      //  "Filters",
-      //  "Description",
-      //  [](NodeInfo* info) { return new FlangerNode(info); }
-      //  });
+      //});
