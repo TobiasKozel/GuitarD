@@ -41,7 +41,7 @@ namespace guitard {
     MeterCoupling mMeters[MAX_NODE_METERS];
 
     int mInputCount = 0;
-    NodeSocket* mSocketsIn[MAX_NODE_SOCKETS] = { nullptr };
+    NodeSocket* mSocketsIn[MAX_NODE_SOCKETS] = { nullptr }; // TODO move these in the class, since the count if fixed anyways
     int mOutputCount = 0;
     NodeSocket* mSocketsOut[MAX_NODE_SOCKETS] = { nullptr };
 
@@ -393,8 +393,12 @@ namespace guitard {
      * @prop max Maximum value
      * @prop Stepsize for the gui precision
      */
-    int addParameter(const char* name, sample* prop, sample def, sample min, sample max, sample stepSize) {
-      return addParameter(ParameterCoupling(name, prop, def, min, max, stepSize));
+    int addParameter(const char* name, sample* prop, sample def, sample min, sample max, sample stepSize, Coord2D pos = {0, 0}) {
+      int index = addParameter(ParameterCoupling(name, prop, def, min, max, stepSize));
+      if (index >= 0) {
+        mParameters[index].pos = pos;
+      }
+      return index;
     }
 
     /**

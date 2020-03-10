@@ -4,14 +4,11 @@ namespace guitard {
   class OverDriveNode final : public FaustGenerated::OverDrive {
   public:
     OverDriveNode(NodeList::NodeInfo* info) {
-      shared.info = info;
+      mInfo = info;
     }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      Node::setupUi(pGrahics);
-      mUi->setColor(Theme::Categories::DISTORTION);
-    }
-#endif
   };
+
+  GUITARD_REGISTER_NODE(OverDriveNode,
+    "Overdrive", "Distortion", "I drive.", "image"
+  )
 }

@@ -1,21 +1,46 @@
 #pragma once
 #include "../misc/NodeList.h"
+
+/**
+ * Tools
+ */
+#include "./stereo_tool/StereoToolNode.h"
+
+/**
+ * Distortions
+ */
 #include "./simple_drive/SimpleDriveNode.h"
 #include "./bitcrusher/BitCrusherNode.h"
 #include "./rectify/RectifyNode.h"
+#include "./fuzz/FuzzNode.h"
+#include "./overdrive/OverDriveNode.h"
 
-//#include "./stereo_tool/StereoToolNode.h"
-// #include "./simple_delay/SimpleDelayNode.h"
+/**
+ * Delay/Reverbs
+ */
+#include "./simple_delay/SimpleDelayNode.h"
+
+/**
+ * Filters
+ */
+#include "./crybaby/CryBabyNode.h"
+
+
+/**
+ * Routing
+ */
+#include "./combine/CombineNode.h"
+#include "./feedback/FeedbackNode.h"
+
+
 //#include "./simple_cab/SimpleCabNode.h"
-//#include "./crybaby/CryBabyNode.h"
-//#include "./combine/CombineNode.h"
-//#include "./feedback/FeedbackNode.h"
+
 //#include "./simple_reverb/SimpleReverbNode.h"
 //#include "./simple_gate/SimpleGateNode.h"
 //#include "./simple_compressor/SimpleComressorNode.h"
-//#include "./fuzz/FuzzNode.h"
 
-//#include "./overdrive/OverDriveNode.h"
+
+
 //#include "./paramerticeq/ParametricEqNode.h"
 //#include "./phasetool/PhaseToolNode.h"
 //#include "./envelope/EnvelopeNode.h"
@@ -33,26 +58,7 @@
 //#include "./transpose/TransposeNode.h"
 
 //registerNode(NodeInfo{
-//  "SimpleDelayNode",
-//  "Basic Delay",
-//  "asd",
-//  "Delays/Reverbs",
-//  "A very simple delay effect",
-//  [](NodeInfo* info) { return new SimpleDelayNode(info); }
-//  });
-    //RegisterProxy<SimpleDriveNode> registerSimpleDriveNode({
-    //  "SimpleDriveNode", "Soft Clipper",
-    //  "asd", "Distortion", "Description"
-    //});
 
-      //registerNode(NodeInfo{
-      //  "SimpleDriveNode",
-      //  "Soft Clipper",
-      //  "asd",
-      //  "Distortion",
-      //  "Description",
-      //  [](NodeInfo* info) { return new SimpleDriveNode(info); }
-      //  });
       //registerNode(NodeInfo{
       //  "CombineNode",
       //  "Combine",
@@ -80,15 +86,6 @@
       //  [](NodeInfo* info) { return new BandSplitNode(info); }
       //  });
 
-
-      //registerNode(NodeInfo{
-      //  "StereoToolNode",
-      //  "Stereo Tool",
-      //  "asd",
-      //  "Tools",
-      //  "Does panning and Stereo width",
-      //  [](NodeInfo* info) { return new StereoToolNode(info); }
-      //  });
 
       //registerNode(NodeInfo{
       //  "FeedbackNode",
@@ -133,15 +130,6 @@
       //  "Distortion",
       //  "Description",
       //  [](NodeInfo* info) { return new SimpleDriveNode(info); }
-      //  });
-
-      //registerNode(NodeInfo{
-      //    "OverDriveNode",
-      //    "Overdrive",
-      //    "asd",
-      //    "Distortion",
-      //    "Description",
-      //  [](NodeInfo* info) { return new OverDriveNode(info); }
       //  });
 
       //  registerNode(NodeInfo{
@@ -224,15 +212,6 @@
       //  "Cabinets",
       //  "Allows flipping through IRs quickly. Offline and Online (Soundwoofer) IR database",
       //  [](NodeInfo* info) { return new CabLibNode(info); }
-      //  });
-
-      //registerNode(NodeInfo{
-      //  "CryBabyNode",
-      //  "Crybaby",
-      //  "asd",
-      //  "Filters",
-      //  "Description",
-      //  [](NodeInfo* info) { return new CryBabyNode(info); }
       //  });
 
       //registerNode(NodeInfo{

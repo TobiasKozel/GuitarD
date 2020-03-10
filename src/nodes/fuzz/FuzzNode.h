@@ -5,15 +5,8 @@ namespace guitard {
   class FuzzNode final : public FaustGenerated::Fuzz {
   public:
     FuzzNode(NodeList::NodeInfo* info) {
-      shared.info = info;
+      mInfo = info;
     }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      Node::setupUi(pGrahics);
-      mUi->setColor(Theme::Categories::DISTORTION);
-    }
-#endif
 
     String getLicense() override {
       String l = "\nFaust code from Guitarix, probably needs to be replaced/removed";
@@ -21,4 +14,8 @@ namespace guitard {
       return l;
     }
   };
+
+  GUITARD_REGISTER_NODE(
+    FuzzNode, "Fuzz", "Distortion", "apparently fuzz", "image"
+  )
 }

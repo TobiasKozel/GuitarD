@@ -9,18 +9,18 @@ namespace guitard {
     sample pan2 = 0;
     sample mix = 0.5;
     sample mAddMode = 0;
-    sample** emptyBuffer;
+    sample** emptyBuffer = nullptr;
   public:
     CombineNode(NodeList::NodeInfo* info) {
-      shared.info = info;
-      shared.width = 200;
-      shared.height = 150;
+      mInfo = info;
+      mDimensions.x = 200;
+      mDimensions.y = 150;
     }
 
     void ProcessBlock(const int nFrames) override {
       if (mIsProcessed) { return; }
-      NodeSocket* s1 = shared.socketsIn[0];
-      NodeSocket* s2 = shared.socketsIn[1];
+      NodeSocket* s1 = mSocketsIn[0];
+      NodeSocket* s2 = mSocketsIn[1];
 
       // see which inputs are connected
       const bool has1 = s1->getConnectedNode() != nullptr;
@@ -40,10 +40,10 @@ namespace guitard {
       sample** buffer2 = has2 ? s2->mConnectedTo[0]->mParentBuffer : emptyBuffer;
 
       // Update the params
-      shared.parameters[0].update();
-      shared.parameters[1].update();
-      shared.parameters[2].update();
-      shared.parameters[3].update();
+      mParameters[0].update();
+      mParameters[1].update();
+      mParameters[2].update();
+      mParameters[3].update();
 
       // prepare the values
       double baseMix;
@@ -79,40 +79,14 @@ namespace guitard {
       mIsProcessed = true;
     }
 
-    void setup(MessageBus::Bus* pBus, const int pSamplerate = 48000, const int pMaxBuffer = 512, int pChannles = 2, int pInputs = 1, int pOutputs = 1) override {
-      Node::setup(pBus, pSamplerate, pMaxBuffer, 2, 2, 1);
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "PAN 1", &pan1, 0.0, -1.0, 1.0, 0.01
-      );
-      shared.parameters[shared.parameterCount].x = -40;
-      shared.parameters[shared.parameterCount].y = -20;
-      shared.parameterCount++;
-
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "PAN 2", &pan2, 0.0, -1.0, 1.0, 0.01
-      );
-      shared.parameters[shared.parameterCount].x = -40;
-      shared.parameters[shared.parameterCount].y = 40;
-      shared.parameterCount++;
-
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "MIX", &mix, 0.5, 0.0, 1.0, 0.01
-      );
-      shared.parameters[shared.parameterCount].x = 40;
-      shared.parameters[shared.parameterCount].y = -20;
-      shared.parameterCount++;
-
-      shared.parameters[shared.parameterCount] = ParameterCoupling(
-        "Add mode", &mAddMode, 0, 0.0, 1.0, 1.0
-      );
-      shared.parameters[shared.parameterCount].x = 40;
-      shared.parameters[shared.parameterCount].y = 40;
-      shared.parameters[shared.parameterCount].wantsDawParameter = false;
-      shared.parameterCount++;
-
-      shared.socketsIn[0]->mY += -35;
-      shared.socketsIn[1]->mY += -25;
-      shared.socketsOut[0]->mY += -10;
+    void setup(const int pSamplerate, const int pMaxBuffer, int, int, int) override {
+      Node::setup(pSamplerate, pMaxBuffer, 2, 1, 2);
+      addParameter("PAN 1", &pan1, 0.0, -1.0, 1.0, 0.01, {-40, -20});
+      addParameter("PAN 2", &pan2, 0.0, -1.0, 1.0, 0.01, { -40, 40 });
+      addParameter("MIX", &mix, 0.5, 0.0, 1.0, 0.01, { 40, -20 });
+      mParameters[
+        addParameter("Add mode", &mAddMode, 0, 0.0, 1.0, 1.0, { 40, 40 })
+      ].wantsDawParameter = false;
     }
 
     void deleteBuffers() override {
@@ -130,18 +104,15 @@ namespace guitard {
       // this will be used to do processing on a disconnected node
       emptyBuffer = new sample * [mChannelCount];
       for (int c = 0; c < mChannelCount; c++) {
-        emptyBuffer[c] = new sample[shared.maxBlockSize];
-        for (int i = 0; i < shared.maxBlockSize; i++) {
+        emptyBuffer[c] = new sample[mMaxBlockSize];
+        for (int i = 0; i < mMaxBlockSize; i++) {
           emptyBuffer[c][i] = 0;
         }
       }
     }
-
-#ifndef GUITARD_HEADLESS
-    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-      Node::setupUi(pGrahics);
-      mUi->setColor(Theme::Categories::TOOLS);
-    }
-#endif
   };
+
+  GUITARD_REGISTER_NODE(CombineNode,
+    "Combine", "Signal Flow", "Will combine two signals", "image"
+  )
 }
