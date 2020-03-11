@@ -497,6 +497,9 @@ namespace guitard {
 
         removeAllNodes();
 
+        mInputNode->mPos.x = json["input"]["position"][0];
+        mInputNode->mPos.y = json["input"]["position"][1];
+
         if (json.contains("maxBlockSize")) {
           mMaxBlockSize = json["maxBlockSize"];
         }
@@ -596,6 +599,8 @@ namespace guitard {
         }
 
         // connect the output nodes to the global output
+        mOutputNode->mPos.x = json["output"]["position"][0];
+        mOutputNode->mPos.y = json["output"]["position"][1];
         const int outNodeIndex = json["output"]["inputs"][0][0];
         const int outConnectionIndex = json["output"]["inputs"][0][1];
         if (mNodes[outNodeIndex] != nullptr) {

@@ -193,7 +193,7 @@ namespace soundwoofer {
       // Create the output buffer
       const size_t outSamplesPadded = outSamples + mWindowSizeOut;
       float* outBufferPadded = new float[outSamplesPadded]; // Make the output buffer, also allow space for the window
-      (*outBuffer) = outBufferPadded; // Offset the buffer so the window gets cropped off
+      
 
       // Create a input buffer and copy the samples over
       const size_t inSamplesPadded = inSamples + mMaxWindowSize;
@@ -222,9 +222,10 @@ namespace soundwoofer {
         }
         lowPass(outBufferPadded, outSamplesPadded, mSampleRateOut, mSampleRateIn * 0.5);
       }
-      ::memmove(outBufferPadded, outBufferPadded + outSamplesPadded, outSamplesPadded * sizeof(float));
+      ::memmove(outBufferPadded, outBufferPadded + mWindowSizeOut, outSamples * sizeof(float));
       delete[] inBufferPadded;
-      return outSamplesPadded;
+      (*outBuffer) = outBufferPadded;
+      return outSamples;
     }
 
     static double sinc(const double i) {
