@@ -225,26 +225,31 @@ namespace guitard {
 
     /**
      * Function to calculate the positions of controls on a node
+     * Just give the parameters positons by changing pos in ParameterCoupling
+     * and this will not do anything
+     * override this if this should not happen at all
      */
     virtual void placeControls() {
       for (int i = 0; i < mNode->mParameterCount; i++) {
         ParameterCoupling* p = &mNode->mParameters[i];
         if (p->pos.x != 0 || p->pos.y != 0) {
+          // Only do this if all nodes are still at 0,0
           return;
         }
       }
-
-      Coord2D pos{ mNode->mDimensions.x * -0.5f, mNode->mDimensions.y * -0.5f };
+      const float left = mNode->mDimensions.x * -0.5f + 50;
+      const float top = mNode->mDimensions.y * -0.5f + 50;
+      Coord2D pos{ left, top };
       const Coord2D pad = { 0, 10 };
       for (int i = 0; i < mNode->mParameterCount; i++) {
         if (i == mNode->mByPassedIndex) { continue; }
         ParameterCoupling* p = &mNode->mParameters[i];
         p->pos = pos;
         pos.x += p->dim.x + pad.x;
-        //if (pos.x > mNode->mDimensions.x) {
-        //  pos.x = 0;
-        //  pos.y += p->dim.y + pad.y;
-        //}
+        if (pos.x > -left) {
+          pos.x = left;
+          pos.y += p->dim.y + pad.y;
+        }
       }
     }
 
