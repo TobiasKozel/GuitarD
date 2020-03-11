@@ -309,9 +309,6 @@
     <ClInclude Include="..\src\nodes\crybaby\CryBabyNode.h">
       <Filter>src\nodes\filters</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\nodes\feedback\FeedbackNode.h">
-      <Filter>src\nodes\tools</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\nodes\fuzz\FuzzNode.h">
       <Filter>src\nodes\distortion</Filter>
     </ClInclude>
@@ -542,6 +539,9 @@
     </ClInclude>
     <ClInclude Include="..\thirdparty\soundwoofer\soundwooferResampler.h">
       <Filter>thirdparty\soundwoofer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nodes\feedback\FeedbackNode.h">
+      <Filter>src\nodes\flow</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

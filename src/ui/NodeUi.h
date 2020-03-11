@@ -359,11 +359,7 @@ namespace guitard {
 
     virtual void DrawBg(IGraphics& g) {
       if (mUseSvgBg) {
-#ifdef IGRAPHICS_SKIA
-        g.DrawSVG(mSvgBg, mTargetRECT.GetTranslated(0, 90));
-#else
         g.DrawSVG(mSvgBg, mTargetRECT);
-#endif
       }
       else {
 #ifdef NODE_ROUNDED_CORNER

@@ -64,6 +64,7 @@
 #define ICON_FN "forkawesome-webfont.ttf"
 
 #define SVGBITTERBG_FN "bitter.svg"
+#define SVGFEEDBACK_FN "feedback.svg"
 
 //#define PNGSTEREOSHAPERBG_FN "stereoshaper_bg.png"
 //#define PNGSIMPLECABBG_FN "simplecab_bg.png"

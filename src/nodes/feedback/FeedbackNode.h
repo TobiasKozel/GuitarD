@@ -11,6 +11,7 @@ namespace guitard {
   public:
     FeedbackNode(NodeList::NodeInfo* info) {
       mInfo = info;
+      mDimensions.y = 170;
     }
 
     void setup(int pSamplerate, int pMaxBuffer, int pInputs = 1, int pOutputs = 1, int pChannels = 2) override {
@@ -86,6 +87,7 @@ namespace guitard {
     } };
   public:
     FeedbackNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) {
+      setSvg(SVGFEEDBACK_FN);
       mMaxBlockSizeEvent.subscribe(mBus, MessageBus::MaxBlockSizeEvent, [&](BlockSizeEvent* e) {
         if (e->set) {
           String label = std::to_string(mNode->mMaxBlockSize) + " Samples";
@@ -97,7 +99,7 @@ namespace guitard {
     void setUpControls() override {
       NodeUi::setUpControls();
       std::string label = std::to_string(mNode->mMaxBlockSize) + " Samples";
-      const IRECT button{ mTargetRECT.L + 50, mTargetRECT.T + 130, mTargetRECT.R - 50, mTargetRECT.B - 20 };
+      const IRECT button{ mTargetRECT.L + 50, mTargetRECT.T + 120, mTargetRECT.R - 50, mTargetRECT.B - 20 };
       mBrowseButton = new IVButtonControl(button, [&](IControl* pCaller) {
         SplashClickActionFunc(pCaller);
         float x, y;
@@ -114,7 +116,6 @@ namespace guitard {
       GetUI()->RemoveControl(mBrowseButton);
     }
   };
-
   GUITARD_REGISTER_NODE_UI(FeedbackNode, FeedbackNodeUi)
 #endif
 }

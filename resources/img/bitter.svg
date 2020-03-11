@@ -10,8 +10,8 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="84.86113mm"
-   height="76.023521mm"
+   width="320.73499"
+   height="287.33301"
    viewBox="0 0 84.86113 76.023521"
    version="1.1"
    id="svg8"
@@ -27,16 +27,18 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.979899"
-     inkscape:cx="381.54411"
-     inkscape:cy="101.27406"
-     inkscape:document-units="mm"
-     inkscape:current-layer="Layer1"
+     inkscape:cx="191.29312"
+     inkscape:cy="181.56738"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1017"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="1"
+     inkscape:pagecheckerboard="true"
+     units="px" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -53,10 +55,11 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-39.968244,-104.018)">
+     transform="translate(-39.968244,-103.88437)"
+     style="display:inline">
     <g
        id="layer1-8"
-       transform="translate(-28.726191)">
+       transform="translate(-28.726191,-0.13363492)">
       <g
          style="clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2"
          id="g3872"
