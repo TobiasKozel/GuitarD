@@ -1,8 +1,6 @@
 #pragma once
 
 #include "../../node/Node.h"
-#include "../../ui/NodeUi.h"
-
 namespace guitard {
 
   class InputNode final : public Node {
@@ -67,8 +65,11 @@ namespace guitard {
   private:
     int mInputChannels = 2;
   };
+}
 
 #ifndef GUITARD_HEADLESS
+#include "../../ui/NodeUi.h"
+namespace guitard {
   class InputNodeUi final : public NodeUi {
 
     iplug::igraphics::IText mBlocksizeText;
@@ -87,6 +88,5 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE_UI(InputNode, InputNodeUi)
-#endif
-
 }
+#endif

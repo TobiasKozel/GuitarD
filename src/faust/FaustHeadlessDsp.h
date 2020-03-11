@@ -77,9 +77,12 @@ namespace guitard {
        * The realigned output buffers the faust dsp will write to
        */
       FAUSTFLOAT** mBuffersOutAligned = nullptr;
+#ifndef GUITARD_HEADLESS
+      // TODO replace the oversampler
       iplug::OverSampler<sample>::BlockProcessFunc mOverSampleProcess = [&](sample** inputs, sample** outputs, int nFrames) {
         this->compute(nFrames, inputs, outputs);
       };
+#endif
 
     public:
       // These three will be overridden by the generated faust code
@@ -185,11 +188,14 @@ namespace guitard {
         for (int i = 1; i < mParameterCount; i++) {
           mParameters[i].update();
         }
+#ifndef GUITARD_HEADLESS
         if (mOverSampler != nullptr) {
           updateOversampling();
           mOverSampler->ProcessBlock(mSocketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOutAligned, nFrames, 2, mOverSampleProcess);
         }
-        else {
+        else
+#endif
+        {
           compute(nFrames, mSocketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOutAligned);
         }
         mIsProcessed = true;

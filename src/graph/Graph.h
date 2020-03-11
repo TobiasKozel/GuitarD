@@ -391,6 +391,8 @@ namespace guitard {
       removeNode(mNodes[index]);
     }
 
+#ifndef GUITARD_HEADLESS
+    // TODO this should be handled differently
     void serialize(WDL_String& serialized) {
       nlohmann::json json;
       serialize(json);
@@ -401,12 +403,13 @@ namespace guitard {
         assert(false); // Failed to dump json
       }
     }
+#endif
 
     void serialize(nlohmann::json& json) {
       const int NoNode = -2;
       const int InNode = -1;
       try {
-        json = { { "version", PLUG_VERSION_HEX } };
+        json = { { "version", "PLUG_VERSION_HEX" } };
         json["maxBlockSize"] = mMaxBlockSize;
 
         json["input"]["gain"] = 1.0;

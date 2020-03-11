@@ -6,7 +6,9 @@
 #include "../parameter/MeterCoupling.h"
 #include "../types/gstructs.h"
 #include "../types/types.h"
+#ifndef GUITARD_HEADLESS
 #include "Oversampler.h"
+#endif
 
 namespace guitard {
   /**
@@ -15,7 +17,9 @@ namespace guitard {
    */
   class Node {
   protected:
+#ifndef GUITARD_HEADLESS
     iplug::OverSampler<sample>* mOverSampler = nullptr;
+#endif
   public: // Everything is public since it most of it needs to be accessible from the graph and the NodeUi
     bool mIsAutomated = false; // Flag to skip automation if there's none
     // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
@@ -141,8 +145,9 @@ namespace guitard {
         mSocketsOut[i]->disconnectAll();
         delete mSocketsOut[i];
       }
-
+#ifndef GUITARD_HEADLESS
       delete mOverSampler;
+#endif
     }
 
     /**
@@ -254,24 +259,28 @@ namespace guitard {
     }
 
     void updateOversampling() {
-      if (mOverSampler != nullptr) {
-        mParameters[mOverSamplingIndex].update();
-        if (mOverSamplingFactor != mOverSamplingFactorCurrent && mSampleRate > 0) {
-          mOverSampler->SetOverSampling(iplug::OverSampler<sample>::RateToFactor(int(mOverSamplingFactor)));
-          OnSamplerateChanged((mSampleRate / mOverSamplingFactorCurrent) * mOverSamplingFactor);
-          mOverSamplingFactorCurrent = mOverSamplingFactor;
-        }
-      }
+#ifndef GUITARD_HEADLESS
+       if (mOverSampler != nullptr) {
+         mParameters[mOverSamplingIndex].update();
+         if (mOverSamplingFactor != mOverSamplingFactorCurrent && mSampleRate > 0) {
+           mOverSampler->SetOverSampling(iplug::OverSampler<sample>::RateToFactor(int(mOverSamplingFactor)));
+           OnSamplerateChanged((mSampleRate / mOverSamplingFactorCurrent) * mOverSamplingFactor);
+           mOverSamplingFactorCurrent = mOverSamplingFactor;
+         }
+       }
+#endif
     }
 
     void enableOversampling(int channels = 0) {
-      if (channels == 0) { channels = mChannelCount; }
-      if (mOverSampler == nullptr) {
-        mOverSamplingFactorCurrent = 1;
-        mOverSamplingFactor = 1;
-        mOverSampler = new iplug::OverSampler<sample>(iplug::OverSampler<sample>::RateToFactor(1), true, channels);
-        mOverSamplingIndex = addParameter("OverSampling", &mOverSamplingFactor, 1.0, 1, 16, 1);
-      }
+#ifndef GUITARD_HEADLESS
+       if (channels == 0) { channels = mChannelCount; }
+       if (mOverSampler == nullptr) {
+         mOverSamplingFactorCurrent = 1;
+         mOverSamplingFactor = 1;
+         mOverSampler = new iplug::OverSampler<sample>(iplug::OverSampler<sample>::RateToFactor(1), true, channels);
+         mOverSamplingIndex = addParameter("OverSampling", &mOverSamplingFactor, 1.0, 1, 16, 1);
+       }
+#endif
     }
 
     /**
