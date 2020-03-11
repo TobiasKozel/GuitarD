@@ -98,7 +98,7 @@ namespace guitard {
      * This prevents that from happening twice
      */
     void OnReset(const int pSampleRate, const int pChannels, const bool force = false) override {
-      if (pSampleRate != mSampleRate || pChannels != mChannelCount  || force) {
+      if (pSampleRate != mSampleRate || pChannels != mChannelCount || force) {
         deleteBuffers();
         mSampleRate = pSampleRate;
         mChannelCount = pChannels;
@@ -128,8 +128,11 @@ namespace guitard {
   GUITARD_REGISTER_NODE(
     SimpleCabNode, "Simple Cabinet", "Cabinets", "Can load in IRs up to 10 seconds", "image"
   )
+}
 
 #ifndef GUITARD_HEADLESS
+#include "../../ui/NodeUi.h"
+namespace guitard {
   class SimpleCabNodeUi : public NodeUi {
     SimpleCabNode* mCab = nullptr; // This is just a cast of the node itself
     IText mBlocksizeText;
@@ -226,5 +229,5 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE_UI(SimpleCabNode, SimpleCabNodeUi)
-#endif
 }
+#endif

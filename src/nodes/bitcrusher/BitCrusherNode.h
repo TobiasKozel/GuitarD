@@ -14,9 +14,12 @@ namespace guitard {
   GUITARD_REGISTER_NODE(BitCrusherNode,
     "Bitcrusher", "Distortion", "Bit crush effect for Lo-Fi 8 Bit sound", "image"
   )
+}
 
 #ifndef GUITARD_HEADLESS
-  class BitCrusherNodeUi : public NodeUi {
+#include "../../ui/NodeUi.h"
+namespace guitard {
+  class BitCrusherNodeUi : public guitard::NodeUi {
     public:
       BitCrusherNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) {
         setSvg(SVGBITTERBG_FN);
@@ -34,5 +37,5 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE_UI(BitCrusherNode, BitCrusherNodeUi)
-#endif
 }
+#endif

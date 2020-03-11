@@ -38,8 +38,11 @@ namespace guitard {
   GUITARD_REGISTER_NODE(SimpleDriveNode,
     "Soft Clipper", "Distortion", "Description, with a commma to test", "image"
   )
+}
 
 #ifndef GUITARD_HEADLESS
+#include "../../ui/NodeUi.h"
+namespace guitard {
   class SimpleDriveNodeUi : public NodeUi {
     double last = 0;
     const double speed = 0.2;
@@ -71,5 +74,5 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE_UI(SimpleDriveNode, SimpleDriveNodeUi)
-#endif
 }
+#endif

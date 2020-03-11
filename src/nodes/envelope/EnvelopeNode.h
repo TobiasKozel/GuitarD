@@ -24,7 +24,7 @@ namespace guitard {
 
       addByPassParam();
       const int top = -100;
-      addParameter("Gain", &gain, 3.0, 0.0, 50.0, 0.01, { -80 , top});
+      addParameter("Gain", &gain, 3.0, 0.0, 50.0, 0.01, { -80 , top });
       mParameters[
         addParameter("Filter", &filter, 0.9, 0, 1, 0.01, { 0 , top })
       ].type = ParameterCoupling::Frequency;
@@ -91,13 +91,16 @@ namespace guitard {
       mIsProcessed = true;
     }
   };
-
   GUITARD_REGISTER_NODE(EnvelopeNode,
     "Envelope Automation Tool", "Automation",
     "Allows automating other parameters bades on the volume of the input signal", "image"
   )
+}
+
 
 #ifndef GUITARD_HEADLESS
+#include "../../ui/NodeUi.h"
+namespace guitard {
   class EnvelopeNodeUi final : public NodeUi {
     IVButtonControl* mPicker = nullptr;
     bool mPickerMode = false;
@@ -187,7 +190,6 @@ namespace guitard {
       mDirty = true;
     }
   };
-
   GUITARD_REGISTER_NODE_UI(EnvelopeNode, EnvelopeNodeUi)
-#endif
 }
+#endif

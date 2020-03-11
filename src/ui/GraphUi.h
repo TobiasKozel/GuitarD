@@ -125,7 +125,7 @@ namespace guitard {
 
       const float scale = mGraph->getScale();
       mBackground->mScale = scale;
-      //mGraphics->Resize(mGraphics->Width(), mGraphics->Height(), scale); TODO move this in the plugin
+      mGraphics->Resize(mGraphics->Width(), mGraphics->Height(), scale);
       return scale;
     }
 

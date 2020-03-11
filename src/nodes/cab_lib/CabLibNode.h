@@ -186,6 +186,7 @@ namespace guitard {
 }
 
 #ifndef GUITARD_HEADLESS
+#include "../../ui/NodeUi.h"
 #include "./CabLibPopUp.h"
 
 namespace guitard {

@@ -70,8 +70,11 @@ namespace guitard {
   GUITARD_REGISTER_NODE(FeedbackNode,
     "Feedback", "Signal Flow", "Allows feeding the signal backwards, be careful!", "image"
   )
+}
 
 #ifndef GUITARD_HEADLESS
+#include "../../ui/NodeUi.h"
+namespace guitard {
   class FeedbackNodeUi : public NodeUi {
     IVButtonControl* mBrowseButton = nullptr;
     MessageBus::Subscription<BlockSizeEvent*> mMaxBlockSizeEvent;
@@ -117,5 +120,5 @@ namespace guitard {
     }
   };
   GUITARD_REGISTER_NODE_UI(FeedbackNode, FeedbackNodeUi)
-#endif
 }
+#endif

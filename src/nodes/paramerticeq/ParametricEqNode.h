@@ -27,8 +27,11 @@ namespace guitard {
     "Parametric Equalizer", "Filters",
     "Probably the worst eq in the history of eqs", "image"
   )
+}
 
 #ifndef GUITARD_HEADLESS
+#include "../../ui/NodeUi.h"
+namespace guitard {
   class ParametricEqNodeUi final : public NodeUi {
   public:
     ParametricEqNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) {
@@ -111,5 +114,5 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE_UI(ParametricEqNode, ParametricEqNodeUi)
-#endif
 }
+#endif

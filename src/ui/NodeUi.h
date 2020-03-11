@@ -18,7 +18,7 @@ namespace guitard {
 
   /**
    * This class represents a Node on the UI, it's seperate to the node itself
-   * since it will only exists as long as the UI window is open but is owned by the node
+   * since it will only exists as long as the UI window is open
    */
   class NodeUi : public IControl {
   protected:
@@ -31,24 +31,25 @@ namespace guitard {
     NodeSocketUi* mOutSocketsUi[MAX_NODE_SOCKETS] = { nullptr };
 
     NodeUiHeader mHeader;
-    PointerList<IControl> mElements;
+    PointerList<IControl> mElements; // List of all elements to make moving them around easier
 
-    ILayerPtr mCachedBgLayer; // The layer the backround is rendered on if enabled
-    bool mBgIsCached = false;
+    ILayerPtr mCachedBgLayer; // The layer the background is rendered on if enabled
+    bool mBgIsCached = false; // Whether the background needs to be rendered
     bool mUseSvgBg = false;
-    IBlend mBlend = { EBlend::Default, 1 }; // TODO this might not be needed 
-    bool mNoScale = false;
+    IBlend mBlend = { EBlend::Default, 1 }; // TODO this might not be needed
+    /**
+     * This flag signals if the OnResize was triggered from only moving the node around
+     * This way the background will stay cached and only redraw on a resize
+     */
+    bool mNoScale = false; 
 
     IColor mColor = {255, 128, 128, 128 };
     char* mSvgPath = nullptr;
     ISVG mSvgBg = ISVG(nullptr);
     IText mIconFont;
-    bool mDoRender = true;
-    bool mSelected = false;
-    bool mSelectPressed = false;
-
-
-
+    bool mDoRender = true; // TODOG might not be needed
+    bool mSelected = false; // Will draw the outline for a selection
+    bool mSelectPressed = false; // needed for the selection logic
 
   public:
     Node* mNode = nullptr; // The node which this ui controls

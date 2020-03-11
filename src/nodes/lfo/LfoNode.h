@@ -24,7 +24,7 @@ namespace guitard {
       float top = -100;
       addByPassParam();
       mParameters[
-        addParameter("Frequency", &mLfoF, 0.2, 0.001, 20.0, 0.01, {-80, top})
+        addParameter("Frequency", &mLfoF, 0.2, 0.001, 20.0, 0.01, { -80, top })
       ].type = ParameterCoupling::Frequency;
       addParameter("Noise", &mNoise, 0, 0, 1, 0.001, { 0, top });
       addParameter("Gain", &mGain, 1, -2, 2, 0.001, { 80, top });
@@ -82,7 +82,7 @@ namespace guitard {
       mParameters[1].update();
       mParameters[2].update();
       mParameters[3].update();
-      mTime += (static_cast<sample>(nFrames) / static_cast<sample>(mSampleRate)) * mLfoF * 2.0 * PI;
+      mTime += (static_cast<sample>(nFrames) / static_cast<sample>(mSampleRate))* mLfoF * 2.0 * PI;
 
       mLfoVal = sin(mTime) * 0.5 + 0.5;
       mLfoVal += sin(mTime * 1000.0) * mNoise;
@@ -96,14 +96,17 @@ namespace guitard {
       mIsProcessed = true;
     }
   };
-
   GUITARD_REGISTER_NODE(
     LfoNode, "LFO Automation Tool", "Automation",
     "Lfo to automate other parameters", "image"
   )
+}
+
 
 #ifndef GUITARD_HEADLESS
-  class LfoNodeUi final : public NodeUi {
+#include "../../ui/NodeUi.h"
+namespace guitard {
+  class LfoNodeUi final : public guitard::NodeUi {
     IVButtonControl* mPicker = nullptr;
     bool mPickerMode = false;
     int mHistoryIndex = 0;
@@ -188,6 +191,5 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE_UI(LfoNode, LfoNodeUi)
-#endif
 }
-
+#endif
