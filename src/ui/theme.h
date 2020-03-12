@@ -25,12 +25,13 @@ namespace guitard {
     namespace Gallery {
       const float ADD_CIRCLE_DIAMETER = 48.f;
       const float ADD_CIRCLE_RADIUS = ADD_CIRCLE_DIAMETER * 0.5f;
-      const IColor BACKGROUND(255, 180, 180, 180);
+      const IColor BACKGROUND(255, 50, 50, 50);
       const float BUTTON_SIZE = 18;
       const float BUTTON_ICON_SIZE = 3;
       const float PADDING = 10;
 
       const IText ELEMENT_TITLE{ 18, iplug::igraphics::COLOR_WHITE, "Roboto-Regular", EAlign::Center, EVAlign::Bottom, 0 };
+      const IColor ELEMENT_TITLE_BG(150, 30, 30, 30);
       const float ELEMENT_TITLE_HEIGHT = 28;
       const float ELEMENT_HEIGHT = 110;
       const float ELEMENT_WIDTH = 200;

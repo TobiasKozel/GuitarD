@@ -34,5 +34,5 @@ namespace guitard {
     }
   };
 
-  GUITARD_REGISTER_NODE(RectifyNode, "Rectifier", "Distortion", "adasdsa", "image")
+  GUITARD_REGISTER_NODE(RectifyNode, "Rectifier", "Distortion", "adasdsa")
 }

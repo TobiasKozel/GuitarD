@@ -181,7 +181,7 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE(
-    CabLibNode, "Cabinet Library", "Cabinets", "Cabinet library for quick browsing through IRs", "image"
+    CabLibNode, "Cabinet Library", "Cabinets", "Cabinet library for quick browsing through IRs"
   )
 }
 

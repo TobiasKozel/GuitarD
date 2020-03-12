@@ -9,7 +9,5 @@ namespace guitard {
     }
   };
 
-  GUITARD_REGISTER_NODE(SimpleComressorNode,
-    "Basic Compressor", "Dynamics", "does compressor things", "image"
-  )
+  GUITARD_REGISTER_NODE(SimpleComressorNode, "Basic Compressor", "Dynamics", "does compressor things")
 }

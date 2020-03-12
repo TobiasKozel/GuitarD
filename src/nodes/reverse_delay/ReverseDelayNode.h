@@ -20,6 +20,6 @@ namespace guitard {
 
   GUITARD_REGISTER_NODE(
     ReverseDelayNode, "Reverse Delay", "Delays/Reverbs",
-    "Reversed Delay effect (Kinda Clicky)", "image"
+    "Reversed Delay effect (Kinda Clicky)"
   )
 }

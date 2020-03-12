@@ -28,7 +28,7 @@ namespace guitard {
         // Take the name of the first node, they'll all be the same
         mName = node->categoryName.c_str();
       }
-      mElements.add(new GalleryElement(node));
+      mElements.add(new GalleryElement(node, *GetUI()));
     }
 
     void OnResize() override {

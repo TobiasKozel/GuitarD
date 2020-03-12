@@ -11,7 +11,7 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE(SimpleDelayNode,
-    "Basic Delay", "Delays/Reverbs", "A very simple delay effect", "image"
+    "Basic Delay", "Delays/Reverbs", "A very simple delay effect"
   )
 //#ifndef GUITARD_HEADLESS
 //    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

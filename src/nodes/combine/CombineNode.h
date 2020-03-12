@@ -113,6 +113,6 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE(CombineNode,
-    "Combine", "Signal Flow", "Will combine two signals", "image"
+    "Combine", "Signal Flow", "Will combine two signals"
   )
 }

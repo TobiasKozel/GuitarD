@@ -98,7 +98,7 @@ namespace guitard {
   };
   GUITARD_REGISTER_NODE(
     LfoNode, "LFO Automation Tool", "Automation",
-    "Lfo to automate other parameters", "image"
+    "Lfo to automate other parameters"
   )
 }
 

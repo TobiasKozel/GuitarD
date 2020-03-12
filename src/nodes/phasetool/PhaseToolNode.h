@@ -10,6 +10,6 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE(PhaseToolNode,
-    "Phase Tool", "Tools", "Delays a signal", "image"
+    "Phase Tool", "Tools", "Delays a signal"
   )
 }

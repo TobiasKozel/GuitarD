@@ -9,5 +9,5 @@ namespace guitard {
     }
   };
 
-  GUITARD_REGISTER_NODE(FlangerNode, "Flanger", "Filters", "Flange effect", "image")
+  GUITARD_REGISTER_NODE(FlangerNode, "Flanger", "Filters", "Flange effect")
 }

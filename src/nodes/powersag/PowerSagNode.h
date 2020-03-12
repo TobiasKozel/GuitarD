@@ -201,6 +201,6 @@ namespace guitard {
   };
   GUITARD_REGISTER_NODE(
     PowerSagNode, "Power Sag", "Distortion",
-    "Emulates amp sag effect caused by overloading it", "image"
+    "Emulates amp sag effect caused by overloading it"
   )
 }

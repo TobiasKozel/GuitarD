@@ -9,5 +9,5 @@ namespace guitard {
     }
   };
 
-  GUITARD_REGISTER_NODE(TransposeNode, "Transpose", "Filters", "Simple Transposed", "image")
+  GUITARD_REGISTER_NODE(TransposeNode, "Transpose", "Filters", "Simple Transposed")
 }

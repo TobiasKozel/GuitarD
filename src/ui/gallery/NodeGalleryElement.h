@@ -7,14 +7,21 @@ namespace guitard {
   struct GalleryElement {
     NodeList::NodeInfo* mInfo;
     IRECT mRECT;
-    IBitmap* mBitmap;
     const char* mName;
-    const char* mImage;
     bool mMouseIsOver = false;
+    bool mHasSvg = false;
+    ISVG mSvgBg = ISVG(nullptr);
+    float mAspectRatio = 1.0;
 
-    GalleryElement(NodeList::NodeInfo* node) {
+    GalleryElement(NodeList::NodeInfo* node, IGraphics& g) {
       mInfo = node;
       mName = mInfo->displayName.c_str();
+      if (!node->image.empty()) {
+        mSvgBg = g.LoadSVG(node->image.c_str());
+        if (mSvgBg.IsValid()) {
+          mHasSvg = true;
+        }
+      }
     }
 
     void Draw(IGraphics& g, IRECT* rect, int index, int columns) {
@@ -35,7 +42,17 @@ namespace guitard {
       else {
         g.DrawRect(iplug::igraphics::COLOR_WHITE, mRECT);
       }
-      g.DrawText(Theme::Gallery::ELEMENT_TITLE, mName, mRECT);
+
+      const IRECT padded = mRECT.GetPadded(-2);
+      if (mHasSvg) {
+        g.DrawSVG(mSvgBg, padded);
+      }
+      else {
+        g.FillRoundRect(Theme::Gallery::CATEGORY_TITLE_BG_HOVER, padded, 8);
+      }
+      const IRECT text = padded.GetFromBottom(20);
+      g.FillRect(Theme::Gallery::ELEMENT_TITLE_BG, text);
+      g.DrawText(Theme::Gallery::ELEMENT_TITLE, mName, text);
     }
   };
 }

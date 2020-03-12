@@ -12,7 +12,7 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE(BitCrusherNode,
-    "Bitcrusher", "Distortion", "Bit crush effect for Lo-Fi 8 Bit sound", "image"
+    "Bitcrusher", "Distortion", "Bit crush effect for Lo-Fi 8 Bit sound", SVGBITTERBG_FN
   )
 }
 

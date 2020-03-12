@@ -126,7 +126,7 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE(
-    SimpleCabNode, "Simple Cabinet", "Cabinets", "Can load in IRs up to 10 seconds", "image"
+    SimpleCabNode, "Simple Cabinet", "Cabinets", "Can load in IRs up to 10 seconds"
   )
 }
 

@@ -11,6 +11,6 @@ namespace guitard {
 
   GUITARD_REGISTER_NODE(SimpleReverbNode,
     "Stereo Reverb", "Delays/Reverbs",
-    "Zika Reverb", "image"
+    "Zika Reverb"
   )
 }

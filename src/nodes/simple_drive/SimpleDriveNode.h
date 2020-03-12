@@ -36,7 +36,7 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE(SimpleDriveNode,
-    "Soft Clipper", "Distortion", "Description, with a commma to test", "image"
+    "Soft Clipper", "Distortion", "Description, with a commma to test"
   )
 }
 

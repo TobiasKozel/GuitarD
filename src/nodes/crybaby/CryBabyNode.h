@@ -9,7 +9,5 @@ namespace guitard {
     }
   };
 
-  GUITARD_REGISTER_NODE(CryBabyNode,
-    "Crybaby", "Filters", "Wah!", "image"
-  )
+  GUITARD_REGISTER_NODE(CryBabyNode, "Crybaby", "Filters", "Wah!")
 }

@@ -15,7 +15,5 @@ namespace guitard {
     }
   };
 
-  GUITARD_REGISTER_NODE(
-    FuzzNode, "Fuzz", "Distortion", "apparently fuzz", "image"
-  )
+  GUITARD_REGISTER_NODE(FuzzNode, "Fuzz", "Distortion", "apparently fuzz")
 }

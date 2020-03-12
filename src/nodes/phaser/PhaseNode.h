@@ -11,5 +11,5 @@ namespace guitard {
     }
   };
 
-  GUITARD_REGISTER_NODE(PhaserNode, "Phaser", "Filters", "Phaser effect", "image")
+  GUITARD_REGISTER_NODE(PhaserNode, "Phaser", "Filters", "Phaser effect")
 }

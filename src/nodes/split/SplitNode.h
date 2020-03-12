@@ -10,6 +10,6 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE(SplitNode,
-    "Split L/R", "Signal Flow", "Splits a signal into Left/Right and Mid/Side channels", "image"
+    "Split L/R", "Signal Flow", "Splits a signal into Left/Right and Mid/Side channels"
   )
 }

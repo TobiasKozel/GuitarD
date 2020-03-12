@@ -52,7 +52,7 @@ namespace guitard {
       mTabs[1].name = "Presets";
     }
 
-    void OnInit() override {
+    void OnAttached() override {
       mScrollview.SetRenderPriority(12);
       mScrollview.setDoDragScroll(false);
       mScrollview.setDoScroll(false);
@@ -61,7 +61,6 @@ namespace guitard {
       GetUI()->AttachControl(&mScrollview);
       mScrollview.appendChild(&mNodeGallery);
       mScrollview.appendChild(&mPresetBrowser);
-      OnResize();
     }
 
     void OnDetached() override {
@@ -76,14 +75,18 @@ namespace guitard {
       mScrollview.Hide(!open);
       if (!mIsOpen) {
         mScrollview.OnMouseOut();
-        GetUI()->SetAllControlsDirty();
       }
+      GetUI()->SetAllControlsDirty();
     }
 
     void Draw(IGraphics& g) override {
       if (mIsOpen) {
         g.FillRect(Theme::Gallery::BACKGROUND, mRECT);
         drawTabHeaders(g);
+        // small gap between the tabs and content
+        g.FillRect(Theme::Gallery::CATEGORY_BG,
+          mRECT.GetReducedFromRight(Theme::SideBar::HEADER_WITH + Theme::Gallery::PADDING - 2).GetFromRight(2)
+        );
       }
       else {
         drawButton(g);

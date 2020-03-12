@@ -11,7 +11,6 @@ namespace guitard {
 
   GUITARD_REGISTER_NODE(BandSplitNode,
     "Band Split", "Signal Flow",
-    "Splits up a signal into three frequency bands with Butterworth High/Lowpass filters",
-    "image"
+    "Splits up a signal into three frequency bands with Butterworth High/Lowpass filters"
   )
 }

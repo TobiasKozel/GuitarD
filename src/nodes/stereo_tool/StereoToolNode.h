@@ -10,7 +10,7 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE(StereoToolNode,
-    "Stereo Tool", "Tools", "Allows panning and altering the stereo width", "image"
+    "Stereo Tool", "Tools", "Allows panning and altering the stereo width"
   )
 
 //#ifndef GUITARD_HEADLESS

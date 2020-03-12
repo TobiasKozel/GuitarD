@@ -68,7 +68,7 @@ namespace guitard {
   };
 
   GUITARD_REGISTER_NODE(FeedbackNode,
-    "Feedback", "Signal Flow", "Allows feeding the signal backwards, be careful!", "image"
+    "Feedback", "Signal Flow", "Allows feeding the signal backwards, be careful!", SVGFEEDBACK_FN
   )
 }
 

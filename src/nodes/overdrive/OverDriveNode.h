@@ -8,7 +8,5 @@ namespace guitard {
     }
   };
 
-  GUITARD_REGISTER_NODE(OverDriveNode,
-    "Overdrive", "Distortion", "I drive.", "image"
-  )
+  GUITARD_REGISTER_NODE(OverDriveNode, "Overdrive", "Distortion", "I drive.")
 }

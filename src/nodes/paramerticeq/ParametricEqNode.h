@@ -25,7 +25,7 @@ namespace guitard {
 
   GUITARD_REGISTER_NODE(ParametricEqNode,
     "Parametric Equalizer", "Filters",
-    "Probably the worst eq in the history of eqs", "image"
+    "Probably the worst eq in the history of eqs"
   )
 }
 

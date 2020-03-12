@@ -93,7 +93,7 @@ namespace guitard {
   };
   GUITARD_REGISTER_NODE(EnvelopeNode,
     "Envelope Automation Tool", "Automation",
-    "Allows automating other parameters bades on the volume of the input signal", "image"
+    "Allows automating other parameters bades on the volume of the input signal"
   )
 }
 

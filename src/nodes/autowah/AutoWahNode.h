@@ -11,5 +11,5 @@ namespace guitard {
     }
   };
 
-  GUITARD_REGISTER_NODE(AutoWahNode, "Auto Wah", "Filters", "Wah!", "image")
+  GUITARD_REGISTER_NODE(AutoWahNode, "Auto Wah", "Filters", "Wah!")
 }

@@ -9,5 +9,5 @@ namespace guitard {
     }
   };
 
-  GUITARD_REGISTER_NODE(SimpleGateNode, "Basic Noise Gate", "Dynamics", "A nois gate", "image")
+  GUITARD_REGISTER_NODE(SimpleGateNode, "Basic Noise Gate", "Dynamics", "A nois gate")
 }
