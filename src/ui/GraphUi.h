@@ -426,6 +426,17 @@ namespace guitard {
           mGraph->sortGraph();
           return true;
         }
+        if (key.VK == iplug::kVK_F1) {
+          if (mSelectedNodes.size() == 1) {
+            mGraphics->ShowMessageBox(
+              mSelectedNodes[0]->mNode->getLicense().c_str(),
+              "Node Copyright Info",
+              iplug::igraphics::kMB_OK
+            );
+            return true;
+          }
+          return false;
+        }
       }
       return false;
     }
