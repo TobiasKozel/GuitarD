@@ -32,7 +32,7 @@ namespace guitard {
       g.DrawText(Theme::Gallery::CATEGORY_TITLE, mPreset->name.c_str(), mRECT);
     }
 
-    void OnMouseUp(const float x, const float y, const IMouseMod& mod) override {
+    void OnMouseDown(const float x, const float y, const IMouseMod& mod) override {
       soundwoofer::preset::load(mPreset);
       if (!mPreset->data.empty()) {
         MessageBus::fireEvent<const char*>(
