@@ -172,7 +172,7 @@ namespace guitard {
 
     inline void processChannel(sample** in, sample** out, const int nFrames, int channel) {
 #ifdef GUITARD_CONV_SAME_TYPE
-      mConvolvers[0]->process(in[channel], out[channel], nFrames); // no conversion needed
+      mConvolvers[channel].process(in[channel], out[channel], nFrames); // no conversion needed
 #else
       for (int i = 0; i < nFrames; i++) {
         mConversionBufferIn[channel][i] = static_cast<float>(in[channel][i]);

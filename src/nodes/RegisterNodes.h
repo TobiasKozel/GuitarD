@@ -12,6 +12,7 @@
 #include "./simple_gate/SimpleGateNode.h"
 #include "./simple_compressor/SimpleComressorNode.h"
 #include "./autogain/AutoGainNode.h"
+#include "./gate_sidechain/SideChainGateNode.h"
 
 /**
  * Tools
