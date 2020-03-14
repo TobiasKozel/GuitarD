@@ -2,14 +2,10 @@
 #include <string>
 namespace guitard {
   typedef
-#ifdef GUITARD_HEADLESS
-#ifdef GUITARD_SAMPLE_TYPE
-    GUITARD_SAMPLE_TYPE
+#ifdef SAMPLE_TYPE_FLOAT
+  float
 #else
   double
-#endif
-#else
-  iplug::sample
 #endif
   sample;
 

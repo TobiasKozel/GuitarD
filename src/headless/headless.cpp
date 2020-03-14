@@ -10,6 +10,7 @@
   #define NOMINMAX
 #endif
 
+#include "../../config.h"
 #include "soundwoofer/soundwoofer.h"
 #include "../types/types.h"
 #include "../graph/Graph.h"

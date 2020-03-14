@@ -77,7 +77,7 @@ namespace guitard {
       baseValue = pDefault;
       min = pMin;
       max = pMax;
-      if (abs((max + min) * 0.5 - defaultVal) < 0.001) {
+      if (std::abs(sample((max + min) * 0.5) - defaultVal) < sample(0.001)) {
         centerAngle = 0;
       }
       stepSize = pStepSize;

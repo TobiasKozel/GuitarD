@@ -7,7 +7,15 @@
 #define PLUG_URL_STR "https://iplug2.github.io"
 #define PLUG_EMAIL_STR "spam@me.com"
 #define PLUG_COPYRIGHT_STR "Copyright 2019 me lol"
-#define PLUG_CLASS_NAME GuitarD
+
+#ifndef GUITARD_HEADLESS
+    #define PLUG_CLASS_NAME GuitarD
+    #define AUV2_ENTRY GuitarD_Entry
+    #define AUV2_ENTRY_STR "GuitarD_Entry"
+    #define AUV2_FACTORY GuitarD_Factory
+    #define AUV2_VIEW_CLASS GuitarD_View
+    #define AUV2_VIEW_CLASS_STR "GuitarD_View"
+#endif
 
 #define BUNDLE_NAME "GuitarD"
 #define BUNDLE_MFR "Tobias"
@@ -36,11 +44,7 @@
 #define PLUG_FPS 60
 #define PLUG_SHARED_RESOURCES 0
 
-#define AUV2_ENTRY GuitarD_Entry
-#define AUV2_ENTRY_STR "GuitarD_Entry"
-#define AUV2_FACTORY GuitarD_Factory
-#define AUV2_VIEW_CLASS GuitarD_View
-#define AUV2_VIEW_CLASS_STR "GuitarD_View"
+
 
 #define AAX_TYPE_IDS 'EFN1', 'EFN2'
 #define AAX_TYPE_IDS_AUDIOSUITE 'EFA1', 'EFA2'

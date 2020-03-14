@@ -77,7 +77,7 @@ namespace guitard {
       mParameters[3].update();
       double value = 0;
       for (int i = 0; i < nFrames; i++) {
-        value += abs(buffer[0][i]);
+        value += std::abs(buffer[0][i]);
       }
       value /= nFrames;
       avg = (filter * value + (1 - filter) * avg);
