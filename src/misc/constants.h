@@ -36,7 +36,7 @@
 #define DEFAULT_NODE_NAME "DEFAULTNODENAME"
 
 // Nodes will allocated this much space for their buffers, larger chunks will be split up and processed normally
-#define MAX_BUFFER 512
+#define GUITARD_MAX_BUFFER 512
 
 #define MIN_BLOCK_SIZE 64
 

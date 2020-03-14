@@ -15,7 +15,7 @@ namespace guitard {
         mPos.x = mDimensions.x * 0.3f;
       }
 #endif
-      Node::setup(48000, MAX_BUFFER, 0, 1, 2);
+      Node::setup(48000, GUITARD_MAX_BUFFER, 0, 1, 2);
     }
 
     ~InputNode() {

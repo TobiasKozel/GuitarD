@@ -72,7 +72,7 @@ namespace guitard {
 
     void createBuffers() override {
       Node::createBuffers();
-      mConvolver = new WrappedConvolver(mSampleRate, mMaxBlockSize);
+      mConvolver = new WrappedConvolver(mMaxBlockSize);
       soundwoofer::SWImpulseShared ir = mLoadedIr;
       soundwoofer::ir::load(ir, mSampleRate);
       if (mConvolver != nullptr) { // Since the lambda could return at a point were samplerate has changed we check for null

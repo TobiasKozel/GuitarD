@@ -83,8 +83,8 @@ namespace guitard {
 
     void createBuffers() override {
       Node::createBuffers();
-      mConvolver = new WrappedConvolver(mSampleRate, mMaxBlockSize);
-      mConvolver2 = new WrappedConvolver(mSampleRate, mMaxBlockSize);
+      mConvolver = new WrappedConvolver(mMaxBlockSize);
+      mConvolver2 = new WrappedConvolver(mMaxBlockSize);
       mBlendBuffer = new sample * [mChannelCount];
       for (int c = 0; c < mChannelCount; c++) {
         mBlendBuffer[c] = new sample[mMaxBlockSize];

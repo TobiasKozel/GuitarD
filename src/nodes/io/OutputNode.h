@@ -14,7 +14,7 @@ namespace guitard {
         mPos.x = PLUG_WIDTH - mDimensions.x * 0.3f;
       }
 #endif
-      Node::setup(0, MAX_BUFFER, 1, 0, 2);
+      Node::setup(0, GUITARD_MAX_BUFFER, 1, 0, 2);
     }
 
     void ProcessBlock(int) override {

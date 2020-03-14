@@ -1,21 +1,35 @@
 #pragma once
-// #define useThreadPool
-// #define useOpenMP
+//#define GUITARD_CONV_THREAD_POOL
+//#define GUITARD_CONV_OPENMP
 
-#ifdef useOpenMP
+#ifdef GUITARD_CONV_OPENMP
   #include <omp.h>
 #endif
 
 #include "../../misc/constants.h"
 #include "../../types/types.h"
+
+/**
+ * Decide which type the convolution will use
+ */
 #ifndef GUITARD_FLOAT_CONVOLUTION
   #define FFTCONVOLVER_TYPE guitard::sample
 #else
   #define FFTCONVOLVER_TYPE float
 #endif
 
+/**
+ * Figure out whether there needs to be a conversion
+ */
+#if defined(GUITARD_FLOAT_CONVOLUTION) && defined(SAMPLE_TYPE_FLOAT) || !defined(GUITARD_FLOAT_CONVOLUTION) && !defined(SAMPLE_TYPE_FLOAT)
+  #define GUITARD_CONV_SAME_TYPE
+#endif
+
 #include "../../../thirdparty/convolver/twoStageConvolver.h"
-#include "../../../thirdparty/threadpool.h"
+
+#ifdef GUITARD_CONV_THREAD_POOL
+  #include "../../../thirdparty/threadpool.h"
+#endif
 
 namespace guitard {
   /**
@@ -27,18 +41,19 @@ namespace guitard {
     const int CONV_TAIL_BLOCK_SIZE = 1024 * 4;
     static const int CHANNEL_COUNT = 2;
     int mMaxBuffer = 0;
-#ifdef useThreadPool
-    ctpl::thread_pool tPool;
+
+#ifdef GUITARD_CONV_THREAD_POOL
+    ctpl::thread_pool mPool;
 #endif
 
     /** We'll only do stereo convolution at most */
-    fftconvolver::TwoStageFFTConvolver* mConvolvers[CHANNEL_COUNT] = { nullptr };
+    fftconvolver::TwoStageFFTConvolver mConvolvers[CHANNEL_COUNT];
 
+#ifndef GUITARD_CONV_SAME_TYPE
     /** Buffers need to be converted from double to float */
-    FFTCONVOLVER_TYPE** mConversionBufferIn = nullptr;
-    FFTCONVOLVER_TYPE** mConversionBufferOut = nullptr;
-
-    int mSampleRate = 0;
+    FFTCONVOLVER_TYPE mConversionBufferIn[CHANNEL_COUNT][GUITARD_MAX_BUFFER];
+    FFTCONVOLVER_TYPE mConversionBufferOut[CHANNEL_COUNT][GUITARD_MAX_BUFFER];
+#endif
 
     bool mIRLoaded = false;
     const int maxBuffer;
@@ -56,39 +71,11 @@ namespace guitard {
     WrappedConvolver& operator= (const WrappedConvolver&) = delete;
     WrappedConvolver& operator= (WrappedConvolver&&) = delete;
 
-    explicit WrappedConvolver(const int samplerate = 48000, const int maxBuffer = 512): maxBuffer(maxBuffer) {
-#ifdef useThreadPool
-      tPool.resize(2);
+    explicit WrappedConvolver(const int maxBuffer = 512): maxBuffer(maxBuffer) {
+#ifdef GUITARD_CONV_THREAD_POOL
+      mPool.resize(1);
 #endif
-      mSampleRate = samplerate;
-      for (int c = 0; c < CHANNEL_COUNT; c++) {
-        mConvolvers[c] = new fftconvolver::TwoStageFFTConvolver();
-      }
       mMaxBuffer = maxBuffer;
-#ifdef GUITARD_FLOAT_CONVOLUTION
-      mConversionBufferIn = new FFTCONVOLVER_TYPE *[CHANNEL_COUNT];
-      mConversionBufferOut = new FFTCONVOLVER_TYPE * [CHANNEL_COUNT];
-      for (int c = 0; c < CHANNEL_COUNT; c++) {
-        mConversionBufferIn[c] = new FFTCONVOLVER_TYPE[mMaxBuffer];
-        mConversionBufferOut[c] = new FFTCONVOLVER_TYPE[mMaxBuffer];
-      }
-#endif
-    }
-
-    ~WrappedConvolver() {
-      for (int c = 0; c < CHANNEL_COUNT; c++) {
-        delete mConvolvers[c];
-      }
-#ifdef GUITARD_FLOAT_CONVOLUTION
-      for (int c = 0; c < CHANNEL_COUNT; c++) {
-        delete[] mConversionBufferIn[c];
-        delete[] mConversionBufferOut[c];
-      }
-      delete[] mConversionBufferIn;
-      delete[] mConversionBufferOut;
-      mConversionBufferIn = nullptr;
-      mConversionBufferOut = nullptr;
-#endif
     }
 
     void loadIR(float** samples, const size_t sampleCount, const size_t channelCount) {
@@ -99,18 +86,19 @@ namespace guitard {
       for (int c = 0; c < channelCount; c++) {
         if (channelCount == 1) {
           for (int ch = 0; ch < CHANNEL_COUNT; ch++) {
-            mConvolvers[ch]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, samples[0], sampleCount);
+            mConvolvers[ch].init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, samples[0], sampleCount);
           }
         }
         else if (channelCount == CHANNEL_COUNT) {
-          mConvolvers[c]->init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, samples[c], sampleCount);
+          mConvolvers[c].init(CONV_BLOCK_SIZE, CONV_TAIL_BLOCK_SIZE, samples[c], sampleCount);
         }
       }
       mIRLoaded = true;
     }
 
     void ProcessBlock(sample** in, sample** out, const int nFrames) {
-      if (!mIRLoaded) {
+
+      if (!mIRLoaded) { // kust pass the signal through
         for (int c = 0; c < CHANNEL_COUNT; c++) {
           for (int i = 0; i < nFrames; i++) {
             out[c][i] = in[c][i];
@@ -118,95 +106,53 @@ namespace guitard {
         }
         return;
       }
+      
       mIsProcessing = true;
-#ifdef GUITARD_FLOAT_CONVOLUTION
-      /**                           THREADPOOLING ATTEMPT                           */
-#ifdef useThreadPool
+
+#ifdef GUITARD_CONV_THREAD_POOL
+      /**                          THREADPOOL TEST                       */
       std::future<void> right;
-      if (mStereo) {
-        right = tPool.push([&](int id) {
-          for (int i = 0; i < nFrames; i++) {
-            mConversionBufferIn[1][i] = in[1][i];
-          }
-          mConvolvers[1]->process(mConversionBufferIn[1], mConversionBufferOut[1], nFrames);
-          for (int i = 0; i < nFrames; i++) {
-            out[1][i] = mConversionBufferOut[1][i];
-          }
+      if (mStereo) { // do the conv on the second channel
+        right = mPool.push([&](int id) {
+          processChannel(in, out, nFrames, 1);
         });
       }
 
-      for (int i = 0; i < nFrames; i++) {
-        mConversionBufferIn[0][i] = in[0][i];
-      }
-      mConvolvers[0]->process(mConversionBufferIn[0], mConversionBufferOut[0], nFrames);
-      for (int i = 0; i < nFrames; i++) {
-        out[0][i] = mConversionBufferOut[0][i];
-      }
+      processChannel(in, out, nFrames, 0);
 
-      if (!mStereo) {
-        for (int i = 0; i < nFrames; i++) {
-          out[1][i] = out[0][i];
-        }
+      if (mStereo) {
+        right.wait(); // wait for the second channel result
       }
       else {
-        right.wait();
+        ::memcpy(out[1], out[0], nFrames * sizeof(sample));
       }
-
 #else
-    /**                           OPENMP ATTEMPT                           */
-#ifdef useOpenMP
+#ifdef GUITARD_CONV_OPENMP
+      /**                             OPENMP TEST                        */
       if (mStereo) {
 #pragma omp parallel num_threads(2)
-        {
-          int id = omp_get_thread_num();
-          for (int i = 0; i < nFrames; i++) {
-            mConversionBufferIn[id][i] = in[id][i];
-          }
-          mConvolvers[id]->process(mConversionBufferIn[id], mConversionBufferOut[id], nFrames);
-          for (int i = 0; i < nFrames; i++) {
-            out[id][i] = mConversionBufferOut[id][i];
-          }
-        }
-      }
-#else
-    /**                           REFERENCE                           */
-      for (int i = 0; i < nFrames; i++) {
-        mConversionBufferIn[0][i] = static_cast<float>(in[0][i]);
-      }
-      mConvolvers[0]->process(mConversionBufferIn[0], mConversionBufferOut[0], nFrames);
-      for (int i = 0; i < nFrames; i++) {
-        out[0][i] = mConversionBufferOut[0][i];
-      }
-
-      if (!mStereo) {
-        for (int i = 0; i < nFrames; i++) {
-          out[1][i] = out[0][i];
+#pragma omp for
+        for (int n = 0; n < 2; ++n) {
+          processChannel(in, out, nFrames, n);
         }
       }
       else {
-        for (int i = 0; i < nFrames; i++) {
-          mConversionBufferIn[1][i] = static_cast<float>(in[1][i]);
-        }
-        mConvolvers[1]->process(mConversionBufferIn[1], mConversionBufferOut[1], nFrames);
-        for (int i = 0; i < nFrames; i++) {
-          out[1][i] = mConversionBufferOut[1][i];
-        }
+        processChannel(in, out, nFrames, 0);
+        ::memcpy(out[1], out[0], nFrames * sizeof(sample));
       }
-#endif
-
-#endif
-
 #else
-      convolver.process(buffer[0], outputs[0][0], nFrames);
-      if (mStereo) {
-        convolver2.process(buffer[1], outputs[0][1], nFrames);
-      }
-      else {
-        for (int i = 0; i < nFrames; i++) {
-          outputs[0][1][i] = outputs[0][0][i];
-        }
+      /**                           REFERENCE                           */
+      processChannel(in, out, nFrames, 0);
+
+      if (!mStereo) { // mono needs the other channel filled too
+        ::memcpy(out[1], out[0], nFrames * sizeof(sample));
+    }
+      else { // else do the second channel as well
+        processChannel(in, out, nFrames, 1);
       }
 #endif
+#endif
+
       mIsProcessing = false;
     }
 
@@ -220,6 +166,22 @@ namespace guitard {
       l += "https://github.com/mackron/dr_libs/blob/master/dr_wav.h\n";
       l += "Public domain";
       return l;
+    }
+
+  private:
+
+    inline void processChannel(sample** in, sample** out, const int nFrames, int channel) {
+#ifdef GUITARD_CONV_SAME_TYPE
+      mConvolvers[0]->process(in[channel], out[channel], nFrames); // no conversion needed
+#else
+      for (int i = 0; i < nFrames; i++) {
+        mConversionBufferIn[channel][i] = static_cast<float>(in[channel][i]);
+      }
+      mConvolvers[channel].process(mConversionBufferIn[channel], mConversionBufferOut[channel], nFrames);
+      for (int i = 0; i < nFrames; i++) {
+        out[channel][i] = mConversionBufferOut[channel][i];
+      }
+#endif
     }
   };
 }

@@ -56,7 +56,7 @@ namespace guitard {
     /**
      * The max blockSize which can be used to minimize round trip delay when having cycles in the graph
      */
-    int mMaxBlockSize = MAX_BUFFER;
+    int mMaxBlockSize = GUITARD_MAX_BUFFER;
 
 
     /**
@@ -164,7 +164,7 @@ namespace guitard {
      * Will set the max blocksize to change roundtrip delay inside the graph
      */
     void setBlockSize(const int size) {
-      if (size == mMaxBlockSize || size > MAX_BUFFER) { return; }
+      if (size == mMaxBlockSize || size > GUITARD_MAX_BUFFER) { return; }
       lockAudioThread();
       mMaxBlockSize = size;
       for (int i = 0; i < mNodes.size(); i++) {

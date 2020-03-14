@@ -96,7 +96,7 @@ namespace guitard {
       virtual void metadata(Meta* m) = 0;
 
       void setup(
-          const int pSamplerate, const int pMaxBuffer = MAX_BUFFER,
+          const int pSamplerate, const int pMaxBuffer = GUITARD_MAX_BUFFER,
           int pInputs = 1, int pOutputs = 1, const int pChannels = 2
       ) override {
 
