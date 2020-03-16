@@ -45,7 +45,7 @@ namespace guitard {
       bool gotAllParams = true;
       String prefix = node->mInfo->displayName;
       for (int i = 0; i < node->mParameterCount; i++) {
-        if (!claimParameter(&node->mParameters[i], prefix.c_str())) {
+        if (node->mParameters[i].wantsDawParameter && !claimParameter(&node->mParameters[i], prefix.c_str())) {
           /**
            * this means the manager has no free parameters left and the control cannot be automated from the daw
            */
@@ -81,18 +81,14 @@ namespace guitard {
           }
         }
       }
-      if (MAX_DAW_PARAMS <= i || mParametersClaimed[i] || i == kNoParameter || !couple->wantsDawParameter) {
+      if (MAX_DAW_PARAMS <= i || mParametersClaimed[i] || i == kNoParameter) {
         // This is bad and means a preset will not load correctly
 #ifndef GUITARD_HEADLESS
         couple->setParam(nullptr);
 #endif
         couple->parameterIdx = kNoParameter;
-        if (couple->wantsDawParameter) {
-          // Couldn't get a param but wanted one
-          WDBGMSG("Could not claim a prefered DAW parameter!\n");
-          return false;
-        }
-        return true;
+        WDBGMSG("Could not claim a prefered DAW parameter!\n");
+        return false;
       }
       mParametersLeft--;
       mParametersClaimed[i] = true;

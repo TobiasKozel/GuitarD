@@ -22,6 +22,11 @@ namespace guitard {
     PointerList<Node> mNodes;
 
     /**
+     * List used to process the nodes in the right order
+     */
+    PointerList<Node> mProcessList;
+
+    /**
      * Mutex to keep changes to the graph like adding/removing or rerouting from crashing
      */
     Mutex mAudioMutex;
@@ -93,16 +98,17 @@ namespace guitard {
     }
 
     void lockAudioThread() {
-      if (mPauseAudio == 0) {
-        mAudioMutex.lock();
-      }
       mPauseAudio++;
+      while (mIsProcessing) { } // wait till the audio thread is done
+      //if (mPauseAudio == 0) {
+      //  mAudioMutex.lock();
+      //}
     }
 
     void unlockAudioThread() {
-      if (mPauseAudio == 1) {
-        mAudioMutex.unlock();
-      }
+      //if (mPauseAudio == 1) {
+      //  mAudioMutex.unlock();
+      //}
       mPauseAudio--;
     }
 
@@ -204,8 +210,7 @@ namespace guitard {
         }
       }
 
-      const int nodeCount = mNodes.size();
-      const int maxAttempts = 10;
+      const int nodeCount = mProcessList.size();
 
       if (mPauseAudio > 0) {
         /**
@@ -219,41 +224,26 @@ namespace guitard {
         return;
       }
 
-      const auto start = std::chrono::high_resolution_clock::now();
-      LockGuard lock(mAudioMutex); // TODOG might not need a lock if the gui has to wait
+      // LockGuard lock(mAudioMutex); // TODOG might not need a lock if the gui has to wait
       mIsProcessing = true;
+
       mInputNode->CopyIn(in, nFrames);
+
       for (int n = 0; n < nodeCount; n++) {
-        mNodes[n]->BlockStart();
+        mProcessList[n]->BlockStart();
       }
       mOutputNode->BlockStart();
-      // The List is pre sorted so the attempts are only needed to catch circular dependencies and other edge cases
-      int attempts = 0;
-      while (!mOutputNode->mIsProcessed && attempts < maxAttempts) {
-        for (int n = 0; n < nodeCount; n++) {
-          mNodes[n]->ProcessBlock(nFrames);
-        }
-        mOutputNode->ProcessBlock(nFrames);
-        attempts++;
-      }
 
-      // This extra iteration makes sure the feedback loops get data from their previous nodes
-      if (attempts < maxAttempts) {
-        for (int n = 0; n < nodeCount; n++) {
-          mNodes[n]->ProcessBlock(nFrames);
-        }
-        mStats.valid = true;
+      for (int n = 0; n < nodeCount; n++) {
+        mNodes[n]->ProcessBlock(nFrames);
       }
-      else {
-        mStats.valid = false;
-      }
+      mOutputNode->ProcessBlock(nFrames);
+
+      mStats.valid = mOutputNode->mIsProcessed;
 
       mOutputNode->CopyOut(out, nFrames);
+
       mIsProcessing = false;
-      const auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(
-        std::chrono::high_resolution_clock::now() - start
-        );
-      mStats.executionTime = duration.count();
     }
 
     /**
@@ -282,11 +272,9 @@ namespace guitard {
         node->connectInput(pInput->mSocketsOut[outputIndex], inputIndex);
       }
 
-      lockAudioThread();
-      // Allocating the node is thread safe, but not the node list itself
       mNodes.add(node);
+
       sortGraph();
-      unlockAudioThread();
     }
 
     /**
@@ -371,19 +359,22 @@ namespace guitard {
       if (reconnect) {
         byPassConnection(node);
       }
+      sortGraph();
+
+      // unlockAudioThread(); TODOG we should be able to unlock here
+
+      mNodes.remove(node);
+      if (mNodes.find(node) != -1) {
+        assert(false);
+      }
 
       if (mParamManager != nullptr) {
         mParamManager->releaseNode(node);
       }
       
       node->cleanUp();
-      mNodes.remove(node);
-      if (mNodes.find(node) != -1) {
-        assert(false);
-      }
+
       delete node;
-      sortGraph();
-      // mMaxBlockSize = hasFeedBackNode() ? MIN_BLOCK_SIZE : MAX_BUFFER;
       unlockAudioThread();
     }
 
@@ -449,10 +440,16 @@ namespace guitard {
             int automation = mNodes.find(para->automationDependency);
             json["nodes"][i]["parameters"][p] = {
               { "name", name },
-              { "idx", idx},
-              { "value", val },
-              { "automation", automation }
+              { "value", val }
             };
+            if (automation >= 0) {
+              // Only write the automation value in here if there's one
+              json["nodes"][i]["parameters"][p]["automation"] = automation;
+          }
+            if (idx >= 0) {
+              // only write an parameter index if there was one assigned
+              json["nodes"][i]["parameters"][p]["idx"] = idx;
+          }
           }
           node->serializeAdditional(json["nodes"][i]);
         }
@@ -530,7 +527,13 @@ namespace guitard {
               ParameterCoupling* para = &node->mParameters[i];
               if (para->name == name) {
                 found++;
+                if (param.contains("idk")) {
                 para->parameterIdx = param["idx"];
+                  para->wantsDawParameter = true;
+                }
+                else {
+                  para->wantsDawParameter = false;
+                }
                 sample val = param["value"];
                 para->setValue(val);
               }
@@ -585,10 +588,9 @@ namespace guitard {
             for (int i = 0; i < node->mParameterCount; i++) {
               ParameterCoupling* para = &node->mParameters[i];
               if (para->name == name) {
-                // TODOG no need to check on up to date presets
                 if (param.contains("automation")) {
                   const int automationIndex = param.at("automation");
-                  if (automationIndex != -1) {
+                  if (automationIndex >= 0) {
                     node->attachAutomation(mNodes[automationIndex], i);
                   }
                 }
@@ -647,19 +649,18 @@ namespace guitard {
 
     void sortGraph() {
       lockAudioThread();
-      PointerList<Node> sorted;
+      mProcessList.clear();
       for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
         // Put in the nodes which directly follow the input node
         NodeSocket* con = mInputNode->mSocketsOut[0]->mConnectedTo[i];
         if (con != nullptr) {
-          sorted.add(con->mParentNode);
+          mProcessList.add(con->mParentNode);
         }
       }
 
-      // Arbitrary depth
-      for (int tries = 0; tries < 100; tries++) {
-        for (int i = 0; i < sorted.size(); i++) {
-          Node* node = sorted[i];
+      for (int tries = 0; tries < mNodes.size(); tries++) {
+        for (int i = 0; i < mProcessList.size(); i++) {
+          Node* node = mProcessList[i];
           for (int out = 0; out < node->mOutputCount; out++) {
             NodeSocket* outSocket = node->mSocketsOut[out];
             if (outSocket == nullptr) { continue; }
@@ -668,33 +669,17 @@ namespace guitard {
               if (nextSocket == nullptr) { continue; }
               Node* nextNode = nextSocket->mParentNode;
               // Don't want to add duplicates or the output node
-              if (sorted.find(nextNode) != -1) { continue; }
-              sorted.add(nextNode);
+              if (mProcessList.find(nextNode) != -1) { continue; }
+              mProcessList.add(nextNode);
             }
           }
         }
       }
 
-      // Add in all the nodes which might not be connected or were missed because of the depth limit
-      for (int i = 0; i < mNodes.size(); i++) {
-        Node* nextNode = mNodes[i];
-        if (sorted.find(nextNode) != -1) { continue; }
-        sorted.add(nextNode);
+      if (mProcessList.find(mOutputNode) == -1) {
+        assert(false);
       }
-
-      mNodes.clear();
-      for (int i = 0; i < sorted.size(); i++) {
-        Node* n = sorted[i];
-        if (n == mOutputNode) { continue; }
-        bool dupli = false;
-        for (int j = 0; j < mNodes.size(); j++) {
-          if (mNodes[j] == n) {
-            dupli = true;
-          }
-        }
-        if (dupli) { continue; } // TODOG there shouldn't be any dupes, but it happens for some reason
-        mNodes.add(n);
-      }
+      mProcessList.remove(mOutputNode);
       unlockAudioThread();
     }
   };

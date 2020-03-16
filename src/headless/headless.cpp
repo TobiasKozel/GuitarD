@@ -3,9 +3,8 @@
  * There's no GUI and all of the IPlug components are replaced
  */
 #define GUITARD_HEADLESS
-#define WDL_RESAMPLE_TYPE float
-#define FLOATCONV
-
+#define SAMPLE_TYPE_FLOAT
+// #define FFTCONVOLVER_USE_SSE
 #ifdef _MSC_VER
   #define NOMINMAX
 #endif
@@ -86,10 +85,10 @@ namespace guitard {
 }
 
 int main() {
-  const size_t samplesLeftTotal = 48000 * 20;
+  const int samplerate = 48000;
+  const size_t samplesLeftTotal = samplerate * 20;
   int sizes[] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 };
   const int channels = 2;
-  const int samplerate = 48000;
   guitard::sample* in[channels];
   guitard::sample* out[channels];
   for (int i = 0; i < channels; i++) {
