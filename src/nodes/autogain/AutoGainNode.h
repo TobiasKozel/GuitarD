@@ -32,8 +32,8 @@ namespace guitard {
     }
 
     void ProcessBlock(const int nFrames) override {
-      if (!inputsReady() || mIsProcessed || byPass()) { return; }
-      sample** buffer = mSocketsIn[0]->mConnectedTo[0]->mParentBuffer;
+      if (byPass()) { return; }
+      sample** buffer = mSocketsIn[0].mBuffer;
       double avg = 0;
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
@@ -65,10 +65,9 @@ namespace guitard {
       sample val = ParameterCoupling::dbToLinear(gain);
       for (int c = 0; c < mChannelCount; c++) {
         for (int i = 0; i < nFrames; i++) {
-          mBuffersOut[0][c][i] = buffer[c][i] * val;
+          mSocketsOut[0].mBuffer[c][i] = buffer[c][i] * val;
         }
       }
-      mIsProcessed = true;
     }
   };
 

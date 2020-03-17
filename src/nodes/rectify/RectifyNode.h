@@ -20,17 +20,16 @@ namespace guitard {
     }
 
     void ProcessBlock(int nFrames) override {
-      if (!inputsReady() || mIsProcessed || byPass()) { return; }
-      sample** in = mSocketsIn[0]->mConnectedTo[0]->mParentBuffer;
+      if (byPass()) { return; }
+      sample** in = mSocketsIn[0].mBuffer;
       mParameters[1].update();
       mParameters[2].update();
       for (int i = 0; i < nFrames; i++) {
         for (int c = 0; c < mChannelCount; c++) {
           const sample val = in[c][i];
-          mBuffersOut[0][c][i] = val * ((val > 0) ? mGainUp : mGainDown);
+          mSocketsOut[0].mBuffer[c][i] = val * ((val > 0) ? mGainUp : mGainDown);
         }
       }
-      mIsProcessed = true;
     }
   };
 

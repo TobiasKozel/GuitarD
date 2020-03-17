@@ -334,6 +334,9 @@ namespace guitard {
     }
 
     void removeAllNodes() {
+      for (int i = 0; i < mNodes.size(); i++) {
+        disconnectNode(mNodes[i]);
+      }
       while (mNodes.size()) {
         removeNode(0);
       }

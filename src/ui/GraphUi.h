@@ -436,6 +436,13 @@ namespace guitard {
           mGraph->sortGraph();
           return true;
         }
+        if (key.VK == iplug::kVK_L) {
+          cleanUpAllNodeUis();
+          mGraph->removeAllNodes();
+          setGraph(mGraph);
+          return true;
+        }
+
         if (key.VK == iplug::kVK_F1) {
           if (mSelectedNodes.size() == 1) {
             mGraphics->ShowMessageBox(

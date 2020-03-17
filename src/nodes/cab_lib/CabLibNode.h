@@ -64,6 +64,7 @@ namespace guitard {
       serialized["path"] = mLoadedIr->file;
       serialized["id"] = mLoadedIr->id;
     }
+
     void deserializeAdditional(nlohmann::json& serialized) override {
       try {
         if (!serialized.contains("path")) {
@@ -132,7 +133,7 @@ namespace guitard {
     }
 
     void ProcessBlock(const int nFrames) override {
-      if (!inputsReady() || mIsProcessed || byPass()) { return; }
+      if (byPass()) { return; }
       if (mConvolver == nullptr) {
         outputSilence();
         return;
@@ -143,10 +144,10 @@ namespace guitard {
       if (mIsBlending) { // Means we'll need to take care of 2 convolvers
         mConvolver2->mStereo = mConvolver->mStereo; // Sync the stereo flag
         mConvolver->ProcessBlock(
-          mSocketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0], nFrames
+          mSocketsIn[0].mBuffer, mSocketsOut[0].mBuffer, nFrames
         );
         mConvolver2->ProcessBlock(
-          mSocketsIn[0]->mConnectedTo[0]->mParentBuffer, mBlendBuffer, nFrames
+          mSocketsIn[0].mBuffer, mBlendBuffer, nFrames
         );
         for (int i = 0; i < nFrames; i++) {
           if (mBlendPos < 1.0) {
@@ -156,7 +157,7 @@ namespace guitard {
             mBlendPos = 1.0;
           }
           for (int c = 0; c < mChannelCount; c++) {
-            mBuffersOut[0][c][i] = mBuffersOut[0][c][i] * (1 - mBlendPos) + mBlendBuffer[c][i] * mBlendPos;
+            mSocketsOut[0].mBuffer[c][i] = mSocketsOut[0].mBuffer[c][i] * (1 - mBlendPos) + mBlendBuffer[c][i] * mBlendPos;
           }
         }
         if (mBlendPos >= 1.0) { // Blend is over
@@ -166,10 +167,9 @@ namespace guitard {
       }
       else { // Normal processing
         mConvolver->ProcessBlock(
-          mSocketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0], nFrames
+          mSocketsIn[0].mBuffer, mSocketsOut[0].mBuffer, nFrames
         );
       }
-      mIsProcessed = true;
     }
 
     String getLicense() override {

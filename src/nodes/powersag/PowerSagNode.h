@@ -59,12 +59,11 @@ namespace guitard {
     }
 
     void ProcessBlock(int nFrames) override {
-      if (!inputsReady() || mIsProcessed || byPass()) { return; }
-      sample** buffer = mSocketsIn[0]->mConnectedTo[0]->mParentBuffer;
-      sample* in1 = buffer[0];
-      sample* in2 = buffer[1];
-      sample* out1 = mBuffersOut[0][0];
-      sample* out2 = mBuffersOut[0][1];
+      if (byPass()) { return; }
+      sample* in1 = mSocketsIn[0].mBuffer[0];
+      sample* in2 = mSocketsIn[0].mBuffer[1];
+      sample* out1 = mSocketsOut[0].mBuffer[0];
+      sample* out2 = mSocketsOut[0].mBuffer[1];
 
       mParameters[1].update();
       mParameters[2].update();
@@ -187,8 +186,6 @@ namespace guitard {
         *out1++;
         *out2++;
       }
-
-      mIsProcessed = true;
     }
 
     String getLicense() override {

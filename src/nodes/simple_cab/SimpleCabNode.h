@@ -107,7 +107,7 @@ namespace guitard {
     }
 
     void ProcessBlock(const int nFrames) override {
-      if (!inputsReady() || mIsProcessed || byPass()) { return; }
+      if (byPass()) { return; }
       mParameters[1].update();
       if (mConvolver == nullptr) {
         outputSilence();
@@ -115,9 +115,8 @@ namespace guitard {
       }
       mConvolver->mStereo = mStereo > 0.5 ? true : false;
       mConvolver->ProcessBlock(
-        mSocketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOut[0], nFrames
+        mSocketsIn[0].mBuffer, mSocketsOut[0].mBuffer, nFrames
       );
-      mIsProcessed = true;
     }
 
     String getLicense() override {

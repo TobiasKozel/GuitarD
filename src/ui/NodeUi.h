@@ -118,14 +118,15 @@ namespace guitard {
      * @param output If true will return a output socket
      */
     virtual NodeSocket* getQuickConnectSocket(const bool output = false) {
-      for (int i = 0; i < MAX_NODE_SOCKETS; i++) {
+      const int count = output ? mNode->mOutputCount : mNode->mInputCount;
+      for (int i = 0; i < count; i++) {
         NodeSocket* socket = output ? &mNode->mSocketsOut[i] : &mNode->mSocketsIn[i];
         if (socket->mParentNode != nullptr && !socket->mConnected) {
           // Look for the first unconnected socket
           return socket;
         }
       }
-      for (int i = 0; i < MAX_NODE_SOCKETS; i++) {
+      for (int i = 0; i < count; i++) {
         NodeSocket* socket = output ? &mNode->mSocketsOut[i] : &mNode->mSocketsIn[i];
         if (socket->mParentNode != nullptr) {
           // Use a socket even if it is connected
