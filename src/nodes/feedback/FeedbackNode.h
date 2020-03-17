@@ -7,6 +7,7 @@ namespace guitard {
     sample gain = 0.0;
     RingBuffer<sample> mPrevL;
     RingBuffer<sample> mPrevR;
+    bool mEmitted = false;
 
   public:
     FeedbackNode(NodeList::NodeInfo* info) {
@@ -22,8 +23,8 @@ namespace guitard {
       ].type = ParameterCoupling::Gain;
 
       // Swap the socket positions
-      mSocketsIn[0]->mRel.x = mDimensions.x * 0.5 - 20;
-      mSocketsOut[0]->mRel.x = -mDimensions.x * 0.5 + 20;
+      mSocketsIn[0].mRel.x = mDimensions.x * 0.5 - 20;
+      mSocketsOut[0].mRel.x = -mDimensions.x * 0.5 + 20;
 
     }
 
@@ -39,28 +40,32 @@ namespace guitard {
       mPrevR.setSize(0);
     }
 
+    void BlockStart() override {
+      mEmitted = false;
+    }
 
-    void ProcessBlock(int nFrames) override {
+
+    void ProcessBlock(const int nFrames) override {
       if (byPass()) { return; }
-      if (mIsProcessed == false) {
-        if (mPrevL.inBuffer() > mMaxBlockSize&& mPrevL.nFree() == 0) { // nFrames can never been larger than mMaxBuffer
+      if (!mEmitted) { // Emit the saved samples first
+        if (mPrevL.inBuffer() > mMaxBlockSize && mPrevL.nFree() == 0) { // nFrames can never been larger than mMaxBuffer
           mParameters[1].update();
           sample val = ParameterCoupling::dbToLinear(gain);
-          mPrevL.get(mBuffersOut[0][0], nFrames);
-          mPrevR.get(mBuffersOut[0][1], nFrames);
+          mPrevL.get(mSocketsOut[0].mBuffer[0], nFrames);
+          mPrevR.get(mSocketsOut[0].mBuffer[1], nFrames);
           for (int i = 0; i < nFrames; i++) {
-            mBuffersOut[0][0][i] *= val;
-            mBuffersOut[0][1][i] *= val;
+            mSocketsOut[0].mBuffer[0][i] *= val;
+            mSocketsOut[0].mBuffer[1][i] *= val;
           }
-          mIsProcessed = true;
         }
         else {
-          outputSilence();
+          outputSilence(); // or silence if there aren't enough samples buffered yet
         }
+        mEmitted = true;
       }
-
-      if (inputsReady()) {
-        sample** buffer = mSocketsIn[0]->mConnectedTo[0]->mParentBuffer;
+      else {
+        // Second round will get the input to buffer
+        sample** buffer = mSocketsIn[0].mBuffer;
         mPrevL.add(buffer[0], nFrames);
         mPrevR.add(buffer[1], nFrames);
       }

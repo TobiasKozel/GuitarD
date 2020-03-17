@@ -728,10 +728,14 @@ namespace guitard {
           mProcessList.add(con->mParentNode);
         }
       }
-
+      PointerList<Node> feedback;
       for (int tries = 0; tries < mNodes.size(); tries++) {
         for (int i = 0; i < mProcessList.size(); i++) {
           Node* node = mProcessList[i];
+          // gather the feedback nodes to push them add the end of the list again
+          if (node->mInfo->name == "FeedbackNode" && feedback.find(node) == -1) {
+            feedback.add(node);
+          }
           for (int out = 0; out < node->mOutputCount; out++) {
             NodeSocket* outSocket = &node->mSocketsOut[out];
             if (outSocket->mParentNode == nullptr) { continue; }
@@ -753,7 +757,9 @@ namespace guitard {
       else {
         mProcessList.remove(mOutputNode);
       }
-      
+      for (int i = 0; i < feedback.size(); i++) {
+        mProcessList.add(feedback[i]);
+      }
       unlockAudioThread();
     }
   };
