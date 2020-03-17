@@ -30,8 +30,8 @@ namespace guitard {
 
     void createBuffers() override {
       Node::createBuffers();
-      mPrevL.setSize(mMaxBlockSize + 1); // This is needed or the ring buffer will
-      mPrevR.setSize(mMaxBlockSize + 1); // underflow for some reason
+      mPrevL.setSize(mMaxBlockSize); // This is needed or the ring buffer will
+      mPrevR.setSize(mMaxBlockSize); // underflow for some reason
     }
 
     void deleteBuffers() override {
@@ -47,11 +47,18 @@ namespace guitard {
 
     void ProcessBlock(const int nFrames) override {
       if (byPass()) { return; }
-      if (!mEmitted) { // Emit the saved samples first
-        if (mPrevL.inBuffer() > mMaxBlockSize && mPrevL.nFree() == 0) { // nFrames can never been larger than mMaxBuffer
+      if (mEmitted) {
+        mPrevL.add(mSocketsIn[0].mBuffer[0], nFrames);
+        mPrevR.add(mSocketsIn[0].mBuffer[1], nFrames);
+      }
+      else {
+        if (mPrevL.inBuffer() >= mMaxBlockSize && mPrevL.inBuffer() >= nFrames) {
           mParameters[1].update();
           sample val = ParameterCoupling::dbToLinear(gain);
-          mPrevL.get(mSocketsOut[0].mBuffer[0], nFrames);
+          int ret = mPrevL.get(mSocketsOut[0].mBuffer[0], nFrames);
+          if (ret != nFrames) {
+            assert(false);
+          }
           mPrevR.get(mSocketsOut[0].mBuffer[1], nFrames);
           for (int i = 0; i < nFrames; i++) {
             mSocketsOut[0].mBuffer[0][i] *= val;
@@ -62,12 +69,6 @@ namespace guitard {
           outputSilence(); // or silence if there aren't enough samples buffered yet
         }
         mEmitted = true;
-      }
-      else {
-        // Second round will get the input to buffer
-        sample** buffer = mSocketsIn[0].mBuffer;
-        mPrevL.add(buffer[0], nFrames);
-        mPrevR.add(buffer[1], nFrames);
       }
     }
   };

@@ -178,6 +178,10 @@ namespace guitard {
         n->mMaxBlockSize = size;
         n->OnReset(mSampleRate, mChannelCount, true);
       }
+      for (int i = 0; i < mNodes.size(); i++) {
+        mNodes[i]->OnConnectionsChanged();
+      }
+      mOutputNode->OnConnectionsChanged();
       unlockAudioThread();
     }
 
@@ -230,13 +234,10 @@ namespace guitard {
       for (int n = 0; n < mNodes.size(); n++) {
         mNodes[n]->BlockStart();
       }
-      mOutputNode->BlockStart();
 
       for (int n = 0; n < mProcessList.size(); n++) {
         mProcessList[n]->ProcessBlock(nFrames);
       }
-
-      mOutputNode->ProcessBlock(nFrames);
 
       mOutputNode->CopyOut(out, nFrames);
 
@@ -246,7 +247,7 @@ namespace guitard {
     /**
      * Used to add nodes and pause the audio thread
      */
-    void addNode(Node* node, const Coord2D pos = {0, 0}, Node* clone = nullptr) {
+    void addNode(Node* node, const Coord2D pos = {0, 0}, Node* clone = nullptr, bool claim = true) {
       if (mNodes.find(node) != -1) {
         assert(false); // In case node is already in the list
         return;
@@ -258,7 +259,7 @@ namespace guitard {
         node->copyState(clone);
       }
 
-      if (mParamManager != nullptr) {
+      if (claim && mParamManager != nullptr) {
         mParamManager->claimNode(node);
       }
 
@@ -495,6 +496,8 @@ namespace guitard {
 
         if (json.contains("maxBlockSize")) {
           mMaxBlockSize = json["maxBlockSize"];
+        } else {
+          mMaxBlockSize = GUITARD_MAX_BUFFER;
         }
 
         connectSockets(&mOutputNode->mSocketsIn[0]);
@@ -511,7 +514,7 @@ namespace guitard {
             WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
           }
 
-          addNode(node, { sNode["position"][0], sNode["position"][1] });
+          addNode(node, { sNode["position"][0], sNode["position"][1] }, nullptr, false);
 
           // Set the parameter values
           for (auto param : sNode["parameters"]) {
@@ -522,7 +525,7 @@ namespace guitard {
               if (para->name == name) {
                 found++;
                 if (param.contains("idk")) {
-                para->parameterIdx = param["idx"];
+                  para->parameterIdx = param["idx"];
                   para->wantsDawParameter = true;
                 }
                 else {
@@ -675,7 +678,6 @@ namespace guitard {
           }
           out->sortConnectedTo();
           out->mParentNode->OnConnectionsChanged();
-          in->mBuffer = out->mBuffer;
         }
         in->sortConnectedTo();
         in->mParentNode->OnConnectionsChanged();

@@ -1,6 +1,12 @@
 #pragma once
 
-#ifdef GUITARD_HEADLESS
+#define GUITARD_VECTOR_LIST
+
+#if defined(GUITARD_HEADLESS)
+#define GUITARD_VECTOR_LIST
+#endif
+
+#ifdef GUITARD_VECTOR_LIST
 #include <vector>
 #else
 #include "ptrlist.h"
@@ -9,7 +15,7 @@
 namespace guitard {
   template <class T>
   class PointerList {
-#ifdef GUITARD_HEADLESS
+#ifdef GUITARD_VECTOR_LIST
     std::vector<T*> mList;
 #else
     WDL_PtrList<T> mList;
@@ -17,7 +23,7 @@ namespace guitard {
 
   public:
     T* get(const size_t index) const {
-#ifdef GUITARD_HEADLESS
+#ifdef GUITARD_VECTOR_LIST
       if (index >= mList.size()) {
         return nullptr;
       }
@@ -32,7 +38,7 @@ namespace guitard {
     }
 
     void add(T* element) {
-#ifdef GUITARD_HEADLESS
+#ifdef GUITARD_VECTOR_LIST
       mList.push_back(element);
 #else
       mList.Add(element);
@@ -40,7 +46,7 @@ namespace guitard {
     }
 
     void remove(const T* element, bool const destroy = false) {
-#ifdef GUITARD_HEADLESS
+#ifdef GUITARD_VECTOR_LIST
       auto position = std::find(mList.begin(), mList.end(), element);
       if (position != mList.end()) {
         mList.erase(position);
@@ -58,7 +64,7 @@ namespace guitard {
     }
 
     size_t size() const {
-#ifdef GUITARD_HEADLESS
+#ifdef GUITARD_VECTOR_LIST
       return mList.size();
 #else
       return mList.GetSize();
@@ -66,7 +72,7 @@ namespace guitard {
     }
 
     int find(const T* element) const {
-#ifdef GUITARD_HEADLESS
+#ifdef GUITARD_VECTOR_LIST
       auto position = std::find(mList.begin(), mList.end(), element);
       if (position != mList.end()) {
         return std::distance(mList.begin(), position);
@@ -83,7 +89,7 @@ namespace guitard {
           delete get(i);
         }
       }
-#ifdef GUITARD_HEADLESS
+#ifdef GUITARD_VECTOR_LIST
       mList.clear();
 #else
       mList.Empty();

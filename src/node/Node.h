@@ -257,10 +257,19 @@ namespace guitard {
     }
 
     /**
-     * Means the in or out connections changed
+     * Means the in or out connections changed, get the pointer to the right buffer again
+     * CALL BASE IMPLEMENTATION
      */
     virtual void OnConnectionsChanged() {
       outputSilence();
+      for (int i = 0; i < mInputCount; i++) {
+        if (mSocketsIn[i].mConnected) {
+          mSocketsIn[i].mBuffer = mSocketsIn[i].mConnectedTo[0]->mBuffer;
+        }
+        else {
+          mSocketsIn[i].mBuffer = EMPTY_BUFFER;
+        }
+      }
     }
 
     /**

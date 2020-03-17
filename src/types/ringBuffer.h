@@ -1,6 +1,6 @@
 #pragma once
 /**
- * Based on the "circbuf.h" implementation from Cockos WDL
+ * Based on the "circbuf.h" implementation from Cockos WDL but without their heap buffer
  */
 
 namespace guitard {
@@ -26,6 +26,9 @@ namespace guitard {
     RingBuffer& operator= (const RingBuffer&) = delete;
     RingBuffer& operator= (RingBuffer&&) = delete;
 
+    /**
+     * Will resize the buffer an clear it
+     */
     void setSize(const int size) {
       if (mBuffer != nullptr) {
         delete[] mBuffer;
@@ -39,6 +42,9 @@ namespace guitard {
       }
     }
 
+    /**
+     * Puts a number of elements in the array provided
+     */
     int peek(T* out, int elements, int offset = 0) {
       if (offset < 0) { return 0; } // only use positive offsets
       const int head = mHead - offset; // Offset the head
@@ -64,12 +70,18 @@ namespace guitard {
       return elements;
     }
 
+    /**
+     * Pops a number of elements and puts them in the buffer provided
+     */
     int get(T* out, const int elements) {
       const int elementsOut = peek(out, elements);
       mHead -= elementsOut; // Move the head back, can't exceed bounds since it was clamped in peek
       return elementsOut;
     }
 
+    /**
+     * Adds a number of elements
+     */
     int add(T* in, int elements) {
       const int spaceLeftHead = mSize - mHead; // Space left before exceeding upper buffer bounds
       if (elements > spaceLeftHead) {
@@ -97,10 +109,16 @@ namespace guitard {
       return elements;
     }
 
+    /**
+     * Returns how many more elements the buffer can hold
+     */
     int nFree() const {
       return mSize - mHead;
     }
 
+    /**
+     * Returns how many elements are in the buffer
+     */
     int inBuffer() const {
       return mHead;
     }
