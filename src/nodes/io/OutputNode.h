@@ -17,53 +17,20 @@ namespace guitard {
       Node::setup(0, GUITARD_MAX_BUFFER, 1, 0, 2);
     }
 
-    void ProcessBlock(int) override {
-      NodeSocket* in = mSocketsIn[0]->mConnectedTo[0];
-      if (in == nullptr) {
-        mIsProcessed = true;
-      }
-      else {
-        mIsProcessed = in->mParentNode->mIsProcessed;
-      }
-    }
+    void ProcessBlock(int) override { }
 
-    void CopyOut(sample** out, int nFrames) {
-      NodeSocket* in = mSocketsIn[0]->mConnectedTo[0];
-      if (mMaxBlockSize < nFrames || in == nullptr || !in->mParentNode->mIsProcessed) {
-        for (int c = 0; c < mChannelCount; c++) {
-          for (int i = 0; i < nFrames; i++) {
-            // output silence
-            out[c][i] = 0;
-          }
+    void CopyOut(sample** out, int nFrames) const {
+      for (int c = 0; c < mChannelCount; c++) {
+        for (int i = 0; i < nFrames; i++) {
+          out[c][i] = mSocketsIn[0].mBuffer[c][i];
         }
       }
-      else {
-        sample** buf = in->mParentBuffer;
-        for (int c = 0; c < mChannelCount; c++) {
-          for (int i = 0; i < nFrames; i++) {
-            out[c][i] = buf[c][i];
-          }
-        }
-      }
-      mIsProcessed = true;
     }
 
     void OnReset(int p_sampleRate, int p_channels, bool force = false) override {
       mChannelCount = p_channels;
     }
 
-//#ifndef GUITARD_HEADLESS
-//    void setupUi(IGraphics* pGrahics) override {
-//      shared.graphics = pGrahics;
-//      mUi = new OutputNodeUi(&shared);
-//      mUi->setColor(IColor(255, 100, 150, 100));
-//      pGrahics->AttachControl(mUi);
-//      mUi->setUp();
-//      mUiReady = true;
-//    }
-//#endif
-//
-//
   };
 }
 
@@ -74,7 +41,6 @@ namespace guitard {
     public:
       OutputNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) { }
     };
-
     GUITARD_REGISTER_NODE_UI(OutputNode, OutputNodeUi)
 }
 #endif

@@ -89,7 +89,7 @@ namespace guitard {
 
       mInputNode = new InputNode();
       mOutputNode = new OutputNode();
-      mOutputNode->connectInput(mInputNode->mSocketsOut[0]);
+      connectNodes(mInputNode, 0, mOutputNode, 0);
     }
 
     ~Graph() {
@@ -239,8 +239,6 @@ namespace guitard {
       }
       mOutputNode->ProcessBlock(nFrames);
 
-      mStats.valid = mOutputNode->mIsProcessed;
-
       mOutputNode->CopyOut(out, nFrames);
 
       mIsProcessing = false;
@@ -249,10 +247,7 @@ namespace guitard {
     /**
      * Used to add nodes and pause the audio thread
      */
-    void addNode(
-      Node* node, Node* pInput = nullptr, const Coord2D pos = {0, 0},
-        const int outputIndex = 0, const int inputIndex = 0, Node* clone = nullptr
-    ) {
+    void addNode(Node* node, const Coord2D pos = {0, 0}, Node* clone = nullptr) {
       if (mNodes.find(node) != -1) {
         assert(false); // In case node is already in the list
         return;
@@ -268,10 +263,6 @@ namespace guitard {
         mParamManager->claimNode(node);
       }
 
-      if (pInput != nullptr) {
-        node->connectInput(pInput->mSocketsOut[outputIndex], inputIndex);
-      }
-
       mNodes.add(node);
 
       sortGraph();
@@ -281,10 +272,10 @@ namespace guitard {
      * Will re route the connections the node provided
      * Only takes care of the first input and first output
      */
-    void byPassConnection(Node* node) const {
+    void byPassConnection(Node* node) {
       if (node->mInputCount > 0 && node->mOutputCount > 0) {
-        NodeSocket* inSock = node->mSocketsIn[0];
-        NodeSocket* outSock = node->mSocketsOut[0];
+        NodeSocket* inSock = &node->mSocketsIn[0];
+        NodeSocket* outSock = &node->mSocketsOut[0];
         NodeSocket* prevSock = inSock->mConnectedTo[0];
         if (prevSock != nullptr) { // make sure there's a previous node
           int nextSocketCount = 0;
@@ -305,11 +296,11 @@ namespace guitard {
           }
           }
 
-          outSock->disconnectAll();
-          inSock->disconnectAll();
+          connectSockets(outSock);
+          connectSockets(inSock);
 
           for (int i = 0; i < nextSocketCount; i++) {
-            prevSock->connect(nextSockets[i]);
+            connectSockets(prevSock, nextSockets[i]);
           }
         }
       }
@@ -321,23 +312,23 @@ namespace guitard {
      */
     Node* spliceInCombine(Node* node) {
       if (node->mInputCount > 0 && node->mOutputCount > 0) {
-        NodeSocket* inSock = node->mSocketsIn[0];
-        NodeSocket* outSock = node->mSocketsOut[0];
+        NodeSocket* inSock = &node->mSocketsIn[0];
+        NodeSocket* outSock = &node->mSocketsOut[0];
         NodeSocket* source = inSock->mConnectedTo[0];
         NodeSocket* target = outSock->mConnectedTo[0];
         if (target == nullptr || source == nullptr) {
           return nullptr;
         }
         Node* combine = NodeList::createNode("CombineNode");
-        addNode(combine, nullptr, node->mPos);
+        addNode(combine, node->mPos);
 
         for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
           if (outSock->mConnectedTo[i] != nullptr) {
-            combine->mSocketsOut[0]->connect(outSock->mConnectedTo[i]);
+            connectSockets(&combine->mSocketsOut[0], outSock->mConnectedTo[i]);
           }
         }
-        combine->mSocketsIn[0]->connect(outSock);
-        combine->mSocketsIn[1]->connect(source);
+        connectSockets(&combine->mSocketsIn[0], outSock);
+        connectSockets(&combine->mSocketsIn[1], source);
         return combine;
       }
       return nullptr;
@@ -355,13 +346,14 @@ namespace guitard {
      */
     void removeNode(Node* node, const bool reconnect = false) {
       if (node == mInputNode || node == mOutputNode) { return; }
+
       lockAudioThread();
       if (reconnect) {
         byPassConnection(node);
       }
+      disconnectNode(node);
       sortGraph();
-
-      // unlockAudioThread(); TODOG we should be able to unlock here
+      unlockAudioThread();
 
       mNodes.remove(node);
       if (mNodes.find(node) != -1) {
@@ -375,7 +367,6 @@ namespace guitard {
       node->cleanUp();
 
       delete node;
-      unlockAudioThread();
     }
 
     void removeNode(const int index) {
@@ -417,7 +408,7 @@ namespace guitard {
           json["nodes"][i]["type"] = node->mInfo->name;
           json["nodes"][i]["inputs"] = nlohmann::json::array();
           for (int prev = 0; prev < node->mInputCount; prev++) {
-            Node* cNode = node->mSocketsIn[prev]->getConnectedNode();
+            Node* cNode = node->mSocketsIn[prev].getConnectedNode();
             if (cNode == nullptr) {
               json["nodes"][i]["inputs"][prev] = { NoNode, 0 };
             }
@@ -427,7 +418,7 @@ namespace guitard {
             else {
               json["nodes"][i]["inputs"][prev] = {
                 mNodes.find(cNode),
-                node->mSocketsIn[prev]->getConnectedSocketIndex()
+                node->mSocketsIn[prev].getConnectedSocketIndex()
               };
             }
           }
@@ -457,7 +448,7 @@ namespace guitard {
         // Handle the output node
         json["output"]["gain"] = 1.0;
         json["output"]["position"] = { mOutputNode->mPos.x, mOutputNode->mPos.y };
-        Node* lastNode = mOutputNode->mSocketsIn[0]->getConnectedNode();
+        Node* lastNode = mOutputNode->mSocketsIn[0].getConnectedNode();
         int lastNodeIndex = NoNode;
         if (lastNode == mInputNode) {
           lastNodeIndex = InNode;
@@ -468,7 +459,7 @@ namespace guitard {
 
         json["output"]["inputs"][0] = {
           lastNodeIndex,
-          mOutputNode->mSocketsIn[0]->getConnectedSocketIndex()
+          mOutputNode->mSocketsIn[0].getConnectedSocketIndex()
         };
 
       }
@@ -503,7 +494,8 @@ namespace guitard {
         if (json.contains("maxBlockSize")) {
           mMaxBlockSize = json["maxBlockSize"];
         }
-        mOutputNode->connectInput(nullptr, 0);
+
+        connectSockets(&mOutputNode->mSocketsIn[0]);
 
         int expectedIndex = 0;
         int paramBack = MAX_DAW_PARAMS - 1;
@@ -517,7 +509,7 @@ namespace guitard {
             WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
           }
 
-          addNode(node, nullptr, { sNode["position"][0], sNode["position"][1] });
+          addNode(node, { sNode["position"][0], sNode["position"][1] });
 
           // Set the parameter values
           for (auto param : sNode["parameters"]) {
@@ -567,17 +559,13 @@ namespace guitard {
             const int inNodeIdx = connection[0];
             const int inBufferIdx = connection[1];
             if (inNodeIdx >= 0 && mNodes[inNodeIdx] != nullptr) {
-              node->connectInput(
-                mNodes[inNodeIdx]->mSocketsOut[inBufferIdx],
-                currentInputIdx
+              connectSockets(
+                &node->mSocketsIn[currentInputIdx], &mNodes[inNodeIdx]->mSocketsOut[inBufferIdx]
               );
             }
             else if (inNodeIdx == InNode) {
               // if it's NoNode it's not connected at all and we'll just leave it at a nullptr
-              node->connectInput(
-                mInputNode->mSocketsOut[0],
-                currentInputIdx
-              );
+              connectSockets(&node->mSocketsIn[currentInputIdx], &mInputNode->mSocketsOut[0]);
             }
             currentInputIdx++;
           }
@@ -609,13 +597,13 @@ namespace guitard {
         const int outNodeIndex = json["output"]["inputs"][0][0];
         const int outConnectionIndex = json["output"]["inputs"][0][1];
         if (mNodes[outNodeIndex] != nullptr) {
-          mOutputNode->connectInput(
-            mNodes[outNodeIndex]->mSocketsOut[outConnectionIndex]
+          connectSockets(
+            &mOutputNode->mSocketsIn[0], &mNodes[outNodeIndex]->mSocketsOut[outConnectionIndex]
           );
         }
         else if (outNodeIndex == InNode) {
           // In case the output goes straight to the input
-          mOutputNode->connectInput(mInputNode->mSocketsOut[0]);
+          connectNodes(mInputNode, 0, mOutputNode, 0);
         }
 
         sortGraph();
@@ -647,12 +635,93 @@ namespace guitard {
       return mOutputNode;
     }
 
+    /**
+     * Allows connecting and disconnecting sockets
+     * Provide 2 sockets to connect each other
+     * Provide a single socket to disconnect it from everything
+     */
+    void connectSockets(NodeSocket* s1, NodeSocket* s2 = nullptr) {
+      if (s2 != nullptr && s1->mIsInput == s2->mIsInput) {
+        WDBGMSG("Trying to connect same sockets!\n");
+        // assert(false);
+        return;
+      }
+      NodeSocket* in, * out; // Figure out which is which
+      if (s1->mIsInput) { in = s1; out = s2; }
+      else { in = s2; out = s1; }
+
+      lockAudioThread();
+      if (in != nullptr) {
+        if (in->mConnected) { // Get rid of the old connection on the input
+          NodeSocket* prevOut = in->mConnectedTo[0];
+          for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+            if (prevOut->mConnectedTo[i] == in) {
+              prevOut->mConnectedTo[i] = nullptr;
+            }
+          }
+          prevOut->sortConnectedTo();
+          prevOut->mParentNode->OnConnectionsChanged();
+        }
+
+        in->mConnectedTo[0] = out; // in to out
+        if (out != nullptr) { // both are connected, so make a new connection
+          for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+            if (out->mConnectedTo[i] == nullptr) {
+              out->mConnectedTo[i] = in; // out to in
+              break;
+            }
+          }
+          out->sortConnectedTo();
+          out->mParentNode->OnConnectionsChanged();
+          in->mBuffer = out->mBuffer;
+        }
+        in->sortConnectedTo();
+        in->mParentNode->OnConnectionsChanged();
+      }
+      else if (out != nullptr) { // Only the out is connected
+        for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+          if (out->mConnectedTo[i] != nullptr) {
+            connectSockets(out->mConnectedTo[i]);
+          }
+        }
+      }
+      unlockAudioThread();
+      if (mPauseAudio == 0) {
+        sortGraph();
+      }
+    }
+
+    void connectNodes(Node* out, const int outIndex, Node* in, const int inIndex) {
+      if (out->mOutputCount > outIndex && in->mInputCount > inIndex) {
+        connectSockets(&out->mSocketsOut[outIndex], &in->mSocketsIn[inIndex]);
+      }
+    }
+
+    /**
+     * Severs all connections from a node
+     */
+    void disconnectNode(Node* node) {
+      lockAudioThread();
+      for (int i = 0; i < node->mInputCount; i++) {
+        connectSockets(&node->mSocketsIn[i]);
+      }
+
+      for (int i = 0; i < node->mOutputCount; i++) {
+        connectSockets(&node->mSocketsOut[i]);
+      }
+      unlockAudioThread();
+    }
+
+    /**
+     * This function will build the list used to calculate the DSP
+     * Has to be called each time a connection changes
+     */
     void sortGraph() {
       lockAudioThread();
       mProcessList.clear();
       for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
         // Put in the nodes which directly follow the input node
-        NodeSocket* con = mInputNode->mSocketsOut[0]->mConnectedTo[i];
+        NodeSocket* con = mInputNode->mSocketsOut[0].mConnectedTo[i];
         if (con != nullptr) {
           mProcessList.add(con->mParentNode);
         }
@@ -662,8 +731,8 @@ namespace guitard {
         for (int i = 0; i < mProcessList.size(); i++) {
           Node* node = mProcessList[i];
           for (int out = 0; out < node->mOutputCount; out++) {
-            NodeSocket* outSocket = node->mSocketsOut[out];
-            if (outSocket == nullptr) { continue; }
+            NodeSocket* outSocket = &node->mSocketsOut[out];
+            if (outSocket->mParentNode == nullptr) { continue; }
             for (int next = 0; next < MAX_SOCKET_CONNECTIONS; next++) {
               NodeSocket* nextSocket = outSocket->mConnectedTo[next];
               if (nextSocket == nullptr) { continue; }
@@ -677,9 +746,12 @@ namespace guitard {
       }
 
       if (mProcessList.find(mOutputNode) == -1) {
-        assert(false);
+        // Graph can't be processed;
       }
-      mProcessList.remove(mOutputNode);
+      else {
+        mProcessList.remove(mOutputNode);
+      }
+      
       unlockAudioThread();
     }
   };

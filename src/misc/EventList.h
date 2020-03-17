@@ -11,7 +11,6 @@ namespace guitard {
       AwaitAudioMutex,
       DisconnectSocket,
       SocketConnect,
-      SocketRedirectConnection, // Takes a SocketConnectRequest and will replace the current connection with the one provided
       PreviewSocket,
       OpenGallery,
       ParametersChanged, // Informs the DAW about a change of parameter names (doesn't seem to bother VST3)

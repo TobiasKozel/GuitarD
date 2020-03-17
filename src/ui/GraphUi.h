@@ -40,6 +40,8 @@ namespace guitard {
     MessageBus::Subscription<BlockSizeEvent*> mMaxBlockSizeEvent;
     MessageBus::Subscription<NodeSelectionChanged> mSelectionChagedEvent;
     MessageBus::Subscription<Drag> mNodeDragged;
+    MessageBus::Subscription<SocketConnectRequest> mOnConnectionEvent;
+    MessageBus::Subscription<Node*> mOnDisconnectAllEvent;
 
     /**
      * Control elements
@@ -240,10 +242,18 @@ namespace guitard {
       /**
        * All the events the Graph is subscribed to
        */
+      mOnConnectionEvent.subscribe(mBus, MessageBus::SocketConnect, [&](const SocketConnectRequest req) {
+        mGraph->connectSockets(req.from, req.to);
+      });
+
+      mOnDisconnectAllEvent.subscribe(mBus, MessageBus::NodeDisconnectAll, [&](Node* node) {
+        mGraph->disconnectNode(node);
+      });
+
       mNodeAddEvent.subscribe(mBus, MessageBus::NodeAdd, [&](const NodeList::NodeInfo& info) {
         MessageBus::fireEvent(mBus, MessageBus::PushUndoState, false);
         Node* node = NodeList::createNode(info.name);
-        mGraph->addNode(node, nullptr, { 300, 300 });
+        mGraph->addNode(node, { 300, 300 });
         setUpNodeUi(node);
       });
 
@@ -261,7 +271,7 @@ namespace guitard {
       mNodeCloneEvent.subscribe(mBus, MessageBus::CloneNode, [&](Node* node) {
         Node* clone = NodeList::createNode(node->mInfo->name);
         if (clone != nullptr) {
-          mGraph->addNode(clone, nullptr, node->mPos, 0, 0, node);
+          mGraph->addNode(clone, node->mPos, node);
           NodeUi* ui = setUpNodeUi(clone);
           ui->mDragging = true;
           mGraphics->SetCapturedControl(ui);
@@ -274,7 +284,7 @@ namespace guitard {
       mNodeDragSpawn.subscribe(mBus, MessageBus::NodeDragSpawn, [&](NodeDragSpawnRequest req) {
         Node* node = NodeList::createNode(req.name);
         if (node != nullptr) {
-          mGraph->addNode(node, nullptr, req.pos, 0, 0);
+          mGraph->addNode(node, req.pos);
           NodeUi* ui = setUpNodeUi(node);
           ui->mDragging = true;
           mGraphics->SetCapturedControl(ui);
@@ -449,7 +459,7 @@ namespace guitard {
       getUiFromNode(node)->setTranslation(0, 0);
       NodeSocket* socket = nullptr;
       for (int i = 0; i < node->mOutputCount; i++) {
-        socket = node->mSocketsOut[i];
+        socket = &node->mSocketsOut[i];
         for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
           if (socket->mConnectedTo[j] != nullptr) {
             if (socket->mConnectedTo[j]->mIndex == 0) {
@@ -476,7 +486,7 @@ namespace guitard {
       float nextX = 0;
       NodeSocket* socket = nullptr;
       for (int i = 0; i < node->mOutputCount; i++) {
-        socket = node->mSocketsOut[i];
+        socket = &node->mSocketsOut[i];
         for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
           if (socket->mConnectedTo[j] != nullptr) {
             if (socket->mConnectedTo[j]->mIndex == 0) {

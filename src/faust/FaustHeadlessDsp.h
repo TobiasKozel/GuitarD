@@ -77,6 +77,8 @@ namespace guitard {
        * The realigned output buffers the faust dsp will write to
        */
       FAUSTFLOAT** mBuffersOutAligned = nullptr;
+      FAUSTFLOAT** mBuffersInAligned = nullptr;
+
 #ifndef GUITARD_HEADLESS
       // TODO replace the oversampler
       iplug::OverSampler<sample>::BlockProcessFunc mOverSampleProcess = [&](sample** inputs, sample** outputs, int nFrames) {
@@ -160,6 +162,7 @@ namespace guitard {
       void deleteBuffers() override {
         Node::deleteBuffers();
         delete[] mBuffersOutAligned;
+        delete[] mBuffersInAligned;
       }
 
       /**
@@ -173,10 +176,20 @@ namespace guitard {
         mBuffersOutAligned = new FAUSTFLOAT * [mOutputCount * mChannelCount];
         for (int i = 0; i < mOutputCount; i++) {
           for (int c = 0; c < mChannelCount; c++) {
-            mBuffersOutAligned[i * mChannelCount + c] = mBuffersOut[i][c];
+            mBuffersOutAligned[i * mChannelCount + c] = mSocketsOut[i].mBuffer[c];
           }
         }
+        mBuffersInAligned = new FAUSTFLOAT * [mInputCount * mChannelCount];
         instanceClear();
+      }
+
+      void OnConnectionsChanged() override {
+        Node::OnConnectionsChanged();
+        for (int i = 0; i < mInputCount; i++) {
+          for (int c = 0; c < mChannelCount; c++) {
+            mBuffersInAligned[i * mChannelCount + c] = mSocketsIn[i].mBuffer[c];
+          }
+        }
       }
 
       /**
@@ -184,21 +197,20 @@ namespace guitard {
        * so this just wraps the call and updates the parameters
        */
       void ProcessBlock(const int nFrames) override {
-        if (!inputsReady() || mIsProcessed || byPass()) { return; }
+        if (byPass()) { return; }
         for (int i = 1; i < mParameterCount; i++) {
           mParameters[i].update();
         }
 #ifndef GUITARD_HEADLESS
         if (mOverSampler != nullptr) {
           updateOversampling();
-          mOverSampler->ProcessBlock(mSocketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOutAligned, nFrames, 2, mOverSampleProcess);
+          mOverSampler->ProcessBlock(mBuffersInAligned, mBuffersOutAligned, nFrames, 2, mOverSampleProcess);
         }
         else
 #endif
         {
-          compute(nFrames, mSocketsIn[0]->mConnectedTo[0]->mParentBuffer, mBuffersOutAligned);
+          compute(nFrames, mBuffersInAligned, mBuffersOutAligned);
         }
-        mIsProcessed = true;
       }
 
       /**

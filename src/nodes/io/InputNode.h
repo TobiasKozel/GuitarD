@@ -38,30 +38,19 @@ namespace guitard {
       mLastBlockSize = nFrames;
       if (mInputChannels == 1) {
         for (int i = 0; i < nFrames; i++) {
-          mBuffersOut[0][0][i] = in[0][i];
-          mBuffersOut[0][1][i] = in[0][i];
+          mSocketsOut[0].mBuffer[0][i] = in[0][i];
+          mSocketsOut[0].mBuffer[1][i] = in[0][i];
         }
       }
       else {
-        for (int c = 0; c < mChannelCount; c++) {
-          for (int i = 0; i < nFrames; i++) {
-            mBuffersOut[0][c][i] = in[c][i];
+        for (int i = 0; i < nFrames; i++) {
+          for (int c = 0; c < mChannelCount; c++) {
+            mSocketsOut[0].mBuffer[c][i] = in[c][i];
           }
         }
       }
-      mIsProcessed = true;
     }
 
-//#ifndef GUITARD_HEADLESS
-//    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-//      shared.graphics = pGrahics;
-//      mUi = new InputNodeUi(&shared);
-//      mUi->setColor(IColor(255, 100, 150, 100));
-//      pGrahics->AttachControl(mUi);
-//      mUi->setUp();
-//      mUiReady = true;
-//    }
-//#endif
   private:
     int mInputChannels = 2;
   };

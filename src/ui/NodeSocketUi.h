@@ -5,13 +5,9 @@
 
 namespace guitard {
   class NodeSocketUi : public IControl {
-    MessageBus::Subscription<SocketConnectRequest> mOnConnectionEvent;
-    MessageBus::Subscription<SocketConnectRequest> mOnConnectionRedirectEvent;
-    MessageBus::Subscription<Node*> mOnDisconnectAllEvent;
     IMouseMod mMouseDown;
 
   protected:
-    // NodeShared* mShared = nullptr;
     ConnectionDragData mDragData;
     NodeSocket* mSocket = nullptr;
     MessageBus::Bus* mBus = nullptr;
@@ -35,44 +31,17 @@ namespace guitard {
       mRECT.R = mRECT.L + mDiameter;
       mRECT.B = mRECT.T + mDiameter;
       SetTargetAndDrawRECTs(mRECT);
-
-      socket->callback = [&](bool doLock) {
-        MessageBus::fireEvent(this->mBus, MessageBus::AwaitAudioMutex, doLock);
-      };
-
-      mOnConnectionEvent.subscribe(mBus, MessageBus::SocketConnect, [&](const SocketConnectRequest req) {
-        if (req.to == this->mSocket) {
-          this->mSocket->connect(req.from);
-        }
-      });
-
-      mOnConnectionRedirectEvent.subscribe(mBus, MessageBus::SocketRedirectConnection, [&](const SocketConnectRequest req) {
-        if (req.from == this->mSocket) {
-          this->mSocket->connect(req.to);
-        }
-      });
-
-      mOnDisconnectAllEvent.subscribe(mBus, MessageBus::NodeDisconnectAll, [&](Node* node) {
-        if (this->mSocket->mParentNode == node) {
-          this->mSocket->disconnectAll();
-        }
-      });
-
     }
 
     void OnAttached() override {
       IRECT test = GetRECT();
     }
 
-    virtual ~NodeSocketUi() {
-      mSocket->callback = nullptr;
-    }
-
     void Draw(IGraphics& g) override {
       // This doesn't do the actual drawing since it needs to stay on top of the
       // layer stack. It's drawn in the cable layer and only a control to handle input
       if (mDragData.dragging) {
-        // This is just a nice highlight around the socket beeing dragged
+        // This is just a nice highlight around the socket being dragged
         g.FillCircle(Theme::Sockets::COLOR_ACTIVE, mDragData.startX,
           mDragData.startY, Theme::Sockets::ACTIVE_SIZE, &mBlend
         );
@@ -92,11 +61,11 @@ namespace guitard {
       }
     }
 
-    virtual void OnMouseUp(float x, float y, const IMouseMod& mod) override {
+    void OnMouseUp(float x, float y, const IMouseMod& mod) override {
       mDragData.dragging = false;
       MessageBus::fireEvent<ConnectionDragData*>(
         mBus, MessageBus::ConnectionDragged, &mDragData
-        );
+      );
       if (mMouseDown.C) {
         mMouseDown = IMouseMod();
         return;
@@ -111,20 +80,17 @@ namespace guitard {
         NodeSocketUi* targetUi = dynamic_cast<NodeSocketUi*>(target);
         if (targetUi != nullptr) {
           NodeSocket* targetSocket = targetUi->mSocket;
-          MessageBus::fireEvent<SocketConnectRequest>(
-            mBus,
-            MessageBus::SocketConnect,
-            SocketConnectRequest{
-              mSocket,
-              targetSocket
-            }
-          );
+          if (targetSocket != mSocket) { // don't try connecting to itself
+            MessageBus::fireEvent<SocketConnectRequest>(
+              mBus, MessageBus::SocketConnect, { mSocket, targetSocket }
+            );
+          }
         }
         else {
           MessageBus::fireEvent(mBus, MessageBus::QuickConnectSocket, QuickConnectRequest{
             Coord2D{x, y},
             mSocket
-            });
+          });
         }
       }
       mMouseDown = IMouseMod();
@@ -140,14 +106,16 @@ namespace guitard {
       mDragData.currentY = y;
       MessageBus::fireEvent<ConnectionDragData*>(
         mBus, MessageBus::ConnectionDragged, &mDragData
-        );
+      );
     }
 
     /**
      * Disconnect the input on double click
      */
     void OnMouseDblClick(float x, float y, const IMouseMod& mod) override {
-      mSocket->disconnectAll();
+      MessageBus::fireEvent<SocketConnectRequest>(
+        mBus, MessageBus::SocketConnect, { mSocket, nullptr }
+      );
       GetUI()->SetAllControlsDirty();
     }
   };

@@ -22,13 +22,11 @@ namespace guitard {
 #endif
   public: // Everything is public since it most of it needs to be accessible from the graph and the NodeUi
     bool mIsAutomated = false; // Flag to skip automation if there's none
-    // The dsp will write the result here and it will be exposed to other nodes over the NodeSocket
-    sample*** mBuffersOut = nullptr;
-    bool mIsProcessed = false;
 
     sample mOverSamplingFactor = 1.0;
     sample mOverSamplingFactorCurrent = 1.0;
     int mOverSamplingIndex = -1;
+
     int mSampleRate = 0;
     int mLastBlockSize = 0;
     // This size will be used to allocate the dsp buffer, the actual samples per block can be lowe
@@ -41,16 +39,18 @@ namespace guitard {
 
     int mParameterCount = 0;
     ParameterCoupling mParameters[MAX_NODE_PARAMETERS];
+
     int mMeterCount = 0;
     MeterCoupling mMeters[MAX_NODE_METERS];
 
     int mInputCount = 0;
-    NodeSocket* mSocketsIn[MAX_NODE_SOCKETS] = { nullptr }; // TODO move these in the class, since the count if fixed anyways
+    NodeSocket mSocketsIn[MAX_NODE_SOCKETS];
     int mOutputCount = 0;
-    NodeSocket* mSocketsOut[MAX_NODE_SOCKETS] = { nullptr };
+    NodeSocket mSocketsOut[MAX_NODE_SOCKETS];
 
     Coord2D mPos = { 0, 0 }; // Position on the canvas in pixels
     Coord2D mDimensions = { 250, 200 }; // Size in Pixels
+
     NodeList::NodeInfo* mInfo;
 
     /**
@@ -69,16 +69,19 @@ namespace guitard {
       mMaxBlockSize = pMaxBuffer;
       mInputCount = pInputs;
       mOutputCount = pOutputs;
-      mIsProcessed = false;
       mChannelCount = pChannels;
 
       // Setup the sockets for the node connections
       for (int i = 0; i < mInputCount; i++) {
-        mSocketsIn[i] = new NodeSocketIn(this, i); 
+        mSocketsIn[i].mParentNode = this;
+        mSocketsIn[i].mIndex = i;
+        mSocketsIn[i].mIsInput = true;
       }
 
       for (int i = 0; i < mOutputCount; i++) {
-        mSocketsOut[i] = new NodeSocketOut(this, i);
+        mSocketsOut[i].mParentNode = this;
+        mSocketsOut[i].mIndex = i;
+        mSocketsOut[i].mIsInput = false;
       }
 
       // This will create all the needed buffers
@@ -90,17 +93,11 @@ namespace guitard {
      * Called from on reset when the channel count changes
      */
     virtual void createBuffers() {
-      if (mBuffersOut != nullptr) {
-        WDBGMSG("Trying to create a new dsp buffer without cleanung up the old one");
-        assert(false);
-      }
-      mBuffersOut = new sample** [mOutputCount];
       for (int i = 0; i < mOutputCount; i++) {
-        mBuffersOut[i] = new sample* [mChannelCount];
+        mSocketsOut[i].mBuffer = new sample* [mChannelCount];
         for (int c = 0; c < mChannelCount; c++) {
-          mBuffersOut[i][c] = new sample[mMaxBlockSize];
+          mSocketsOut[i].mBuffer[c] = new sample[mMaxBlockSize];
         }
-        mSocketsOut[i]->mParentBuffer = mBuffersOut[i]; // Need to inform the outputs about the buffer
       }
     }
 
@@ -108,16 +105,14 @@ namespace guitard {
      * Deletes all the allocated audio buffers
      */
     virtual void deleteBuffers() {
-      if (mBuffersOut != nullptr) {
-        for (int i = 0; i < mOutputCount; i++) {
+      for (int i = 0; i < mOutputCount; i++) {
+        if (mSocketsOut[i].mBuffer != EMPTY_BUFFER) {
           for (int c = 0; c < mChannelCount; c++) {
-            delete mBuffersOut[i][c];
+            delete[] mSocketsOut[i].mBuffer[c];
           }
-          delete mBuffersOut[i];
-          mSocketsOut[i]->mParentBuffer = nullptr;
+          delete[] mSocketsOut[i].mBuffer;
+          mSocketsOut[i].mBuffer = EMPTY_BUFFER;
         }
-        delete mBuffersOut;
-        mBuffersOut = nullptr;
       }
     }
 
@@ -135,16 +130,7 @@ namespace guitard {
       for (int i = 0; i < mParameterCount; i++) {
         detachAutomation(&mParameters[i]); // Make sure no automation is attached
       }
-
-      for (int i = 0; i < mInputCount; i++) {
-        mSocketsIn[i]->disconnectAll();
-        delete mSocketsIn[i];
-      }
-
-      for (int i = 0; i < mOutputCount; i++) {
-        mSocketsOut[i]->disconnectAll();
-        delete mSocketsOut[i];
-      }
+      // will disconnect all sockets
 #ifndef GUITARD_HEADLESS
       delete mOverSampler;
 #endif
@@ -153,73 +139,30 @@ namespace guitard {
     /**
      * Will fill all the output buffers with silence and set the processed flag to true
      */
-    void outputSilence() {
+    void outputSilence() const {
       for (int o = 0; o < mOutputCount; o++) {
         for (int c = 0; c < mChannelCount; c++) {
           for (int i = 0; i < mMaxBlockSize; i++) {
-            mBuffersOut[o][c][i] = 0;
+            mSocketsOut[o].mBuffer[c][i] = 0;
           }
         }
       }
-      mIsProcessed = true;
     }
 
     /**
      * Will return true if the node is bypassed and also do the bypassing of buffers
      */
-    bool byPass() {
-      mParameters[mByPassedIndex].update(); // The first param will always be bypass
+    bool byPass() const {
+      mParameters[mByPassedIndex].update();
       if (mByPassed < 0.5) { return false; }
-      sample** in = mSocketsIn[0]->mConnectedTo[0]->mParentBuffer;
+      sample** in = mSocketsIn[0].mBuffer;
       for (int o = 0; o < mOutputCount; o++) {
         for (int c = 0; c < mChannelCount; c++) {
           for (int i = 0; i < mMaxBlockSize; i++) {
-            mBuffersOut[o][c][i] = in[c][i];
+            mSocketsOut[o].mBuffer[c][i] = in[c][i];
           }
         }
       }
-      mIsProcessed = true;
-      return true;
-    }
-
-    /**
-     * Check whether the node is able to process a block
-     * Will also output silence if not connected
-     */
-    virtual bool inputsReady() {
-      /**
-       * Check for disconnected inputs
-       * If one input isn't connected, skip the processing and output silence
-       * If that's not desired, this function has to be overriden
-       */
-      for (int i = 0; i < mInputCount; i++) {
-        if (mSocketsIn[i]->mConnectedTo[0] == nullptr) {
-          outputSilence();
-          return false;
-        }
-      }
-
-      /**
-       * Check for inputs which are connected to unprocessed nodes
-       */
-      for (int i = 0; i < mInputCount; i++) {
-        if (!mSocketsIn[i]->mConnectedTo[0]->mParentNode->mIsProcessed) {
-          return false; // A node isn't ready so return false
-        }
-      }
-
-      /**
-       * Check for automation since it needs to be ready as well
-       */
-      if (mIsAutomated) {
-        for (int i = 0; i < mParameterCount; i++) {
-          Node* n = mParameters[i].automationDependency;
-          if (n != nullptr && !n->mIsProcessed) {
-            return false;
-          }
-        }
-      }
-
       return true;
     }
 
@@ -245,9 +188,7 @@ namespace guitard {
     /**
      * Signals a new audio block is about to processed
      */
-    virtual void BlockStart() {
-      mIsProcessed = false;
-    }
+    virtual void BlockStart() { }
 
     /**
      * Called if the daw changed the channel count
@@ -258,6 +199,9 @@ namespace guitard {
       createBuffers();
     }
 
+    /**
+     * Called if the oversampling factor changes
+     */
     void updateOversampling() {
 #ifndef GUITARD_HEADLESS
        if (mOverSampler != nullptr) {
@@ -271,6 +215,9 @@ namespace guitard {
 #endif
     }
 
+    /**
+     * Called once when the node is constructed to allow oversampling later on
+     */
     void enableOversampling(int channels = 0) {
 #ifndef GUITARD_HEADLESS
        if (channels == 0) { channels = mChannelCount; }
@@ -310,20 +257,10 @@ namespace guitard {
     }
 
     /**
-     * Connects a given socket to a input at a given index of this node
-     * @param out The output socket to connect
-     * @param inputNumber The index of the input socket to connect the out socket to
+     * Means the in or out connections changed
      */
-    virtual void connectInput(NodeSocket* out, const int inputNumber = 0) {
-      NodeSocket* inSocket = mSocketsIn[inputNumber];
-      if (inSocket != nullptr) {
-        if (out == nullptr) {
-          inSocket->disconnect();
-        }
-        else {
-          inSocket->connect(out);
-        }
-      }
+    virtual void OnConnectionsChanged() {
+      outputSilence();
     }
 
     /**
@@ -368,8 +305,7 @@ namespace guitard {
 
 
     /**
-     * ALWAYS NEEDS TO BE THE FIRST PARAM IF USED
-     * Generic function to call when the node can be bypassed
+     * Called once to add a bypass parameter
      */
     void addByPassParam() {
       if (mByPassedIndex != -1) {
@@ -456,27 +392,6 @@ namespace guitard {
      * Allows loading additional settings after deserialization
      */
     virtual void deserializeAdditional(nlohmann::json& serialized) { }
-
-
-    /**                 UI STUFF                */
-    // TODO this has to go
-
-#ifndef GUITARD_HEADLESS
-    //void moveAlong(const float x) {
-    //  if (shared.info->name == "FeedbackNode") { return; }
-    //  if (mUi != nullptr) {
-    //    mUi->translate(x, 0);
-    //  }
-    //  for (int i = 0; i < shared.outputCount; i++) {
-    //    NodeSocket* socket = shared.socketsOut[i];
-    //    for (int s = 0; s < MAX_SOCKET_CONNECTIONS; s++) {
-    //      if (socket->mConnectedTo[s] != nullptr) {
-    //        socket->mConnectedTo[s]->mParentNode->moveAlong(x);
-    //      }
-    //    }
-    //  }
-    //}
-#endif
 
     /**
      * Function to retrieve the license/copyright info about the node

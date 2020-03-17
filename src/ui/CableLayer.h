@@ -68,7 +68,9 @@ namespace guitard {
       mNodeSeverEvent.subscribe(mBus, MessageBus::SeverNodeConnection, [&](const Coord2D pos) {
         NodeSocket* close = getClosestToConnection(pos);
         if (close != nullptr) {
-          close->disconnectAll();
+          MessageBus::fireEvent<SocketConnectRequest>(
+            mBus, MessageBus::SocketConnect, { close, nullptr }
+          );
         }
         mDirty = true;
       });
@@ -85,8 +87,8 @@ namespace guitard {
           }
           Node* targetNode = target->mParentNode;
           for (int i = 0; i < targetNode->mInputCount; i++) {
-            if (targetNode->mSocketsIn[i]->mConnectedTo[0] != nullptr &&
-              targetNode->mSocketsIn[i]->mConnectedTo[0]->mParentNode == node) {
+            if (targetNode->mSocketsIn[i].mConnectedTo[0] != nullptr &&
+              targetNode->mSocketsIn[i].mConnectedTo[0]->mParentNode == node) {
               return;
             }
           }
@@ -102,11 +104,13 @@ namespace guitard {
         // WDBGMSG(socket->mParentNode->mType.c_str());
         // TODOG this is kinda shady and does not use the MessageBus::SocketConnect event
         if (mOutNode == nullptr) { return; }
-        NodeSocket* outSocket = mOutNode->mSocketsIn[0];
+        NodeSocket* outSocket = &mOutNode->mSocketsIn[0];
         if (socket == this->mPreviewSocketPrev || socket == this->mPreviewSocket) {
           // If the socket clicked is the current preview socket, connect the original socket again
           if (this->mPreviewSocketPrev != nullptr) {
-            outSocket->connect(this->mPreviewSocketPrev);
+            MessageBus::fireEvent<SocketConnectRequest>(
+              mBus, MessageBus::SocketConnect, { outSocket, this->mPreviewSocketPrev }
+            );
             this->mPreviewSocketPrev = nullptr;
           }
           this->mPreviewSocket = nullptr;
@@ -119,7 +123,9 @@ namespace guitard {
             this->mPreviewSocketPrev = outSocket->mConnectedTo[0];
           }
           this->mPreviewSocket = socket;
-          outSocket->connect(socket);
+          MessageBus::fireEvent<SocketConnectRequest>(
+            mBus, MessageBus::SocketConnect, { outSocket, socket }
+          );
         }
         this->mDirty = true;
       });
@@ -186,7 +192,7 @@ namespace guitard {
       for (int n = 0; n < mNodes->size(); n++) {
         NodeUi* curNode = mNodes->get(n);
         for (int i = 0; i < curNode->mNode->mOutputCount; i++) {
-          NodeSocket* curSock = curNode->mNode->mSocketsOut[i];
+          NodeSocket* curSock = &curNode->mNode->mSocketsOut[i];
           for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
             if (curSock->mConnectedTo[j] != nullptr) {
               NodeSocket* tarSock = curSock->mConnectedTo[j];
@@ -209,10 +215,10 @@ namespace guitard {
       for (int n = 0; n < mNodes->size(); n++) {
         NodeUi* curNode = mNodes->get(n);
         for (int i = 0; i < curNode->mNode->mInputCount; i++) {
-          NodeSocket* curSock = curNode->mNode->mSocketsIn[i];
+          NodeSocket* curSock = &curNode->mNode->mSocketsIn[i];
           if (curSock->mConnectedTo[0] != nullptr) {
             NodeSocket* tarSock = curSock->mConnectedTo[0];
-            if (tarSock == mPreviewSocket && curSock == mOutNode->mSocketsIn[0]) {
+            if (tarSock == mPreviewSocket && curSock == &mOutNode->mSocketsIn[0]) {
               // Draw the temporary bypass
               g.DrawDottedLine(
                 curSock == mHighlightSocket ? Theme::Cables::COLOR_SPLICE_IN : Theme::Cables::COLOR,
@@ -254,13 +260,13 @@ namespace guitard {
       for (int n = 0; n < mNodes->size(); n++) {
         NodeUi* curNode = mNodes->get(n);
         for (int i = 0; i < curNode->mNode->mOutputCount; i++) {
-          NodeSocket* curSock = curNode->mNode->mSocketsOut[i];
+          NodeSocket* curSock = &curNode->mNode->mSocketsOut[i];
           if (curSock != nullptr) {
             DrawSocket(g, curSock);
           }
         }
         for (int i = 0; i < curNode->mNode->mInputCount; i++) {
-          NodeSocket* curSock = curNode->mNode->mSocketsIn[i];
+          NodeSocket* curSock = &curNode->mNode->mSocketsIn[i];
           if (curSock != nullptr) {
             DrawSocket(g, curSock);
           }
@@ -338,7 +344,7 @@ namespace guitard {
       for (int n = 0; n < mNodes->size(); n++) {
         NodeUi* curNode = mNodes->get(n);
         for (int i = 0; i < curNode->mNode->mInputCount; i++) {
-          NodeSocket* curSock = curNode->mNode->mSocketsIn[i];
+          NodeSocket* curSock = &curNode->mNode->mSocketsIn[i];
           NodeSocket* tarSock = curSock->mConnectedTo[0];
           if (tarSock != nullptr) {
             float x1 = tarSock->mAbs.x + socketRadius;

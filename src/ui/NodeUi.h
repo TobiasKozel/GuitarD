@@ -86,9 +86,12 @@ namespace guitard {
         NodeSocket* out = getQuickConnectSocket(true);
         NodeSocket* prev = pair.socket->mConnectedTo[0];
         if (in != nullptr && out != nullptr) {
-          pair.socket->disconnect();
-          in->connect(prev);
-          out->connect(pair.socket);
+          MessageBus::fireEvent<SocketConnectRequest>(
+            mBus, MessageBus::SocketConnect, { in, prev }
+          );
+          MessageBus::fireEvent<SocketConnectRequest>(
+            mBus, MessageBus::SocketConnect, { out, pair.socket }
+          );
         }
       });
 
@@ -96,7 +99,9 @@ namespace guitard {
         if (mTargetRECT.Contains(IRECT{ req.pos.x, req.pos.y, req.pos.x, req.pos.y })) {
           NodeSocket* socket = getQuickConnectSocket(req.from->mIsInput);
           if (socket != nullptr) {
-            socket->connect(req.from);
+            MessageBus::fireEvent<SocketConnectRequest>(
+              mBus, MessageBus::SocketConnect, { socket, req.from }
+            );
           }
         }
       });
@@ -114,15 +119,15 @@ namespace guitard {
      */
     virtual NodeSocket* getQuickConnectSocket(const bool output = false) {
       for (int i = 0; i < MAX_NODE_SOCKETS; i++) {
-        NodeSocket* socket = output ? mNode->mSocketsOut[i] : mNode->mSocketsIn[i];
-        if (socket != nullptr && !socket->mConnected) {
+        NodeSocket* socket = output ? &mNode->mSocketsOut[i] : &mNode->mSocketsIn[i];
+        if (socket->mParentNode != nullptr && !socket->mConnected) {
           // Look for the first unconnected socket
           return socket;
         }
       }
       for (int i = 0; i < MAX_NODE_SOCKETS; i++) {
-        NodeSocket* socket = output ? mNode->mSocketsOut[i] : mNode->mSocketsIn[i];
-        if (socket != nullptr) {
+        NodeSocket* socket = output ? &mNode->mSocketsOut[i] : &mNode->mSocketsIn[i];
+        if (socket->mParentNode != nullptr) {
           // Use a socket even if it is connected
           return socket;
         }
@@ -188,14 +193,14 @@ namespace guitard {
      */
     void setUpSockets() {
       for (int i = 0; i < mNode->mInputCount; i++) {
-        NodeSocketUi* s = new NodeSocketUi(mNode->mPos, mNode->mSocketsIn[i], mBus);
+        NodeSocketUi* s = new NodeSocketUi(mNode->mPos, &mNode->mSocketsIn[i], mBus);
         GetUI()->AttachControl(s);
         mInSocketsUi[i] = s;
         mElements.add(s);
       }
 
       for (int i = 0; i < mNode->mOutputCount; i++) {
-        NodeSocketUi* socket = new NodeSocketUi(mNode->mPos, mNode->mSocketsOut[i], mBus);
+        NodeSocketUi* socket = new NodeSocketUi(mNode->mPos, &mNode->mSocketsOut[i], mBus);
         GetUI()->AttachControl(socket);
         mOutSocketsUi[i] = socket;
         mElements.add(socket);
@@ -207,7 +212,7 @@ namespace guitard {
      */
     virtual void placeSockets() const {
       for (int i = 0; i < mNode->mInputCount; i++) {
-        NodeSocket* s = mNode->mSocketsIn[i];
+        NodeSocket* s = &mNode->mSocketsIn[i];
         if (s->mRel.x == 0 && s->mRel.y == 0) {
           s->mRel.x = mNode->mDimensions.x * -0.5 + Theme::Node::SHADOW_BOUNDS;
           s->mRel.y = i * 50.f - (mNode->mInputCount / 2);
@@ -215,7 +220,7 @@ namespace guitard {
       }
 
       for (int i = 0; i < mNode->mOutputCount; i++) {
-        NodeSocket* s = mNode->mSocketsOut[i];
+        NodeSocket* s = &mNode->mSocketsOut[i];
         if (s->mRel.x == 0 && s->mRel.y == 0) {
           s->mRel.x = mNode->mDimensions.x * 0.5 - Theme::Node::SHADOW_BOUNDS;
           s->mRel.y = i * 35.f - (mNode->mOutputCount / 2) * 35;
@@ -523,13 +528,13 @@ namespace guitard {
       }
 
       for (int i = 0; i < mNode->mInputCount; i++) {
-        mNode->mSocketsIn[i]->mAbs.x += dX;
-        mNode->mSocketsIn[i]->mAbs.y += dY;
+        mNode->mSocketsIn[i].mAbs.x += dX;
+        mNode->mSocketsIn[i].mAbs.y += dY;
       }
 
       for (int i = 0; i < mNode->mOutputCount; i++) {
-        mNode->mSocketsOut[i]->mAbs.x += dX;
-        mNode->mSocketsOut[i]->mAbs.y += dY;
+        mNode->mSocketsOut[i].mAbs.x += dX;
+        mNode->mSocketsOut[i].mAbs.y += dY;
       }
       mNode->mPos.x += dX;
       mNode->mPos.y += dY;

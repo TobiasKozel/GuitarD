@@ -11,7 +11,7 @@
  */
 #include "./simple_gate/SimpleGateNode.h"
 #include "./simple_compressor/SimpleComressorNode.h"
-#include "./autogain/AutoGainNode.h"
+// #include "./autogain/AutoGainNode.h"
 #include "./gate_sidechain/SideChainGateNode.h"
 
 /**
@@ -23,12 +23,12 @@
 /**
  * Distortions
  */
-#include "./simple_drive/SimpleDriveNode.h"
-#include "./bitcrusher/BitCrusherNode.h"
-#include "./rectify/RectifyNode.h"
-#include "./fuzz/FuzzNode.h"
-#include "./overdrive/OverDriveNode.h"
-#include "./powersag/PowerSagNode.h"
+//#include "./simple_drive/SimpleDriveNode.h"
+//#include "./bitcrusher/BitCrusherNode.h"
+//#include "./rectify/RectifyNode.h"
+//#include "./fuzz/FuzzNode.h"
+//#include "./overdrive/OverDriveNode.h"
+//#include "./powersag/PowerSagNode.h"
 
 
 /**
@@ -51,19 +51,19 @@
 /**
  * Routing
  */
-#include "./combine/CombineNode.h"
-#include "./feedback/FeedbackNode.h"
-#include "./split/SplitNode.h"
-#include "./band_split/BandSplitNode.h"
+//#include "./combine/CombineNode.h"
+//#include "./feedback/FeedbackNode.h"
+//#include "./split/SplitNode.h"
+//#include "./band_split/BandSplitNode.h"
 
 /**
  * Cab stuff
  */
-#include "./simple_cab/SimpleCabNode.h"
-#include "./cab_lib/CabLibNode.h"
+//#include "./simple_cab/SimpleCabNode.h"
+//#include "./cab_lib/CabLibNode.h"
 
 /**
  * Automation
  */
-#include "./envelope/EnvelopeNode.h"
-#include "./lfo/LfoNode.h"
+//#include "./envelope/EnvelopeNode.h"
+//#include "./lfo/LfoNode.h"
