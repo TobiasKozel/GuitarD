@@ -51,7 +51,7 @@
 /**
  * Routing
  */
-//#include "./combine/CombineNode.h"
+#include "./combine/CombineNode.h"
 //#include "./feedback/FeedbackNode.h"
 //#include "./split/SplitNode.h"
 //#include "./band_split/BandSplitNode.h"

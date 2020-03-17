@@ -210,8 +210,6 @@ namespace guitard {
         }
       }
 
-      const int nodeCount = mProcessList.size();
-
       if (mPauseAudio > 0) {
         /**
          * Skip the block if the mutex is locked, waiting will most likely result in an under-run anyways
@@ -229,14 +227,15 @@ namespace guitard {
 
       mInputNode->CopyIn(in, nFrames);
 
-      for (int n = 0; n < nodeCount; n++) {
-        mProcessList[n]->BlockStart();
+      for (int n = 0; n < mNodes.size(); n++) {
+        mNodes[n]->BlockStart();
       }
       mOutputNode->BlockStart();
 
-      for (int n = 0; n < nodeCount; n++) {
-        mNodes[n]->ProcessBlock(nFrames);
+      for (int n = 0; n < mProcessList.size(); n++) {
+        mProcessList[n]->ProcessBlock(nFrames);
       }
+
       mOutputNode->ProcessBlock(nFrames);
 
       mOutputNode->CopyOut(out, nFrames);

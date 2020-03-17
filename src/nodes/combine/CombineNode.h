@@ -18,26 +18,9 @@ namespace guitard {
     }
 
     void ProcessBlock(const int nFrames) override {
-      if (mIsProcessed) { return; }
-      NodeSocket* s1 = mSocketsIn[0];
-      NodeSocket* s2 = mSocketsIn[1];
-
-      // see which inputs are connected
-      const bool has1 = s1->getConnectedNode() != nullptr;
-      const bool has2 = s2->getConnectedNode() != nullptr;
-      if (has1 == has2 && has1 == false) {
-        outputSilence();
-        return;
-      }
-
-      if ((has1 && !s1->getConnectedNode()->mIsProcessed) || (has2 && !s2->getConnectedNode()->mIsProcessed)) {
-        // skip until inputs are ready
-        return;
-      }
-
       // Choose the buffer from the input or use silence
-      sample** buffer1 = has1 ? s1->mConnectedTo[0]->mParentBuffer : emptyBuffer;
-      sample** buffer2 = has2 ? s2->mConnectedTo[0]->mParentBuffer : emptyBuffer;
+      sample** buffer1 = mSocketsIn[0].mBuffer;
+      sample** buffer2 = mSocketsIn[1].mBuffer;
 
       // Update the params
       mParameters[0].update();
@@ -68,15 +51,14 @@ namespace guitard {
         smoothed[2] = pan2l + smoothed[3] * smoothing;
         smoothed[4] = pan1r + smoothed[5] * smoothing;
         smoothed[6] = pan2r + smoothed[7] * smoothing;
-        mBuffersOut[0][0][i] = buffer1[0][i] * smoothed[0] + buffer2[0][i] * smoothed[2];
-        mBuffersOut[0][1][i] = buffer1[1][i] * smoothed[4] + buffer2[1][i] * smoothed[6];
+        mSocketsOut[0].mBuffer[0][i] = buffer1[0][i] * smoothed[0] + buffer2[0][i] * smoothed[2];
+        mSocketsOut[0].mBuffer[1][i] = buffer1[1][i] * smoothed[4] + buffer2[1][i] * smoothed[6];
         smoothed[1] = smoothed[0];
         smoothed[3] = smoothed[2];
         smoothed[5] = smoothed[4];
         smoothed[7] = smoothed[6];
       }
 
-      mIsProcessed = true;
     }
 
     void setup(const int pSamplerate, const int pMaxBuffer, int, int, int) override {
@@ -87,28 +69,6 @@ namespace guitard {
       mParameters[
         addParameter("Add mode", &mAddMode, 0, 0.0, 1.0, 1.0, { 40, 40 })
       ].wantsDawParameter = false;
-    }
-
-    void deleteBuffers() override {
-      Node::deleteBuffers();
-      if (emptyBuffer != nullptr) {
-        for (int c = 0; c < mChannelCount; c++) {
-          delete emptyBuffer[c];
-        }
-        emptyBuffer = nullptr;
-      }
-    }
-
-    void createBuffers() override {
-      Node::createBuffers();
-      // this will be used to do processing on a disconnected node
-      emptyBuffer = new sample * [mChannelCount];
-      for (int c = 0; c < mChannelCount; c++) {
-        emptyBuffer[c] = new sample[mMaxBlockSize];
-        for (int i = 0; i < mMaxBlockSize; i++) {
-          emptyBuffer[c][i] = 0;
-        }
-      }
     }
   };
 
