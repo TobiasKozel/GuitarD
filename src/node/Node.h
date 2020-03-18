@@ -21,8 +21,6 @@ namespace guitard {
     iplug::OverSampler<sample>* mOverSampler = nullptr;
 #endif
   public: // Everything is public since it most of it needs to be accessible from the graph and the NodeUi
-    bool mIsAutomated = false; // Flag to skip automation if there's none
-
     sample mOverSamplingFactor = 1.0;
     sample mOverSamplingFactorCurrent = 1.0;
     int mOverSamplingIndex = -1;
@@ -47,6 +45,12 @@ namespace guitard {
     NodeSocket mSocketsIn[MAX_NODE_SOCKETS];
     int mOutputCount = 0;
     NodeSocket mSocketsOut[MAX_NODE_SOCKETS];
+
+    /**
+     * Nodes which this one depends on an need to be processed first
+     */
+    Node* mDependencies[MAX_NODE_SOCKETS + MAX_NODE_PARAMETERS] = { nullptr };
+    int mDependencyCount = 0;
 
     Coord2D mPos = { 0, 0 }; // Position on the canvas in pixels
     Coord2D mDimensions = { 250, 200 }; // Size in Pixels
@@ -167,19 +171,6 @@ namespace guitard {
     }
 
     /**
-     * Updates the internal mIsAutomated state
-     */
-    void checkIsAutomated() {
-      for (int i = 0; i < mParameterCount; i++) {
-        if (mParameters[i].automationDependency != nullptr) {
-          mIsAutomated = true;
-          return;
-        }
-      }
-      mIsAutomated = false;
-    }
-
-    /**
      * Main Processing, only takes a blocksize since the node knows its inputs
      */
     virtual void ProcessBlock(int nFrames) = 0;
@@ -254,6 +245,7 @@ namespace guitard {
       if (pChannels != mChannelCount || force) {
         OnChannelsChanged(pChannels);
       }
+      OnConnectionsChanged();
     }
 
     /**
@@ -270,6 +262,24 @@ namespace guitard {
           mSocketsIn[i].mBuffer = EMPTY_BUFFER;
         }
       }
+
+      memset(mDependencies, 0, MAX_NODE_SOCKETS + MAX_NODE_PARAMETERS * sizeof(Node*));
+      mDependencyCount = 0;
+      for (int i = 0; i < mInputCount; i++) {
+        if (mSocketsIn[i].mConnected) {
+          Node* parent = mSocketsIn[i].mConnectedTo[0]->mParentNode;
+          if (parent->mInfo->name != "InputNode" && parent->mInfo->name != "FeedbackNode") {
+            mDependencies[mDependencyCount] = mSocketsIn[i].mConnectedTo[0]->mParentNode;
+            mDependencyCount++;
+          }
+        }
+      }
+      for (int i = 0; i < mParameterCount; i++) {
+        if (mParameters[i].automationDependency != nullptr) {
+          mDependencies[mDependencyCount] = mParameters[i].automationDependency;
+          mDependencyCount++;
+        }
+      }
     }
 
     /**
@@ -281,7 +291,7 @@ namespace guitard {
       if (index >= mParameterCount) { return; }
       ParameterCoupling* p = &mParameters[index];
       n->addAutomationTarget(p);
-      checkIsAutomated();
+      OnConnectionsChanged();
     }
 
     /**
@@ -295,7 +305,7 @@ namespace guitard {
           p->automationDependency->removeAutomationTarget(p);
         }
       }
-      checkIsAutomated();
+      OnConnectionsChanged();
     }
 
     /**

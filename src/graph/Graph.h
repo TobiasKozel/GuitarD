@@ -110,6 +110,10 @@ namespace guitard {
       //  mAudioMutex.unlock();
       //}
       mPauseAudio--;
+      if (mPauseAudio < 0) {
+        WDBGMSG("Looks like the audio thread was unlocked too many times");
+        assert(false);
+    }
     }
 
     /**
@@ -264,8 +268,9 @@ namespace guitard {
       }
 
       mNodes.add(node);
-
-      sortGraph();
+      if (mPauseAudio == 0) {
+        buildProcessingList();
+      }
     }
 
     /**
@@ -355,10 +360,12 @@ namespace guitard {
         byPassConnection(node);
       }
       disconnectNode(node);
-      sortGraph();
+      mNodes.remove(node);
+      if (mPauseAudio == 1) {
+        buildProcessingList();
+      }
       unlockAudioThread();
 
-      mNodes.remove(node);
       if (mNodes.find(node) != -1) {
         assert(false);
       }
@@ -524,7 +531,7 @@ namespace guitard {
               ParameterCoupling* para = &node->mParameters[i];
               if (para->name == name) {
                 found++;
-                if (param.contains("idk")) {
+                if (param.contains("idx")) {
                   para->parameterIdx = param["idx"];
                   para->wantsDawParameter = true;
                 }
@@ -611,7 +618,7 @@ namespace guitard {
           connectNodes(mInputNode, 0, mOutputNode, 0);
         }
 
-        sortGraph();
+        buildProcessingList();
         unlockAudioThread();
       }
       catch (...) {
@@ -630,6 +637,10 @@ namespace guitard {
 
     PointerList<Node> getNodes() const {
       return mNodes;
+    }
+
+    PointerList<Node> getProcessList() const {
+      return mProcessList;
     }
 
     Node* getInputNode() const {
@@ -691,7 +702,7 @@ namespace guitard {
       }
       unlockAudioThread();
       if (mPauseAudio == 0) {
-        sortGraph();
+        buildProcessingList();
       }
     }
 
@@ -720,49 +731,60 @@ namespace guitard {
      * This function will build the list used to calculate the DSP
      * Has to be called each time a connection changes
      */
-    void sortGraph() {
-      lockAudioThread();
-      mProcessList.clear();
-      for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
-        // Put in the nodes which directly follow the input node
-        NodeSocket* con = mInputNode->mSocketsOut[0].mConnectedTo[i];
-        if (con != nullptr) {
-          mProcessList.add(con->mParentNode);
-        }
-      }
+    void buildProcessingList() {
+      
+      PointerList<Node> visited;
+      PointerList<Node> stack;
       PointerList<Node> feedback;
-      for (int tries = 0; tries < mNodes.size(); tries++) {
-        for (int i = 0; i < mProcessList.size(); i++) {
-          Node* node = mProcessList[i];
-          // gather the feedback nodes to push them add the end of the list again
-          if (node->mInfo->name == "FeedbackNode" && feedback.find(node) == -1) {
-            feedback.add(node);
-          }
-          for (int out = 0; out < node->mOutputCount; out++) {
-            NodeSocket* outSocket = &node->mSocketsOut[out];
-            if (outSocket->mParentNode == nullptr) { continue; }
-            for (int next = 0; next < MAX_SOCKET_CONNECTIONS; next++) {
-              NodeSocket* nextSocket = outSocket->mConnectedTo[next];
-              if (nextSocket == nullptr) { continue; }
-              Node* nextNode = nextSocket->mParentNode;
-              // Don't want to add duplicates or the output node
-              if (mProcessList.find(nextNode) != -1) { continue; }
-              mProcessList.add(nextNode);
-            }
-          }
+
+      for (int i = 0; i < mNodes.size(); i++) {
+        if (mNodes[i]->mInfo->name == "FeedbackNode") {
+          feedback.add(mNodes[i]);
+        }
+        if (visited.find(mNodes[i]) == -1) {
+          topSort(mNodes[i], visited, stack);
         }
       }
 
-      if (mProcessList.find(mOutputNode) == -1) {
-        // Graph can't be processed;
+
+      lockAudioThread();
+      mProcessList.clear();
+
+      /**
+       * Push all the feedbacks in front so they can emit their last buffer
+       */
+      for (int i = 0; i < feedback.size(); i++) {
+        mProcessList.add(feedback[i]);
       }
-      else {
-        mProcessList.remove(mOutputNode);
+
+      /**
+       * Get the main bulk of the node in the process list
+       * except for feedback nodes
+       */
+      for (int i = 0; i < stack.size(); i++) {
+        if (stack[i]->mInfo->name != "FeedbackNode") {
+          mProcessList.add(stack[i]);
+        }
       }
+
+      /**
+       * Push the feeback nodes a second time at the back so they can grab the buffers they need for the next block
+       */
       for (int i = 0; i < feedback.size(); i++) {
         mProcessList.add(feedback[i]);
       }
       unlockAudioThread();
+    }
+
+  private:
+    void topSort(Node* n, PointerList<Node>& visited, PointerList<Node>& stack) {
+      visited.add(n);
+      for (int i = 0; i < n->mDependencyCount; i++) {
+        if (visited.find(n->mDependencies[i]) == -1) {
+          topSort(n->mDependencies[i], visited, stack);
+        }
+      }
+      stack.add(n);
     }
   };
 }

@@ -70,8 +70,8 @@ namespace guitard {
     }
 
     void ProcessBlock(const int nFrames) override {
-      if (!inputsReady() || mIsProcessed || byPass()) { return; }
-      sample** buffer = mSocketsIn[0]->mConnectedTo[0]->mParentBuffer;
+      if (byPass()) { return; }
+      sample** buffer = mSocketsIn[0].mBuffer;
       mParameters[1].update();
       mParameters[2].update();
       mParameters[3].update();
@@ -88,7 +88,6 @@ namespace guitard {
         // TODOG take into account the scaling type e.g. frequency
         c->automation = current * c->max;
       }
-      mIsProcessed = true;
     }
   };
   GUITARD_REGISTER_NODE(EnvelopeNode,

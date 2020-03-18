@@ -69,14 +69,12 @@ namespace guitard {
     }
 
     void ProcessBlock(const int nFrames) override {
-      if (mIsProcessed) { return; }
       mParameters[0].update();
       if (mByPassed > 0.5) {
         for (int i = 0; i < mAutomationTargetCount; i++) {
           ParameterCoupling* c = mAutomationTargets.get(i);
           c->automation = 0.0;
         }
-        mIsProcessed = true;
         return;
       }
       mParameters[1].update();
@@ -93,7 +91,6 @@ namespace guitard {
         // TODOG take into account the scaling type e.g. frequency
         c->automation = mLfoVal * c->max;
       }
-      mIsProcessed = true;
     }
   };
   GUITARD_REGISTER_NODE(

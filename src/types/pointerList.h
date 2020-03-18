@@ -95,5 +95,14 @@ namespace guitard {
       mList.Empty();
 #endif
     }
+
+    void insert(T* element, const int index) {
+      if (index > size() || index < 0) { return; }
+#ifdef GUITARD_VECTOR_LIST
+      mList.insert(mList.begin() + index, element);
+#else
+      mList.Insert(index, element);
+#endif
+    }
   };
 }

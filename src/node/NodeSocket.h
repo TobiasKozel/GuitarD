@@ -17,7 +17,7 @@ namespace guitard {
   struct NodeSocket {
     // Will not change over the lifetime of the object
     bool mIsInput;
-    Node* mParentNode; // The node it belongs to
+    Node* mParentNode = nullptr; // The node it belongs to
     int mIndex; // The index of the input or output
 
     Coord2D mRel; // Relative position

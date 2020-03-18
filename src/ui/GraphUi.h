@@ -333,6 +333,7 @@ namespace guitard {
               if (node != r.automationNode) {
                 // Don't allow automation on self
                 node->attachAutomation(r.automationNode, p);
+                mGraph->buildProcessingList();
               }
             }
           }
@@ -433,7 +434,7 @@ namespace guitard {
           return true;
         }
         if (key.VK == iplug::kVK_S) {
-          mGraph->sortGraph();
+          mGraph->buildProcessingList();
           return true;
         }
         if (key.VK == iplug::kVK_L) {
@@ -442,7 +443,22 @@ namespace guitard {
           setGraph(mGraph);
           return true;
         }
-
+        if (key.VK == iplug::kVK_W) {
+          if (mSelectedNodes.size() == 1) {
+            String test = "\nProcess list positions: ";
+            auto nodes = mGraph->getProcessList();
+            Node* node = mSelectedNodes[0]->mNode;
+            for (int i = 0; i < nodes.size(); i++) {
+              if (nodes[i] == node) {
+                test += " " + std::to_string(i);
+              }
+            }
+            test += "\n";
+            WDBGMSG(test.c_str());
+            return true;
+          }
+          return false;
+        }
         if (key.VK == iplug::kVK_F1) {
           if (mSelectedNodes.size() == 1) {
             mGraphics->ShowMessageBox(

@@ -65,5 +65,5 @@
 /**
  * Automation
  */
-//#include "./envelope/EnvelopeNode.h"
-//#include "./lfo/LfoNode.h"
+#include "./envelope/EnvelopeNode.h"
+#include "./lfo/LfoNode.h"
