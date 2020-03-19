@@ -29,7 +29,7 @@ GuitarD::GuitarD(const InstanceInfo& info) : iplug::Plugin(info, MakeConfig(MAX_
    * TODOG This doesn't work for VST3 right now for some reason
    */
   mParamChanged.subscribe(&mBus, guitard::MessageBus::ParametersChanged, [&](bool) {
-    this->InformHostOfParameterDetailsChange();
+    // this->InformHostOfParameterDetailsChange();
   });
 
   /**

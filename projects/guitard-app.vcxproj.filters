@@ -543,6 +543,9 @@
     <ClInclude Include="..\src\nodes\feedback\FeedbackNode.h">
       <Filter>src\nodes\flow</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\nodes\gate_sidechain\SideChainGateNode.h">
+      <Filter>src\nodes\dynamics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

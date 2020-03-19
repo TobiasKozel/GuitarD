@@ -5,17 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(Windows) Launch",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/src/headless/headless.exe",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false
-        },
-        {
             "type": "node",
             "request": "launch",
             "name": "Soundwoofer Dummy",
@@ -26,16 +15,17 @@
             ]
         },
         {
-            "name": "(gdb) Headless",
+            "name": "(gdb) launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/src/headless/headless",
+            "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
+            "miDebuggerPath": "C:\\Strawberry\\c\\bin\\gdb.exe",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

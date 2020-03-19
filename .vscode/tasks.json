@@ -4,31 +4,46 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "msvc headless debug",
+            "label": "msvc debug",
             "type": "shell",
-            "command": "cl /DEBUG:FULL /ZI /I./ /I./thirdparty /I./src/faust/generated ./src/headless/headless.cpp /link /O./src/headless/headless.exe",
+            "command": "cl",
+            "args": [
+                "/DEBUG:FULL",
+                "/ZI",
+                "/I./",
+                "/I./thirdparty",
+                "/I./src/faust/generated",
+                "${file}",
+                "/link",
+                "/O",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "problemMatcher": ["$msCompile"]
         },
         {
-            "label": "msvc headless",
+            "label": "gcc debug",
             "type": "shell",
-            "command": "cl /O2 /I./ /I./thirdparty /I./src/faust/generated ./src/headless/headless.cpp /link /OUT:./src/headless/headless.exe",
+            "command": "g++",
+            "args": [
+                "-g",
+                "-I./",
+                "-I./thirdparty/",
+                "-I./src/faust/generated/",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}",
+                // "-pthread"
+                "-lws2_32"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
-        },
-        {
-            "label": "gcc headless",
-            "type": "shell",
-            "command": "python ./scripts/compile_faust.py && g++ -g -pthread -I./ -I./thirdparty/ -I./src/faust/generated/ ./src/headless/headless.cpp -o ./src/headless/headless",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            },
+            "problemMatcher": ["$gcc"]
         }
     ]
 }

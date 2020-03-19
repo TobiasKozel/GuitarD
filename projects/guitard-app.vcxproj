@@ -359,6 +359,7 @@
     <ClInclude Include="..\src\nodes\feedback\FeedbackNode.h" />
     <ClInclude Include="..\src\nodes\flanger\FlangerNode.h" />
     <ClInclude Include="..\src\nodes\fuzz\FuzzNode.h" />
+    <ClInclude Include="..\src\nodes\gate_sidechain\SideChainGateNode.h" />
     <ClInclude Include="..\src\nodes\io\InputNode.h" />
     <ClInclude Include="..\src\nodes\io\OutputNode.h" />
     <ClInclude Include="..\src\nodes\lfo\LfoNode.h" />
