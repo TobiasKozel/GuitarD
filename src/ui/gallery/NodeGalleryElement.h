@@ -11,7 +11,7 @@ namespace guitard {
     bool mMouseIsOver = false;
     bool mHasSvg = false;
     ISVG mSvgBg = ISVG(nullptr);
-    float mAspectRatio = 1.0;
+    Coord2D mSvgPadding;
 
     GalleryElement(NodeList::NodeInfo* node, IGraphics& g) {
       mInfo = node;
@@ -20,6 +20,16 @@ namespace guitard {
         mSvgBg = g.LoadSVG(node->image.c_str());
         if (mSvgBg.IsValid()) {
           mHasSvg = true;
+          const Coord2D svg = { mSvgBg.W(), mSvgBg.H() };
+          const Coord2D scale = {
+            Theme::Gallery::ELEMENT_WIDTH / svg.x,
+            Theme::Gallery::ELEMENT_HEIGHT / svg.y
+          };
+          const float s = std::min(scale.x, scale.y);
+          mSvgPadding = {
+            ( Theme::Gallery::ELEMENT_WIDTH - (svg.x * s)) * 0.5f,
+            (Theme::Gallery::ELEMENT_HEIGHT - (svg.y * s)) * 0.5f
+          };
         }
       }
     }
@@ -37,18 +47,24 @@ namespace guitard {
         (index % columns + 1) * Theme::Gallery::ELEMENT_PADDING;
       mRECT.R = mRECT.L + Theme::Gallery::ELEMENT_WIDTH;
       if (mMouseIsOver) {
+        g.FillRect(Theme::Gallery::ELEMENT_BACKGROUND_HOVER, mRECT);
         g.DrawRect(iplug::igraphics::COLOR_ORANGE, mRECT);
       }
       else {
+        g.FillRect(Theme::Gallery::ELEMENT_BACKGROUND, mRECT);
         g.DrawRect(iplug::igraphics::COLOR_WHITE, mRECT);
       }
 
       const IRECT padded = mRECT.GetPadded(-2);
       if (mHasSvg) {
-        g.DrawSVG(mSvgBg, padded);
+        g.DrawSVG(mSvgBg, padded.GetAltered(
+          mSvgPadding.x, mSvgPadding.y, -mSvgPadding.x, -mSvgPadding.y
+        ));
       }
       else {
-        g.FillRoundRect(Theme::Gallery::CATEGORY_TITLE_BG_HOVER, padded, 8);
+        g.FillRoundRect(Theme::Gallery::CATEGORY_TITLE_BG_HOVER,
+          padded.GetAltered(20, 0, -20, 0), 8
+        );
       }
       const IRECT text = padded.GetFromBottom(20);
       g.FillRect(Theme::Gallery::ELEMENT_TITLE_BG, text);

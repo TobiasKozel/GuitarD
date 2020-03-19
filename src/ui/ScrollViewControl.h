@@ -67,7 +67,6 @@ namespace guitard {
         if (!skipResize) {
           OnResize();
         }
-        return;
       }
     }
 

@@ -12,7 +12,7 @@ namespace guitard {
   class SideBar : public IControl {
     MessageBus::Bus* mBus = nullptr;
   public:
-    ScrollViewControl mScrollview;
+    ScrollViewControl mScrollView;
     bool mIsOpen = false;
     IText mStats;
     long long avgExecutionTime;
@@ -53,18 +53,18 @@ namespace guitard {
     }
 
     void OnAttached() override {
-      mScrollview.SetRenderPriority(12);
-      mScrollview.setDoDragScroll(false);
-      mScrollview.setDoScroll(false);
-      mScrollview.setScrollBarEnable(false);
-      mScrollview.setCleanUpEnabled(false); // All the children of the scrollview are on the stack of this object
-      GetUI()->AttachControl(&mScrollview);
-      mScrollview.appendChild(&mNodeGallery);
-      mScrollview.appendChild(&mPresetBrowser);
+      mScrollView.SetRenderPriority(12);
+      mScrollView.setDoDragScroll(false);
+      mScrollView.setDoScroll(false);
+      mScrollView.setScrollBarEnable(false);
+      mScrollView.setCleanUpEnabled(false); // All the children of the scroll view are on the stack of this object
+      GetUI()->AttachControl(&mScrollView);
+      mScrollView.appendChild(&mNodeGallery);
+      mScrollView.appendChild(&mPresetBrowser);
     }
 
     void OnDetached() override {
-      GetUI()->DetachControl(&mScrollview);
+      GetUI()->DetachControl(&mScrollView);
       IControl::OnDetached();
     }
 
@@ -72,9 +72,9 @@ namespace guitard {
       if (open == mIsOpen) { return; }
       mIsOpen = open;
       OnResize();
-      mScrollview.Hide(!open);
+      mScrollView.Hide(!open);
       if (!mIsOpen) {
-        mScrollview.OnMouseOut();
+        mScrollView.OnMouseOut();
       }
       GetUI()->SetAllControlsDirty();
     }
@@ -84,7 +84,7 @@ namespace guitard {
         g.FillRect(Theme::Gallery::BACKGROUND, mRECT);
         drawTabHeaders(g);
         // small gap between the tabs and content
-        g.FillRect(Theme::Gallery::CATEGORY_BG,
+        g.FillRect(Theme::Gallery::BACKGROUND,
           mRECT.GetReducedFromRight(Theme::SideBar::HEADER_WITH + Theme::Gallery::PADDING - 2).GetFromRight(2)
         );
       }
@@ -122,13 +122,13 @@ namespace guitard {
       float x1 = mRECT.L + Theme::Gallery::ADD_CIRCLE_RADIUS - (Theme::Gallery::BUTTON_SIZE / 2);
       float y1 = mRECT.T + Theme::Gallery::ADD_CIRCLE_RADIUS - (Theme::Gallery::BUTTON_ICON_SIZE / 2);
       g.FillRect(iplug::igraphics::COLOR_WHITE, IRECT(
-                   x1, y1, x1 + Theme::Gallery::BUTTON_SIZE, y1 + Theme::Gallery::BUTTON_ICON_SIZE
-                 ));
+        x1, y1, x1 + Theme::Gallery::BUTTON_SIZE, y1 + Theme::Gallery::BUTTON_ICON_SIZE
+      ));
       x1 = mRECT.L + Theme::Gallery::ADD_CIRCLE_RADIUS - (Theme::Gallery::BUTTON_ICON_SIZE / 2);
       y1 = mRECT.T + Theme::Gallery::ADD_CIRCLE_RADIUS - (Theme::Gallery::BUTTON_SIZE / 2);
       g.FillRect(iplug::igraphics::COLOR_WHITE, IRECT(
-                   x1, y1, x1 + Theme::Gallery::BUTTON_ICON_SIZE, y1 + Theme::Gallery::BUTTON_SIZE
-                 ));
+        x1, y1, x1 + Theme::Gallery::BUTTON_ICON_SIZE, y1 + Theme::Gallery::BUTTON_SIZE
+      ));
       //GraphStats* stats;
       //MessageBus::fireEvent<GraphStats**>(mBus, MessageBus::GetGraphStats, &stats);
       //avgExecutionTime = static_cast<long long> ((59 * avgExecutionTime + stats->executionTime) / 60.0);
@@ -161,7 +161,7 @@ namespace guitard {
           mTabs[i].header.T = main.T + i * (Theme::SideBar::HEADER_HEIGHT + Theme::SideBar::HEADER_PADDING);
           mTabs[i].header.B = mTabs[i].header.T + Theme::SideBar::HEADER_HEIGHT;
         }
-        mScrollview.SetTargetAndDrawRECTs(main);
+        mScrollView.SetTargetAndDrawRECTs(main);
       }
       else {
         bounds.Pad(-Theme::Gallery::PADDING);

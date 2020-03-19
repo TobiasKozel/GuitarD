@@ -20,7 +20,7 @@ namespace guitard {
        */
       ScrollViewControl::OnInit();
       setFullWidthChildren(true);
-      // setDoDragScroll(false);
+      setDoDragScroll(false);
       init();
       OnResize();
     }

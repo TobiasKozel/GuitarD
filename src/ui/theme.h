@@ -31,11 +31,13 @@ namespace guitard {
       const float PADDING = 10;
 
       const IText ELEMENT_TITLE{ 18, iplug::igraphics::COLOR_WHITE, "Roboto-Regular", EAlign::Center, EVAlign::Bottom, 0 };
-      const IColor ELEMENT_TITLE_BG(150, 30, 30, 30);
+      const IColor ELEMENT_TITLE_BG(190, 30, 30, 30);
       const float ELEMENT_TITLE_HEIGHT = 28;
       const float ELEMENT_HEIGHT = 110;
       const float ELEMENT_WIDTH = 200;
       const float ELEMENT_PADDING = 8;
+      const IColor ELEMENT_BACKGROUND = { 255, 60, 60, 60 };
+      const IColor ELEMENT_BACKGROUND_HOVER = { 255, 100, 100, 100 };
 
       const IColor CATEGORY_TITLE_BG(255, 100, 100, 100);
       const IColor CATEGORY_TITLE_BG_HOVER(255, 150, 150, 150);
