@@ -9,6 +9,9 @@
 #include "../nodes/io/OutputNode.h"
 #include "../parameter/ParameterManager.h"
 
+//#define GUITARD_GRAPH_MUTEX
+//#define GUITARD_GRAPH_ATOMIC
+
 namespace guitard {
   /**
    * A object of this class will hold a bunch of Nodes and can process them
@@ -25,11 +28,6 @@ namespace guitard {
      * List used to process the nodes in the right order
      */
     PointerList<Node> mProcessList;
-
-    /**
-     * Mutex to keep changes to the graph like adding/removing or rerouting from crashing
-     */
-    Mutex mAudioMutex;
 
     /**
      * Acts as a semaphore since the mAudioMutex only needs to be locked once to stop the audio thread
@@ -76,15 +74,29 @@ namespace guitard {
      */
     float mScale = 1.0;
 
+#ifdef GUITARD_GRAPH_MUTEX
+    /**
+     * Mutex to keep changes to the graph like adding/removing or rerouting from crashing
+     */
+    Mutex mAudioMutex;
+#else
     /**
      * True if a thread is in the ProcessBlock right now
      */
-    bool mIsProcessing = false;
+#ifdef GUITARD_GRAPH_ATOMIC
+    std::atomic<bool> mIsProcessing;
+#else
+    bool mIsProcessing;
+#endif
+#endif
 
   public:
     GraphStats mStats;
 
     explicit Graph(ParameterManager* pParamManager) {
+#ifndef GUITARD_GRAPH_MUTEX
+      mIsProcessing = false;
+#endif
       mParamManager = pParamManager; // we'll keep this around to let nodes register parameters
 
       mInputNode = new InputNode();
@@ -99,16 +111,21 @@ namespace guitard {
 
     void lockAudioThread() {
       mPauseAudio++;
+#ifdef GUITARD_GRAPH_MUTEX
+      if (mPauseAudio == 0) {
+        mAudioMutex.lock();
+      }
+#else
       while (mIsProcessing) { } // wait till the audio thread is done
-      //if (mPauseAudio == 0) {
-      //  mAudioMutex.lock();
-      //}
+#endif
     }
 
     void unlockAudioThread() {
-      //if (mPauseAudio == 1) {
-      //  mAudioMutex.unlock();
-      //}
+#ifdef GUITARD_GRAPH_MUTEX
+      if (mPauseAudio == 1) {
+        mAudioMutex.unlock();
+      }
+#endif
       mPauseAudio--;
       if (mPauseAudio < 0) {
         WDBGMSG("Looks like the audio thread was unlocked too many times");
@@ -230,8 +247,11 @@ namespace guitard {
         return;
       }
 
-      // LockGuard lock(mAudioMutex); // TODOG might not need a lock if the gui has to wait
+#ifdef GUITARD_GRAPH_MUTEX
+      LockGuard lock(mAudioMutex); // TODOG might not need a lock if the gui has to wait
+#else
       mIsProcessing = true;
+#endif
 
       mInputNode->CopyIn(in, nFrames);
 
@@ -245,7 +265,9 @@ namespace guitard {
 
       mOutputNode->CopyOut(out, nFrames);
 
+#ifndef GUITARD_GRAPH_MUTEX
       mIsProcessing = false;
+#endif
     }
 
     /**

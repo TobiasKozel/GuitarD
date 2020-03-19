@@ -9,5 +9,5 @@ namespace guitard {
     }
   };
 
-  // GUITARD_REGISTER_NODE(SideChainGateNode, "Sidechain Gate", "Dynamics", "second input is the trigger")
+  GUITARD_REGISTER_NODE(SideChainGateNode, "Sidechain Gate", "Dynamics", "second input is the trigger")
 }
