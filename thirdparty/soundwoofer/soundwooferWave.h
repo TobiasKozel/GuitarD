@@ -13,41 +13,6 @@
 
 namespace soundwoofer {
   namespace wave {
-    template <typename Tin, typename Tout>
-    class SincResampler {
-      double mStepSize = 0;
-    public:
-      SincResampler(const double inFreq, const double outFreq) {
-        mStepSize = inFreq / outFreq;
-      }
-
-      /**
-       * Will allocate an array for you with the correct size
-       * This is extremely slow since it will take all the samples into account for resampling
-       */
-      size_t resample(Tin* in, const size_t length, Tout** out, Tout amplitude = 1.0) {
-        const size_t outSamples = length / mStepSize;
-        if (outSamples <= 0) { return 0; }
-        (*out) = new Tout[outSamples];
-        double j = 0; // The position at which the sinc interpolation of the input signal should be evaluated
-        for (size_t k = 0; k < outSamples; k++, j += mStepSize) {
-          Tout interpolated = 0;
-          for (size_t i = 0; i < length; i++) {
-            interpolated += in[i] * sinc(j - i);
-          }
-          (*out)[k] = interpolated * amplitude;
-        }
-        return outSamples;
-      }
-
-      static Tout sinc(const double i) {
-        if (i == 0) {
-          return 1;
-        }
-        return (sin(PI * i) / (PI * i));
-      }
-    };
-
     void normalizeIR(SWImpulseShared& ir) {
       if (ir->normalized || ir->samples == nullptr) { return; }
       float sum = 0;
