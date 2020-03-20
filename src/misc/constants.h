@@ -46,3 +46,7 @@
 #define SPLICEIN_DISTANCE 14
 
 #define GUITARD_FLOAT_CONVOLUTION // Means we'll do float convolution since it allows sse
+
+#ifdef GUITARD_SSE
+  #define FFTCONVOLVER_USE_SSE
+#endif
