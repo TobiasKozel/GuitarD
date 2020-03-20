@@ -6,6 +6,7 @@
 #include "../parameter/MeterCoupling.h"
 #include "../types/gstructs.h"
 #include "../types/types.h"
+#include "../types/hiirOversampler.h"
 #ifndef GUITARD_HEADLESS
 #include "Oversampler.h"
 #endif
@@ -17,12 +18,9 @@ namespace guitard {
    */
   class Node {
   protected:
-#ifndef GUITARD_HEADLESS
-    iplug::OverSampler<sample>* mOverSampler = nullptr;
-#endif
+    HiirOverSampler* mOverSampler = nullptr;
   public: // Everything is public since it most of it needs to be accessible from the graph and the NodeUi
-    sample mOverSamplingFactor = 1.0;
-    sample mOverSamplingFactorCurrent = 1.0;
+    sample mOverSamplingFactor = 1.0; // The oversampling factor bound to the control
     int mOverSamplingIndex = -1;
 
     int mSampleRate = 0;
@@ -194,40 +192,40 @@ namespace guitard {
      * Called if the oversampling factor changes
      */
     void updateOversampling() {
-#ifndef GUITARD_HEADLESS
        if (mOverSampler != nullptr) {
          mParameters[mOverSamplingIndex].update();
-         if (mOverSamplingFactor != mOverSamplingFactorCurrent && mSampleRate > 0) {
-           mOverSampler->SetOverSampling(iplug::OverSampler<sample>::RateToFactor(int(mOverSamplingFactor)));
-           OnSamplerateChanged((mSampleRate / mOverSamplingFactorCurrent) * mOverSamplingFactor);
-           mOverSamplingFactorCurrent = mOverSamplingFactor;
+         int fac = std::floor(mOverSamplingFactor);
+         if (fac != mOverSampler->mFactor && mSampleRate > 0) {
+           float prevFac = mOverSampler->mFactor;
+           mOverSampler->setFactor(fac);
+           OnSamplerateChanged(mSampleRate / prevFac);
          }
        }
-#endif
     }
 
     /**
      * Called once when the node is constructed to allow oversampling later on
      */
-    void enableOversampling(int channels = 0) {
-#ifndef GUITARD_HEADLESS
-       if (channels == 0) { channels = mChannelCount; }
+    virtual void enableOversampling() {
        if (mOverSampler == nullptr) {
-         mOverSamplingFactorCurrent = 1;
-         mOverSamplingFactor = 1;
-         mOverSampler = new iplug::OverSampler<sample>(iplug::OverSampler<sample>::RateToFactor(1), true, channels);
+         mOverSamplingFactor = 1.0;
+         mOverSampler = new HiirOverSampler();
          mOverSamplingIndex = addParameter("OverSampling", &mOverSamplingFactor, 1.0, 1, 16, 1);
        }
-#endif
     }
 
     /**
      * React to a change in sample rate
-     * since it won't affect the buffers and the dsp usually needs
-     * to change some internal values, we can't deal with it here
+     * Call the base implementation first and then use the value
+     * stored in mSampleRate to get the oversampling right
      */
     virtual void OnSamplerateChanged(const int pSampleRate) {
-      mSampleRate = pSampleRate;
+      if (mOverSampler != nullptr) {
+        mSampleRate = pSampleRate * mOverSampler->mFactor;
+      }
+      else {
+        mSampleRate = pSampleRate;
+      }
     }
 
     /**

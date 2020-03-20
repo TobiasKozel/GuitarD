@@ -9,7 +9,7 @@ namespace guitard {
   public:
     SimpleDriveNode(NodeList::NodeInfo* info) {
       mInfo = info;
-      enableOversampling(SimpleDrive::getNumOutputs());
+      FaustHeadlessDsp::enableOversampling();
     }
 
 
@@ -65,9 +65,6 @@ namespace guitard {
         IColor(255, bright, 50, 50),
         IRECT(x, y, x + 30, y + 30)
       );
-      std::string factor = "OverSampling " + std::to_string(mNode->mOverSamplingFactorCurrent) + "x";
-      
-      g.DrawText(Theme::Node::HEADER_TEXT, factor.c_str(), mRECT);
       mDirty = true;
     }
 

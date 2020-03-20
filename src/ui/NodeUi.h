@@ -17,7 +17,7 @@ namespace guitard {
 
 
   /**
-   * This class represents a Node on the UI, it's seperate to the node itself
+   * This class represents a Node on the UI, it's separate to the node itself
    * since it will only exists as long as the UI window is open
    */
   class NodeUi : public IControl {
@@ -231,7 +231,7 @@ namespace guitard {
 
     /**
      * Function to calculate the positions of controls on a node
-     * Just give the parameters positons by changing pos in ParameterCoupling
+     * Just give the parameters positions by changing pos in ParameterCoupling
      * and this will not do anything
      * override this if this should not happen at all
      */

@@ -5,6 +5,7 @@
 #include "../misc/constants.h"
 #include "../parameter/ParameterCoupling.h"
 #include "../node/Node.h"
+
 namespace guitard {
   namespace FaustGenerated {
     /**
@@ -79,13 +80,6 @@ namespace guitard {
       FAUSTFLOAT** mBuffersOutAligned = nullptr;
       FAUSTFLOAT** mBuffersInAligned = nullptr;
 
-#ifndef GUITARD_HEADLESS
-      // TODO replace the oversampler
-      iplug::OverSampler<sample>::BlockProcessFunc mOverSampleProcess = [&](sample** inputs, sample** outputs, int nFrames) {
-        this->compute(nFrames, inputs, outputs);
-      };
-#endif
-
     public:
       // These three will be overridden by the generated faust code
       virtual void init(int samplingFreq) = 0;
@@ -148,8 +142,8 @@ namespace guitard {
       }
 
       void OnSamplerateChanged(const int pSamplerate) override {
-        instanceConstants(pSamplerate);
-        mSampleRate = pSamplerate;
+        Node::OnSamplerateChanged(pSamplerate);
+        instanceConstants(mSampleRate);
       }
 
       void OnTransport() override {
@@ -192,6 +186,13 @@ namespace guitard {
         }
       }
 
+      void enableOversampling() override {
+        Node::enableOversampling();
+        mOverSampler->mProc = [&](sample** inputs, sample** outputs, int nFrames) {
+          this->compute(nFrames, inputs, outputs);
+        };
+      }
+
       /**
        * The faust uses a fairly similar way of processing blocks,
        * so this just wraps the call and updates the parameters
@@ -201,14 +202,11 @@ namespace guitard {
         for (int i = 1; i < mParameterCount; i++) {
           mParameters[i].update();
         }
-#ifndef GUITARD_HEADLESS
         if (mOverSampler != nullptr) {
           updateOversampling();
-          mOverSampler->ProcessBlock(mBuffersInAligned, mBuffersOutAligned, nFrames, 2, mOverSampleProcess);
+          mOverSampler->process(mBuffersInAligned, mBuffersOutAligned, nFrames);
         }
-        else
-#endif
-        {
+        else {
           compute(nFrames, mBuffersInAligned, mBuffersOutAligned);
         }
       }

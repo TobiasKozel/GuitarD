@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include "../misc/constants.h"
+
 namespace guitard {
   typedef
 #ifdef SAMPLE_TYPE_FLOAT
