@@ -19,6 +19,7 @@
  */
 #include "./stereo_tool/StereoToolNode.h"
 #include "./phasetool/PhaseToolNode.h"
+#include "./graph_node/GraphNode.h"
 
 /**
  * Distortions

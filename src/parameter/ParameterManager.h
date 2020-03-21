@@ -19,7 +19,7 @@ namespace guitard {
     int mParametersLeft = 0;
 
   public:
-    explicit ParameterManager(MessageBus::Bus* pBus) {
+    explicit ParameterManager(MessageBus::Bus* pBus = nullptr) {
       mBus = pBus;
     }
 

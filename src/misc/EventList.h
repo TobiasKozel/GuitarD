@@ -33,6 +33,7 @@ namespace guitard {
       MaxBlockSizeEvent, // Handles both setting and getting the maxBufferSize
       NodeDragSpawn, // Called from the node gallery category
       NodeSelectionChange,
+      EditMetaNode, // Called with a graph signaling the UI should open a GraphNode
       TOTAL_MESSAGE_IDS // Keep this one at the bottom to count all events
     };
   }

@@ -93,7 +93,7 @@ namespace guitard {
   public:
     GraphStats mStats;
 
-    explicit Graph(ParameterManager* pParamManager) {
+    Graph(ParameterManager* pParamManager = nullptr) {
 #ifndef GUITARD_GRAPH_MUTEX
       mIsProcessing = false;
 #endif

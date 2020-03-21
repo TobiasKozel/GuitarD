@@ -55,6 +55,10 @@ namespace guitard {
       }
     }
 
+    void OnMouseDblClick(float x, float y, const IMouseMod& mod) override {
+      MessageBus::fireEvent<Graph*>(mBus, MessageBus::EditMetaNode, nullptr);
+    }
+
     void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
       if (mod.L) {
         if (mod.C) {

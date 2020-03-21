@@ -101,6 +101,7 @@ namespace guitard {
 
     template <class T>
     void fireEvent(Bus* b, const MESSAGE_ID pEventId, T param) {
+      if (b == nullptr) { return; }
       if (b->mSubscriptions[pEventId].size() == 0) {
         WDBGMSG("Fired a event with not subscribers!\n");
         return;

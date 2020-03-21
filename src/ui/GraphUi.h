@@ -6,6 +6,7 @@
 #include "../misc/HistoryStack.h"
 #include "../graph/Graph.h"
 #include "./NodeUi.h"
+#include "../types/gstack.h"
 
 namespace guitard {
   /**
@@ -19,6 +20,7 @@ namespace guitard {
     MessageBus::Bus* mBus = nullptr;
     IGraphics* mGraphics = nullptr; // Since this is not a UI element, well need to keep the graphics around
     Graph* mGraph = nullptr; // This is the Graph object which will be manipulated from this UI object
+    PointerStack<Graph, 8> mGraphStack;
     PointerList<NodeUi> mNodeUis; // Keep around all the node UIs
 
     /**
@@ -42,6 +44,7 @@ namespace guitard {
     MessageBus::Subscription<Drag> mNodeDragged;
     MessageBus::Subscription<SocketConnectRequest> mOnConnectionEvent;
     MessageBus::Subscription<Node*> mOnDisconnectAllEvent;
+    MessageBus::Subscription<Graph*> mEditMetaNode;
 
     /**
      * Control elements
@@ -389,6 +392,21 @@ namespace guitard {
       mNodeDragged.subscribe(mBus, MessageBus::NodeDragged, [&](const Drag drag) {
         for (int i = 0; i < mSelectedNodes.size(); i++) {
           mSelectedNodes[i]->translate(drag.delta.x, drag.delta.y);
+        }
+      });
+
+      mEditMetaNode.subscribe(mBus, MessageBus::EditMetaNode, [&](Graph* g) {
+        if (g == nullptr) {
+          g = mGraphStack.pop();
+          if (g != nullptr) {
+            setGraph(g);
+          }
+        }
+        else {
+          if (mGraphStack.push(mGraph)) {
+            // Push the current graph on the stack
+            setGraph(g);
+          }
         }
       });
     }

@@ -7,9 +7,6 @@
 #include "../types/gstructs.h"
 #include "../types/types.h"
 #include "../types/hiirOversampler.h"
-#ifndef GUITARD_HEADLESS
-#include "Oversampler.h"
-#endif
 
 namespace guitard {
   /**

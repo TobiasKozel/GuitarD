@@ -19,8 +19,7 @@
 
 namespace guitard {
   /**
-   * This is a stripped down version of the HIIR oversampler from iPlug2
-   * https://github.com/iPlug2/iPlug2/blob/master/IPlug/Extras/Oversampler.h
+   * Super simple wrapper for the hiir up and down samplers
    * It only goes up to 4x oversampling 
    */
   class HiirOverSampler {
@@ -50,6 +49,11 @@ namespace guitard {
     T** mBuf2xDown = nullptr;
     T** mBuf4xUp = nullptr;
     T** mBuf4xDown = nullptr;
+
+    /**
+     * Straight up stolen from the hiir oversampler wrapper from iPlug2
+     * https://github.com/iPlug2/iPlug2/blob/master/IPlug/Extras/Oversampler.h
+     */
     static constexpr double coeffs2x[12] = { 0.036681502163648017, 0.13654762463195794, 0.27463175937945444, 0.42313861743656711, 0.56109869787919531, 0.67754004997416184, 0.76974183386322703, 0.83988962484963892, 0.89226081800387902, 0.9315419599631839, 0.96209454837808417, 0.98781637073289585 };
     static constexpr double coeffs4x[4] = { 0.041893991997656171, 0.16890348243995201, 0.39056077292116603, 0.74389574826847926 };
   public:
