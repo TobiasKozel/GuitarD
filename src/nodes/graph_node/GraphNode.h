@@ -46,7 +46,7 @@ namespace guitard {
     }
   };
 
-  GUITARD_REGISTER_NODE(GraphNode, "Graph Meta Node", "Tools", "adasdsa")
+  GUITARD_REGISTER_NODE(GraphNode, "Graph Meta Node", "Tools", "A meta node which can hold its own graph inside")
 }
 
 #ifndef GUITARD_HEADLESS
@@ -55,6 +55,13 @@ namespace guitard {
   class GraphNodeUi : public NodeUi {
   public:
     GraphNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) { }
+    void Draw(IGraphics& g) override {
+      NodeUi::Draw(g);
+      IRECT padded = mRECT.GetPadded(-40);
+      g.DrawText(Theme::Gallery::ELEMENT_TITLE, "Double click to enter node", padded.GetReducedFromBottom(20));
+      g.DrawText(Theme::Gallery::ELEMENT_TITLE, "Double click background to leave", padded);
+      
+    }
 
     void OnMouseDblClick(float x, float y, const IMouseMod& mod) override {
       MessageBus::fireEvent(mBus, MessageBus::EditMetaNode,
