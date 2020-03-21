@@ -45,17 +45,21 @@ namespace guitard {
     hiir::Downsampler2xFpuTpl<4, T> mDown4x[mChannels];
 #endif
 
-    T** mBuf2xUp = nullptr;
-    T** mBuf2xDown = nullptr;
-    T** mBuf4xUp = nullptr;
-    T** mBuf4xDown = nullptr;
+    // Stack buffers are more convenient
+    T mBufs2x[mChannels * 2][GUITARD_MAX_BUFFER * 2];
+    T* mBuf2xUp[mChannels] = { mBufs2x[0], mBufs2x[1] };
+    T* mBuf2xDown[mChannels] = { mBufs2x[2], mBufs2x[3] };
+
+    T mBufs4x[mChannels * 2][GUITARD_MAX_BUFFER * 4];
+    T* mBuf4xUp[mChannels] = { mBufs4x[0], mBufs4x[1] };
+    T* mBuf4xDown[mChannels] = { mBufs4x[2], mBufs4x[3] };
 
     /**
      * Straight up stolen from the hiir oversampler wrapper from iPlug2
      * https://github.com/iPlug2/iPlug2/blob/master/IPlug/Extras/Oversampler.h
      */
-    static constexpr double coeffs2x[12] = { 0.036681502163648017, 0.13654762463195794, 0.27463175937945444, 0.42313861743656711, 0.56109869787919531, 0.67754004997416184, 0.76974183386322703, 0.83988962484963892, 0.89226081800387902, 0.9315419599631839, 0.96209454837808417, 0.98781637073289585 };
-    static constexpr double coeffs4x[4] = { 0.041893991997656171, 0.16890348243995201, 0.39056077292116603, 0.74389574826847926 };
+    const double coeffs2x[12] = { 0.036681502163648017, 0.13654762463195794, 0.27463175937945444, 0.42313861743656711, 0.56109869787919531, 0.67754004997416184, 0.76974183386322703, 0.83988962484963892, 0.89226081800387902, 0.9315419599631839, 0.96209454837808417, 0.98781637073289585 };
+    const double coeffs4x[4] = { 0.041893991997656171, 0.16890348243995201, 0.39056077292116603, 0.74389574826847926 };
   public:
     int mFactor = 1;
     using ProcessFunction = std::function<void(T**, T**, int)>;
@@ -64,34 +68,12 @@ namespace guitard {
   
 
     HiirOverSampler() {
-      mBuf2xUp   = new T* [mChannels];
-      mBuf2xDown = new T* [mChannels];
-      mBuf4xUp   = new T* [mChannels];
-      mBuf4xDown = new T* [mChannels];
-
       for (int c = 0; c < mChannels; c++) {
         mUp2x[c].set_coefs(coeffs2x);
         mDown2x[c].set_coefs(coeffs2x);
         mUp4x[c].set_coefs(coeffs4x);
         mDown4x[c].set_coefs(coeffs4x);
-        mBuf2xDown[c] = new T[GUITARD_MAX_BUFFER * 2];
-        mBuf2xUp[c]   = new T[GUITARD_MAX_BUFFER * 2];
-        mBuf4xDown[c] = new T[GUITARD_MAX_BUFFER * 4];
-        mBuf4xUp[c]   = new T[GUITARD_MAX_BUFFER * 4];
       }
-    }
-
-    ~HiirOverSampler() {
-      for (int c = 0; c < mChannels; c++) {
-        delete[] mBuf2xDown[c];
-        delete[] mBuf2xUp[c];
-        delete[] mBuf4xDown[c];
-        delete[] mBuf4xUp[c];
-      }
-      delete[] mBuf2xDown;
-      delete[] mBuf2xUp;
-      delete[] mBuf4xDown;
-      delete[] mBuf4xUp;
     }
 
     void setFactor(const int factor) {
@@ -110,13 +92,13 @@ namespace guitard {
       /**
        * 2x OverSampling
        */
-      if (mFactor == 2) {
+      if (mFactor == 2 || mFactor == 3) {
         for (int c = 0; c < mChannels; c++) {
           mUp2x[c].process_block(mBuf2xUp[c], in[c], frames);
         }
 
         mProc(mBuf2xUp, mBuf2xDown, frames * 2);
-
+        
         for (int c = 0; c < mChannels; c++) {
           mDown2x[c].process_block(out[c], mBuf2xDown[c], frames);
         }
