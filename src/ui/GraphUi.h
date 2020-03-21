@@ -20,7 +20,7 @@ namespace guitard {
     MessageBus::Bus* mBus = nullptr;
     IGraphics* mGraphics = nullptr; // Since this is not a UI element, well need to keep the graphics around
     Graph* mGraph = nullptr; // This is the Graph object which will be manipulated from this UI object
-    PointerStack<Graph, 8> mGraphStack;
+    PointerStack<Graph, 8> mGraphStack; // When editing a meta node the parent will be put on the stack so we can return to it
     PointerList<NodeUi> mNodeUis; // Keep around all the node UIs
 
     /**
@@ -40,7 +40,7 @@ namespace guitard {
     MessageBus::Subscription<const char*> mLoadPresetEvent;
     MessageBus::Subscription<WDL_String*> mSavePresetEvent;
     MessageBus::Subscription<BlockSizeEvent*> mMaxBlockSizeEvent;
-    MessageBus::Subscription<NodeSelectionChanged> mSelectionChagedEvent;
+    MessageBus::Subscription<NodeSelectionChanged> mSelectionChangedEvent;
     MessageBus::Subscription<Drag> mNodeDragged;
     MessageBus::Subscription<SocketConnectRequest> mOnConnectionEvent;
     MessageBus::Subscription<Node*> mOnDisconnectAllEvent;
@@ -130,7 +130,7 @@ namespace guitard {
 
       const float scale = mGraph->getScale();
       mBackground->mScale = scale;
-      mGraphics->Resize(mGraphics->Width(), mGraphics->Height(), scale);
+      // mGraphics->Resize(mGraphics->Width(), mGraphics->Height(), scale);
       return scale;
     }
 
@@ -298,11 +298,14 @@ namespace guitard {
       });
 
       mPushUndoState.subscribe(mBus, MessageBus::PushUndoState, [&](bool) {
+        if (!mGraphStack.empty()) { return; }
+        // The undo stack only works at the top level
         WDBGMSG("PushState");
         mGraph->serialize(*(mHistoryStack.pushState()));
       });
 
       mPopUndoState.subscribe(mBus, MessageBus::PopUndoState, [&](const bool redo) {
+        if (!mGraphStack.empty()) { return; }
         nlohmann::json* state = mHistoryStack.popState(redo);
         if (state != nullptr) {
           WDBGMSG("PopState");
@@ -361,7 +364,7 @@ namespace guitard {
         }
       });
 
-      mSelectionChagedEvent.subscribe(mBus, MessageBus::NodeSelectionChange, [&](NodeSelectionChanged event) {
+      mSelectionChangedEvent.subscribe(mBus, MessageBus::NodeSelectionChange, [&](NodeSelectionChanged event) {
         if (event.remove) {
           event.node->setSelected(false);
           mSelectedNodes.remove(event.node);

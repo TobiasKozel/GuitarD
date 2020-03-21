@@ -21,11 +21,13 @@ namespace  guitard {
       mUndos = mRedos = mIndex = 0;
     }
 
+    /**
+     * Will create a new json object and put it on the stack
+     * The state has to be stored in the returned object
+     */
     nlohmann::json* pushState() {
       nlohmann::json* state = states[mIndex];
-      if (state != nullptr) {
-        delete state;
-      }
+      delete state;
       states[mIndex] = state = new nlohmann::json();
 
       mRedos = 0;
@@ -40,6 +42,9 @@ namespace  guitard {
       return state;
     }
 
+    /**
+     * Will return a state if there is one
+     */
     nlohmann::json* popState(const bool redo = false) {
       if (!redo) {
         // A PushState has to happen here for the redo to work

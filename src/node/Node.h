@@ -32,7 +32,6 @@ namespace guitard {
 
     int mParameterCount = 0;
     ParameterCoupling mParameters[MAX_NODE_PARAMETERS];
-
     int mMeterCount = 0;
     MeterCoupling mMeters[MAX_NODE_METERS];
 
@@ -43,6 +42,7 @@ namespace guitard {
 
     /**
      * Nodes which this one depends on an need to be processed first
+     * Every socket can be a dependency and every parameter for automation
      */
     Node* mDependencies[MAX_NODE_SOCKETS + MAX_NODE_PARAMETERS] = { nullptr };
     int mDependencyCount = 0;
@@ -130,9 +130,7 @@ namespace guitard {
         detachAutomation(&mParameters[i]); // Make sure no automation is attached
       }
       // will disconnect all sockets
-#ifndef GUITARD_HEADLESS
       delete mOverSampler;
-#endif
     }
 
     /**
@@ -207,7 +205,7 @@ namespace guitard {
        if (mOverSampler == nullptr) {
          mOverSamplingFactor = 1.0;
          mOverSampler = new HiirOverSampler();
-         mOverSamplingIndex = addParameter("OverSampling", &mOverSamplingFactor, 1.0, 1, 16, 1);
+         mOverSamplingIndex = addParameter("OverSampling", &mOverSamplingFactor, 1.0, 1, 4, 1);
        }
     }
 

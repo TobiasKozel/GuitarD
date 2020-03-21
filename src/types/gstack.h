@@ -23,5 +23,17 @@ namespace guitard {
       }
       return nullptr;
     }
+
+    int length() const {
+      return mIndex;
+    }
+
+    bool empty() const {
+      return mIndex == 0;
+    }
+
+    bool full() const {
+      return mIndex == N;
+    }
   };
 }
