@@ -360,6 +360,7 @@
     <ClInclude Include="..\src\nodes\flanger\FlangerNode.h" />
     <ClInclude Include="..\src\nodes\fuzz\FuzzNode.h" />
     <ClInclude Include="..\src\nodes\gate_sidechain\SideChainGateNode.h" />
+    <ClInclude Include="..\src\nodes\graph_node\GraphNode.h" />
     <ClInclude Include="..\src\nodes\io\InputNode.h" />
     <ClInclude Include="..\src\nodes\io\OutputNode.h" />
     <ClInclude Include="..\src\nodes\lfo\LfoNode.h" />
@@ -390,7 +391,9 @@
     <ClInclude Include="..\src\parameter\ParameterCoupling.h" />
     <ClInclude Include="..\src\parameter\ParameterManager.h" />
     <ClInclude Include="..\src\types\files.h" />
+    <ClInclude Include="..\src\types\gstack.h" />
     <ClInclude Include="..\src\types\gstructs.h" />
+    <ClInclude Include="..\src\types\hiirOversampler.h" />
     <ClInclude Include="..\src\types\iplugTypes.h" />
     <ClInclude Include="..\src\types\gmutex.h" />
     <ClInclude Include="..\src\types\pointerList.h" />

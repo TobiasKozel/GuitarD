@@ -61,11 +61,9 @@ namespace guitard {
     const double coeffs2x[12] = { 0.036681502163648017, 0.13654762463195794, 0.27463175937945444, 0.42313861743656711, 0.56109869787919531, 0.67754004997416184, 0.76974183386322703, 0.83988962484963892, 0.89226081800387902, 0.9315419599631839, 0.96209454837808417, 0.98781637073289585 };
     const double coeffs4x[4] = { 0.041893991997656171, 0.16890348243995201, 0.39056077292116603, 0.74389574826847926 };
   public:
-    int mFactor = 1;
+    unsigned int mFactor = 1;
     using ProcessFunction = std::function<void(T**, T**, int)>;
     ProcessFunction mProc;
-
-  
 
     HiirOverSampler() {
       for (int c = 0; c < mChannels; c++) {
@@ -74,10 +72,6 @@ namespace guitard {
         mUp4x[c].set_coefs(coeffs4x);
         mDown4x[c].set_coefs(coeffs4x);
       }
-    }
-
-    void setFactor(const int factor) {
-      mFactor = factor;
     }
 
     void process(T** in, T** out, const int frames) {

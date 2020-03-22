@@ -1,4 +1,5 @@
 #define SAMPLE_TYPE_FLOAT
+#define GUITARD_SSE
 
 #include <fstream>
 #include <string>

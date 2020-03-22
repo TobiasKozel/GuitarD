@@ -546,6 +546,15 @@
     <ClInclude Include="..\src\nodes\gate_sidechain\SideChainGateNode.h">
       <Filter>src\nodes\dynamics</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\types\hiirOversampler.h">
+      <Filter>src\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nodes\graph_node\GraphNode.h">
+      <Filter>src\nodes\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\types\gstack.h">
+      <Filter>src\types</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

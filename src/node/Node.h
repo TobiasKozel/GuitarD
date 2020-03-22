@@ -184,29 +184,29 @@ namespace guitard {
     }
 
     /**
-     * Called if the oversampling factor changes
+     * Called on each block to handle a changing oversampling factor
      */
     void updateOversampling() {
-       if (mOverSampler != nullptr) {
-         mParameters[mOverSamplingIndex].update();
-         int fac = std::floor(mOverSamplingFactor);
-         if (fac != mOverSampler->mFactor && mSampleRate > 0) {
-           float prevFac = mOverSampler->mFactor;
-           mOverSampler->setFactor(fac);
-           OnSamplerateChanged(mSampleRate / prevFac);
-         }
-       }
+      if (mOverSampler != nullptr) {
+        mParameters[mOverSamplingIndex].update();
+        int fac = std::floor(mOverSamplingFactor);
+        if (fac != mOverSampler->mFactor && mSampleRate > 0) {
+          float prevFac = mOverSampler->mFactor;
+          mOverSampler->mFactor = fac;
+          OnSamplerateChanged(mSampleRate / prevFac);
+        }
+      }
     }
 
     /**
      * Called once when the node is constructed to allow oversampling later on
      */
     virtual void enableOversampling() {
-       if (mOverSampler == nullptr) {
-         mOverSamplingFactor = 1.0;
-         mOverSampler = new HiirOverSampler();
-         mOverSamplingIndex = addParameter("OverSampling", &mOverSamplingFactor, 1.0, 1, 4, 1);
-       }
+      if (mOverSampler == nullptr) {
+        mOverSamplingFactor = 1.0;
+        mOverSampler = new HiirOverSampler();
+        mOverSamplingIndex = addParameter("OverSampling", &mOverSamplingFactor, 1.0, 1, 4, 1);
+      }
     }
 
     /**
