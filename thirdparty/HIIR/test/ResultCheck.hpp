@@ -22,8 +22,8 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/test/SweepingSine.h"
-#include "hiir/def.h"
+#include "./test/SweepingSine.h"
+#include "./def.h"
 
 #include <algorithm>
 #include <vector>

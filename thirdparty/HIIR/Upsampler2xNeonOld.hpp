@@ -22,7 +22,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/StageProcNeonV4.h"
+#include "./StageProcNeonV4.h"
 
 #include <arm_neon.h>
 

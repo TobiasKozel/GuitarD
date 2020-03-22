@@ -36,8 +36,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/def.h"
-#include "hiir/StageDataF64Sse2.h"
+#include "./def.h"
+#include "./StageDataF64Sse2.h"
 
 #include <emmintrin.h>
 
@@ -124,7 +124,7 @@ private:
 
 
 
-#include "hiir/Downsampler2x2F64Sse2.hpp"
+#include "./Downsampler2x2F64Sse2.hpp"
 
 
 

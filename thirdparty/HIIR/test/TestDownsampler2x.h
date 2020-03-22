@@ -96,7 +96,7 @@ private:
 
 
 
-#include "hiir/test/TestDownsampler2x.hpp"
+#include "./test/TestDownsampler2x.hpp"
 
 
 

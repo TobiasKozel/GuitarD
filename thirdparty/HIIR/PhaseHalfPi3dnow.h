@@ -33,8 +33,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/def.h"
-#include "hiir/StageData3dnow.h"
+#include "./def.h"
+#include "./StageData3dnow.h"
 
 #include <array>
 
@@ -118,7 +118,7 @@ private:
 
 
 
-#include "hiir/PhaseHalfPi3dnow.hpp"
+#include "./PhaseHalfPi3dnow.hpp"
 
 
 

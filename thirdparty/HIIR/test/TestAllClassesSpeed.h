@@ -86,7 +86,7 @@ private:
 
 
 
-#include "hiir/test/TestAllClassesSpeed.hpp"
+#include "./test/TestAllClassesSpeed.hpp"
 
 
 

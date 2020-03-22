@@ -47,6 +47,10 @@
 
 #define GUITARD_FLOAT_CONVOLUTION // Means we'll do float convolution since it allows sse
 
+#ifdef __arm__ // No sse for arm obviously
+  #undef GUITARD_SSE
+#endif
+
 #ifdef GUITARD_SSE
   #define FFTCONVOLVER_USE_SSE
 #endif

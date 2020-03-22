@@ -35,8 +35,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/def.h"
-#include "hiir/StageDataAvx512.h"
+#include "./def.h"
+#include "./StageDataAvx512.h"
 
 #include <xmmintrin.h>
 
@@ -124,7 +124,7 @@ private:
 
 
 
-#include "hiir/Downsampler2x16Avx512.hpp"
+#include "./Downsampler2x16Avx512.hpp"
 
 
 

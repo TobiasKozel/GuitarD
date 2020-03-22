@@ -22,7 +22,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/StageProc4Sse.h"
+#include "./StageProc4Sse.h"
 
 #include <cassert>
 

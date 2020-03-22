@@ -31,8 +31,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/test/SpeedTesterBase.h"
-#include "hiir/def.h"
+#include "./test/SpeedTesterBase.h"
+#include "./def.h"
 
 
 
@@ -100,7 +100,7 @@ private:
 
 
 
-#include "hiir/test/SpeedTester.hpp"
+#include "./test/SpeedTester.hpp"
 
 
 

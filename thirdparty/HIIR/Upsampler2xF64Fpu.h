@@ -23,7 +23,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/Upsampler2xFpuTpl.h"
+#include "./Upsampler2xFpuTpl.h"
 
 
 
@@ -41,7 +41,7 @@ using Upsampler2xF64Fpu = Upsampler2xFpuTpl <NC, double>;
 
 
 
-//#include "hiir/Upsampler2xF64Fpu.hpp"
+//#include "./Upsampler2xF64Fpu.hpp"
 
 
 

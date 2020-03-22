@@ -92,7 +92,7 @@ private:
 
 
 
-#include "hiir/test/TestUpsampler2x.hpp"
+#include "./test/TestUpsampler2x.hpp"
 
 
 

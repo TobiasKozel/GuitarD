@@ -46,7 +46,7 @@ T	ipowp (T x, long n);
 
 
 
-#include "hiir/fnc.hpp"
+#include "./fnc.hpp"
 
 
 

@@ -10,8 +10,6 @@
 namespace soundwoofer {
   namespace http {
     bool offline = false;
-    // const std::string BACKEND_URL = "svenssj.tech";
-    // const std::string BACKEND_URL = "localhost";
     const std::string BACKEND_URL = "api.tobias-kozel.de";
     const std::string API_VERSION = "0.1";
     const int BACKEND_PORT = 80;

@@ -22,7 +22,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/StageProc16Avx512.h"
+#include "./StageProc16Avx512.h"
 
 #include <cassert>
 

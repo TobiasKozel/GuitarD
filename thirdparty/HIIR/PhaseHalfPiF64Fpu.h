@@ -23,7 +23,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/PhaseHalfPiFpuTpl.h"
+#include "./PhaseHalfPiFpuTpl.h"
 
 
 
@@ -41,7 +41,7 @@ using PhaseHalfPiF64Fpu = PhaseHalfPiFpuTpl <NC, double>;
 
 
 
-//#include "hiir/PhaseHalfPiF64Fpu.hpp"
+//#include "./PhaseHalfPiF64Fpu.hpp"
 
 
 

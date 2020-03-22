@@ -92,7 +92,7 @@ private:
 
 
 
-#include "hiir/test/TestPhaseHalfPi.hpp"
+#include "./test/TestPhaseHalfPi.hpp"
 
 
 

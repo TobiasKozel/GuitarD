@@ -23,7 +23,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/def.h"
+#include "./def.h"
 
 #include <arm_neon.h>
 
@@ -49,7 +49,7 @@ hiir_FORCEINLINE void         storeu (float *ptr, float32x2_t x);
 
 
 
-#include "hiir/fnc_neon.hpp"
+#include "./fnc_neon.hpp"
 
 
 

@@ -24,7 +24,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/test/CpuId.h"
+#include "./test/CpuId.h"
 
 #if hiir_ARCHI == hiir_ARCHI_X86
 	#if defined (__GNUC__)

@@ -4,7 +4,7 @@
  */
 
 #define SAMPLE_TYPE_FLOAT
-#define FFTCONVOLVER_USE_SSE
+#define GUITARD_SSE
 
 #include "./headless.h"
 

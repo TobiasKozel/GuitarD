@@ -97,7 +97,7 @@ private:
 
 
 
-#include "hiir/test/SpeedTesterBase.hpp"
+#include "./test/SpeedTesterBase.hpp"
 
 
 

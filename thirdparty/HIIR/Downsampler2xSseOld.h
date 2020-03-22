@@ -37,8 +37,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/def.h"
-#include "hiir/StageDataSse.h"
+#include "./def.h"
+#include "./StageDataSse.h"
 
 #include <array>
 
@@ -122,7 +122,7 @@ private:
 
 
 
-#include "hiir/Downsampler2xSseOld.hpp"
+#include "./Downsampler2xSseOld.hpp"
 
 
 

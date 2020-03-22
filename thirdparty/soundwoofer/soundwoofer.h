@@ -1,3 +1,10 @@
+/**
+ * Soundwoofer is a online service which provides Impulse responses
+ * They plan on developing a api to access them from plugins
+ * This is kind of a barebones version of that
+ * It also can fetch Presets
+ */
+
 #pragma once
 
 // #define SOUNDWOOFER_NO_API

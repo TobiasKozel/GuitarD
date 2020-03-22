@@ -131,21 +131,6 @@ http.createServer((req, res) => {
         if (req.url.search("/File") === 0) {
             let id = req.url.slice("/File/Download/".length);
 
-            // Proxy 
-            // let data = Buffer.alloc(0);
-            // http.get("http://svenssj.tech:5000/File/Download/" + id, (resp) => {
-            //     resp.on('data', (chunk) => {
-            //         data = Buffer.concat([data, chunk]);
-            //     });
-            //     resp.on('end', () => {
-            //         res.write(data, "binary");
-            //         res.end(null, "binary");
-            //         console.log("finnished dl");
-            //     });
-            // }).on("error", (err) => {
-            //     console.log("Error: " + err.message);
-            // });
-
             let data;
             try {
                 data = fs.readFileSync(basePath + "irs/" + id);

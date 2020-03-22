@@ -29,7 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/test/SweepingSine.h"
+#include "./test/SweepingSine.h"
 
 #include <cassert>
 #include <cmath>

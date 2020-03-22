@@ -22,8 +22,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/fnc_neon.h"
-#include "hiir/StageProc4Neon.h"
+#include "./fnc_neon.h"
+#include "./StageProc4Neon.h"
 
 #include <cassert>
 

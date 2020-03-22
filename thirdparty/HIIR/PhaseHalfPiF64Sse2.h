@@ -23,8 +23,8 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/def.h"
-#include "hiir/StageDataF64Sse2.h"
+#include "./def.h"
+#include "./StageDataF64Sse2.h"
 
 #include <emmintrin.h>
 
@@ -111,7 +111,7 @@ private:
 
 
 
-#include "hiir/PhaseHalfPiF64Sse2.hpp"
+#include "./PhaseHalfPiF64Sse2.hpp"
 
 
 

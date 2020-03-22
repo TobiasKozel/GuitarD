@@ -35,11 +35,11 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/test/conf.h"
-#include "hiir/test/TestAllClassesFnc.h"
-#include "hiir/test/TestAllClassesSpeed.h"
-#include "hiir/def.h"
-#include "hiir/fnc.h"
+#include "./test/conf.h"
+#include "./test/TestAllClassesFnc.h"
+#include "./test/TestAllClassesSpeed.h"
+#include "./def.h"
+#include "./fnc.h"
 
 #if defined (_MSC_VER)
 #include <crtdbg.h>

@@ -4,6 +4,10 @@
 #include "./soundwooferTypes.h"
 
 namespace soundwoofer {
+  /**
+   * Fairly inieficent and low quality resampler
+   * No dependecies though
+   */
   class Resampler {
     double mStepSize = 0; // Used to step over the input signal, will be > 1 if downsampling
     size_t mWindowSizeOut = 0; // The window size adjusted to the out sample rate
@@ -137,6 +141,7 @@ namespace soundwoofer {
     }
 
     void sincInterpolation(size_t outSamplesPadded, size_t inSamples, float* inBufferPadded, float* outBufferPadded, size_t windowSize) const {
+      // Windowing only seemed to improve the quality for bigger windows
       // double* window = new double[windowSize];
       // for (size_t i = 0; i < windowSize; i++) { // Use a raised cos as a window
       //     // window[i] = -cos(i * (1.0 / windowSize) * 2 * PI) * 0.5 + 0.5;
@@ -185,7 +190,10 @@ namespace soundwoofer {
       mWindowSizeOut = maxWindowSize / mStepSize;
     }
 
-
+    /**
+     * Does the reampling and allocates a new buffer to store the result in
+     * Not realtime safe at all
+     */
     size_t resample(float* inBuffer = nullptr, const size_t inSamples = 0, float** outBuffer = nullptr) {
       const size_t outSamples = std::ceil(inSamples / mStepSize);
       if (outSamples <= 0) { return 0; }

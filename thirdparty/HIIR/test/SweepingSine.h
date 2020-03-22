@@ -96,7 +96,7 @@ private:
 
 
 
-#include "hiir/test/SweepingSine.hpp"
+#include "./test/SweepingSine.hpp"
 
 
 

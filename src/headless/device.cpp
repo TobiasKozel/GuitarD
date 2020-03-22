@@ -1,3 +1,8 @@
+/**
+ * Simple cli app which uses mini audio to do audio io
+ */
+
+
 #define SAMPLE_TYPE_FLOAT
 #define GUITARD_SSE
 
@@ -6,7 +11,7 @@
 #include "./headless.h"
 
 #define MINIAUDIO_IMPLEMENTATION
-#include "./miniaudio.h"
+#include "../../thirdparty/miniaudio.h"
 
 guitard::GuitarDHeadless headless;
 

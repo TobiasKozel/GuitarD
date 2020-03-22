@@ -87,7 +87,7 @@ private:
 
 
 
-#include "hiir/test/TestAllClassesFnc.hpp"
+#include "./test/TestAllClassesFnc.hpp"
 
 
 

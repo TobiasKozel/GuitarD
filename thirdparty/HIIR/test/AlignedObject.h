@@ -101,7 +101,7 @@ private:
 
 
 
-#include "hiir/test/AlignedObject.hpp"
+#include "./test/AlignedObject.hpp"
 
 
 

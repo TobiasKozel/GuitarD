@@ -30,7 +30,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/def.h"
+#include "./def.h"
 
 #include <xmmintrin.h>
 
@@ -95,7 +95,7 @@ private:
 
 
 
-#include "hiir/StageProc8F64Avx512.hpp"
+#include "./StageProc8F64Avx512.hpp"
 
 
 

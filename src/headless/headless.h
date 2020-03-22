@@ -11,7 +11,7 @@
 #define GUITARD_HEADLESS
 
 #include "../../config.h"
-#include "soundwoofer/soundwoofer.h"
+#include "../../thirdparty/soundwoofer/soundwoofer.h"
 #include "../types/types.h"
 #include "../graph/Graph.h"
 #include "../nodes/RegisterNodes.h"

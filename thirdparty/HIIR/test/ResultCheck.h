@@ -87,7 +87,7 @@ private:
 
 
 
-#include "hiir/test/ResultCheck.hpp"
+#include "./test/ResultCheck.hpp"
 
 
 

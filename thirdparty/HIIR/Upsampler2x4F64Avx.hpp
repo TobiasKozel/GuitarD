@@ -23,7 +23,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/StageProc4F64Avx.h"
+#include "./StageProc4F64Avx.h"
 
 #include <cassert>
 

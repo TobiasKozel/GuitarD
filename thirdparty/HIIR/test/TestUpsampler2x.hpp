@@ -27,10 +27,10 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/test/BlockSplitter.h"
-#include "hiir/test/FileOp.h"
-#include "hiir/test/ResultCheck.h"
-#include "hiir/test/SweepingSine.h"
+#include "./test/BlockSplitter.h"
+#include "./test/FileOp.h"
+#include "./test/ResultCheck.h"
+#include "./test/SweepingSine.h"
 
 #include <type_traits>
 

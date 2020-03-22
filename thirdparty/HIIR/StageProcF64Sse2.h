@@ -23,7 +23,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "hiir/def.h"
+#include "./def.h"
 
 #include <emmintrin.h>
 
@@ -93,7 +93,7 @@ private:
 
 
 
-#include "hiir/StageProcF64Sse2.hpp"
+#include "./StageProcF64Sse2.hpp"
 
 
 
