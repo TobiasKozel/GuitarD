@@ -7,7 +7,12 @@ It's fairly unstable and experimental but contains most of the important feature
 This whole thing started as my bachelors thesis, but I plan on developing it further to a point where it's usable.
 
 ## Builds
-No pre-build Binaries yet.
+[See here](https://github.com/TobiasKozel/GuitarD/releases)
+
+## I'm not responsible for any crashes or hearing loss. (Seriously, be careful)
+
+## How to use
+TODO
 
 ## Compilation
 To build a plugin you'll need [this fork of iPlug2](https://github.com/TobiasKozel/iPlug2) and switch to the `guitard` branch there.
