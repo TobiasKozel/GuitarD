@@ -10,11 +10,11 @@ No pre-build Binaries yet.
 ## Compilation
 To build a plugin you'll need [this fork of iPlug2](https://github.com/TobiasKozel/iPlug2) and switch to the `guitard` branch there.
 
-To get iPlug2 up and running, make sure all its dependencies are downloaded. To do tha, run:
+To get iPlug2 up and running, make sure all its dependencies are downloaded. Run both of these shell scripts (use git bash on windows):
 
 `iPlug2/Dependencies/download-prebuilt-libs.sh`
 
-`iPlug2/Dependencies/IPlug/download-iplug-libs.sh` (use git bash on windows)
+`iPlug2/Dependencies/IPlug/download-iplug-libs.sh`
 
 After that, simply clone this repository into the Examples folder of iPlug2 and open the IDE project for your platform.
 
@@ -22,7 +22,7 @@ Make sure the [FAUST compiler](https://github.com/grame-cncm/faust/releases) is 
 
 The VST/AU plugin works on Windows and Mac OS X.
 
-The DSP code can be compiled without iPlug and the GUI so it can be included in other plugins easily. Just include `./src/headless/headless.h` and you should be good to go. Everything is header only to make the code as portable as possible. The headless version was testet on Windows (MSVC, gcc), Mac OS X (clang) and Linux (gcc, clang).
+The DSP code can be compiled without iPlug and the GUI so it can be included in other projects easily. Just include `./src/headless/headless.h` and you should be good to go. Everything is header only to make the code as portable as possible. The headless version was testet on Windows (MSVC, gcc), Mac OS X (clang) and Linux (gcc, clang).
 
 ## Where to start
 
