@@ -1,7 +1,5 @@
 # Headless
-The headless.h wraps up all the classes needed to make the DSP run on it's own and allow it to be controlled.
-
-All paths in this project are relative so just including it should be enough to make it work in another project.
+The headless.h wraps up all the classes needed to make the DSP run on it's own and allow it to be controlled. All paths in this project are relative so just including it should be enough to make it work in another project.
 
 `benchmark.cpp` and `device.cpp` show how it can be used.
 
