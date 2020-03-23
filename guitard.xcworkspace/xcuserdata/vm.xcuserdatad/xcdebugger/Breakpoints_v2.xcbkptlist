@@ -274,5 +274,85 @@
             landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B7A19CFC-F6A2-4A07-87D3-460072D6752A"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../IGraphics/IGraphics.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1007"
+            endingLineNumber = "1007"
+            landmarkName = "IGraphics::OnMouseUp(points)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "8DC35476-003A-44FC-B058-C1D61C7284E9"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../IGraphics/IGraphics.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1006"
+            endingLineNumber = "1006"
+            landmarkName = "IGraphics::OnMouseUp(points)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "8DC35476-003A-44FC-B058-C1D61C7284E9 - da7396c0bb047628"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "iplug::igraphics::IGraphics::OnMouseUp(std::__1::vector&lt;iplug::igraphics::IMouseInfo, std::__1::allocator&lt;iplug::igraphics::IMouseInfo&gt; &gt; const&amp;)"
+                  moduleName = "GuitarD"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/vm/Documents/git/iPlug2/IGraphics/IGraphics.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1006"
+                  endingLineNumber = "1006"
+                  offsetFromSymbolStart = "48">
+               </Location>
+               <Location
+                  uuid = "8DC35476-003A-44FC-B058-C1D61C7284E9 - da7396c0bb047628"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "iplug::igraphics::IGraphics::OnMouseUp(std::__1::vector&lt;iplug::igraphics::IMouseInfo, std::__1::allocator&lt;iplug::igraphics::IMouseInfo&gt; &gt; const&amp;)"
+                  moduleName = "GuitarD"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/vm/Documents/git/iPlug2/IGraphics/IGraphics.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1006"
+                  endingLineNumber = "1006"
+                  offsetFromSymbolStart = "108">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "48FD30D4-046B-4732-9F71-E2C32E8F4CE4"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/ui/GraphUi.h"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "310"
+            endingLineNumber = "310"
+            landmarkName = "initSubscriptions()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>
