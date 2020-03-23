@@ -1,5 +1,5 @@
 #pragma once
-#include "../../node/Node.h"
+#include "../../main/Node.h"
 
 namespace guitard {
   class CombineNode final : public Node {

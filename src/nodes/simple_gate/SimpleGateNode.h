@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/SimpleGate.h"
+#include "../../main/faust/generated/SimpleGate.h"
 
 namespace guitard {
   class SimpleGateNode final : public FaustGenerated::SimpleGate {

@@ -23,8 +23,8 @@
 #ifndef _FFTCONVOLVER_FFTCONVOLVER_H
 #define _FFTCONVOLVER_FFTCONVOLVER_H
 
-#include "fft.h"
-#include "util.h"
+#include "./fft.h"
+#include "./util.h"
 
 #if defined (FFTCONVOLVER_USE_SSE)
   #include <xmmintrin.h>

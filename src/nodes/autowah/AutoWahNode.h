@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/AutoWah.h"
+#include "../../main/faust/generated/AutoWah.h"
 
 namespace guitard {
   class AutoWahNode final : public FaustGenerated::AutoWah {

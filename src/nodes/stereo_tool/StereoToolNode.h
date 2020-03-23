@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/StereoTool.h"
+#include "../../main/faust/generated/StereoTool.h"
 
 namespace guitard {
   class StereoToolNode final : public FaustGenerated::StereoTool {

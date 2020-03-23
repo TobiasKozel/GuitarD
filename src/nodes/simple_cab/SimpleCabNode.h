@@ -1,13 +1,15 @@
 #pragma once
 
-#include "../../node/Node.h"
+#include "../../main/Node.h"
 #include "../../../thirdparty/soundwoofer/soundwoofer.h"
+
 #ifndef GUITARD_HEADLESS
   #include "filebrowse.h"
 #endif
-#include "./InternalIRs.h"
-#include "./WrappedConvolver.h"
-#include "../../types/files.h"
+
+#include "../../types/GConvolver.h"
+#include "../../content/ir/InternalIRs.h"
+#include "../../types/GFile.h"
 
 // TODOG figure out this swell stuff
 #ifdef FillRect
@@ -130,7 +132,7 @@ namespace guitard {
 }
 
 #ifndef GUITARD_HEADLESS
-#include "../../ui/NodeUi.h"
+#include "../../ui/elements/NodeUi.h"
 namespace guitard {
   class SimpleCabNodeUi : public NodeUi {
     SimpleCabNode* mCab = nullptr; // This is just a cast of the node itself

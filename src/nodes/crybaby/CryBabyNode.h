@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/CryBaby.h"
+#include "../../main/faust/generated/CryBaby.h"
 
 namespace guitard {
   class CryBabyNode final : public FaustGenerated::CryBaby {

@@ -2,7 +2,7 @@
 #ifdef GUITARD_HEADLESS
 #include <mutex>
 #else
-#include "./mutex.h"
+#include "mutex.h" // The wdl mutex
 #endif
 
 namespace guitard {

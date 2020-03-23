@@ -1,6 +1,6 @@
 #pragma once
-#include "../../node/Node.h"
-#include "../../types/ringBuffer.h"
+#include "../../main/Node.h"
+#include "../../types/GRingBuffer.h"
 
 namespace guitard {
   class FeedbackNode final : public Node {
@@ -79,7 +79,7 @@ namespace guitard {
 }
 
 #ifndef GUITARD_HEADLESS
-#include "../../ui/NodeUi.h"
+#include "../../ui/elements/NodeUi.h"
 namespace guitard {
   class FeedbackNodeUi : public NodeUi {
     IVButtonControl* mBrowseButton = nullptr;

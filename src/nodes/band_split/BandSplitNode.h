@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/BandSplit.h"
+#include "../../main/faust/generated/BandSplit.h"
 
 namespace guitard {
   class BandSplitNode final : public FaustGenerated::BandSplit {

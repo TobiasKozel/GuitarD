@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/Phaser.h"
+#include "../../main/faust/generated/Phaser.h"
 
 namespace guitard {
   class PhaserNode final : public FaustGenerated::Phaser {

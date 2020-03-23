@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/Transpose.h"
+#include "../../main/faust/generated/Transpose.h"
 
 namespace guitard {
   class TransposeNode final : public FaustGenerated::Transpose {

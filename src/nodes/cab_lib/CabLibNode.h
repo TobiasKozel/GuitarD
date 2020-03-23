@@ -1,6 +1,7 @@
 #pragma once
-#include "../../node/Node.h"
-#include "../simple_cab/WrappedConvolver.h"
+#include "../../main/Node.h"
+#include "../../types/GConvolver.h"
+#include "../../content/ir/InternalIRs.h"
 
 namespace guitard {
   /**
@@ -186,7 +187,7 @@ namespace guitard {
 }
 
 #ifndef GUITARD_HEADLESS
-#include "../../ui/NodeUi.h"
+#include "../../ui/elements/NodeUi.h"
 #include "./CabLibPopUp.h"
 
 namespace guitard {

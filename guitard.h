@@ -4,13 +4,12 @@ const int kNumPrograms = 2;
 #include "./thirdparty/soundwoofer/soundwoofer.h" // since winsocks does some weird stuff when being included after windows.h it needs to be included here though it's not used here
 #include "IPlug_include_in_plug_hdr.h"
 
-#include "./src/graph/Graph.h"
-#include "./src/ui/GraphUi.h"
-#include "./src/parameter/ParameterManager.h"
+#include "./src/main/Graph.h"
+#include "./src/ui/elements/GraphUi.h"
+#include "./src/main/parameter/ParameterManager.h"
 
 class GuitarD : public iplug::Plugin
 {
-  guitard::MessageBus::Subscription<bool> mParamChanged;
   // Each instance of a plugin has to have its own MessageBus
   guitard::MessageBus::Bus mBus;
   /** Is true when the plugin is ready to process samples (Knows the sample rate and in out channel count) */

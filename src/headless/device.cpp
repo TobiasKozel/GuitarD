@@ -8,7 +8,7 @@
 
 #include <fstream>
 #include <string>
-#include "./headless.h"
+#include "./GHeadless.h"
 
 #define MINIAUDIO_IMPLEMENTATION
 #include "../../thirdparty/miniaudio.h"

@@ -1,9 +1,9 @@
 import os
 cwd = os.getcwd()
-outFolder = os.path.join(cwd, "src/faust/generated")
+outFolder = os.path.join(cwd, "src/main/faust/generated")
 rootFolder = "guitard"
 baseCommand = "faust -i -single -scn FaustHeadlessDsp -a "
-baseCommand += os.path.join(cwd, "src/faust/FaustArchitecture.cpp")
+baseCommand += os.path.join(cwd, "src/main/faust/FaustArchitecture.cpp")
 
 for root, dirs, files in os.walk(cwd):
     for file in files:

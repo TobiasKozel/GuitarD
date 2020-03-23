@@ -6,7 +6,7 @@
 #define SAMPLE_TYPE_FLOAT
 #define GUITARD_SSE
 
-#include "./headless.h"
+#include "./GHeadless.h"
 
 int main() {
   const int samplerate = 44100;

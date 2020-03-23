@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/PhaseTool.h"
+#include "../../main/faust/generated/PhaseTool.h"
 
 namespace guitard {
   class PhaseToolNode final : public FaustGenerated::PhaseTool {

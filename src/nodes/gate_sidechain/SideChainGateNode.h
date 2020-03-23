@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/SideChainGate.h"
+#include "../../main/faust/generated/SideChainGate.h"
 
 namespace guitard {
   class SideChainGateNode final : public FaustGenerated::SideChainGate {

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../../types/pointerList.h"
+#include "../../types/GPointerList.h"
 #include "IControl.h"
 #include "../../../thirdparty/soundwoofer/soundwoofer.h"
-#include "../../ui/ScrollViewControl.h"
-#include "../../ui/theme.h"
+#include "../../ui/elements/scroll/ScrollViewControl.h"
+#include "../../ui/GUIConfig.h"
 #include <functional>
 
 namespace guitard {

@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/OverDrive.h"
+#include "../../main/faust/generated/OverDrive.h"
 namespace guitard {
   class OverDriveNode final : public FaustGenerated::OverDrive {
   public:

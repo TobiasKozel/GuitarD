@@ -26,4 +26,4 @@ html/
 Icon?
 .DS_Stor*
 
-src/faust/generated/*.h
+src/main/faust/generated/*.h

@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/ParametricEq.h"
+#include "../../main/faust/generated/ParametricEq.h"
 
 namespace guitard {
   class ParametricEqNode final : public FaustGenerated::ParametricEq {
@@ -30,7 +30,7 @@ namespace guitard {
 }
 
 #ifndef GUITARD_HEADLESS
-#include "../../ui/NodeUi.h"
+#include "../../ui/elements/NodeUi.h"
 namespace guitard {
   class ParametricEqNodeUi final : public NodeUi {
   public:

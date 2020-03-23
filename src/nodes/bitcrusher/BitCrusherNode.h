@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/BitCrusher.h"
+#include "../../main/faust/generated/BitCrusher.h"
 
 namespace guitard {
   class BitCrusherNode final : public FaustGenerated::BitCrusher {
@@ -17,7 +17,7 @@ namespace guitard {
 }
 
 #ifndef GUITARD_HEADLESS
-#include "../../ui/NodeUi.h"
+#include "../../ui/elements/NodeUi.h"
 namespace guitard {
   class BitCrusherNodeUi : public guitard::NodeUi {
     public:

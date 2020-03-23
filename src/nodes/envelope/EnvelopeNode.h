@@ -1,5 +1,5 @@
 #pragma once
-#include "../../node/Node.h"
+#include "../../main/Node.h"
 namespace guitard {
   /**
    * This will take a signal and allow internal modulation for any other parameters
@@ -98,7 +98,7 @@ namespace guitard {
 
 
 #ifndef GUITARD_HEADLESS
-#include "../../ui/NodeUi.h"
+#include "../../ui/elements/NodeUi.h"
 namespace guitard {
   class EnvelopeNodeUi final : public NodeUi {
     IVButtonControl* mPicker = nullptr;

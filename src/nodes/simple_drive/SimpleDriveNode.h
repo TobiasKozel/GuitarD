@@ -1,5 +1,5 @@
 #pragma once
-#include "../../faust/generated/SimpleDrive.h"
+#include "../../main/faust/generated/SimpleDrive.h"
 
 
 namespace guitard {
@@ -41,7 +41,7 @@ namespace guitard {
 }
 
 #ifndef GUITARD_HEADLESS
-#include "../../ui/NodeUi.h"
+#include "../../ui/elements/NodeUi.h"
 namespace guitard {
   class SimpleDriveNodeUi : public NodeUi {
     double last = 0;

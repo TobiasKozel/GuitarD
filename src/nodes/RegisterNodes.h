@@ -1,6 +1,4 @@
 #pragma once
-#include "../misc/NodeList.h"
-
 /**
  *      All nodes should be included in here to avoid any
  *      problems with this header only stuff

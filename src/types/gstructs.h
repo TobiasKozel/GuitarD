@@ -1,10 +1,12 @@
 #pragma once
 
+#include "./GTypes.h"
+
 namespace guitard {
-  // Some structs used to pass around bundled data with the MessageBus
-  class Node;
-  class NodeUi;
-  struct NodeSocket;
+  /**
+   * Collection of small structs to pass around using the message bus,
+   * or just convenience
+   */
 
   struct Coord2D {
     float x = 0;

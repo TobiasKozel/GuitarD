@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../node/Node.h"
+#include "../../main/Node.h"
 
 namespace guitard {
   class OutputNode final : public Node {
@@ -35,7 +35,7 @@ namespace guitard {
 }
 
 #ifndef GUITARD_HEADLESS
-#include "../../ui/NodeUi.h"
+#include "../../ui/elements/NodeUi.h"
 namespace guitard {
     class OutputNodeUi final : public NodeUi {
     public:

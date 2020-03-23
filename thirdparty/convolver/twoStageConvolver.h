@@ -23,8 +23,8 @@
 #ifndef _FFTCONVOLVER_TWOSTAGEFFTCONVOLVER_H
 #define _FFTCONVOLVER_TWOSTAGEFFTCONVOLVER_H
 
-#include "convolver.h"
-#include "util.h"
+#include "./convolver.h"
+#include "./util.h"
 
 
 namespace fftconvolver {

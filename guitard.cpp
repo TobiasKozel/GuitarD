@@ -15,7 +15,13 @@ GuitarD::GuitarD(const InstanceInfo& info) : iplug::Plugin(info, MakeConfig(MAX_
   UserHomePath(path);
   soundwoofer::setup::setHomeDirectory(path.Get());
 
-  mParamManager = new guitard::ParameterManager(&mBus);
+  mParamManager = new guitard::ParameterManager([&]() {
+  /**
+   * The DAW needs to be informed if the assignments for parameters have changed
+   * TODOG This doesn't work for VST3 right now for some reason
+   */
+    this->InformHostOfParameterDetailsChange();
+  });
 
   for (int i = 0; i < MAX_DAW_PARAMS; i++) {
     // Gather a good amount of parameters to expose to the daw so they can be assigned internally
@@ -23,14 +29,6 @@ GuitarD::GuitarD(const InstanceInfo& info) : iplug::Plugin(info, MakeConfig(MAX_
   }
 
   mGraph = new guitard::Graph(mParamManager);
-
-  /**
-   * The DAW needs to be informed if the assignments for parameters have changed
-   * TODOG This doesn't work for VST3 right now for some reason
-   */
-  mParamChanged.subscribe(&mBus, guitard::MessageBus::ParametersChanged, [&](bool) {
-    // this->InformHostOfParameterDetailsChange();
-  });
 
   /**
    * Distributed UI won't work since the editor doesn't only affect IParams
