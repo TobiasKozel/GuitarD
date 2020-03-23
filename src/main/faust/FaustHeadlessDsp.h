@@ -23,12 +23,12 @@ namespace guitard {
       Node* node = nullptr;
       UI(Node* n) {
         node = n;
-        name = DEFAULT_NODE_NAME;
+        name = GUITARD_DEFAULT_NODE_NAME;
       }
 
       void openVerticalBox(const char* key) {
         // NOTE This only is the name of the module if it has one box!
-        if (name != DEFAULT_NODE_NAME) {
+        if (name != GUITARD_DEFAULT_NODE_NAME) {
           WDBGMSG("openVerticalBox called multiple times. The node Type might be wrong!");
           assert(false);
         }
@@ -109,7 +109,7 @@ namespace guitard {
         buildUserInterface(&faustUi);
         init(pSamplerate);
 
-        if (mInfo->name == DEFAULT_NODE_NAME) { // If a name wasn't set from outside, use the from faust
+        if (mInfo->name == GUITARD_DEFAULT_NODE_NAME) { // If a name wasn't set from outside, use the from faust
           mInfo->name = faustUi.name;
         }
 

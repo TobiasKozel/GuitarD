@@ -15,7 +15,14 @@
 #ifndef GUITARD_FLOAT_CONVOLUTION
   #define FFTCONVOLVER_TYPE guitard::sample
 #else
+  /**
+   * If it's float the convolver can do sse
+   */
   #define FFTCONVOLVER_TYPE float
+
+  #ifdef GUITARD_SSE
+    #define FFTCONVOLVER_USE_SSE
+  #endif
 #endif
 
 /**

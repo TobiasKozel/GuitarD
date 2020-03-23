@@ -531,6 +531,9 @@
     <ClInclude Include="..\src\nodes\split\SplitNode.h">
       <Filter>src\nodes\flow</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\ui\GUIConfig.h">
+      <Filter>src\ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

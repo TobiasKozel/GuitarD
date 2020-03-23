@@ -6,7 +6,7 @@ using namespace iplug;
 
 
 
-GuitarD::GuitarD(const InstanceInfo& info) : iplug::Plugin(info, MakeConfig(MAX_DAW_PARAMS, kNumPrograms)) {
+GuitarD::GuitarD(const InstanceInfo& info) : iplug::Plugin(info, MakeConfig(GUITARD_MAX_DAW_PARAMS, kNumPrograms)) {
   /**
    * Setup the soundwoofer lib
    */
@@ -23,7 +23,7 @@ GuitarD::GuitarD(const InstanceInfo& info) : iplug::Plugin(info, MakeConfig(MAX_
     this->InformHostOfParameterDetailsChange();
   });
 
-  for (int i = 0; i < MAX_DAW_PARAMS; i++) {
+  for (int i = 0; i < GUITARD_MAX_DAW_PARAMS; i++) {
     // Gather a good amount of parameters to expose to the daw so they can be assigned internally
     mParamManager->addParameter(GetParam(i));
   }

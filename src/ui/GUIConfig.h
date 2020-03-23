@@ -2,6 +2,13 @@
 #include "config.h"
 #include "IPlugStructs.h"
 
+#define GUITARD_MAX_UNDOS 8
+
+/**
+ * Distance in pixels from the cable the cursor needs to be within for the splice in to happen
+ */
+#define GUITARD_SPLICEIN_DISTANCE 14
+
 namespace guitard {
   namespace Theme {
     namespace Colors {

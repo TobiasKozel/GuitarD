@@ -12,9 +12,9 @@ namespace guitard {
 #else
     ParameterCoupling*
 #endif
-    mParameters[MAX_DAW_PARAMS] = { nullptr };
+    mParameters[GUITARD_MAX_DAW_PARAMS] = { nullptr };
 
-    bool mParametersClaimed[MAX_DAW_PARAMS] = { true };
+    bool mParametersClaimed[GUITARD_MAX_DAW_PARAMS] = { true };
     int mParametersLeft = 0;
 
     /**
@@ -78,14 +78,14 @@ namespace guitard {
       int i = couple->parameterIdx;
       if (i == kNoParameter && mParametersLeft > 0) {
         // if there's no parameter index set, go look for one
-        for (i = 0; i < MAX_DAW_PARAMS; i++) {
+        for (i = 0; i < GUITARD_MAX_DAW_PARAMS; i++) {
           if (!mParametersClaimed[i]) {
             // found one
             break;
           }
         }
       }
-      if (MAX_DAW_PARAMS <= i || mParametersClaimed[i] || i == kNoParameter) {
+      if (GUITARD_MAX_DAW_PARAMS <= i || mParametersClaimed[i] || i == kNoParameter) {
         // This is bad and means a preset will not load correctly
 #ifndef GUITARD_HEADLESS
         couple->setParam(nullptr);
@@ -114,7 +114,7 @@ namespace guitard {
     }
 
     void releaseParameter(ParameterCoupling* couple) {
-      for (int i = 0; i < MAX_DAW_PARAMS; i++) {
+      for (int i = 0; i < GUITARD_MAX_DAW_PARAMS; i++) {
 #ifndef GUITARD_HEADLESS
         if (mParameters[i] == couple->getParam()) {
 #else

@@ -504,7 +504,7 @@ namespace guitard {
       NodeSocket* socket = nullptr;
       for (int i = 0; i < node->mOutputCount; i++) {
         socket = &node->mSocketsOut[i];
-        for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
+        for (int j = 0; j < GUITARD_MAX_SOCKET_CONNECTIONS; j++) {
           if (socket->mConnectedTo[j] != nullptr) {
             if (socket->mConnectedTo[j]->mIndex == 0) {
               resetBranchPos(socket->mConnectedTo[j]->mParentNode);
@@ -531,7 +531,7 @@ namespace guitard {
       NodeSocket* socket = nullptr;
       for (int i = 0; i < node->mOutputCount; i++) {
         socket = &node->mSocketsOut[i];
-        for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
+        for (int j = 0; j < GUITARD_MAX_SOCKET_CONNECTIONS; j++) {
           if (socket->mConnectedTo[j] != nullptr) {
             if (socket->mConnectedTo[j]->mIndex == 0) {
               Coord2D branch = arrangeBranch(socket->mConnectedTo[j]->mParentNode, pos);

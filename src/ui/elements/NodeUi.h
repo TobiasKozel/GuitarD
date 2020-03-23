@@ -12,8 +12,8 @@ namespace guitard {
   struct NodeUiHeader { // TODO get rid of this 
     bool hasByPass = false;
     bool hasRemove = true;
-    IControl* bypass;
-    IControl* remove;
+    IControl* bypass = nullptr;
+    IControl* remove = nullptr;
   };
 
 
@@ -28,8 +28,8 @@ namespace guitard {
     MessageBus::Subscription<NodeSpliceInPair> mNodeSpliceInEvent;
     MessageBus::Subscription<QuickConnectRequest> mNodeQuickConnectEvent;
 
-    NodeSocketUi* mInSocketsUi[MAX_NODE_SOCKETS] = { nullptr };
-    NodeSocketUi* mOutSocketsUi[MAX_NODE_SOCKETS] = { nullptr };
+    NodeSocketUi* mInSocketsUi[GUITARD_MAX_NODE_SOCKETS] = { nullptr };
+    NodeSocketUi* mOutSocketsUi[GUITARD_MAX_NODE_SOCKETS] = { nullptr };
 
     NodeUiHeader mHeader;
     PointerList<IControl> mElements; // List of all elements to make moving them around easier

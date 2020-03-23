@@ -406,6 +406,7 @@
     <ClInclude Include="..\src\ui\elements\scroll\ScrollViewChild.h" />
     <ClInclude Include="..\src\ui\elements\scroll\ScrollViewControl.h" />
     <ClInclude Include="..\src\ui\elements\SideBar.h" />
+    <ClInclude Include="..\src\ui\GUIConfig.h" />
     <ClInclude Include="..\src\ui\HistoryStack.h" />
     <ClInclude Include="..\thirdparty\convolver\convolver.h" />
     <ClInclude Include="..\thirdparty\convolver\fft.h" />

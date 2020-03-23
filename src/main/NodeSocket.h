@@ -23,7 +23,7 @@ namespace guitard {
     Coord2D mRel; // Relative position
     Coord2D mAbs; // Absolute position only used for rendering
     bool mConnected = false; // Whether it's connected
-    NodeSocket* mConnectedTo[MAX_SOCKET_CONNECTIONS] = { nullptr };
+    NodeSocket* mConnectedTo[GUITARD_MAX_SOCKET_CONNECTIONS] = { nullptr };
     // Buffer is only relevant for a output node
 
     /**
@@ -38,7 +38,7 @@ namespace guitard {
      */
     void sortConnectedTo() {
       bool hasConnection = false;
-      for (int i = MAX_SOCKET_CONNECTIONS - 1; i >= 0 ; i--) {
+      for (int i = GUITARD_MAX_SOCKET_CONNECTIONS - 1; i >= 0 ; i--) {
         if (mConnectedTo[i] != nullptr) {
           hasConnection = true;
           for (int j = 0; j < i; j++) {

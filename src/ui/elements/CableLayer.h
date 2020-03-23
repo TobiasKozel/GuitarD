@@ -194,7 +194,7 @@ namespace guitard {
         NodeUi* curNode = mNodes->get(n);
         for (int i = 0; i < curNode->mNode->mOutputCount; i++) {
           NodeSocket* curSock = &curNode->mNode->mSocketsOut[i];
-          for (int j = 0; j < MAX_SOCKET_CONNECTIONS; j++) {
+          for (int j = 0; j < GUITARD_MAX_SOCKET_CONNECTIONS; j++) {
             if (curSock->mConnectedTo[j] != nullptr) {
               NodeSocket* tarSock = curSock->mConnectedTo[j];
               g.DrawLine(iplug::igraphics::COLOR_RED,
@@ -353,16 +353,16 @@ namespace guitard {
             float y1 = tarSock->mAbs.y + socketRadius;
             float y2 = curSock->mAbs.y + socketRadius;
             IRECT box;
-            box.L = std::min(x1, x2) - SPLICEIN_DISTANCE;
-            box.R = std::max(x1, x2) + SPLICEIN_DISTANCE;
-            box.T = std::min(y1, y2) - SPLICEIN_DISTANCE;
-            box.B = std::max(y1, y2) + SPLICEIN_DISTANCE;
+            box.L = std::min(x1, x2) - GUITARD_SPLICEIN_DISTANCE;
+            box.R = std::max(x1, x2) + GUITARD_SPLICEIN_DISTANCE;
+            box.T = std::min(y1, y2) - GUITARD_SPLICEIN_DISTANCE;
+            box.B = std::max(y1, y2) + GUITARD_SPLICEIN_DISTANCE;
             if (box.Contains(IRECT{ pos.x, pos.y, pos.x, pos.y })) {
               const float a = y1 - y2;
               const float b = x2 - x1;
               const float c = x1 * y2 - x2 * y1;
               const float d = abs(a * pos.x + b * pos.y + c) / sqrt(a * a + b * b);
-              if (d < SPLICEIN_DISTANCE) {
+              if (d < GUITARD_SPLICEIN_DISTANCE) {
                 return curSock;
               }
             }

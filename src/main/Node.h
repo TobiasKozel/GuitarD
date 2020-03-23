@@ -36,20 +36,20 @@ namespace guitard {
     sample mStereo = 1;
 
     int mParameterCount = 0;
-    ParameterCoupling mParameters[MAX_NODE_PARAMETERS];
+    ParameterCoupling mParameters[GUITARD_MAX_NODE_PARAMETERS];
     int mMeterCount = 0;
-    MeterCoupling mMeters[MAX_NODE_METERS];
+    MeterCoupling mMeters[GUITARD_MAX_NODE_METERS];
 
     int mInputCount = 0;
-    NodeSocket mSocketsIn[MAX_NODE_SOCKETS];
+    NodeSocket mSocketsIn[GUITARD_MAX_NODE_SOCKETS];
     int mOutputCount = 0;
-    NodeSocket mSocketsOut[MAX_NODE_SOCKETS];
+    NodeSocket mSocketsOut[GUITARD_MAX_NODE_SOCKETS];
 
     /**
      * Nodes which this one depends on an need to be processed first
      * Every socket can be a dependency and every parameter for automation
      */
-    Node* mDependencies[MAX_NODE_SOCKETS + MAX_NODE_PARAMETERS] = { nullptr };
+    Node* mDependencies[GUITARD_MAX_NODE_SOCKETS + GUITARD_MAX_NODE_PARAMETERS] = { nullptr };
     int mDependencyCount = 0;
 
     Coord2D mPos = { 0, 0 }; // Position on the canvas in pixels
@@ -261,7 +261,7 @@ namespace guitard {
         }
       }
 
-      memset(mDependencies, 0, MAX_NODE_SOCKETS + MAX_NODE_PARAMETERS * sizeof(Node*));
+      memset(mDependencies, 0, GUITARD_MAX_NODE_SOCKETS + GUITARD_MAX_NODE_PARAMETERS * sizeof(Node*));
       mDependencyCount = 0;
       for (int i = 0; i < mInputCount; i++) {
         if (mSocketsIn[i].mConnected) {
@@ -367,7 +367,7 @@ namespace guitard {
      * Adds a parametercoupling
      */
     int addParameter(const ParameterCoupling p) {
-      if (mParameterCount >= MAX_NODE_PARAMETERS) { return -1; }
+      if (mParameterCount >= GUITARD_MAX_NODE_PARAMETERS) { return -1; }
       mParameters[mParameterCount] = p;
       mParameterCount++;
       return mParameterCount - 1;

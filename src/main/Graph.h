@@ -305,8 +305,8 @@ namespace guitard {
         NodeSocket* prevSock = inSock->mConnectedTo[0];
         if (prevSock != nullptr) { // make sure there's a previous node
           int nextSocketCount = 0;
-          NodeSocket* nextSockets[MAX_SOCKET_CONNECTIONS] = { nullptr };
-          for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) { // Gather all the sockets connected to the output of this node
+          NodeSocket* nextSockets[GUITARD_MAX_SOCKET_CONNECTIONS] = { nullptr };
+          for (int i = 0; i < GUITARD_MAX_SOCKET_CONNECTIONS; i++) { // Gather all the sockets connected to the output of this node
             NodeSocket* nextSock = outSock->mConnectedTo[i];
             if (nextSock != nullptr) {
               bool duplicate = false;
@@ -348,7 +348,7 @@ namespace guitard {
         Node* combine = NodeList::createNode("CombineNode");
         addNode(combine, node->mPos);
 
-        for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+        for (int i = 0; i < GUITARD_MAX_SOCKET_CONNECTIONS; i++) {
           if (outSock->mConnectedTo[i] != nullptr) {
             connectSockets(&combine->mSocketsOut[0], outSock->mConnectedTo[i]);
           }
@@ -531,7 +531,7 @@ namespace guitard {
         connectSockets(&mOutputNode->mSocketsIn[0]);
 
         int expectedIndex = 0;
-        int paramBack = MAX_DAW_PARAMS - 1;
+        int paramBack = GUITARD_MAX_DAW_PARAMS - 1;
 
         // create all the nodes and setup the parameters in the first pass
         for (auto sNode : json["nodes"]) {
@@ -691,7 +691,7 @@ namespace guitard {
       if (in != nullptr) {
         if (in->mConnected) { // Get rid of the old connection on the input
           NodeSocket* prevOut = in->mConnectedTo[0];
-          for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+          for (int i = 0; i < GUITARD_MAX_SOCKET_CONNECTIONS; i++) {
             if (prevOut->mConnectedTo[i] == in) {
               prevOut->mConnectedTo[i] = nullptr;
             }
@@ -702,7 +702,7 @@ namespace guitard {
 
         in->mConnectedTo[0] = out; // in to out
         if (out != nullptr) { // both are connected, so make a new connection
-          for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+          for (int i = 0; i < GUITARD_MAX_SOCKET_CONNECTIONS; i++) {
             if (out->mConnectedTo[i] == nullptr) {
               out->mConnectedTo[i] = in; // out to in
               break;
@@ -715,7 +715,7 @@ namespace guitard {
         in->mParentNode->OnConnectionsChanged();
       }
       else if (out != nullptr) { // Only the out is connected
-        for (int i = 0; i < MAX_SOCKET_CONNECTIONS; i++) {
+        for (int i = 0; i < GUITARD_MAX_SOCKET_CONNECTIONS; i++) {
           if (out->mConnectedTo[i] != nullptr) {
             connectSockets(out->mConnectedTo[i]);
           }
