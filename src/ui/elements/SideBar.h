@@ -9,6 +9,11 @@
 #include "./preset/PresetBrowser.h"
 
 namespace guitard {
+  /**
+   * This is the tab view which manages the preset list
+   * and node gallery
+   * If the side bar is closed it will draw the add icon in the top right instead
+   */
   class SideBar : public IControl {
     MessageBus::Bus* mBus = nullptr;
   public:
@@ -142,8 +147,13 @@ namespace guitard {
       IRECT bounds = GetUI()->GetBounds();
       if (mIsOpen) {
         bounds.Pad(-Theme::Gallery::PADDING);
-        // Only take up half the screen
-        bounds.L = bounds.R * 0.5f;
+        if (bounds.R > 1300) { // 3 columns
+          bounds.L = bounds.R - 680;
+        } else if (bounds.R > 800) { // 2 columns
+          bounds.L = bounds.R - 480;
+        } else { // 60% of the screen
+          bounds.L = bounds.R * 0.4f;
+        }
         mRECT = bounds;
         mTargetRECT = bounds;
         IRECT main = bounds.GetPadded(-Theme::Gallery::PADDING);
