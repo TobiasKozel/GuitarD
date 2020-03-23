@@ -2,7 +2,7 @@
 
 It's a basic multi effects processor which follows a node based approach.
 It's fairly unstable and experimental but contains most of the important features.
-This while thing started as my bachelors thesis, but I plan on developing it further to a point where it's useable.
+This whole thing started as my bachelors thesis, but I plan on developing it further to a point where it's usable.
 
 ## Builds
 No pre-build Binaries yet.
