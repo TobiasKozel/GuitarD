@@ -55,7 +55,15 @@ namespace guitard {
     Coord2D mPos = { 0, 0 }; // Position on the canvas in pixels
     Coord2D mDimensions = { 250, 200 }; // Size in Pixels
 
-    NodeList::NodeInfo* mInfo;
+    NodeList::NodeInfo* mInfo = nullptr;
+
+    /**
+     * Will be called from the NodeList factory directly after the object is constructed
+     */
+    void setNodeInfo(NodeList::NodeInfo* info) {
+      assert(mInfo == nullptr);
+      mInfo = info;
+    }
 
     /**
      * This is basically a delayed constructor with the only disadvantage: derived methods have to have the same parameters

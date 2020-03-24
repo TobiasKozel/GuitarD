@@ -4,8 +4,7 @@
 namespace guitard {
   class BitCrusherNode final : public FaustGenerated::BitCrusher {
   public:
-    explicit BitCrusherNode(NodeList::NodeInfo* info) {
-      mInfo = info;
+    BitCrusherNode() {
       mDimensions.x = 250;
       mDimensions.y = 240;
     }
@@ -19,7 +18,7 @@ namespace guitard {
 #ifndef GUITARD_HEADLESS
 #include "../../ui/elements/NodeUi.h"
 namespace guitard {
-  class BitCrusherNodeUi : public guitard::NodeUi {
+  class BitCrusherNodeUi : public NodeUi {
     public:
       BitCrusherNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) {
         setSvg(SVGBITTERBG_FN);

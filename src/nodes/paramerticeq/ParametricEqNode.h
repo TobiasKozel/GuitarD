@@ -4,23 +4,10 @@
 namespace guitard {
   class ParametricEqNode final : public FaustGenerated::ParametricEq {
   public:
-    ParametricEqNode(NodeList::NodeInfo* info) {
-      mInfo = info;
+    ParametricEqNode() {
       mDimensions.x = 400;
       mDimensions.y = 200;
     }
-
-//#ifndef GUITARD_HEADLESS
-//    void setupUi(iplug::igraphics::IGraphics* pGrahics) override {
-//      shared.graphics = pGrahics;
-//      mUi = new ParametricEqNodeUi(&shared);
-//      mUi->setColor(Theme::Categories::FILTER);
-
-//      pGrahics->AttachControl(mUi);
-//      mUi->setUp();
-//      mUiReady = true;
-//    }
-//#endif
   };
 
   GUITARD_REGISTER_NODE(ParametricEqNode,

@@ -7,9 +7,6 @@ namespace guitard {
   class GraphNode final : public Node {
   public:
     Graph mGraph;
-    GraphNode(NodeList::NodeInfo* info) {
-      mInfo = info;
-    }
 
     void setup(int pSamplerate, int pMaxBuffer, int, int, int) override {
       Node::setup(pSamplerate, pMaxBuffer, 1, 1, 2);

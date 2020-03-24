@@ -2,12 +2,7 @@
 #include "../../main/faust/generated/BandSplit.h"
 
 namespace guitard {
-  class BandSplitNode final : public FaustGenerated::BandSplit {
-  public:
-    BandSplitNode(NodeList::NodeInfo* info) {
-      mInfo = info;
-    }
-  };
+  using BandSplitNode = FaustGenerated::BandSplit;
 
   GUITARD_REGISTER_NODE(BandSplitNode,
     "Band Split", "Signal Flow",

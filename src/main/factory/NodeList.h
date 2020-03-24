@@ -66,7 +66,9 @@ namespace guitard {
       RegisterProxy(NodeInfo pInfo) {
         if (pInfo.constructor == nullptr) {
           pInfo.constructor = [](NodeInfo* info) {
-            return new T(info);
+            T* node = new T();
+            node->setNodeInfo(info);
+            return node;
           };
         }
         registerNode(pInfo);

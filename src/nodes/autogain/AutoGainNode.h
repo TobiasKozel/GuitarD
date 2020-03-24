@@ -10,8 +10,7 @@ namespace guitard {
     int samplesPassed = 0;
     int samplesTarget = 0;
   public:
-    AutoGainNode(NodeList::NodeInfo* info) {
-      mInfo = info;
+    AutoGainNode() {
       mDimensions.x = 100;
       mDimensions.y = 100;
       addByPassParam();

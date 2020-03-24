@@ -2,12 +2,6 @@
 #include "../../main/faust/generated/Transpose.h"
 
 namespace guitard {
-  class TransposeNode final : public FaustGenerated::Transpose {
-  public:
-    TransposeNode(NodeList::NodeInfo* info) {
-      mInfo = info;
-    }
-  };
-
+  using TransposeNode = FaustGenerated::Transpose;
   GUITARD_REGISTER_NODE(TransposeNode, "Transpose", "Filters", "Simple Transposed")
 }

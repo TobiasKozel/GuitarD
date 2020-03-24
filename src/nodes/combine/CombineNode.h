@@ -11,8 +11,7 @@ namespace guitard {
     sample mAddMode = 0;
     sample** emptyBuffer = nullptr;
   public:
-    CombineNode(NodeList::NodeInfo* info) {
-      mInfo = info;
+    CombineNode() {
       mDimensions.x = 200;
       mDimensions.y = 150;
     }

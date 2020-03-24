@@ -10,8 +10,7 @@ namespace guitard {
     bool mEmitted = false;
 
   public:
-    FeedbackNode(NodeList::NodeInfo* info) {
-      mInfo = info;
+    FeedbackNode() {
       mDimensions.y = 170;
     }
 

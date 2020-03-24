@@ -4,8 +4,7 @@
 namespace guitard {
   class AutoWahNode final : public FaustGenerated::AutoWah {
   public:
-    explicit AutoWahNode(NodeList::NodeInfo* info) {
-      mInfo = info;
+    AutoWahNode() {
       mDimensions.x = 200;
       mDimensions.y = 200;
     }

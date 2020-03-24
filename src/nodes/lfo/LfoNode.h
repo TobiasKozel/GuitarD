@@ -12,10 +12,6 @@ namespace guitard {
     sample mNoise = 0;
     sample mGain = 1.0;
   public:
-    explicit LfoNode(NodeList::NodeInfo* info) {
-      mInfo = info;
-
-    }
 
     void setup(const int pSamplerate, int pMaxBuffer, int, int, int) override {
       Node::setup(pSamplerate, pMaxBuffer, 0, 0, 2); // No output sockets

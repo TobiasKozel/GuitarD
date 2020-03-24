@@ -3,15 +3,11 @@
 
 
 namespace guitard {
-
-
   class SimpleDriveNode final : public FaustGenerated::SimpleDrive {
   public:
-    SimpleDriveNode(NodeList::NodeInfo* info) {
-      mInfo = info;
+    SimpleDriveNode() {
       FaustHeadlessDsp::enableOversampling();
     }
-
 
 #ifndef GUITARD_HEADLESS
     //void setupUi(iplug::igraphics::IGraphics* pGrahics) override {

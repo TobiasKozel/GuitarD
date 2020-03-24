@@ -8,10 +8,6 @@ namespace guitard {
     sample mGainDown = 1.0;
 
   public:
-    RectifyNode(NodeList::NodeInfo* info) {
-      mInfo = info;
-    }
-
     void setup(int pSamplerate, int pMaxBuffer, int, int, int) override {
       Node::setup(pSamplerate, pMaxBuffer, 1, 1, 2);
       addByPassParam();

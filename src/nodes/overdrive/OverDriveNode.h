@@ -1,12 +1,6 @@
 #pragma once
 #include "../../main/faust/generated/OverDrive.h"
 namespace guitard {
-  class OverDriveNode final : public FaustGenerated::OverDrive {
-  public:
-    OverDriveNode(NodeList::NodeInfo* info) {
-      mInfo = info;
-    }
-  };
-
+  using OverDriveNode = FaustGenerated::OverDrive;
   GUITARD_REGISTER_NODE(OverDriveNode, "Overdrive", "Distortion", "I drive.")
 }

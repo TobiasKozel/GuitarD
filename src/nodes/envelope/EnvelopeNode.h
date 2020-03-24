@@ -13,12 +13,8 @@ namespace guitard {
     sample avg = 0;
     sample current = 0;
   public:
-    explicit EnvelopeNode(NodeList::NodeInfo* info) {
-      mInfo = info;
-      addMeter("Value", &avg, 0, 1);
-    }
-
     void setup(const int pSamplerate, int pMaxBuffer, int, int, int) override {
+      addMeter("Value", &avg, 0, 1);
       Node::setup(pSamplerate, pMaxBuffer, 1, 0, 2);
       mDimensions.y = 300;
 

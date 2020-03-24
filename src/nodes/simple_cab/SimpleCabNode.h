@@ -25,8 +25,7 @@ namespace guitard {
 
   public:
     soundwoofer::SWImpulseShared mLoadedIr = InternalIRs[0];
-    SimpleCabNode(NodeList::NodeInfo* info) {
-      mInfo = info;
+    SimpleCabNode() {
       mStereo = 0;
       addByPassParam();
       addStereoParam();

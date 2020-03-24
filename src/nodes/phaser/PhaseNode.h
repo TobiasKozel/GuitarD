@@ -4,8 +4,7 @@
 namespace guitard {
   class PhaserNode final : public FaustGenerated::Phaser {
   public:
-    explicit PhaserNode(NodeList::NodeInfo* info) {
-      mInfo = info;
+    PhaserNode() {
       mDimensions.x = 250;
       mDimensions.y = 240;
     }
