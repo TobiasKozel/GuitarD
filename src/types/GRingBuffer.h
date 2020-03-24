@@ -3,6 +3,7 @@
  * Based on the "circbuf.h" implementation from Cockos WDL but without their heap buffer
  */
 #include <cstring>
+#include "GTypes.h"
 
 namespace guitard {
   template <typename T>
@@ -18,14 +19,7 @@ namespace guitard {
       setSize(0);
     }
 
-    /**
-     * Won't allow copying for now
-     */
-    RingBuffer(const RingBuffer&) = delete;
-    RingBuffer(const RingBuffer*) = delete;
-    RingBuffer(RingBuffer&&) = delete;
-    RingBuffer& operator= (const RingBuffer&) = delete;
-    RingBuffer& operator= (RingBuffer&&) = delete;
+    GUITARD_NO_COPY(RingBuffer)
 
     /**
      * Will resize the buffer an clear it

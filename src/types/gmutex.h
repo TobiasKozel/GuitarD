@@ -5,6 +5,8 @@
 #include "mutex.h" // The wdl mutex
 #endif
 
+#include "./GTypes.h"
+
 namespace guitard {
   class Mutex {
 #ifdef GUITARD_HEADLESS
@@ -31,9 +33,7 @@ namespace guitard {
 #endif
     }
 
-    Mutex(Mutex&) = delete;
-    Mutex(Mutex*) = delete;
-    Mutex& operator=(const Mutex&) = delete;
+    GUITARD_NO_COPY(Mutex)
   };
 
   class LockGuard {
@@ -48,8 +48,6 @@ namespace guitard {
       mMutex->unlock();
     }
 
-    LockGuard(LockGuard&) = delete;
-    LockGuard(LockGuard*) = delete;
-    LockGuard& operator=(const LockGuard&) = delete;
+    GUITARD_NO_COPY(LockGuard)
   };
 }

@@ -69,14 +69,7 @@ namespace guitard {
 
     bool mStereo = false;
 
-    /**
-     * Won't allow copying for now
-     */
-    WrappedConvolver(const WrappedConvolver&) = delete;
-    WrappedConvolver(const WrappedConvolver*) = delete;
-    WrappedConvolver(WrappedConvolver&&) = delete;
-    WrappedConvolver& operator= (const WrappedConvolver&) = delete;
-    WrappedConvolver& operator= (WrappedConvolver&&) = delete;
+    GUITARD_NO_COPY(WrappedConvolver)
 
     explicit WrappedConvolver(const int maxBuffer = 512): maxBuffer(maxBuffer) {
 #ifdef GUITARD_CONV_THREAD_POOL

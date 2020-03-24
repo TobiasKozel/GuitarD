@@ -2,6 +2,7 @@
 #include <string>
 
 namespace guitard {
+  class WrappedConvolver;
   class Node;
   class NodeUi;
   class Graph;
@@ -41,6 +42,15 @@ namespace guitard {
   #endif
 #endif
 
+/**
+ * A macro to disable all kinds of implicit copy mechanisms
+ */
+#define GUITARD_NO_COPY(name) \
+name(const name&) = delete; \
+name(const name*) = delete; \
+name(name&&) = delete; \
+name& operator= (const name&) = delete; \
+name& operator= (name&&) = delete;
 
 /**
  * This is one of the downsides of going header only
