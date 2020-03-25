@@ -7,16 +7,16 @@
 
 #ifdef GUITARD_SSE
   #ifdef SAMPLE_TYPE_FLOAT
-    #include "../../thirdparty/hiir/Downsampler2xSse.h"
-    #include "../../thirdparty/hiir/Upsampler2xSse.h"
+    #include "../../thirdparty/HIIR/Downsampler2xSse.h"
+    #include "../../thirdparty/HIIR/Upsampler2xSse.h"
   #else
-    #include "../../thirdparty/hiir/Upsampler2xF64Sse2.h"
-    #include "../../thirdparty/hiir/Downsampler2xF64Sse2.h"
+    #include "../../thirdparty/HIIR/Upsampler2xF64Sse2.h"
+    #include "../../thirdparty/HIIR/Downsampler2xF64Sse2.h"
   #endif
   
 #else
-  #include "../../thirdparty/hiir/Upsampler2xFpu.h"
-  #include "../../thirdparty/hiir/Downsampler2xFpu.h"
+  #include "../../thirdparty/HIIR/Upsampler2xFpu.h"
+  #include "../../thirdparty/HIIR/Downsampler2xFpu.h"
 #endif
 
 

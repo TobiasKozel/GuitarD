@@ -12,6 +12,8 @@ Windows: `g++.exe -O2 --fast-math -ftree-vectorize .\benchmark.cpp -lws2_32`
 
 Linux: `g++ -O2 --fast-math -ftree-vectorize ./benchmark.cpp -pthread`
 
+Compiling device.cpp will also need `-ldl`
+
 Raspberry Pi 2b: `g++ -O3 -ffast-math -ftree-vectorize -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mtune=cortex-a7 ./benchmark.cpp -pthread`
 
 The RPi2b is about 10 times slower than my i7-4790k. For smaller blocksizes it gets much worse though.

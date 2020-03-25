@@ -139,7 +139,7 @@ namespace guitard {
 
 #ifdef GUITARD_HEADLESS
     ParameterCoupling* getCoupling(int index) {
-        if (index < MAX_DAW_PARAMS && mParameters[index] != nullptr) {
+        if (index < GUITARD_MAX_DAW_PARAMS && mParameters[index] != nullptr) {
           return mParameters[index];
         }
         return nullptr;
