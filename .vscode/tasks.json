@@ -30,6 +30,7 @@
             "command": "g++",
             "args": [
                 "-g",
+                "-O0",
                 "-I./",
                 "-I./thirdparty/",
                 "-I./src/faust/generated/",

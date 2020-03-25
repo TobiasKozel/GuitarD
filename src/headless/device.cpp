@@ -11,6 +11,7 @@
 #include "./GHeadless.h"
 
 #define MINIAUDIO_IMPLEMENTATION
+#define MA_NO_DECODING
 #include "../../thirdparty/miniaudio.h"
 
 guitard::GuitarDHeadless headless;
@@ -41,6 +42,36 @@ int main(int argc, char** argv) {
   ma_result result;
   ma_device_config deviceConfig;
   ma_device device;
+
+  ma_context context;
+  ma_device_info* pPlaybackDeviceInfos;
+  ma_uint32 playbackDeviceCount;
+  ma_device_info* pCaptureDeviceInfos;
+  ma_uint32 captureDeviceCount;
+  ma_uint32 iDevice;
+
+  if (ma_context_init(NULL, 0, NULL, &context) != MA_SUCCESS) {
+    printf("Failed to initialize context.\n");
+    return -2;
+  }
+
+  result = ma_context_get_devices(&context, &pPlaybackDeviceInfos, &playbackDeviceCount, &pCaptureDeviceInfos, &captureDeviceCount);
+  if (result != MA_SUCCESS) {
+      printf("Failed to retrieve device information.\n");
+      return -3;
+  }
+
+  printf("Playback Devices\n");
+  for (iDevice = 0; iDevice < playbackDeviceCount; ++iDevice) {
+      printf("    %u: %s\n", iDevice, pPlaybackDeviceInfos[iDevice].name);
+  }
+
+  printf("\n");
+
+  printf("Capture Devices\n");
+  for (iDevice = 0; iDevice < captureDeviceCount; ++iDevice) {
+      printf("    %u: %s\n", iDevice, pCaptureDeviceInfos[iDevice].name);
+  }
 
   deviceConfig = ma_device_config_init(ma_device_type_duplex);
   deviceConfig.capture.pDeviceID  = NULL;
