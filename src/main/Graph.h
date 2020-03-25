@@ -10,7 +10,7 @@
 #include "./parameter/ParameterManager.h"
 
 //#define GUITARD_GRAPH_MUTEX
-//#define GUITARD_GRAPH_ATOMIC
+#define GUITARD_GRAPH_ATOMIC
 
 namespace guitard {
   /**
