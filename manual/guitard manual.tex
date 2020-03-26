@@ -1,3 +1,32 @@
 \documentclass[a4paper,14pt]{report}
 \begin{document}
+\chapter{Usage \& Keyboard Shortcuts}
+\begin{itemize}
+  \item Dragging a Node near a connection will highlight the connection if the cursor gets close enough to it. Releasing the mouse will splice in the node into that connection.
+  \item Duplicate Node: Control + Drag a Node
+  \item Bypass connections of a Node: Alt + Drag a Node
+  \item Quick wet/dry mix of a Node: Shift + Drag a Node
+  \item Sever all connections of a Node: Alt + Control + Drag a Node
+  \item Quick grab a output connection: Right-click + Drag a Node
+  \item Jump to InputNode: Q
+  \item Jump to OutputNode: E
+  \item Jump to center: C
+  \item Tidy up the node positions: F
+  \item Undo: Shift + Z (DAWs might capture Control + Z strokes)
+  \item Copy current preset to the clipboard: Shift + C
+  \item Load preset from clipboard (Will discard the current one!): Shift + V
+  \item Display copyright information about a (single) selected Node: F1
+\end{itemize}
+
+\chapter{Nodes}
+\section{Feedback Node}
+The only safe way to routing a signal back in the node chain.
+Simply routing back a signal without it might work, but can result in undefined behavior.
+
+\section{Graph Meta Node}
+Double click it to edit the contents. Adding or deliting nodes will all take place inside this node. This also applies to loading presets.
+There is no visual feedback whether you are editing a Meta Node for now.
+Double clicking the background will leave the Meta Node and go back to the graph containing it (which might also be a Meta Node).
+Meta Nodes can go 7 recursions deep.
+
 \end{document}

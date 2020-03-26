@@ -12,7 +12,7 @@ This whole thing started as my bachelors thesis, but I plan on developing it fur
 ## I'm not responsible for any crashes or hearing loss. (Seriously, be careful)
 
 ## How to use
-TODO
+In progress. Have a look at `./manual/guitard manual.pdf`
 
 ## Compilation
 To build a plugin you'll need [this fork of iPlug2](https://github.com/TobiasKozel/iPlug2) and switch to the `guitard` branch there.
