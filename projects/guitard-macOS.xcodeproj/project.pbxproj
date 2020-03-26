@@ -338,7 +338,6 @@
 		4FFBB93020863B0E00DDD0E7 /* fbuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F8158C1205D50EB00393585 /* fbuffer.cpp */; };
 		4FFBB93420863B0E00DDD0E7 /* coreiids.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F8158E0205D50EB00393585 /* coreiids.cpp */; };
 		4FFBB93520863B0E00DDD0E7 /* vstnoteexpressiontypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F81588E205D50EB00393585 /* vstnoteexpressiontypes.cpp */; };
-		94257ECE234F85310043976D /* src in Resources */ = {isa = PBXBuildFile; fileRef = 94257ECD234F85310043976D /* src */; };
 		94448969238049C2008A11C6 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 4FC82B4620BD522B00722133 /* fonts */; };
 		9444896A238049FE008A11C6 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 4FC82B4620BD522B00722133 /* fonts */; };
 		947151C5237D99F600867A1F /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 947151C4237D99E200867A1F /* Accelerate.framework */; };
@@ -379,6 +378,8 @@
 		94DD580224283E9C008EF58B /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 94DD580124283E9C008EF58B /* Roboto-Regular.ttf */; };
 		94DD580424283EE9008EF58B /* bitter.svg in Resources */ = {isa = PBXBuildFile; fileRef = 94DD580324283EE8008EF58B /* bitter.svg */; };
 		94DD580624283EF2008EF58B /* feedback.svg in Resources */ = {isa = PBXBuildFile; fileRef = 94DD580524283EF2008EF58B /* feedback.svg */; };
+		94DD5808242D0AAF008EF58B /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 4FC82B4620BD522B00722133 /* fonts */; };
+		94DD5809242D0AAF008EF58B /* img in Resources */ = {isa = PBXBuildFile; fileRef = 4FC82B4520BD522B00722133 /* img */; };
 		94E5BA1D237DA1BF00D42D87 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 947151C4237D99E200867A1F /* Accelerate.framework */; };
 		94E5BA24237DA1EE00D42D87 /* AUv3Framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94E5BA23237DA1EE00D42D87 /* AUv3Framework.framework */; };
 		94E5BA25237DA1F400D42D87 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 947151C4237D99E200867A1F /* Accelerate.framework */; };
@@ -2184,7 +2185,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				94257ECE234F85310043976D /* src in Resources */,
+				94DD5808242D0AAF008EF58B /* fonts in Resources */,
+				94DD5809242D0AAF008EF58B /* img in Resources */,
 				4F78D88613B6382B0032E0F3 /* GuitarD.icns in Resources */,
 				4F1B4AE42014D33600BC64D4 /* GuitarD-macOS-MainMenu.xib in Resources */,
 			);
