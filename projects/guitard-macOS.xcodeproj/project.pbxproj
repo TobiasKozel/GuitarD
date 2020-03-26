@@ -358,6 +358,27 @@
 		948EF39424282D2A003E4A36 /* filebrowse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9483AF8523898E8D002E0332 /* filebrowse.cpp */; };
 		948EF39524282D53003E4A36 /* filebrowse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9483AF8523898E8D002E0332 /* filebrowse.cpp */; };
 		94B9451E237D9E710093CE4A /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 947151C4237D99E200867A1F /* Accelerate.framework */; };
+		94DD57EC24283C6C008EF58B /* swell-appstub.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4F5C5F6A21BED08700E024A7 /* swell-appstub.mm */; };
+		94DD57ED24283C6C008EF58B /* swell-menugen.h in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D0213B63489001D0217 /* swell-menugen.h */; };
+		94DD57EE24283C6C008EF58B /* swell-dlggen.h in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D0313B63494001D0217 /* swell-dlggen.h */; };
+		94DD57F124283C6C008EF58B /* swell-ini.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D1513B634D2001D0217 /* swell-ini.cpp */; };
+		94DD57F224283C6C008EF58B /* swell-dlg.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D0413B634AA001D0217 /* swell-dlg.mm */; };
+		94DD57F324283C6C008EF58B /* swell-kb.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D3913B63582001D0217 /* swell-kb.mm */; };
+		94DD57F424283C6C008EF58B /* swell-miscdlg.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D3B13B6358C001D0217 /* swell-miscdlg.mm */; };
+		94DD57F524283C6C008EF58B /* swell-menu.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D3D13B63595001D0217 /* swell-menu.mm */; };
+		94DD57F624283C6C008EF58B /* swell-wnd.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D4113B635AB001D0217 /* swell-wnd.mm */; };
+		94DD57F724283C6C008EF58B /* swell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D4313B635B2001D0217 /* swell.cpp */; };
+		94DD57F824283C6C008EF58B /* swell-misc.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D3F13B635A0001D0217 /* swell-misc.mm */; };
+		94DD57F924283C6C008EF58B /* swell-internal.h in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D2B13B6353C001D0217 /* swell-internal.h */; };
+		94DD57FA24283C6C008EF58B /* swell-types.h in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D3013B6355A001D0217 /* swell-types.h */; };
+		94DD57FB24283C6C008EF58B /* swell-functions.h in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D2213B6351C001D0217 /* swell-functions.h */; };
+		94DD57FC24283C6C008EF58B /* swell-gdi.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D0B13B634BF001D0217 /* swell-gdi.mm */; };
+		94DD57FD24283C6C008EF58B /* swell.h in Sources */ = {isa = PBXBuildFile; fileRef = 4FD16D1713B634E5001D0217 /* swell.h */; };
+		94DD57FE24283E88008EF58B /* img in Resources */ = {isa = PBXBuildFile; fileRef = 4FC82B4520BD522B00722133 /* img */; };
+		94DD580024283E94008EF58B /* forkawesome-webfont.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 94DD57FF24283E94008EF58B /* forkawesome-webfont.ttf */; };
+		94DD580224283E9C008EF58B /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 94DD580124283E9C008EF58B /* Roboto-Regular.ttf */; };
+		94DD580424283EE9008EF58B /* bitter.svg in Resources */ = {isa = PBXBuildFile; fileRef = 94DD580324283EE8008EF58B /* bitter.svg */; };
+		94DD580624283EF2008EF58B /* feedback.svg in Resources */ = {isa = PBXBuildFile; fileRef = 94DD580524283EF2008EF58B /* feedback.svg */; };
 		94E5BA1D237DA1BF00D42D87 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 947151C4237D99E200867A1F /* Accelerate.framework */; };
 		94E5BA24237DA1EE00D42D87 /* AUv3Framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94E5BA23237DA1EE00D42D87 /* AUv3Framework.framework */; };
 		94E5BA25237DA1F400D42D87 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 947151C4237D99E200867A1F /* Accelerate.framework */; };
@@ -845,6 +866,10 @@
 		9444895B238040CB008A11C6 /* TwoStageFFTConvolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TwoStageFFTConvolver.cpp; path = ../thirdparty/fftconvolver/TwoStageFFTConvolver.cpp; sourceTree = "<group>"; };
 		947151C4237D99E200867A1F /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		9483AF8523898E8D002E0332 /* filebrowse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = filebrowse.cpp; path = ../../../WDL/filebrowse.cpp; sourceTree = "<group>"; };
+		94DD57FF24283E94008EF58B /* forkawesome-webfont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "forkawesome-webfont.ttf"; path = "../resources/fonts/forkawesome-webfont.ttf"; sourceTree = "<group>"; };
+		94DD580124283E9C008EF58B /* Roboto-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Roboto-Regular.ttf"; path = "../resources/fonts/Roboto-Regular.ttf"; sourceTree = "<group>"; };
+		94DD580324283EE8008EF58B /* bitter.svg */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = bitter.svg; path = ../resources/img/bitter.svg; sourceTree = "<group>"; };
+		94DD580524283EF2008EF58B /* feedback.svg */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = feedback.svg; path = ../resources/img/feedback.svg; sourceTree = "<group>"; };
 		94E5BA23237DA1EE00D42D87 /* AUv3Framework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AUv3Framework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		94E7662D236251A0000B599F /* resample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = resample.cpp; path = ../../../WDL/resample.cpp; sourceTree = "<group>"; };
 		B8E22A0A220268C4007CBF4C /* IPlugVST3_ProcessorBase.cpp */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.cpp.cpp; name = IPlugVST3_ProcessorBase.cpp; path = ../../../IPlug/VST3/IPlugVST3_ProcessorBase.cpp; sourceTree = "<group>"; tabWidth = 2; };
@@ -939,6 +964,10 @@
 		089C166AFE841209C02AAC07 /* IPlugExample */ = {
 			isa = PBXGroup;
 			children = (
+				94DD580524283EF2008EF58B /* feedback.svg */,
+				94DD580324283EE8008EF58B /* bitter.svg */,
+				94DD580124283E9C008EF58B /* Roboto-Regular.ttf */,
+				94DD57FF24283E94008EF58B /* forkawesome-webfont.ttf */,
 				52FBBED30D0CF143001C8B8A /* config.h */,
 				4F3862EE2014BBEC0009F402 /* GuitarD.h */,
 				4F3862ED2014BBEC0009F402 /* GuitarD.cpp */,
@@ -2110,7 +2139,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94DD580224283E9C008EF58B /* Roboto-Regular.ttf in Resources */,
+				94DD580024283E94008EF58B /* forkawesome-webfont.ttf in Resources */,
 				94448969238049C2008A11C6 /* fonts in Resources */,
+				94DD580424283EE9008EF58B /* bitter.svg in Resources */,
+				94DD580624283EF2008EF58B /* feedback.svg in Resources */,
+				94DD57FE24283E88008EF58B /* img in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2456,6 +2490,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94DD57EC24283C6C008EF58B /* swell-appstub.mm in Sources */,
+				94DD57ED24283C6C008EF58B /* swell-menugen.h in Sources */,
+				94DD57EE24283C6C008EF58B /* swell-dlggen.h in Sources */,
+				94DD57F124283C6C008EF58B /* swell-ini.cpp in Sources */,
+				94DD57F224283C6C008EF58B /* swell-dlg.mm in Sources */,
+				94DD57F324283C6C008EF58B /* swell-kb.mm in Sources */,
+				94DD57F424283C6C008EF58B /* swell-miscdlg.mm in Sources */,
+				94DD57F524283C6C008EF58B /* swell-menu.mm in Sources */,
+				94DD57F624283C6C008EF58B /* swell-wnd.mm in Sources */,
+				94DD57F724283C6C008EF58B /* swell.cpp in Sources */,
+				94DD57F824283C6C008EF58B /* swell-misc.mm in Sources */,
+				94DD57F924283C6C008EF58B /* swell-internal.h in Sources */,
+				94DD57FA24283C6C008EF58B /* swell-types.h in Sources */,
+				94DD57FB24283C6C008EF58B /* swell-functions.h in Sources */,
+				94DD57FC24283C6C008EF58B /* swell-gdi.mm in Sources */,
+				94DD57FD24283C6C008EF58B /* swell.h in Sources */,
 				948EF39224282CCC003E4A36 /* filebrowse.cpp in Sources */,
 				4F78BE1422E7406D00AD537E /* GuitarD.h in Sources */,
 				4F0D965C23099F6900BFDED0 /* IPlugProcessor.cpp in Sources */,
