@@ -128,9 +128,11 @@ namespace guitard {
       moutputNodeUi = setUpNodeUi(mGraph->getOutputNode());
       mCableLayer->setInOutNodes(mInputNodeUi->mNode, moutputNodeUi->mNode);
 
-      const float scale = mGraph->getScale();
-      mBackground->mScale = scale;
+      float scale = mGraph->getScale();
+      //mBackground->mScale = scale;
+      mBackground->reset();
       // mGraphics->Resize(mGraphics->Width(), mGraphics->Height(), scale);
+
       return scale;
     }
 
