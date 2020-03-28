@@ -16,6 +16,7 @@ guitard::GuitarDHeadless headless;
 
 #define CHANNEL_COUNT 2
 #define MAX_BLOCK_SIZE 1024
+#define MONO_IN // Means it still is a stereo device, but only the left input will be used
 
 guitard::sample buffers[CHANNEL_COUNT * 2][MAX_BLOCK_SIZE];
 guitard::sample* in[CHANNEL_COUNT] = { buffers[0], buffers[1] };
@@ -26,32 +27,39 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
   MA_ASSERT(pDevice->capture.channels == pDevice->playback.channels);
   const guitard::sample* inF = static_cast<const guitard::sample*>(pInput);
   guitard::sample* outF = static_cast<guitard::sample*>(pOutput);
+#ifdef MONO_IN
+  for (unsigned int s = 0; s < frameCount; s++) {
+    in[0][s] = inF[s * 2];
+    in[1][s] = inF[s * 2];
+  }
+#else
   for (unsigned int s = 0; s < frameCount * CHANNEL_COUNT; s++) {
     const unsigned int channel = s % CHANNEL_COUNT;
     const unsigned int sample = s / CHANNEL_COUNT;
     in[channel][sample] = inF[s];
   }
+#endif
   headless.process(in, out, frameCount);
   for (int i = 0, j = 0; i < frameCount; i++, j += CHANNEL_COUNT) {
-    outF[j] = out[0][i];
-    outF[j + 1] = out[1][i];
+    outF[j] = out[0][i] * 0.6;
+    outF[j + 1] = out[1][i] * 0.6;
   }
 }
 
 int main(int argc, char** argv) {
-  ma_uint32 frame_size = 128;
-  const char* path = "../../thirdparty/soundwoofer/dummy_backend/presets/";
-  if (argc > 1) {
-    frame_size = atoi(argv[1]);
-  }
-  if (argc == 2) {
-    path = argv[2];
+  std::string folder = "../../thirdparty/soundwoofer/dummy_backend/presets/";
+
+  if (argc == 4) {
+    folder = argv[3];
   }
 
-  std::vector<soundwoofer::file::FileInfo> presets = soundwoofer::file::scanDir(path);
+  std::vector<soundwoofer::file::FileInfo> presets = soundwoofer::file::scanDir(folder);
   int currentPresetIndex = 0;
 
-  if (presets.empty()) { return -1; }
+  if (presets.empty()) { 
+    printf("Preset folder not found!\n");
+    return -1;
+  }
 
   ma_result result;
   ma_device_config deviceConfig;
@@ -65,15 +73,29 @@ int main(int argc, char** argv) {
   deviceConfig.playback.format    = ma_format_f32;
   deviceConfig.playback.channels  = CHANNEL_COUNT;
   deviceConfig.dataCallback       = data_callback;
-  deviceConfig.periodSizeInFrames = frame_size;
+
+  if (argc > 1) {
+    deviceConfig.periodSizeInFrames = atoi(argv[1]);
+  }
+  else {
+    deviceConfig.periodSizeInFrames = 128;
+  }
+  if (argc > 2) {
+    deviceConfig.sampleRate = atoi(argv[2]);
+  }
+  else {
+    deviceConfig.sampleRate = 44100;
+  }
+
   result = ma_device_init(NULL, &deviceConfig, &device);
   if (result != MA_SUCCESS) {
       return result;
   }
-  printf("\n Framesize: %u\n", deviceConfig.periodSizeInFrames);
-	headless.setConfig(device.sampleRate, device.playback.channels, device.capture.channels);
 
   ma_device_start(&device);
+
+  printf("\n Framesize: %u Samplerate: %u\n", deviceConfig.periodSizeInFrames, deviceConfig.sampleRate);
+	headless.setConfig(device.sampleRate, device.playback.channels, device.capture.channels);
 
   while (42) {
     std::ifstream file(presets[currentPresetIndex].absolute);
