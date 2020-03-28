@@ -3136,6 +3136,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = XKMCM5DHUB;
 				DSTROOT = "$(AU_PATH)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -3165,6 +3167,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = XKMCM5DHUB;
 				DSTROOT = "$(AU_PATH)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -3194,6 +3198,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = XKMCM5DHUB;
 				DSTROOT = "$(AU_PATH)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -3374,6 +3380,7 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
@@ -3895,6 +3902,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = "GuitarD-macOS.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = XKMCM5DHUB;
 				DSTROOT = "$(APP_PATH)";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -3924,6 +3932,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = "GuitarD-macOS.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = XKMCM5DHUB;
 				DSTROOT = "$(APP_PATH)";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -3953,6 +3962,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = "GuitarD-macOS.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = XKMCM5DHUB;
 				DSTROOT = "$(APP_PATH)";
 				ENABLE_HARDENED_RUNTIME = YES;

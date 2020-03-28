@@ -34,7 +34,7 @@ PLUGIN_NAME=`echo | grep BUNDLE_NAME config.h`
 PLUGIN_NAME=${PLUGIN_NAME//\#define BUNDLE_NAME }
 PLUGIN_NAME=${PLUGIN_NAME//\"}
 
-DMG_NAME=$PLUGIN_NAME-v$FULL_VERSION-mac
+DMG_NAME=$PLUGIN_NAME-mac
 
 if [ $DEMO == 1 ]
 then
@@ -80,7 +80,7 @@ echo ""
 
 #---------------------------------------------------------------------------------------------------------
 
-./scripts/update_installer_version.py $DEMO
+# ./scripts/update_installer_version.py $DEMO
 
 echo "touching source to force recompile" 
 touch *.cpp
@@ -130,7 +130,8 @@ fi
 
 # build xcode project. Change target to build individual formats 
 
-xcodebuild -project ./projects/$PLUGIN_NAME-macOS.xcodeproj -xcconfig ./config/$PLUGIN_NAME-mac.xcconfig DEMO_VERSION=$DEMO -target "All" -configuration Release 2> ./build-mac.log
+xcodebuild -project ./projects/$PLUGIN_NAME-macOS.xcodeproj -xcconfig ./config/$PLUGIN_NAME-mac.xcconfig DEMO_VERSION=$DEMO -target "APP" -configuration Release 2> ./build-mac.log
+xcodebuild -project ./projects/$PLUGIN_NAME-macOS.xcodeproj -xcconfig ./config/$PLUGIN_NAME-mac.xcconfig DEMO_VERSION=$DEMO -target "AU" -configuration Release 2> ./build-mac.log
 
 if [ -s build-mac.log ]
 then
@@ -148,9 +149,7 @@ fi
 echo "setting icons"
 echo ""
 setfileicon resources/$PLUGIN_NAME.icns $AU
-setfileicon resources/$PLUGIN_NAME.icns $VST2
-setfileicon resources/$PLUGIN_NAME.icns $VST3
-setfileicon resources/$PLUGIN_NAME.icns "${AAX}"
+# setfileicon resources/$PLUGIN_NAME.icns $VST3
 
 #---------------------------------------------------------------------------------------------------------
 
@@ -158,22 +157,9 @@ setfileicon resources/$PLUGIN_NAME.icns "${AAX}"
 
 echo "stripping binaries"
 strip -x $AU/Contents/Resources/plugin.vst3/Contents/MacOS/$PLUGIN_NAME
-strip -x $VST2/Contents/MacOS/$PLUGIN_NAME
-strip -x $VST3/Contents/MacOS/$PLUGIN_NAME
+# strip -x $VST3/Contents/MacOS/$PLUGIN_NAME
 strip -x $APP/Contents/MacOS/$PLUGIN_NAME
-strip -x "${AAX}/Contents/MacOS/$PLUGIN_NAME"
 
-#---------------------------------------------------------------------------------------------------------
-
-#ProTools stuff
-echo "copying AAX ${PLUGIN_NAME} from 3PDev to main AAX folder"
-sudo cp -p -R "${AAX}" "${AAX_FINAL}"
-mkdir "${AAX_FINAL}/Contents/Factory Presets/"
-
-echo "code sign AAX binary"
-/Applications/PACEAntiPiracy/Eden/Fusion/Current/bin/wraptool sign --verbose --account XXXX --wcguid XXXX --signid "Developer ID Application: ""${CERT_ID}" --in "${AAX_FINAL}" --out "${AAX_FINAL}"
-
-#---------------------------------------------------------------------------------------------------------
 
 #Mac AppStore stuff
 
@@ -215,7 +201,7 @@ productsign --sign "Developer ID Installer: ""${CERT_ID}" "${PKG_US}" "${PKG}"
 rm -R -f "${PKG_US}"
 
 #set installer icon
-setfileicon resources/$PLUGIN_NAME.icns "${PKG}"
+#setfileicon resources/$PLUGIN_NAME.icns "${PKG}"
 
 #---------------------------------------------------------------------------------------------------------
 
