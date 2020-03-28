@@ -153,6 +153,8 @@ namespace guitard {
       void deleteBuffers() override {
         delete[] mBuffersOutAligned;
         delete[] mBuffersInAligned;
+        mBuffersOutAligned = nullptr;
+        mBuffersInAligned = nullptr;
         Node::deleteBuffers();
       }
 
@@ -164,21 +166,27 @@ namespace guitard {
        */
       void createBuffers() override {
         Node::createBuffers();
-        mBuffersOutAligned = new FAUSTFLOAT * [mOutputCount * mChannelCount];
+        if (mBuffersOutAligned == nullptr) {
+          mBuffersOutAligned = new FAUSTFLOAT * [mOutputCount * mChannelCount];
+        }
         for (int i = 0; i < mOutputCount; i++) {
           for (int c = 0; c < mChannelCount; c++) {
             mBuffersOutAligned[i * mChannelCount + c] = mSocketsOut[i].mBuffer[c];
           }
         }
-        mBuffersInAligned = new FAUSTFLOAT * [mInputCount * mChannelCount];
+        if (mBuffersInAligned == nullptr) {
+          mBuffersInAligned = new FAUSTFLOAT * [mInputCount * mChannelCount];
+        }
         instanceClear();
       }
 
       void OnConnectionsChanged() override {
         Node::OnConnectionsChanged();
-        for (int i = 0; i < mInputCount; i++) {
-          for (int c = 0; c < mChannelCount; c++) {
-            mBuffersInAligned[i * mChannelCount + c] = mSocketsIn[i].mBuffer[c];
+        if (mBuffersInAligned != nullptr) {
+          for (int i = 0; i < mInputCount; i++) {
+            for (int c = 0; c < mChannelCount; c++) {
+              mBuffersInAligned[i * mChannelCount + c] = mSocketsIn[i].mBuffer[c];
+            }
           }
         }
       }

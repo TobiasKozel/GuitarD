@@ -129,7 +129,7 @@ namespace guitard {
       if (mPauseAudio < 0) {
         WDBGMSG("Looks like the audio thread was unlocked too many times");
         assert(false);
-    }
+      }
     }
 
     /**

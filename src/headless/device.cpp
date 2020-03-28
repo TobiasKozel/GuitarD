@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
     printf("Press to load the next preset\n");
     getchar();
     currentPresetIndex++;
-    if (currentPresetIndex <= presets.size()) {
+    if (currentPresetIndex >= presets.size()) {
       currentPresetIndex = 0;
     }
   }
