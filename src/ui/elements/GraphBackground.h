@@ -34,8 +34,11 @@ namespace guitard {
         IRECT bounds = GetUI()->GetBounds();
         mRECT = bounds;
         mTargetRECT = bounds;
+        lastWidth = bounds.R;
+        lastHeight = bounds.B;
+        mScale = GetUI()->GetDrawScale();
+        GetUI()->Resize(ceil(lastWidth), ceil(lastHeight), mScale);
       }
-      // mScale = 1.0f;
     }
 
     /**

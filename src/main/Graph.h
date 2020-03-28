@@ -9,8 +9,8 @@
 #include "../nodes/io/OutputNode.h"
 #include "./parameter/ParameterManager.h"
 
-//#define GUITARD_GRAPH_MUTEX
-#define GUITARD_GRAPH_ATOMIC
+#define GUITARD_GRAPH_MUTEX // A mutex seems the safest but also excessive
+//#define GUITARD_GRAPH_ATOMIC
 
 namespace guitard {
   /**
@@ -511,6 +511,7 @@ namespace guitard {
     }
 
     void deserialize(nlohmann::json& json) {
+      soundwoofer::async::cancelAll();
       try {
         const int NoNode = -2;
         const int InNode = -1;

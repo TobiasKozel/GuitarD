@@ -1,0 +1,685 @@
+{
+    "input": {
+        "gain": 1.0,
+        "position": [
+            -741.6668090820313,
+            533.3333740234375
+        ]
+    },
+    "maxBlockSize": 512,
+    "nodes": [
+        {
+            "idx": 0,
+            "inputs": [
+                [
+                    -1,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 28,
+                    "name": "Bypass",
+                    "value": 0.0
+                },
+                {
+                    "idx": 29,
+                    "name": "Attack",
+                    "value": 0.009999999776482582
+                },
+                {
+                    "idx": 30,
+                    "name": "Hold",
+                    "value": 0.10000000149011612
+                },
+                {
+                    "idx": 31,
+                    "name": "Release",
+                    "value": 0.10000000149011612
+                },
+                {
+                    "idx": 32,
+                    "name": "Threshold",
+                    "value": -56.66704559326172
+                }
+            ],
+            "position": [
+                -403.70001220703125,
+                514.326171875
+            ],
+            "type": "SimpleGateNode"
+        },
+        {
+            "idx": 1,
+            "inputs": [
+                [
+                    0,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 6,
+                    "name": "Bypass",
+                    "value": 0.0
+                },
+                {
+                    "idx": 7,
+                    "name": "f1",
+                    "value": 300.0
+                },
+                {
+                    "idx": 8,
+                    "name": "f2",
+                    "value": 3000.0
+                },
+                {
+                    "idx": 9,
+                    "name": "highF",
+                    "value": 20.0
+                },
+                {
+                    "idx": 10,
+                    "name": "highQ",
+                    "value": 1.0
+                },
+                {
+                    "idx": 11,
+                    "name": "lowF",
+                    "value": 293.5643310546875
+                },
+                {
+                    "idx": 12,
+                    "name": "lowQ",
+                    "value": 1.0
+                },
+                {
+                    "idx": 13,
+                    "name": "peak1",
+                    "value": 0.0
+                },
+                {
+                    "idx": 14,
+                    "name": "peak2",
+                    "value": 0.0
+                },
+                {
+                    "idx": 15,
+                    "name": "q1",
+                    "value": 300.0
+                },
+                {
+                    "idx": 16,
+                    "name": "q2",
+                    "value": 500.0
+                }
+            ],
+            "position": [
+                -51.47882080078125,
+                -16.78497314453125
+            ],
+            "type": "ParametricEqNode"
+        },
+        {
+            "idx": 2,
+            "inputs": [
+                [
+                    0,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 17,
+                    "name": "Bypass",
+                    "value": 0.0
+                },
+                {
+                    "idx": 18,
+                    "name": "f1",
+                    "value": 2756.06591796875
+                },
+                {
+                    "idx": 19,
+                    "name": "f2",
+                    "value": 7114.05615234375
+                },
+                {
+                    "idx": 20,
+                    "name": "highF",
+                    "value": 958.5262451171875
+                },
+                {
+                    "idx": 21,
+                    "name": "highQ",
+                    "value": 1.0
+                },
+                {
+                    "idx": 22,
+                    "name": "lowF",
+                    "value": 5220.32958984375
+                },
+                {
+                    "idx": 23,
+                    "name": "lowQ",
+                    "value": 1.0
+                },
+                {
+                    "idx": 24,
+                    "name": "peak1",
+                    "value": 16.66693115234375
+                },
+                {
+                    "idx": 25,
+                    "name": "peak2",
+                    "value": 0.0
+                },
+                {
+                    "idx": 26,
+                    "name": "q1",
+                    "value": 1096.3070068359375
+                },
+                {
+                    "idx": 27,
+                    "name": "q2",
+                    "value": 500.0
+                }
+            ],
+            "position": [
+                39.63250732421875,
+                549.8817138671875
+            ],
+            "type": "ParametricEqNode"
+        },
+        {
+            "idx": 3,
+            "inputs": [
+                [
+                    1,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 231,
+                    "name": "OverSampling",
+                    "value": 1.0
+                },
+                {
+                    "idx": 2,
+                    "name": "Bypass",
+                    "value": 0.0
+                },
+                {
+                    "idx": 254,
+                    "name": "Bass",
+                    "value": 0.0
+                },
+                {
+                    "idx": 3,
+                    "name": "Drive",
+                    "value": 0.8101857900619507
+                },
+                {
+                    "idx": 4,
+                    "name": "Offset",
+                    "value": 0.0
+                },
+                {
+                    "idx": 5,
+                    "name": "Post gain",
+                    "value": 0.5
+                }
+            ],
+            "position": [
+                300.74273681640625,
+                125.43722534179688
+            ],
+            "type": "SimpleDriveNode"
+        },
+        {
+            "idx": 4,
+            "inputs": [
+                [
+                    2,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 226,
+                    "name": "OverSampling",
+                    "value": 1.0
+                },
+                {
+                    "idx": 33,
+                    "name": "Bypass",
+                    "value": 0.0
+                },
+                {
+                    "name": "Bass",
+                    "value": 0.0
+                },
+                {
+                    "idx": 34,
+                    "name": "Drive",
+                    "value": 0.7222234010696411
+                },
+                {
+                    "idx": 35,
+                    "name": "Offset",
+                    "value": 0.0
+                },
+                {
+                    "idx": 36,
+                    "name": "Post gain",
+                    "value": 0.5
+                }
+            ],
+            "position": [
+                508.52130126953125,
+                526.54833984375
+            ],
+            "type": "SimpleDriveNode"
+        },
+        {
+            "idx": 5,
+            "inputs": [
+                [
+                    3,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 40,
+                    "name": "Bypass",
+                    "value": 1.0
+                },
+                {
+                    "idx": 41,
+                    "name": "Left",
+                    "value": 1.0
+                },
+                {
+                    "idx": 42,
+                    "name": "Left/Right Offset",
+                    "value": 0.0
+                },
+                {
+                    "idx": 43,
+                    "name": "Phase Fine",
+                    "value": 0.002222229028120637
+                },
+                {
+                    "idx": 44,
+                    "name": "Phase Rough",
+                    "value": 0.0
+                },
+                {
+                    "idx": 45,
+                    "name": "Right",
+                    "value": 1.0
+                }
+            ],
+            "position": [
+                636.2985229492188,
+                74.3260498046875
+            ],
+            "type": "PhaseToolNode"
+        },
+        {
+            "idx": 6,
+            "inputs": [
+                [
+                    5,
+                    0
+                ],
+                [
+                    4,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 37,
+                    "name": "PAN 1",
+                    "value": 0.5925902128219604
+                },
+                {
+                    "idx": 38,
+                    "name": "PAN 2",
+                    "value": -0.24073779582977295
+                },
+                {
+                    "idx": 39,
+                    "name": "MIX",
+                    "value": 0.5601895451545715
+                },
+                {
+                    "idx": 213,
+                    "name": "Add mode",
+                    "value": 0.0
+                }
+            ],
+            "position": [
+                1068.52099609375,
+                255.43716430664063
+            ],
+            "type": "CombineNode"
+        },
+        {
+            "idx": 7,
+            "inputs": [
+                [
+                    6,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 66,
+                    "name": "Bypass",
+                    "value": 1.0
+                },
+                {
+                    "idx": 67,
+                    "name": "Left",
+                    "value": 1.0
+                },
+                {
+                    "idx": 68,
+                    "name": "Left/Right Offset",
+                    "value": 0.2822188138961792
+                },
+                {
+                    "idx": 69,
+                    "name": "Phase Fine",
+                    "value": 0.0
+                },
+                {
+                    "idx": 70,
+                    "name": "Phase Rough",
+                    "value": 0.0
+                },
+                {
+                    "idx": 71,
+                    "name": "Right",
+                    "value": 1.0
+                }
+            ],
+            "position": [
+                1381.854248046875,
+                328.77056884765625
+            ],
+            "type": "PhaseToolNode"
+        },
+        {
+            "idx": 8,
+            "inputs": [
+                [
+                    7,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 46,
+                    "name": "Bypass",
+                    "value": 0.0
+                },
+                {
+                    "idx": 47,
+                    "name": "f1",
+                    "value": 1453.8599853515625
+                },
+                {
+                    "idx": 48,
+                    "name": "f2",
+                    "value": 7237.6162109375
+                },
+                {
+                    "idx": 49,
+                    "name": "highF",
+                    "value": 123.79204559326172
+                },
+                {
+                    "idx": 50,
+                    "name": "highQ",
+                    "value": 1.0
+                },
+                {
+                    "idx": 51,
+                    "name": "lowF",
+                    "value": 11989.716796875
+                },
+                {
+                    "idx": 52,
+                    "name": "lowQ",
+                    "value": 1.0
+                },
+                {
+                    "idx": 53,
+                    "name": "peak1",
+                    "value": 9.629748344421387
+                },
+                {
+                    "idx": 54,
+                    "name": "peak2",
+                    "value": 13.703727722167969
+                },
+                {
+                    "idx": 55,
+                    "name": "q1",
+                    "value": 3040.768310546875
+                },
+                {
+                    "idx": 56,
+                    "name": "q2",
+                    "value": 2627.438232421875
+                }
+            ],
+            "position": [
+                1686.298583984375,
+                272.1038513183594
+            ],
+            "type": "ParametricEqNode"
+        },
+        {
+            "idx": 9,
+            "inputs": [
+                [
+                    8,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 72,
+                    "name": "Bypass",
+                    "value": 1.0
+                },
+                {
+                    "idx": 73,
+                    "name": "Panning",
+                    "value": 0.0
+                },
+                {
+                    "idx": 74,
+                    "name": "Post panning",
+                    "value": 1.0
+                },
+                {
+                    "idx": 75,
+                    "name": "Width",
+                    "value": 0.4629613161087036
+                }
+            ],
+            "position": [
+                2032.96533203125,
+                129.88153076171875
+            ],
+            "type": "StereoToolNode"
+        },
+        {
+            "customIR": false,
+            "idx": 10,
+            "inputs": [
+                [
+                    9,
+                    0
+                ]
+            ],
+            "irName": "Clean",
+            "parameters": [
+                {
+                    "idx": 0,
+                    "name": "Bypass",
+                    "value": 0.0
+                },
+                {
+                    "idx": 1,
+                    "name": "Stereo",
+                    "value": 1.0
+                }
+            ],
+            "path": "",
+            "position": [
+                2425.2998046875,
+                90.63458251953125
+            ],
+            "type": "SimpleCabNode"
+        },
+        {
+            "idx": 11,
+            "inputs": [
+                [
+                    10,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 57,
+                    "name": "Bypass",
+                    "value": 0.0
+                },
+                {
+                    "idx": 58,
+                    "name": "Band1",
+                    "value": 138.87234497070313
+                },
+                {
+                    "idx": 59,
+                    "name": "Band2",
+                    "value": 8000.0
+                },
+                {
+                    "idx": 60,
+                    "name": "Decay Band1",
+                    "value": 0.009999999776482582
+                },
+                {
+                    "idx": 61,
+                    "name": "Decay Band2",
+                    "value": 0.195000559091568
+                },
+                {
+                    "idx": 200,
+                    "name": "Mix",
+                    "value": 1.0
+                },
+                {
+                    "idx": 199,
+                    "name": "Predelay",
+                    "value": 0.0
+                }
+            ],
+            "position": [
+                2744.07666015625,
+                268.7706604003906
+            ],
+            "type": "SimpleReverbNode"
+        },
+        {
+            "idx": 12,
+            "inputs": [
+                [
+                    10,
+                    0
+                ],
+                [
+                    11,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 63,
+                    "name": "PAN 1",
+                    "value": 0.0
+                },
+                {
+                    "idx": 64,
+                    "name": "PAN 2",
+                    "value": 0.17592646181583405
+                },
+                {
+                    "idx": 65,
+                    "name": "MIX",
+                    "value": 0.23148275911808014
+                },
+                {
+                    "idx": 184,
+                    "name": "Add mode",
+                    "value": 0.0
+                }
+            ],
+            "position": [
+                3000.74365234375,
+                -35.673919677734375
+            ],
+            "type": "CombineNode"
+        },
+        {
+            "idx": 13,
+            "inputs": [
+                [
+                    12,
+                    0
+                ]
+            ],
+            "parameters": [
+                {
+                    "idx": 62,
+                    "name": "Bypass",
+                    "value": 0.0
+                },
+                {
+                    "idx": 76,
+                    "name": "Gain",
+                    "value": -9.208333969116211
+                }
+            ],
+            "position": [
+                3335.5205078125,
+                -52.118408203125
+            ],
+            "type": "AutoGainNode"
+        }
+    ],
+    "output": {
+        "gain": 1.0,
+        "inputs": [
+            [
+                13,
+                0
+            ]
+        ],
+        "position": [
+            3742.5205078125,
+            -33.01617431640625
+        ]
+    },
+    "version": "PLUG_VERSION_HEX"
+}

@@ -166,7 +166,9 @@ namespace soundwoofer {
           i["plugin"],
           SOUNDWOOFER_SRC,
           i["data"],
-          i["version"]
+          i["version"],
+          i["rating"],
+          i["ratings"]
         };
         if (preset.plugin == state::pluginName) {
           return std::make_shared<SWPreset>(preset);

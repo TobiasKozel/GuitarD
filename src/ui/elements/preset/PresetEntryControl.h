@@ -29,7 +29,20 @@ namespace guitard {
         g.FillRect(Theme::Gallery::CATEGORY_TITLE_BG, mRECT);
       }
 
-      g.DrawText(Theme::Gallery::CATEGORY_TITLE, mPreset->name.c_str(), mRECT);
+      float y = mRECT.H() * 0.5 + mRECT.T;
+      for (int i = 0; i < 5; i++) {
+        float x = mRECT.R - (Theme::Preset::STAR_SIZE * Theme::Preset::STAR_PADDING) * 5
+          + i * Theme::Preset::STAR_SIZE * Theme::Preset::STAR_PADDING;
+        if (mPreset->rating <= i) {
+          g.FillCircle(Theme::Preset::RATING_BG, x, y, Theme::Preset::STAR_SIZE);
+        }
+        else {
+          g.FillCircle(Theme::Colors::ACCENT, x, y, Theme::Preset::STAR_SIZE);
+        }
+      }
+
+      g.DrawText(Theme::Preset::TITLE, mPreset->name.c_str(), mRECT.GetHPadded(-10));
+
     }
 
     void OnMouseDown(const float x, const float y, const IMouseMod& mod) override {
@@ -39,13 +52,6 @@ namespace guitard {
           mBus, MessageBus::LoadPresetFromString, mPreset->data.c_str()
         );
       }
-      //soundwoofer::async::loadPreset(mPreset, [&](soundwoofer::Status status) {
-      //  if (status == soundwoofer::SUCCESS) {
-      //    MessageBus::fireEvent<const char*>(
-      //      mBus, MessageBus::LoadPresetFromString, mPreset->data.c_str()
-      //    );
-      //  }
-      //});
     }
   };
 }

@@ -54,6 +54,13 @@ namespace guitard {
       const IColor CATEGORY_BG_HOVER(255, 40, 40, 40);
     }
 
+    namespace Preset {
+      const IText TITLE{ 24, iplug::igraphics::COLOR_WHITE, "Roboto-Regular", EAlign::Near, EVAlign::Middle, 0 };
+      const IColor RATING_BG(255, 30, 30, 30);
+      const float STAR_SIZE = 6;
+      const float STAR_PADDING = 3;
+    }
+
     namespace IRBrowser {
       const IColor BACKGROUND(255, 40, 40, 40);
       const IText PATH{ 24, {255, 220, 220, 220}, "Roboto-Regular", EAlign::Near, EVAlign::Middle, 0 };

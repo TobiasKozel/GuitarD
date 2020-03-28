@@ -136,6 +136,8 @@ namespace soundwoofer {
     Source source = SOUNDWOOFER_SRC;
     std::string data;
     std::string version = "-1";
+    int rating = 0;
+    int ratings = 0;
     std::vector<std::string> tags;
     bool managed = true;
   };
