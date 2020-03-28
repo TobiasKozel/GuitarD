@@ -138,12 +138,14 @@ namespace guitard {
      * will get rid of the automations, audio buffers and sockets
      */
     virtual void cleanUp() {
+      if (mOverSampler != nullptr) {
+        delete mOverSampler;
+      }
       deleteBuffers();
       for (int i = 0; i < mParameterCount; i++) {
+        // will disconnect all sockets
         detachAutomation(&mParameters[i]); // Make sure no automation is attached
       }
-      // will disconnect all sockets
-      delete mOverSampler;
     }
 
     /**

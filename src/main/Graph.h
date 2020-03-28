@@ -109,7 +109,6 @@ namespace guitard {
     }
 
     void lockAudioThread() {
-      mPauseAudio++;
 #ifdef GUITARD_GRAPH_MUTEX
       if (mPauseAudio == 0) {
         mAudioMutex.lock();
@@ -117,6 +116,7 @@ namespace guitard {
 #else
       while (mIsProcessing) { } // wait till the audio thread is done
 #endif
+      mPauseAudio++;
     }
 
     void unlockAudioThread() {

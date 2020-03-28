@@ -86,7 +86,7 @@ namespace soundwoofer {
      */
     Status createFolder(const char* path) {
 #ifdef _WIN32
-      const bool ok = CreateDirectory(path, nullptr);
+      bool ok = CreateDirectory(path, nullptr);
       if (!ok) {
         if (GetLastError() != ERROR_ALREADY_EXISTS) {
           return GENERIC_ERROR; // Probably permission, locked file etc

@@ -151,9 +151,9 @@ namespace guitard {
        * Delete the realigned buffers
        */
       void deleteBuffers() override {
-        Node::deleteBuffers();
         delete[] mBuffersOutAligned;
         delete[] mBuffersInAligned;
+        Node::deleteBuffers();
       }
 
       /**

@@ -28,10 +28,21 @@ namespace guitard {
     GuitarDHeadless() : mParamManager([](){}), mGraph(&mParamManager) {
       String homeDir;
 #ifdef unix
-      homeDir = getenv("HOME");
+      homeDir = getenv("HOME"); // maybe call free on it
 #elif defined(_WIN32)
+  #ifdef _MSC_VER // Also make sure to use the multibyte charset for msvc
+      char* pValue;
+      size_t len;
+      errno_t err = _dupenv_s(&pValue, &len, "HOMEDRIVE");
+      homeDir = pValue;
+      free(pValue);
+      err = _dupenv_s(&pValue, &len, "HOMEPATH");
+      homeDir.append(pValue);
+      free(pValue);
+  #else
       homeDir = getenv("HOMEDRIVE");
       homeDir.append(getenv("HOMEPATH"));
+  #endif
 #endif
       printf("\n%s\n", homeDir.c_str());
       soundwoofer::setup::setPluginName("GuitarD");
