@@ -27,11 +27,12 @@ To get iPlug2 up and running, make sure all its dependencies are downloaded. Run
 
 After that, simply clone this repository into the Examples folder of iPlug2 and open the IDE project for your platform.
 
-Make sure the [FAUST compiler](https://github.com/grame-cncm/faust/releases) is installed and in you PATH environment variable. Run `python ./scripts/compile_faust.py` to compile all the DSP code.
-
 The VST/AU plugin works on Windows and Mac OS X. For 32 Bit support another renderer than SKIA has to be used. Head over to the iPlug2 Wiki for more info about the graphic backends.
 
 ### Only the DSP
+
+Make sure the [FAUST compiler](https://github.com/grame-cncm/faust/releases) is installed and in you PATH environment variable (this should be the default case). Run `python ./scripts/compile_faust.py` to compile all the DSP code.
+
 The DSP code can be compiled without iPlug and the GUI so it can be included in other projects easily. Just include `./src/headless/headless.h` and you should be good to go. Everything is header only to make the code as portable as possible. The headless version was testet on Windows (MSVC, gcc), Mac OS X (clang) and Linux (gcc, clang).
 
 A small demo using the systems default audio devices as in and output can be found here:
