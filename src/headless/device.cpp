@@ -1,16 +1,16 @@
 #include <stdio.h>
 
-#define SAMPLE_TYPE_FLOAT
-#define GUITARD_SSE
-// #define SOUNDWOOFER_NO_API
-
 #include <fstream>
 #include <string>
+// #include "./compile_unit/GHeadlessUnit.h" // you can also use the compile_unit version and link against it to speed up things
 #include "./GHeadless.h"
+
 
 #define MINIAUDIO_IMPLEMENTATION
 #define MA_NO_DECODING
 #include "../../thirdparty/miniaudio.h"
+
+#include "../../thirdparty/soundwoofer/soundwooferFile.h"
 
 guitard::GuitarDHeadless headless;
 
@@ -49,6 +49,12 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
   }
 }
 
+
+
+/**
+ * Takes a few arguments
+ * First one is
+ */
 int main(int argc, char** argv) {
   std::string folder = "../../thirdparty/soundwoofer/dummy_backend/presets/";
 
@@ -64,7 +70,35 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  ma_result result;
+  ma_backend backends[] = { ma_backend_alsa, ma_backend_wasapi, ma_backend_coreaudio };
+  ma_context context;
+  if (ma_context_init(backends, 3, NULL, &context) != MA_SUCCESS) {
+    printf("Failed to initialize context.\n");
+    return -2;
+  }
+  
+  ma_device_info* pPlaybackDeviceInfos;
+  ma_uint32 playbackDeviceCount;
+  ma_device_info* pCaptureDeviceInfos;
+  ma_uint32 captureDeviceCount;
+  ma_result result = ma_context_get_devices(&context, &pPlaybackDeviceInfos, &playbackDeviceCount, &pCaptureDeviceInfos, &captureDeviceCount);
+    if (result != MA_SUCCESS) {
+      printf("Failed to retrieve device information.\n");
+      return -3;
+  }
+
+  ma_uint32 iDevice;
+  printf("Playback Devices\n");
+  for (iDevice = 0; iDevice < playbackDeviceCount; ++iDevice) {
+    printf("    %u: %s\n", iDevice, pPlaybackDeviceInfos[iDevice].name);
+  }
+  printf("\n");
+
+  printf("Capture Devices\n");
+  for (iDevice = 0; iDevice < captureDeviceCount; ++iDevice) {
+    printf("    %u: %s\n", iDevice, pCaptureDeviceInfos[iDevice].name);
+  }
+
   ma_device_config deviceConfig;
   ma_device device;
   deviceConfig = ma_device_config_init(ma_device_type_duplex);
@@ -90,14 +124,14 @@ int main(int argc, char** argv) {
     deviceConfig.sampleRate = 44100;
   }
 
-  result = ma_device_init(NULL, &deviceConfig, &device);
+  result = ma_device_init(&context, &deviceConfig, &device);
   if (result != MA_SUCCESS) {
       return result;
   }
 
   ma_device_start(&device);
 
-  printf("\n Framesize: %u Samplerate: %u\n", deviceConfig.periodSizeInFrames, deviceConfig.sampleRate);
+  printf("\nFramesize: %u Samplerate: %u\n", deviceConfig.periodSizeInFrames, deviceConfig.sampleRate);
 	headless.setConfig(device.sampleRate, device.playback.channels, device.capture.channels);
 
   while (42) {
@@ -115,6 +149,7 @@ int main(int argc, char** argv) {
   }
 
   ma_device_uninit(&device);
+  ma_context_uninit(&context);
   (void)argc;
   (void)argv;
   return 0;
