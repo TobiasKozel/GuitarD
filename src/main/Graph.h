@@ -9,8 +9,12 @@
 #include "../nodes/io/OutputNode.h"
 #include "./parameter/ParameterManager.h"
 
-#define GUITARD_GRAPH_MUTEX // A mutex seems the safest but also excessive
-//#define GUITARD_GRAPH_ATOMIC
+//#define GUITARD_GRAPH_MUTEX // A mutex seems the safest but also excessive
+#define GUITARD_GRAPH_ATOMIC
+
+#ifdef GUITARD_GRAPH_ATOMIC
+  #include <atomic>
+#endif
 
 namespace guitard {
   /**
@@ -92,11 +96,10 @@ namespace guitard {
 
   public:
 
-    Graph(ParameterManager* pParamManager = nullptr) {
+    Graph() {
 #ifndef GUITARD_GRAPH_MUTEX
       mIsProcessing = false;
 #endif
-      mParamManager = pParamManager; // we'll keep this around to let nodes register parameters
 
       mInputNode = new InputNode();
       mOutputNode = new OutputNode();
@@ -130,6 +133,13 @@ namespace guitard {
         WDBGMSG("Looks like the audio thread was unlocked too many times");
         assert(false);
       }
+    }
+
+    void setParameterManager(ParameterManager* pParamManager = nullptr) {
+      if (mParamManager != nullptr && mParamManager != pParamManager) {
+        // TODO unregister all parameters from the old one
+      }
+      mParamManager = pParamManager; // we'll keep this around to let nodes register parameters
     }
 
     /**
@@ -316,10 +326,10 @@ namespace guitard {
                 }
               }
               if (!duplicate) {
-              nextSockets[nextSocketCount] = nextSock;
-              nextSocketCount++;
+                nextSockets[nextSocketCount] = nextSock;
+                nextSocketCount++;
+              }
             }
-          }
           }
 
           connectSockets(outSock);
@@ -377,25 +387,33 @@ namespace guitard {
       if (node == mInputNode || node == mOutputNode) { return; }
 
       lockAudioThread();
+
       if (reconnect) {
         byPassConnection(node);
       }
+
       disconnectNode(node);
+
       mNodes.remove(node);
-      if (mPauseAudio == 1) {
-        buildProcessingList();
-      }
-      unlockAudioThread();
 
       if (mNodes.find(node) != -1) {
         assert(false);
       }
 
+      node->cleanUp();
+
+      if (mPauseAudio == 1) {
+        for (int i = 0; i < mNodes.size(); i++) {
+          mNodes[i]->OnConnectionsChanged();
+        }
+        buildProcessingList();
+      }
+
+      unlockAudioThread();
+
       if (mParamManager != nullptr) {
         mParamManager->releaseNode(node);
       }
-      
-      node->cleanUp();
 
       delete node;
     }
@@ -725,6 +743,7 @@ namespace guitard {
       unlockAudioThread();
       if (mPauseAudio == 0) {
         buildProcessingList();
+        // rebuild the processing list if we're tha last one blocking the audio thread
       }
     }
 

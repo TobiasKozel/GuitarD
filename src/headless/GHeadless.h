@@ -10,7 +10,13 @@
  */
 #define GUITARD_HEADLESS
 
+#define SAMPLE_TYPE_FLOAT
+#define GUITARD_SSE
+// #define SOUNDWOOFER_NO_API
+
 #include "../../config.h" // This is the iplug config
+
+#define SOUNDWOOFER_IMPL
 #include "../../thirdparty/soundwoofer/soundwoofer.h"
 #include "../main/Graph.h"
 #include "../nodes/RegisterNodes.h"
@@ -25,7 +31,8 @@ namespace guitard {
     Graph mGraph;
     bool mReady = false;
   public:
-    GuitarDHeadless() : mParamManager([](){}), mGraph(&mParamManager) {
+    GuitarDHeadless() {
+      mGraph.setParameterManager(&mParamManager);
       String homeDir;
 #ifdef unix
       homeDir = getenv("HOME"); // maybe call free on it
@@ -46,7 +53,6 @@ namespace guitard {
 #endif
       printf("\n%s\n", homeDir.c_str());
       soundwoofer::setup::setPluginName("GuitarD");
-      HOME_PATH = homeDir;
       soundwoofer::setup::setHomeDirectory(homeDir.c_str());
     }
 

@@ -22,7 +22,7 @@ namespace guitard {
      */
     std::function<void()> mCallback;
   public:
-    explicit ParameterManager(std::function<void()> callback) {
+    void setParamChangeCallback(std::function<void()> callback) {
       mCallback = callback;
     }
 
@@ -56,8 +56,9 @@ namespace guitard {
           gotAllParams = false;
         }
       }
-
-      mCallback();
+      if (mCallback != nullptr) {
+        mCallback();
+      }
       return gotAllParams;
     }
 
@@ -110,7 +111,9 @@ namespace guitard {
       for (int i = 0; i < node->mParameterCount; i++) {
         releaseParameter(&node->mParameters[i]);
       }
-      mCallback();
+      if (mCallback != nullptr) {
+        mCallback();
+      }
     }
 
     void releaseParameter(ParameterCoupling* couple) {

@@ -3,6 +3,8 @@ The headless.h wraps up all the classes needed to make the DSP run on it's own a
 
 `benchmark.cpp` and `device.cpp` show how it can be used.
 
+The version in the compile_unit folder can be used to compile a object and link against it to keep compiletimes a bit more manageable.
+
 ## Compilation
 ### MSVC
 `cl.exe .\benchmark.cpp ws2_32.lib /O2`

@@ -10,7 +10,10 @@ This whole thing started as my bachelors thesis, but I plan on developing it fur
 [See here](https://github.com/TobiasKozel/GuitarD/releases)
 
 ## I'm not responsible for any crashes or hearing loss. (Seriously, be careful)
+
 ## The preset and cabinet library go online to fetch thier stuff.
+So if a preset sounds different it might be because it couldn't fetch the IRs from the server.
+You can manually copy the IRs in the GuiutarD/ir_cache in your systems homefolder.
 
 ## How to use
 In progress. Have a look at `./manual/guitard manual.pdf`

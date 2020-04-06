@@ -65,18 +65,6 @@
     <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.cpp">
       <Filter>IGraphics\Drawing</Filter>
     </ClCompile>
-    <ClCompile Include="..\thirdparty\fftconvolver\AudioFFT.cpp">
-      <Filter>thirdparty\convolver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\fftconvolver\FFTConvolver.cpp">
-      <Filter>thirdparty\convolver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.cpp">
-      <Filter>thirdparty\convolver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\thirdparty\fftconvolver\Utilities.cpp">
-      <Filter>thirdparty\convolver</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\WDL\resample.cpp">
       <Filter>WDL</Filter>
     </ClCompile>
@@ -243,18 +231,6 @@
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.h">
       <Filter>IGraphics\Drawing</Filter>
     </ClInclude>
-    <ClInclude Include="..\thirdparty\fftconvolver\AudioFFT.h">
-      <Filter>thirdparty\convolver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\fftconvolver\FFTConvolver.h">
-      <Filter>thirdparty\convolver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\fftconvolver\TwoStageFFTConvolver.h">
-      <Filter>thirdparty\convolver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\thirdparty\fftconvolver\Utilities.h">
-      <Filter>thirdparty\convolver</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="IPlug">
@@ -283,9 +259,6 @@
     </Filter>
     <Filter Include="thirdparty">
       <UniqueIdentifier>{39f41e92-2ecc-49ba-9e46-7bb080fcb7af}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\convolver">
-      <UniqueIdentifier>{0dedb1ce-a9a8-430e-a973-028759bca3bd}</UniqueIdentifier>
     </Filter>
     <Filter Include="WDL">
       <UniqueIdentifier>{280521d9-5c76-41d5-92c5-fec76258f2cb}</UniqueIdentifier>

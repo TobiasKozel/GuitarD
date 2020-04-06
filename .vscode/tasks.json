@@ -31,9 +31,6 @@
             "args": [
                 "-g",
                 "-O0",
-                "-I./",
-                "-I./thirdparty/",
-                "-I./src/faust/generated/",
                 "${file}",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}",

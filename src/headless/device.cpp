@@ -2,7 +2,7 @@
 
 #define SAMPLE_TYPE_FLOAT
 #define GUITARD_SSE
-#define SOUNDWOOFER_NO_API
+// #define SOUNDWOOFER_NO_API
 
 #include <fstream>
 #include <string>
@@ -22,6 +22,9 @@ guitard::sample buffers[CHANNEL_COUNT * 2][MAX_BLOCK_SIZE];
 guitard::sample* in[CHANNEL_COUNT] = { buffers[0], buffers[1] };
 guitard::sample* out[CHANNEL_COUNT] = { buffers[2], buffers[3] };
 
+/**
+ * Audio callback from miniaudio
+ */
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
   MA_ASSERT(pDevice->capture.format == pDevice->playback.format);
   MA_ASSERT(pDevice->capture.channels == pDevice->playback.channels);

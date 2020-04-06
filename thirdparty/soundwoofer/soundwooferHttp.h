@@ -1,11 +1,10 @@
 #pragma once
 
+#include "./soundwooferTypes.h"
 #ifndef SOUNDWOOFER_CUSTOM_HTTP
   // #define CPPHTTPLIB_OPENSSL_SUPPORT
   #include "./dependencies/httplib.h"
 #endif
-
-#include "./soundwooferTypes.h"
 
 namespace soundwoofer {
   namespace http {
@@ -23,16 +22,7 @@ namespace soundwoofer {
         { "accept", "text/plain" }
       };
       bool isSetup = false;
-      void setup () {
-        if (isSetup) { return; }
-        _::cli.set_timeout_sec(3);
-        _::cli.set_read_timeout(3, 0);
-        //_::cli.set_logger([](const auto& req, const auto& res) {
-        //  int i = 0;
-        //});
-        cli.set_keep_alive_max_count(3);
-        isSetup = true;
-      }
+      void setup();
     }
 #endif
 
@@ -41,30 +31,13 @@ namespace soundwoofer {
      * Will do a synchronous http request to the url + port + the endpoint parameter
      * Returns a string of the response body or an empty string for any error
      */
-    std::string get(const std::string endpoint) {
-      _::setup();
-      auto res = _::cli.Get(endpoint.c_str(), _::headers);
-      if (res && res->status == 200) {
-        offline = false;
-        return res->body;
-      }
-      offline = true;
-      return "";
-    }
+    std::string get(const std::string endpoint);
 
-    Status post(const std::string endpoint, const char* data, const size_t length, const std::string mime = "application/json") {
-      _::setup();
-      std::string body;
-      body.append(data, length);
-      // body += "\0"; // make sure it's null terminated
-      auto res = _::cli.Post(endpoint.c_str(), _::headers, body, mime.c_str());
-      if (res && res->status == 200) {
-        offline = false;
-        return SUCCESS;
-      }
-      offline = true;
-      return SERVER_ERROR;
-    }
+    Status post(const std::string endpoint, const char* data, const size_t length, const std::string mime = "application/json");
 #endif
   }
 }
+
+#ifdef SOUNDWOOFER_IMPL
+  #include "./soundwooferHttpImpl.h"
+#endif

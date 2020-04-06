@@ -1,6 +1,7 @@
 #pragma once
 
 const int kNumPrograms = 2;
+#define SOUNDWOOFER_IMPL
 #include "./thirdparty/soundwoofer/soundwoofer.h" // since winsocks does some weird stuff when being included after windows.h it needs to be included here though it's not used here
 #include "IPlug_include_in_plug_hdr.h"
 
