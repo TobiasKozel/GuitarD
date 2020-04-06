@@ -1,4 +1,4 @@
-*.exe
+*.out
 *.sdf
 *.opensdf
 *.zip
@@ -22,6 +22,8 @@ ipch/*
 gui/*
 .vs/*
 html/
+*.o
+*.a
 
 Icon?
 .DS_Stor*
