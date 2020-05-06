@@ -5,8 +5,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "./compile_unit/GHeadlessUnit.h" // you can also use the compile_unit version and link against it to speed up things
-// #include "./GHeadless.h"
+// #include "./compile_unit/GHeadlessUnit.h" // you can also use the compile_unit version and link against it to speed up things
+#include "./GHeadless.h"
 #include "../../thirdparty/rtaudio/RtAudio.h"
 
 #include "../../thirdparty/soundwoofer/soundwooferFile.h"
@@ -14,7 +14,6 @@
 guitard::GuitarDHeadless headless;
 
 #define CHANNEL_COUNT 2
-#define MAX_BLOCK_SIZE 1024
 #define MONO_IN // Means it still is a stereo device, but only the left input will be used
 
 
@@ -27,6 +26,7 @@ int callback(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames, 
   if (status) {
     printf("\nStream over/underflow detected.\n");
   }
+
   float* _in = static_cast<float*>(inputBuffer);
   float* _out = static_cast<float*>(outputBuffer);
 
@@ -38,6 +38,7 @@ int callback(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames, 
 #endif
     out[i] = _out + (i * nBufferFrames);
   }
+
   headless.process(in, out, nBufferFrames);
   return 0;
 }
@@ -71,9 +72,9 @@ int main(int argc, char** argv) {
   // Set the same number of channels for both input and output.
   unsigned int bufferFrames = 128, sampleRate = 44100;
   RtAudio::StreamParameters iParams, oParams;
-  iParams.deviceId = 0; // first available device
+  iParams.deviceId = 0;
   iParams.nChannels = CHANNEL_COUNT;
-  oParams.deviceId = 0; // first available device
+  oParams.deviceId = 0;
   oParams.nChannels = CHANNEL_COUNT;
   RtAudio::StreamOptions streamOptions;
   streamOptions.flags |= RTAUDIO_NONINTERLEAVED;
@@ -96,6 +97,7 @@ int main(int argc, char** argv) {
 
   try {
     adac.startStream();
+    headless.setConfig(sampleRate, CHANNEL_COUNT, CHANNEL_COUNT);
     char input;
     while (42) {
       std::ifstream file(presets[currentPresetIndex].absolute);
