@@ -427,7 +427,7 @@ namespace guitard {
           if (key.VK == iplug::kVK_C) {
             WDL_String data;
             mGraph->serialize(data);
-            mGraphics->SetTextInClipboard(data);
+            mGraphics->SetTextInClipboard(data.Get());
             return true;
           }
           if (key.VK == iplug::kVK_V) {
