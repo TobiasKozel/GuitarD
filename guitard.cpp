@@ -14,7 +14,7 @@ GuitarD::GuitarD(const InstanceInfo& info) : iplug::Plugin(info, MakeConfig(GUIT
   WDL_String path;
 #ifndef OS_LINUX
   UserHomePath(path);
-#else
+#else // UserHomePath causes a linking error on linux for some reason
   char* homeDir = getenv("HOME"); // maybe call free on it
   path.Set(homeDir);
 #endif

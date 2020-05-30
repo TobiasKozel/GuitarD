@@ -50,7 +50,7 @@ namespace guitard {
       });
       avgExecutionTime = 0;
       mStats = DEBUG_FONT;
-      SetRenderPriority(11);
+      SetZIndex(11);
       mTabs[0].tab = &mNodeGallery;
       mTabs[0].name = "Nodes";
       mTabs[1].tab = &mPresetBrowser;
@@ -58,7 +58,7 @@ namespace guitard {
     }
 
     void OnAttached() override {
-      mScrollView.SetRenderPriority(12);
+      mScrollView.SetZIndex(12);
       mScrollView.setDoDragScroll(false);
       mScrollView.setDoScroll(false);
       mScrollView.setScrollBarEnable(false);

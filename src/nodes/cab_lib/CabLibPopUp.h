@@ -303,14 +303,14 @@ namespace guitard {
 
   public:
     CabLibPopUp(CabLibNode* node) : IControl({}) {
-      mRenderPriority = 15;
+      mZIndex = 15;
       mNode = node;
     }
 
     void OnInit() override {
       for (int i = 0; i < 3; i++) { // Create three scroll views
         mScrollView[i] = new ScrollViewControl();
-        mScrollView[i]->SetRenderPriority(16);
+        mScrollView[i]->SetZIndex(16);
         mScrollView[i]->setFullWidthChildren(true);
         mScrollView[i]->setChildPadding(2);
         mScrollView[i]->setCleanUpEnabled(false);

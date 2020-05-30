@@ -37,7 +37,7 @@ namespace guitard {
         lastWidth = bounds.R;
         lastHeight = bounds.B;
         mScale = GetUI()->GetDrawScale();
-        GetUI()->Resize(ceil(lastWidth), ceil(lastHeight), mScale);
+        GetUI()->Resize(ceil(lastWidth), ceil(lastHeight), mScale, false);
       }
     }
 

@@ -82,7 +82,7 @@ namespace guitard {
       mGraphics->AttachControl(mSideBar);
 
       mCableLayer = new CableLayer(mBus, &mNodeUis);
-      mCableLayer->SetRenderPriority(10);
+      mCableLayer->SetZIndex(10);
       mGraphics->AttachControl(mCableLayer);
     }
 
