@@ -12,7 +12,12 @@ GuitarD::GuitarD(const InstanceInfo& info) : iplug::Plugin(info, MakeConfig(GUIT
    */
   soundwoofer::setup::setPluginName(PLUG_NAME);
   WDL_String path;
+#ifndef OS_LINUX
   UserHomePath(path);
+#else
+  char* homeDir = getenv("HOME"); // maybe call free on it
+  path.Set(homeDir);
+#endif
   soundwoofer::setup::setHomeDirectory(path.Get());
 
   mParamManager = new guitard::ParameterManager();

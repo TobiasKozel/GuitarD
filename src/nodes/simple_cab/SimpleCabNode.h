@@ -181,11 +181,16 @@ namespace guitard {
 
     void openFileDialog() {
       const HWND handle = reinterpret_cast<HWND>(GetUI()->GetWindow());
-      char* path = WDL_ChooseFileForOpen( // TODOG LEAK: the string might leak
+      char* path = nullptr;
+
+#ifndef OS_LINUX
+      // TODOG Add filebrowse.cpp to compile units in the makefile
+      path = WDL_ChooseFileForOpen(
         handle, "Open IR", nullptr, nullptr,
         "Wave Files\0*.wav;*.WAV\0", "*.wav",
         true, false
       );
+#endif
       if (path != nullptr) {
         const String result = path;
         free(path);
