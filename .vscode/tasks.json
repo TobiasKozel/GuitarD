@@ -42,6 +42,22 @@
                 "isDefault": true
             },
             "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "build linux app",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-f",
+                "../Makefile",
+                "APP",
+                "IDEBUG=YES"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
         }
     ]
 }
