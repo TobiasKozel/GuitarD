@@ -5,8 +5,11 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src",
-                "${workspaceFolder}/../../IPlug",
-                "${workspaceFolder}/../../IGraphics"
+                "${workspaceFolder}/../../IPlug/**",
+                "${workspaceFolder}/../../IGraphics/**",
+                "${workspaceFolder}/../../WDL/**",
+                "${workspaceFolder}/../../Dependencies/IPlug/**",
+                "${workspaceFolder}/../../Dependencies/IGraphics/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
