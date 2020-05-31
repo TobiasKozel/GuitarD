@@ -666,4 +666,9 @@
       <Filter>resources</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\src\ui\elements\MultiControl.h">
+      <Filter>src\ui\elements</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

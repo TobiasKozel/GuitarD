@@ -520,6 +520,9 @@
     </None>
     <None Include="..\config\GuitarD-mac.xcconfig" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\src\ui\elements\MultiControl.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

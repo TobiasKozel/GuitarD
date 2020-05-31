@@ -7,6 +7,7 @@
 #include "../../main/Graph.h"
 #include "./NodeUi.h"
 #include "../../types/GStack.h"
+#include "./MultiControl.h"
 
 namespace guitard {
   /**
@@ -84,6 +85,15 @@ namespace guitard {
       mCableLayer = new CableLayer(mBus, &mNodeUis);
       mCableLayer->SetZIndex(10);
       mGraphics->AttachControl(mCableLayer);
+
+      //auto mc = new MultiControl({ 10, 10, 300, 300 });
+      //mc->appendChild(
+      //  new GKnobControl(
+      //    {0, 0, 30, 30}, 2, "Control 2"
+      //  )
+      //);
+
+      //mGraphics->AttachControl(mc);
     }
 
     ~GraphUi() {
