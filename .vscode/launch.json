@@ -40,7 +40,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/../Build/Linux-x86_64-dbg/GuitarD/APP/GuitarD",
             "args": [],
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,

@@ -33,10 +33,6 @@ namespace guitard {
       SetTargetAndDrawRECTs(mRECT);
     }
 
-    void OnAttached() override {
-      IRECT test = GetRECT();
-    }
-
     void Draw(IGraphics& g) override {
       // This doesn't do the actual drawing since it needs to stay on top of the
       // layer stack. It's drawn in the cable layer and only a control to handle input

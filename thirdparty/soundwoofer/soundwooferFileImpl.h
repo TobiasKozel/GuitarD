@@ -154,7 +154,7 @@ namespace soundwoofer {
       if ((id[9] & id[14] & id[19] & id[24]) != '-') { return false; }
       for (size_t i = 0; i < id.size(); i++) {
         const char c = id[i];
-        if ('a' <= c && c <= 'z' || '0' <= c && c <= '9' || c == '-') {}
+        if ((('a' <= c) && (c <= 'z')) || (('0' <= c) && (c <= '9')) || (c == '-')) {}
         else { return false; }
       }
       return true;
