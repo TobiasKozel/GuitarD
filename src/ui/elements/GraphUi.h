@@ -85,16 +85,6 @@ namespace guitard {
       mCableLayer = new CableLayer(mBus, &mNodeUis);
       mCableLayer->SetZIndex(10);
       mGraphics->AttachControl(mCableLayer);
-
-      auto mc = new MultiControl({ 10, 10, 300, 300 });
-      mc->appendChild(
-        new GKnobControl(
-          {10, 10, 80, 80}, 2, "Control 2"
-        )
-      );
-      mGraphics->AttachControl(mc);
-
-      mGraphics->AttachControl(new GKnobControl({90, 90, 160, 160}, 3, "Control 3"));
     }
 
     ~GraphUi() {
