@@ -75,7 +75,7 @@ namespace guitard {
 #ifdef GUITARD_VECTOR_LIST
       auto position = std::find(mList.begin(), mList.end(), element);
       if (position != mList.end()) {
-        return std::distance(mList.begin(), position);
+        return static_cast<int>(std::distance(mList.begin(), position));
       }
       return -1;
 #else

@@ -12,19 +12,8 @@ namespace guitard {
     bool mHandleScroll = true;
   };
 
-  class GKnobControl : public MultiControlChild, public IVKnobControl {
-  public:
-    GKnobControl(IRECT r, int p, const char* n) : IVKnobControl(r, p, n)
-    {
-    }
-
-    //void Draw(IGraphics& g) override {
-    //  IVKnobControl::Draw(g);
-    //};
-  };
-
   class MultiControl : public IControl {
-    /** All the controls managed by it */
+    /** All the controls inside the control */
     PointerList<IControl> mChildren;
 
     /** Whether the control is already attached to IGraphics */
@@ -38,15 +27,17 @@ namespace guitard {
     IControl* mCaptured = nullptr;
 
     ILayerPtr mLayer;
+
+    float time = 0;
   public:
+    std::function<void(PointerList<IControl>&, float time)> beforeDraw = nullptr;
+
     MultiControl(const IRECT bounds) : IControl(bounds) {}
 
     MultiControl() : IControl({}) {}
 
     ~MultiControl() {
-      if (mDoCleanUp) {
-        mChildren.clear(true);
-      }
+      mChildren.clear(mDoCleanUp);
     }
 
     /**
@@ -106,14 +97,15 @@ namespace guitard {
     void OnInit() override {
       IControl::OnInit();
       for (int i = 0; i < mChildren.size(); i++) {
-        IControl* c = mChildren[i];
-        c->SetDelegate(*GetDelegate());
+        mChildren[i]->SetDelegate(*GetDelegate());
       }
       mAttached = true;
     }
 
     void Draw(IGraphics& g) override {
-      g.StartLayer(this, mRECT);
+      time += 1 / static_cast<float>(PLUG_FPS);
+      if (beforeDraw) { beforeDraw(mChildren, time); }
+      g.StartLayer(this, { 0, 0, mRECT.W(), mRECT.H() });
       for (int i = 0; i < mChildren.size(); i++) {
         if (!mChildren[i]->IsHidden()) {
           mChildren[i]->Draw(g);
@@ -136,6 +128,8 @@ namespace guitard {
      * Event handling and propagation to child controls
      */
     void OnMouseDblClick(float x, float y, const IMouseMod& mod) override {
+      x -= mRECT.L;
+      y -= mRECT.T;
       IControl* target = getChildAtCoord(x, y);
       if (target != nullptr) {
         target->OnMouseDblClick(x, y, mod);
@@ -144,6 +138,8 @@ namespace guitard {
     }
 
     void OnMouseDown(float x, float y, const IMouseMod& mod) override {
+      x -= mRECT.L;
+      y -= mRECT.T;
       IControl* target = getChildAtCoord(x, y);
       if (target != nullptr) {
         target->OnMouseDown(x, y, mod);
@@ -153,6 +149,8 @@ namespace guitard {
     }
 
     void OnMouseUp(float x, float y, const IMouseMod& mod) override {
+      x -= mRECT.L;
+      y -= mRECT.T;
       if (mCaptured != nullptr) { // A captured control has priority
         mCaptured->OnMouseUp(x, y, mod);
         mCaptured = nullptr;
@@ -167,6 +165,8 @@ namespace guitard {
     }
 
     void OnMouseOver(float x, float y, const IMouseMod& mod) override {
+      x -= mRECT.L;
+      y -= mRECT.T;
       IControl::OnMouseOver(x, y, mod);
       IControl* target = getChildAtCoord(x, y);
       if (mMouseOver != target && mMouseOver != nullptr) {
@@ -190,6 +190,8 @@ namespace guitard {
     }
 
     void OnMouseDrag(float x, float y, float dX, float dY, const IMouseMod& mod) override {
+      x -= mRECT.L;
+      y -= mRECT.T;
       if (mCaptured != nullptr) {
         if (handlesDrag(mCaptured)) {
           mCaptured->OnMouseDrag(x, y, dX, dY, mod);
@@ -199,6 +201,8 @@ namespace guitard {
     }
 
     void OnMouseWheel(float x, float y, const IMouseMod& mod, float d) override {
+      x -= mRECT.L;
+      y -= mRECT.T;
       IControl* c = getChildAtCoord(x, y);
       if (handlesScroll(c)) {
         c->OnMouseWheel(x, y, mod, d);

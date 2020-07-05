@@ -136,7 +136,7 @@ namespace guitard {
     sample getValue() const {
 #ifndef GUITARD_HEADLESS
       if (parameter != nullptr) {
-        return parameter->Value();
+        return static_cast<sample>(parameter->Value());
       }
 #endif
       return baseValue;
