@@ -7,7 +7,6 @@
 #include "../../main/Graph.h"
 #include "./NodeUi.h"
 #include "../../types/GStack.h"
-#include "./MultiControl.h"
 
 namespace guitard {
   /**
@@ -60,10 +59,6 @@ namespace guitard {
 
     NodeUi* mInputNodeUi = nullptr;
     NodeUi* moutputNodeUi = nullptr;
-
-    MultiControl* testMulti = nullptr;
-    IVButtonControl* testChild1 = nullptr;
-    IVButtonControl* testChild2 = nullptr;
   public:
     GraphUi(MessageBus::Bus* bus, IGraphics* graphics) {
       mBus = bus;
@@ -89,19 +84,6 @@ namespace guitard {
       mCableLayer = new CableLayer(mBus, &mNodeUis);
       mCableLayer->SetZIndex(10);
       mGraphics->AttachControl(mCableLayer);
-      float pad = 10;
-      testMulti = new MultiControl({
-        pad, pad, 400, 400
-      });
-      testChild1 = new IVButtonControl({ pad, pad, 100, 40 + pad }, iplug::igraphics::SplashClickActionFunc);
-      testChild2 = new IVButtonControl({ pad, 50 + pad, 100, 100 + pad }, iplug::igraphics::SplashClickActionFunc);
-      testMulti->appendChild(testChild1);
-      testMulti->appendChild(testChild2);
-      testMulti->beforeDraw = [&](PointerList<IControl>& children, float time) {
-        testMulti->SetPosition((sin(time * 0.4) + 1.0) * 50, 0);
-        testChild1->SetPosition((sin(time) + 1.0) * 100, (cos(time) + 1) * 100);
-      };
-      mGraphics->AttachControl(testMulti);
     }
 
     ~GraphUi() {
