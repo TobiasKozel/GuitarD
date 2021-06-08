@@ -29,9 +29,9 @@ namespace guitard {
 // since using iplug::DBGMSG will exapnd to iplug::printf() and fail on linux/osx
 #if defined (GUITARD_HEADLESS)
   #ifdef NDEBUG
-    #define WDBGMSG(...) printf(__VA_ARGS__);
-  #else
     #define WDBGMSG(...)
+  #else
+    #define WDBGMSG(...) printf(__VA_ARGS__);
   #endif
 #else
   #include "IPlugLogger.h"

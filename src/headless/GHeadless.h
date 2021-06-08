@@ -69,9 +69,9 @@ namespace guitard {
       }
     }
 
-    void process(sample** in, sample** out, int samples) {
+    void process(const sample** in, sample** out, int samples) {
       if (mReady) {
-        mGraph.ProcessBlock(in, out, samples);
+        mGraph.ProcessBlock(const_cast<sample**>(in), out, samples);
       }
     }
 

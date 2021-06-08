@@ -33,7 +33,7 @@ namespace guitard {
      */
     void setConfig(int samplerate, int outChannels, int inChannels);
 
-    void process(sample** in, sample** out, int samples);
+    void process(const sample** in, sample** out, int samples);
 
     /**
      * Resets the plugin (kills reverb tails etc)
