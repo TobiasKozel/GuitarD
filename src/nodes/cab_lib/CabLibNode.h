@@ -12,18 +12,10 @@ namespace guitard {
   class CabLibNode final : public Node {
     /** Time in seconds to use for blending between convolvers */
     const sample mTransitionTime = 0.1;
-    sample mBlendStep = 0;
-    sample mBlendPos = 0;
-    sample** mBlendBuffer = nullptr;
     /** Primary convolver */
     WrappedConvolver* mConvolver = nullptr;
-    /** Secondary convolver only used for blending */
-    WrappedConvolver* mConvolver2 = nullptr;
 
     soundwoofer::async::Callback mCallback;
-
-
-    bool mIsBlending = false;
 
   public:
     soundwoofer::SWImpulseShared mLoadedIr = InternalIRs[0]; // So we got some kind of ir going
@@ -35,13 +27,11 @@ namespace guitard {
       // This is the main function called when changing the IR
       mCallback = std::make_shared<soundwoofer::async::CallbackFunc>(
         [&](soundwoofer::Status s) {
-        mConvolver2->loadIR(
+        mConvolver->loadIR(
           mLoadedIr->samples,
           mLoadedIr->length,
           mLoadedIr->channels
         );
-        mBlendPos = 0;
-        mIsBlending = true;
       }
       );
     }
@@ -85,11 +75,6 @@ namespace guitard {
     void createBuffers() override {
       Node::createBuffers();
       mConvolver = new WrappedConvolver(mMaxBlockSize);
-      mConvolver2 = new WrappedConvolver(mMaxBlockSize);
-      mBlendBuffer = new sample * [mChannelCount];
-      for (int c = 0; c < mChannelCount; c++) {
-        mBlendBuffer[c] = new sample[mMaxBlockSize];
-      }
       soundwoofer::SWImpulseShared& ir = mLoadedIr;
       WDBGMSG("Load ir");
       soundwoofer::ir::load(ir, mSampleRate);
@@ -107,15 +92,7 @@ namespace guitard {
     void deleteBuffers() override {
       Node::deleteBuffers();
       delete mConvolver;
-      delete mConvolver2;
       mConvolver = nullptr;
-      mConvolver2 = nullptr;
-      if (mBlendBuffer != nullptr) {
-        for (int c = 0; c < mChannelCount; c++) {
-          delete[] mBlendBuffer[c];
-        }
-        delete[] mBlendBuffer;
-      }
     }
 
     /**
@@ -127,7 +104,6 @@ namespace guitard {
         deleteBuffers();
         mSampleRate = pSampleRate;
         mChannelCount = pChannels;
-        mBlendStep = 1.0f / (pSampleRate * mTransitionTime);
         createBuffers();
       }
     }
@@ -141,35 +117,9 @@ namespace guitard {
       mParameters[1].update(); // this is the stereo param
       mConvolver->mStereo = mStereo > 0.5 ? true : false;
 
-      if (mIsBlending) { // Means we'll need to take care of 2 convolvers
-        mConvolver2->mStereo = mConvolver->mStereo; // Sync the stereo flag
-        mConvolver->ProcessBlock(
-          mSocketsIn[0].mBuffer, mSocketsOut[0].mBuffer, nFrames
-        );
-        mConvolver2->ProcessBlock(
-          mSocketsIn[0].mBuffer, mBlendBuffer, nFrames
-        );
-        for (int i = 0; i < nFrames; i++) {
-          if (mBlendPos < 1.0) {
-            mBlendPos += mBlendStep;
-          }
-          else {
-            mBlendPos = 1.0;
-          }
-          for (int c = 0; c < mChannelCount; c++) {
-            mSocketsOut[0].mBuffer[c][i] = mSocketsOut[0].mBuffer[c][i] * (1 - mBlendPos) + mBlendBuffer[c][i] * mBlendPos;
-          }
-        }
-        if (mBlendPos >= 1.0) { // Blend is over
-          mIsBlending = false;
-          std::swap(mConvolver, mConvolver2);
-        }
-      }
-      else { // Normal processing
-        mConvolver->ProcessBlock(
-          mSocketsIn[0].mBuffer, mSocketsOut[0].mBuffer, nFrames
-        );
-      }
+      mConvolver->ProcessBlock(
+        mSocketsIn[0].mBuffer, mSocketsOut[0].mBuffer, nFrames
+      );
     }
 
     String getLicense() override {

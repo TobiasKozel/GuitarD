@@ -63,7 +63,9 @@ namespace guitard {
    * Resets the plugin (kills reverb tails etc)
    */
   void GuitarDHeadless::reset() {
-    mGraph->OnTransport();
+    if (mReady) {
+      mGraph->OnTransport();
+    }
   }
 
   /**

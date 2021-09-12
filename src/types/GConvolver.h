@@ -97,7 +97,6 @@ namespace guitard {
     }
 
     void ProcessBlock(sample** in, sample** out, const int nFrames) {
-
       if (!mIRLoaded) { // kust pass the signal through
         for (int c = 0; c < CHANNEL_COUNT; c++) {
           for (int i = 0; i < nFrames; i++) {
@@ -146,7 +145,7 @@ namespace guitard {
 
       if (!mStereo) { // mono needs the other channel filled too
         ::memcpy(out[1], out[0], nFrames * sizeof(sample));
-    }
+      }
       else { // else do the second channel as well
         processChannel(in, out, nFrames, 1);
       }
