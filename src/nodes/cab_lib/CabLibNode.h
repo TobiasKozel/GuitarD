@@ -1,8 +1,11 @@
 #pragma once
 #include "../../main/Node.h"
 #include "../../types/GConvolver.h"
-#include "../../content/ir/InternalIRs.h"
 
+
+#include "./GuitarD/thirdparty/SpeexResampler.hpp"
+
+#include "../../../../hardcoded_irs.hpp"
 namespace guitard {
   /**
    * Fairly similar to SimpleCabNode
@@ -10,49 +13,22 @@ namespace guitard {
    * Also does fading between 2 Convolvers to reduce popping sounds when flipping through IRs
    */
   class CabLibNode final : public Node {
-    /** Time in seconds to use for blending between convolvers */
-    const sample mTransitionTime = 0.1;
-    /** Primary convolver */
     WrappedConvolver* mConvolver = nullptr;
-
-    soundwoofer::async::Callback mCallback;
-
+    enum IrType {
+      TypeNone = 0,
+      TypeA,
+      TypeB
+    } mIrType = TypeNone;
   public:
-    soundwoofer::SWImpulseShared mLoadedIr = InternalIRs[0]; // So we got some kind of ir going
     CabLibNode() {
       mStereo = 0;
       addByPassParam();
       addStereoParam();
-
-      // This is the main function called when changing the IR
-      mCallback = std::make_shared<soundwoofer::async::CallbackFunc>(
-        [&](soundwoofer::Status s) {
-        mConvolver->loadIR(
-          mLoadedIr->samples,
-          mLoadedIr->length,
-          mLoadedIr->channels
-        );
-      }
-      );
     }
 
-    /**
-     * Will be called from the UI to start loading an ir
-     */
-    void loadIr(soundwoofer::SWImpulseShared ir) {
-      if (mLoadedIr->file != ir->file) {
-        // don't load if the Ir is the same
-        mLoadedIr = ir;
-        soundwoofer::async::ir::load(ir, mCallback, mSampleRate);
-
-        // (*mCallback)(soundwoofer::ir::load(ir, mSampleRate)); // non async version
-      }
-    }
 
 
     void serializeAdditional(nlohmann::json& serialized) override {
-      serialized["path"] = mLoadedIr->file;
-      serialized["id"] = mLoadedIr->id;
     }
 
     void deserializeAdditional(nlohmann::json& serialized) override {
@@ -60,12 +36,13 @@ namespace guitard {
         if (!serialized.contains("path")) {
           return;
         }
-        mLoadedIr = std::make_shared<soundwoofer::SWImpulse>();
-        mLoadedIr->file = serialized.at("path").get<std::string>();
-        if (serialized.contains("id")) {
-          mLoadedIr->id = serialized.at("id").get<std::string>();
+        if (serialized["path"] == "5d6ed046-903f-4a76-904d-68fa25f91737") {
+          mIrType = TypeA;
+        } else {
+          mIrType = TypeB;
         }
-        soundwoofer::async::ir::loadUnknown(&mLoadedIr, mCallback, mSampleRate);
+        deleteBuffers();
+        createBuffers();
       }
       catch (...) {
         WDBGMSG("Failed to load Cab node data!\n");
@@ -73,20 +50,44 @@ namespace guitard {
     }
 
     void createBuffers() override {
+      if (mIrType == TypeNone) {
+        return;
+      }
+
       Node::createBuffers();
       mConvolver = new WrappedConvolver(mMaxBlockSize);
-      soundwoofer::SWImpulseShared& ir = mLoadedIr;
-      WDBGMSG("Load ir");
-      soundwoofer::ir::load(ir, mSampleRate);
-      WDBGMSG("Load done load");
-      mConvolver->loadIR(ir->samples, ir->length, ir->channels);
-      WDBGMSG("In convolver");
-      //soundwoofer::async::loadIR(ir, [&, ir](soundwoofer::Status status) {
-      //  if (status == soundwoofer::SUCCESS) {
-      //    if (mConvolver == nullptr) { return; }
-      //    mConvolver->resampleAndLoadIR(ir->samples, ir->length, ir->sampleRate, ir->channels);
-      //  }
-      //});
+      unsigned int srcLength = mIrType == TypeA ? IR_TYPE_A_LEN : IR_TYPE_B_LEN;
+      const float* srcBuf = mIrType == TypeA ? IR_TYPE_A : IR_TYPE_B;
+      
+      mConvolver->mStereo = true;
+
+      if (IR_RATE == mSampleRate) {
+        const float* srcMultiBuf[] = { srcBuf };
+        mConvolver->loadIR(srcMultiBuf, srcLength, 1);
+      } else {
+
+        const double dstRate = mSampleRate;
+        const double srcRate = IR_RATE;
+
+        speexport::SpeexResampler resampler;
+        int res;
+        resampler.init(1, srcRate, dstRate, 6, &res);
+        int latency = resampler.get_input_latency() + resampler.get_output_latency();
+        const unsigned int dstLengthOrg = int(dstRate / srcRate * (double) srcLength) + 50; // add some leeway
+        unsigned int dstLength = dstLengthOrg;
+        float* dstBuf = new float[dstLengthOrg];
+        resampler.skip_zeros();
+        resampler.process(0, srcBuf, &srcLength, dstBuf, &dstLength);
+
+        const float scale = srcRate / dstRate;
+        for (int i = 0; i < dstLength; i++) {
+          dstBuf[i] *= scale;
+        }
+
+        const float* srcMultiBuf[] = { dstBuf };
+        mConvolver->loadIR(srcMultiBuf, dstLength, 1);
+        delete[] dstBuf;
+      }
     }
 
     void deleteBuffers() override {
@@ -114,8 +115,8 @@ namespace guitard {
         outputSilence();
         return;
       }
-      mParameters[1].update(); // this is the stereo param
-      mConvolver->mStereo = mStereo > 0.5 ? true : false;
+      //mParameters[1].update(); // this is the stereo param
+      //mConvolver->mStereo = mStereo > 0.5 ? true : false;
 
       mConvolver->ProcessBlock(
         mSocketsIn[0].mBuffer, mSocketsOut[0].mBuffer, nFrames

@@ -78,7 +78,7 @@ namespace guitard {
       mMaxBuffer = maxBuffer;
     }
 
-    void loadIR(float** samples, const size_t sampleCount, const size_t channelCount) {
+    void loadIR(const float** samples, const size_t sampleCount, const size_t channelCount) {
       if (samples == nullptr || sampleCount == 0 || channelCount == 0) { return; }
       mIRLoaded = false;
       while (mIsProcessing) {}

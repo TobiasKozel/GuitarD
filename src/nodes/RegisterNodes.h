@@ -58,7 +58,7 @@
 /**
  * Cab stuff
  */
-#include "./simple_cab/SimpleCabNode.h"
+//#include "./simple_cab/SimpleCabNode.h"
 #include "./cab_lib/CabLibNode.h"
 
 /**

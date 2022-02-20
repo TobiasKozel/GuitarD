@@ -11,8 +11,6 @@
 
 #include "./factory/NodeList.h"
 
-#include "../../thirdparty/soundwoofer/dependencies/json.hpp"
-
 namespace guitard {
   /**
    * Virtual class which all nodes will derive from

@@ -1,6 +1,5 @@
 #pragma once
 #include <chrono>
-#include "../../thirdparty/soundwoofer/soundwoofer.h"
 #include "../GConfig.h"
 #include "../types/GMutex.h"
 #include "../types/GTypes.h"
@@ -529,7 +528,6 @@ namespace guitard {
     }
 
     void deserialize(nlohmann::json& json) {
-      soundwoofer::async::cancelAll();
       try {
         const int NoNode = -2;
         const int InNode = -1;
