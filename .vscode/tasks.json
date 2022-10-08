@@ -4,60 +4,14 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "msvc debug",
+            "label": "make debug",
             "type": "shell",
-            "command": "cl",
-            "args": [
-                "/DEBUG:FULL",
-                "/ZI",
-                "/I./",
-                "/I./thirdparty",
-                "/I./src/faust/generated",
-                "${file}",
-                "/link",
-                "/O",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
-            ],
+            "command": "make DEBUG=true -j8",
+            "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": true
-            },
-            "problemMatcher": ["$msCompile"]
-        },
-        {
-            "label": "gcc debug",
-            "type": "shell",
-            "command": "g++",
-            "args": [
-                "-g",
-                "-O0",
-                "${file}",
-                "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}",
-                // "-pthread"
-                "-lws2_32"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": ["$gcc"]
-        },
-        {
-            "label": "build linux app",
-            "type": "shell",
-            "command": "make",
-            "args": [
-                "-f",
-                "../Makefile",
-                "APP",
-                "IDEBUG=YES"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": ["$gcc"]
+            }
         }
     ]
 }

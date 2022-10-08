@@ -6,7 +6,9 @@
 /**
  * Amounts of daw params to register at start since dynamic amounts are not well supported
  */
-#define GUITARD_MAX_DAW_PARAMS 256
+#ifndef GUITARD_MAX_DAW_PARAMS 
+	#define GUITARD_MAX_DAW_PARAMS 256
+#endif
 
 /**
  * 8 Sockets for each in and output should be enough
@@ -46,5 +48,5 @@
 #define GUITARD_FLOAT_CONVOLUTION
 
 #ifdef __arm__ // No sse for arm obviously
-  #undef GUITARD_SSE
+	#undef GUITARD_SSE
 #endif

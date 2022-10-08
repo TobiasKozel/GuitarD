@@ -1,6 +1,9 @@
 #pragma once
+
 #include <chrono>
+
 #include "../../thirdparty/soundwoofer/soundwoofer.h"
+
 #include "../GConfig.h"
 #include "../types/GMutex.h"
 #include "../types/GTypes.h"

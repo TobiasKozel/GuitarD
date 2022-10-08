@@ -3,6 +3,8 @@
 #include "../GConfig.h"
 #include "../../thirdparty/soundwoofer/dependencies/json.hpp"
 
+#define GUITARD_MAX_UNDOS 8
+
 namespace  guitard {
   // TODOG make this instance specific so multiple plugins don't share the same undo stack
   class HistoryStack {

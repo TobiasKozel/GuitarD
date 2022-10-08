@@ -6,147 +6,147 @@
 #include <functional>
 
 namespace guitard {
-  class ParameterManager {
+	class ParameterManager {
+		ParameterCoupling* mParameters[GUITARD_MAX_DAW_PARAMS] = { nullptr };
+
+		bool mParametersClaimed[GUITARD_MAX_DAW_PARAMS] = { true };
+		int mParametersLeft = 0;
+
+		/**
+		 * If the parameters change the daw or whatever is in charge might want to know about that
+		 */
+		std::function<void()> mCallback;
+	public:
+		void setParamChangeCallback(std::function<void()> callback) {
+			mCallback = callback;
+		}
+
 #ifndef GUITARD_HEADLESS
-    IParam*
+		/**
+		 * This will fill the pool of parameters from the DAW ONCE at plugin startup
+		 * since most DAWs don't seem to support dynamic parameters
+		 */
+		void addParameter(IParam* param) {
+			String paramprefix = "Uninitialized ";
+			mParametersClaimed[mParametersLeft] = false;
+			mParameters[mParametersLeft++] = param;
+			// all these values have a range from 0-1 since this can't be changed later on
+			param->InitDouble((paramprefix + std::to_string(mParametersLeft)).c_str(), 1, 0, 1.0, 0.01);
+		}
+#endif
+
+		/**
+		 * This will go over each control element in the paramters array of the node and try to expose it to the daw
+		 * Will return true if all parameters could be claimed, false if at least one failed
+		 */
+		bool claimNode(Node* node) {
+			bool gotAllParams = true;
+			String prefix = node->mInfo->displayName;
+			for (int i = 0; i < node->mParameterCount; i++) {
+				if (node->mParameters[i].wantsDawParameter && !claimParameter(&node->mParameters[i], prefix.c_str())) {
+					/**
+					 * this means the manager has no free parameters left and the control cannot be automated from the daw
+					 */
+					WDBGMSG("Ran out of daw parameters!\n");
+					gotAllParams = false;
+				}
+			}
+			if (mCallback != nullptr) {
+				mCallback();
+			}
+			return gotAllParams;
+		}
+
+		/**
+		 * This will provide one of the reserved daw parameters. If one is free, it will return true
+		 */
+		bool claimParameter(ParameterCoupling* couple, const char* prefix = nullptr) {
+			const char* name = couple->name;
+			String stringName;
+			if (prefix != nullptr) {
+				/**
+				 * In case we get a node name as a prefix use that but keep the string object around until
+				 * the init function has copied it into the daw land
+				 */
+				stringName = String(prefix) + " " + String(name);
+				name = stringName.c_str();
+			}
+			int i = couple->parameterIdx;
+			if (i == kNoParameter && mParametersLeft > 0) {
+				// if there's no parameter index set, go look for one
+				for (i = 0; i < GUITARD_MAX_DAW_PARAMS; i++) {
+					if (!mParametersClaimed[i]) {
+						// found one
+						break;
+					}
+				}
+			}
+			if (GUITARD_MAX_DAW_PARAMS <= i || mParametersClaimed[i] || i == kNoParameter) {
+				// This is bad and means a preset will not load correctly
+#ifndef GUITARD_HEADLESS
+				couple->setParam(nullptr);
+#endif
+				couple->parameterIdx = kNoParameter;
+				WDBGMSG("Could not claim a prefered DAW parameter!\n");
+				return false;
+			}
+			mParametersLeft--;
+			mParametersClaimed[i] = true;
+#ifndef GUITARD_HEADLESS
+			couple->setParam(mParameters[i]);
 #else
-    ParameterCoupling*
+			mParameters[i] = couple; // Store the couple here so it can be accessed from outside
 #endif
-    mParameters[GUITARD_MAX_DAW_PARAMS] = { nullptr };
+			couple->parameterIdx = i;
+			WDBGMSG("Claimed param %i\n", i);
+			return true;
+		}
 
-    bool mParametersClaimed[GUITARD_MAX_DAW_PARAMS] = { true };
-    int mParametersLeft = 0;
+		void releaseNode(Node* node) {
+			for (int i = 0; i < node->mParameterCount; i++) {
+				releaseParameter(&node->mParameters[i]);
+			}
+			if (mCallback != nullptr) {
+				mCallback();
+			}
+		}
 
-    /**
-     * If the parameters change the daw or whatever is in charge might want to know about that
-     */
-    std::function<void()> mCallback;
-  public:
-    void setParamChangeCallback(std::function<void()> callback) {
-      mCallback = callback;
-    }
-
+		void releaseParameter(ParameterCoupling* couple) {
+			for (int i = 0; i < GUITARD_MAX_DAW_PARAMS; i++) {
 #ifndef GUITARD_HEADLESS
-    /**
-     * This will fill the pool of parameters from the DAW ONCE at plugin startup
-     * since most DAWs don't seem to support dynamic parameters
-     */
-    void addParameter(IParam* param) {
-      String paramprefix = "Uninitialized ";
-      mParametersClaimed[mParametersLeft] = false;
-      mParameters[mParametersLeft++] = param;
-      // all these values have a range from 0-1 since this can't be changed later on
-      param->InitDouble((paramprefix + std::to_string(mParametersLeft)).c_str(), 1, 0, 1.0, 0.01);
-    }
-#endif
-
-    /**
-     * This will go over each control element in the paramters array of the node and try to expose it to the daw
-     * Will return true if all parameters could be claimed, false if at least one failed
-     */
-    bool claimNode(Node* node) {
-      bool gotAllParams = true;
-      String prefix = node->mInfo->displayName;
-      for (int i = 0; i < node->mParameterCount; i++) {
-        if (node->mParameters[i].wantsDawParameter && !claimParameter(&node->mParameters[i], prefix.c_str())) {
-          /**
-           * this means the manager has no free parameters left and the control cannot be automated from the daw
-           */
-          WDBGMSG("Ran out of daw parameters!\n");
-          gotAllParams = false;
-        }
-      }
-      if (mCallback != nullptr) {
-        mCallback();
-      }
-      return gotAllParams;
-    }
-
-    /**
-     * This will provide one of the reserved daw parameters. If one is free, it will return true
-     */
-    bool claimParameter(ParameterCoupling* couple, const char* prefix = nullptr) {
-      const char* name = couple->name;
-      String stringName;
-      if (prefix != nullptr) {
-        /**
-         * In case we get a node name as a prefix use that but keep the string object around until
-         * the init function has copied it into the daw land
-         */
-        stringName = String(prefix) + " " + String(name);
-        name = stringName.c_str();
-      }
-      int i = couple->parameterIdx;
-      if (i == kNoParameter && mParametersLeft > 0) {
-        // if there's no parameter index set, go look for one
-        for (i = 0; i < GUITARD_MAX_DAW_PARAMS; i++) {
-          if (!mParametersClaimed[i]) {
-            // found one
-            break;
-          }
-        }
-      }
-      if (GUITARD_MAX_DAW_PARAMS <= i || mParametersClaimed[i] || i == kNoParameter) {
-        // This is bad and means a preset will not load correctly
-#ifndef GUITARD_HEADLESS
-        couple->setParam(nullptr);
-#endif
-        couple->parameterIdx = kNoParameter;
-        WDBGMSG("Could not claim a prefered DAW parameter!\n");
-        return false;
-      }
-      mParametersLeft--;
-      mParametersClaimed[i] = true;
-#ifndef GUITARD_HEADLESS
-      couple->setParam(mParameters[i]);
+				if (mParameters[i] == couple->getParam()) {
 #else
-      mParameters[i] = couple; // Store the couple here so it can be accessed from outside
+				if (mParameters[i] == couple) { // directly compare the couple
 #endif
-      couple->parameterIdx = i;
-      WDBGMSG("Claimed param %i\n", i);
-      return true;
-    }
-
-    void releaseNode(Node* node) {
-      for (int i = 0; i < node->mParameterCount; i++) {
-        releaseParameter(&node->mParameters[i]);
-      }
-      if (mCallback != nullptr) {
-        mCallback();
-      }
-    }
-
-    void releaseParameter(ParameterCoupling* couple) {
-      for (int i = 0; i < GUITARD_MAX_DAW_PARAMS; i++) {
+					mParametersClaimed[i] = false;
+					const String paramprefix = "Uninitialized ";
 #ifndef GUITARD_HEADLESS
-        if (mParameters[i] == couple->getParam()) {
+					mParameters[i]->InitDouble(
+						(paramprefix + std::to_string(mParametersLeft)).c_str(), 1, 0, 1.0, 0.01
+					);
+					couple->setParam(nullptr);
 #else
-        if (mParameters[i] == couple) { // directly compare the couple
+					mParameters[i] = nullptr;
 #endif
-          mParametersClaimed[i] = false;
-          const String paramprefix = "Uninitialized ";
-#ifndef GUITARD_HEADLESS
-          mParameters[i]->InitDouble(
-            (paramprefix + std::to_string(mParametersLeft)).c_str(), 1, 0, 1.0, 0.01
-          );
-          couple->setParam(nullptr);
-#else
-          mParameters[i] = nullptr;
-#endif
-          mParametersLeft++;
-          WDBGMSG("Released param %i\n", i);
-          return;
-        }
-      }
-    }
+					mParametersLeft++;
+					WDBGMSG("Released param %i\n", i);
+					return;
+				}
+			}
+		}
 
-#ifdef GUITARD_HEADLESS
-    ParameterCoupling* getCoupling(int index) {
-        if (index < GUITARD_MAX_DAW_PARAMS && mParameters[index] != nullptr) {
-          return mParameters[index];
-        }
-        return nullptr;
-      }
-#endif
-  };
+		ParameterCoupling* getCoupling(int index) {
+			if (index < GUITARD_MAX_DAW_PARAMS && mParameters[index] != nullptr) {
+				return mParameters[index];
+			}
+			return nullptr;
+		}
+
+		const ParameterCoupling* getCoupling(int index) const {
+			if (index < GUITARD_MAX_DAW_PARAMS && mParameters[index] != nullptr) {
+				return mParameters[index];
+			}
+			return nullptr;
+		}
+	};
 }

@@ -35,12 +35,12 @@ namespace guitard {
 }
 
 #ifndef GUITARD_HEADLESS
-#include "../../ui/elements/NodeUi.h"
-namespace guitard {
-    class OutputNodeUi final : public NodeUi {
-    public:
-      OutputNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) { }
-    };
-    GUITARD_REGISTER_NODE_UI(OutputNode, OutputNodeUi)
-}
+// #include "../../ui/elements/NodeUi.h"
+// namespace guitard {
+//     class OutputNodeUi final : public NodeUi {
+//     public:
+//       OutputNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) { }
+//     };
+//     GUITARD_REGISTER_NODE_UI(OutputNode, OutputNodeUi)
+// }
 #endif

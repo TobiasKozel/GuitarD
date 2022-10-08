@@ -57,25 +57,24 @@ namespace guitard {
 }
 
 #ifndef GUITARD_HEADLESS
-#include "../../ui/elements/NodeUi.h"
-namespace guitard {
-  class InputNodeUi final : public NodeUi {
+// namespace guitard {
+//   class InputNodeUi final : public NodeUi {
 
-    iplug::igraphics::IText mBlocksizeText;
-    String mInfo;
-  public:
-    InputNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) {
-      mInfo = "";
-      mBlocksizeText = DEBUG_FONT;
-    }
+//     iplug::igraphics::IText mBlocksizeText;
+//     String mInfo;
+//   public:
+//     InputNodeUi(Node* node, MessageBus::Bus* bus) : NodeUi(node, bus) {
+//       mInfo = "";
+//       mBlocksizeText = DEBUG_FONT;
+//     }
 
-    void Draw(IGraphics& g) override {
-      NodeUi::Draw(g);
-      mInfo = "Blocksize: " + std::to_string(mNode->mLastBlockSize) + " Sample-Rate: " + std::to_string(mNode->mSampleRate);
-      g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
-    }
-  };
+//     void Draw(IGraphics& g) override {
+//       NodeUi::Draw(g);
+//       mInfo = "Blocksize: " + std::to_string(mNode->mLastBlockSize) + " Sample-Rate: " + std::to_string(mNode->mSampleRate);
+//       g.DrawText(mBlocksizeText, mInfo.c_str(), mRECT);
+//     }
+//   };
 
-  GUITARD_REGISTER_NODE_UI(InputNode, InputNodeUi)
-}
+//   GUITARD_REGISTER_NODE_UI(InputNode, InputNodeUi)
+// }
 #endif

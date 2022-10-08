@@ -54,9 +54,7 @@ namespace guitard {
 
   struct AutomationAttachRequest {
     Node* automationNode = nullptr;
-#ifndef GUITARD_HEADLESS
-    iplug::igraphics::IControl* targetControl = nullptr;
-#endif
+    void* targetControl = nullptr; // TODO bad this references a ui node
   };
 
   struct NodeDragEndData {

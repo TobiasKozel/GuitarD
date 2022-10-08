@@ -5,7 +5,7 @@
 
 namespace soundwoofer {
   namespace setup {
-    void setPluginName(const std::string& name) {
+    void setPluginName(const char* name) {
       state::pluginName = name;
       state::cacheIRs = true;
       state::cachePresets = true;

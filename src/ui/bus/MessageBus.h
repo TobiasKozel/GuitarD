@@ -1,8 +1,12 @@
 #pragma once
+
 #include <functional>
+#include <cassert>
+
 #include "./EventList.h"
 #include "../../types/GPointerList.h"
 #include "../../types/GMutex.h"
+
 namespace guitard {
   /**
    * This allows for easy communication between classes which don't know each other
