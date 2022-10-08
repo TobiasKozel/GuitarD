@@ -564,7 +564,7 @@ namespace guitard {
             WDBGMSG("Deserialization mismatched indexes, this will not load right\n");
           }
 
-          addNode(node, { sNode["position"][0], sNode["position"][1] }, nullptr, false);
+          addNode(node, Coord2D(sNode["position"][0], sNode["position"][1]), nullptr, false);
 
           // Set the parameter values
           for (auto param : sNode["parameters"]) {

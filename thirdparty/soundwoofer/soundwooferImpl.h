@@ -90,7 +90,7 @@ namespace soundwoofer {
         auto cabLevel = file::scanDir(state::irDirectory);
         for (auto i : cabLevel) {
           if (i.isFolder) {
-            SWRigShared rig(new SWRig{ i.name, i.name, USER_SRC });
+            SWRigShared rig(new SWRig(i.name, i.name, USER_SRC));
             auto micLevel = file::scanDir(i);
             for (auto j : micLevel) {
               SWComponentShared existingMic;
@@ -114,7 +114,7 @@ namespace soundwoofer {
                 auto posLevel = file::scanDir(j);
                 for (auto k : posLevel) {
                   if (!k.isFolder && file::isWaveName(k.name)) {
-                    SWImpulseShared ir(new SWImpulse{ "CHECKSUM", k.name, mic->id, rig->id, k.relative, USER_SRC });
+                    SWImpulseShared ir(new SWImpulse("CHECKSUM", k.name, mic->id, rig->id, k.relative, USER_SRC));
                     state::irList.push_back(ir); // GLOBAL
                     rig->impulses.push_back(ir);
                   }
@@ -247,7 +247,7 @@ namespace soundwoofer {
         auto files = file::scanDir(state::presetDirectory);
         for (auto i : files) {
           if (!i.isFolder && file::isJSONName(i.name)) {
-            SWPresetShared preset(new SWPreset{ i.name, i.name, state::pluginName, USER_SRC });
+            SWPresetShared preset(new SWPreset(i.name, i.name, state::pluginName, USER_SRC));
             state::presetList.push_back(preset);
           }
         }

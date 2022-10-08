@@ -50,6 +50,15 @@ namespace soundwoofer {
 	typedef std::vector<SWPresetShared> SWPresets;
 
 	struct SWImpulse {
+		SWImpulse() { }
+		SWImpulse(std::string p_id, std::string p_name, std::string p_micId, std::string p_rig, std::string p_file, Source p_source) {
+			id = p_id;
+			name = p_name;
+			micId = p_micId;
+			rig = p_rig;
+			file = p_file;
+			source = p_source;
+		}
 		std::string id;
 		std::string name;
 		std::string micId; // The ID of the mic used to record this
@@ -93,6 +102,14 @@ namespace soundwoofer {
 	 * A component can be a microphone or a specific instance of a Cabinet
 	 */
 	struct SWComponent {
+		SWComponent() { }
+		SWComponent(std::string p_id, std::string p_name, std::string p_type, Source p_source) {
+			id = p_id;
+			name = p_name;
+			type = p_type;
+			source = p_source;
+		}
+
 		std::string id;
 		std::string name;
 		std::string type; // "Microphone", "Cabinet"
@@ -115,6 +132,13 @@ namespace soundwoofer {
 	 * since the same cab can be modified or recorded by different people
 	 */
 	struct SWRig {
+		SWRig() { }
+		SWRig(std::string p_id, std::string p_name, Source p_source = SOUNDWOOFER_SRC, std::string p_userName = "") {
+			id = p_id;
+			name = p_name;
+			source = p_source;
+			userName = p_userName;
+		}
 		std::string id;
 		std::string name;
 		Source source = SOUNDWOOFER_SRC;
@@ -130,6 +154,12 @@ namespace soundwoofer {
 	 * Preset Struct Based on the soundwoofer API
 	 */
 	struct SWPreset {
+		SWPreset(std::string p_name, std::string p_id, std::string p_plugin, Source p_source) {
+			name = p_name;
+			id = p_id;
+			plugin = p_plugin;
+			source = p_source;
+		}
 		std::string name;
 		std::string id;
 		std::string plugin;
