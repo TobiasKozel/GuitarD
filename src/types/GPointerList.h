@@ -55,7 +55,7 @@ namespace guitard {
 
 		void clear(const bool destroy = false) {
 			if (destroy) {
-				for (int i = 0; i < size(); i++) {
+				for (size_t i = 0; i < size(); i++) {
 					delete get(i);
 				}
 			}

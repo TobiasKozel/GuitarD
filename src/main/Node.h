@@ -204,7 +204,7 @@ namespace guitard {
     void updateOversampling() {
       if (mOverSampler != nullptr) {
         mParameters[mOverSamplingIndex].update();
-        int fac = std::floor(mOverSamplingFactor);
+        unsigned int fac = std::floor(mOverSamplingFactor);
         if (fac != mOverSampler->mFactor && mSampleRate > 0) {
           float prevFac = mOverSampler->mFactor;
           mOverSampler->mFactor = fac;
@@ -322,13 +322,13 @@ namespace guitard {
      * These should only be called from the attach/detachAutomation functions
      * @param c The ParameterCouple to control
      */
-    virtual void addAutomationTarget(ParameterCoupling* c) { }
+    virtual void addAutomationTarget(ParameterCoupling* c) { (void)(c); }
 
     /**
      * Also for nodes which provide automation, see above
      * @param c The ParameterCouple to control
      */
-    virtual void removeAutomationTarget(ParameterCoupling* c) { }
+    virtual void removeAutomationTarget(ParameterCoupling* c) { (void)(c); }
 
 
     /**
@@ -413,12 +413,12 @@ namespace guitard {
     /**
      * Allows attaching additional data at the end of the serialization
      */
-    virtual void serializeAdditional(nlohmann::json& serialized) { }
+    virtual void serializeAdditional(nlohmann::json& serialized) { (void)(serialized); }
 
     /**
      * Allows loading additional settings after deserialization
      */
-    virtual void deserializeAdditional(nlohmann::json& serialized) { }
+    virtual void deserializeAdditional(nlohmann::json& serialized) { (void)(serialized); }
 
     /**
      * Function to retrieve the license/copyright info about the node

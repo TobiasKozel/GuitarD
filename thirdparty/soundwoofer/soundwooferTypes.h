@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <string>
 #include <memory>
 #include <vector>
@@ -85,7 +86,7 @@ namespace soundwoofer {
 
 		void clearSamples() {
 			if (samples == nullptr || source == EMBEDDED_SRC) { return; }
-			for (int i = 0; i < channels; i++) {
+			for (size_t i = 0; i < channels; i++) {
 				delete[] samples[i];
 			}
 			delete[] samples;

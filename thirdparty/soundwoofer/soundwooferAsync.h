@@ -28,7 +28,7 @@ namespace soundwoofer {
 		 * There's no reason to touch anything in here
 		 */
 		namespace _ {
-			int maxQueueLength =
+			size_t maxQueueLength =
 #ifndef SOUNDWOOFER_MAX_ASYNC_QUEUE
 				3;
 #else

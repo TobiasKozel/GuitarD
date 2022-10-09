@@ -6,9 +6,6 @@
 #define DISTRHO_PLUGIN_URI                "https://TODO.com"
 #define DISTRHO_PLUGIN_LICENSE            "WTFPL"
 
-#define DISTRHO_PLUGIN_VERSION_MAJOR      0
-#define DISTRHO_PLUGIN_VERSION_MINOR      0
-#define DISTRHO_PLUGIN_VERSION_PATCH      1
 
 #define DISTRHO_PLUGIN_HAS_UI             1
 #define DISTRHO_PLUGIN_IS_RT_SAFE         1
@@ -22,6 +19,13 @@
 
 #define DISTRHO_UI_FILE_BROWSER           0
 #define DISTRHO_UI_USER_RESIZABLE         1
+#define DISTRHO_UI_DEFAULT_WIDTH          768
+#define DISTRHO_UI_DEFAULT_HEIGHT         512
+
+// additional non things not controlling DPF itself
+#define DISTRHO_PLUGIN_VERSION_MAJOR      0
+#define DISTRHO_PLUGIN_VERSION_MINOR      0
+#define DISTRHO_PLUGIN_VERSION_PATCH      1
 
 #define DISTRHO_PLUGIN_STATE_PATCH        "patch"
 #define DISTRHO_PLUGIN_STATE_SCREENSHOT   "screenshot"

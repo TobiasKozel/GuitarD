@@ -64,7 +64,7 @@ namespace soundwoofer {
 
       // Deinterleaved buffer
       ir->samples = new float* [ir->channels];
-      for (int c = 0; c < ir->channels; c++) {
+      for (size_t c = 0; c < ir->channels; c++) {
         ir->samples[c] = new float[ir->length];
       }
 

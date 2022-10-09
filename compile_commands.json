@@ -17,7 +17,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -39,9 +39,9 @@
       "../build/dgl/Application.cpp.o",
       "src/Application.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/Application.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/Application.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/Application.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/Application.cpp.o"
   },
   {
     "arguments": [
@@ -61,7 +61,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -83,9 +83,9 @@
       "../build/dgl/ApplicationPrivateData.cpp.o",
       "src/ApplicationPrivateData.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/ApplicationPrivateData.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/ApplicationPrivateData.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/ApplicationPrivateData.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/ApplicationPrivateData.cpp.o"
   },
   {
     "arguments": [
@@ -105,7 +105,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -127,9 +127,9 @@
       "../build/dgl/Color.cpp.o",
       "src/Color.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/Color.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/Color.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/Color.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/Color.cpp.o"
   },
   {
     "arguments": [
@@ -149,7 +149,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -171,9 +171,9 @@
       "../build/dgl/EventHandlers.cpp.o",
       "src/EventHandlers.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/EventHandlers.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/EventHandlers.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/EventHandlers.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/EventHandlers.cpp.o"
   },
   {
     "arguments": [
@@ -193,7 +193,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -215,9 +215,9 @@
       "../build/dgl/Geometry.cpp.o",
       "src/Geometry.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/Geometry.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/Geometry.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/Geometry.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/Geometry.cpp.o"
   },
   {
     "arguments": [
@@ -237,7 +237,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -259,9 +259,9 @@
       "../build/dgl/ImageBase.cpp.o",
       "src/ImageBase.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/ImageBase.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/ImageBase.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/ImageBase.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/ImageBase.cpp.o"
   },
   {
     "arguments": [
@@ -281,7 +281,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -303,9 +303,9 @@
       "../build/dgl/ImageBaseWidgets.cpp.o",
       "src/ImageBaseWidgets.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/ImageBaseWidgets.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/ImageBaseWidgets.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/ImageBaseWidgets.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/ImageBaseWidgets.cpp.o"
   },
   {
     "arguments": [
@@ -325,7 +325,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -347,9 +347,9 @@
       "../build/dgl/Layout.cpp.o",
       "src/Layout.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/Layout.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/Layout.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/Layout.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/Layout.cpp.o"
   },
   {
     "arguments": [
@@ -369,7 +369,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -391,9 +391,9 @@
       "../build/dgl/Resources.cpp.o",
       "src/Resources.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/Resources.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/Resources.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/Resources.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/Resources.cpp.o"
   },
   {
     "arguments": [
@@ -413,7 +413,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -435,9 +435,9 @@
       "../build/dgl/SubWidget.cpp.o",
       "src/SubWidget.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/SubWidget.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/SubWidget.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/SubWidget.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/SubWidget.cpp.o"
   },
   {
     "arguments": [
@@ -457,7 +457,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -479,9 +479,9 @@
       "../build/dgl/SubWidgetPrivateData.cpp.o",
       "src/SubWidgetPrivateData.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/SubWidgetPrivateData.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/SubWidgetPrivateData.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/SubWidgetPrivateData.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/SubWidgetPrivateData.cpp.o"
   },
   {
     "arguments": [
@@ -501,7 +501,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -523,9 +523,9 @@
       "../build/dgl/TopLevelWidget.cpp.o",
       "src/TopLevelWidget.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/TopLevelWidget.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/TopLevelWidget.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/TopLevelWidget.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/TopLevelWidget.cpp.o"
   },
   {
     "arguments": [
@@ -545,7 +545,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -567,9 +567,9 @@
       "../build/dgl/TopLevelWidgetPrivateData.cpp.o",
       "src/TopLevelWidgetPrivateData.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/TopLevelWidgetPrivateData.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/TopLevelWidgetPrivateData.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/TopLevelWidgetPrivateData.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/TopLevelWidgetPrivateData.cpp.o"
   },
   {
     "arguments": [
@@ -589,7 +589,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -611,9 +611,9 @@
       "../build/dgl/Widget.cpp.o",
       "src/Widget.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/Widget.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/Widget.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/Widget.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/Widget.cpp.o"
   },
   {
     "arguments": [
@@ -633,7 +633,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -655,9 +655,9 @@
       "../build/dgl/WidgetPrivateData.cpp.o",
       "src/WidgetPrivateData.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/WidgetPrivateData.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/WidgetPrivateData.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/WidgetPrivateData.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/WidgetPrivateData.cpp.o"
   },
   {
     "arguments": [
@@ -677,7 +677,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -699,9 +699,9 @@
       "../build/dgl/Window.cpp.o",
       "src/Window.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/Window.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/Window.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/Window.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/Window.cpp.o"
   },
   {
     "arguments": [
@@ -721,7 +721,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -743,9 +743,9 @@
       "../build/dgl/WindowPrivateData.cpp.o",
       "src/WindowPrivateData.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/WindowPrivateData.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/WindowPrivateData.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/WindowPrivateData.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/WindowPrivateData.cpp.o"
   },
   {
     "arguments": [
@@ -765,7 +765,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -800,9 +800,9 @@
       "../build/dgl/Cairo.cpp.cairo.o",
       "src/Cairo.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/Cairo.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/Cairo.cpp.cairo.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/Cairo.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/Cairo.cpp.cairo.o"
   },
   {
     "arguments": [
@@ -822,7 +822,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -857,9 +857,9 @@
       "../build/dgl/pugl.cpp.cairo.o",
       "src/pugl.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/pugl.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/pugl.cpp.cairo.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/pugl.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/pugl.cpp.cairo.o"
   },
   {
     "arguments": [
@@ -879,7 +879,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -904,9 +904,9 @@
       "../build/dgl/OpenGL.cpp.opengl.o",
       "src/OpenGL.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/OpenGL.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/OpenGL.cpp.opengl.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/OpenGL.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/OpenGL.cpp.opengl.o"
   },
   {
     "arguments": [
@@ -926,7 +926,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -951,9 +951,9 @@
       "../build/dgl/NanoVG.cpp.opengl.o",
       "src/NanoVG.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/NanoVG.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/NanoVG.cpp.opengl.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/NanoVG.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/NanoVG.cpp.opengl.o"
   },
   {
     "arguments": [
@@ -973,7 +973,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -998,9 +998,9 @@
       "../build/dgl/pugl.cpp.opengl.o",
       "src/pugl.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/pugl.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/pugl.cpp.opengl.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/pugl.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/pugl.cpp.opengl.o"
   },
   {
     "arguments": [
@@ -1020,7 +1020,7 @@
       "-msse2",
       "-mfpmath=sse",
       "-fvisibility=hidden",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I/usr/include/dbus-1.0",
       "-I/usr/lib/dbus-1.0/include",
@@ -1044,9 +1044,9 @@
       "../build/dgl/pugl.cpp.o",
       "src/pugl.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/dgl/src/pugl.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/dpf/build/dgl/pugl.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/dpf/dgl",
+    "file": "/home/usr/git/audio/GuitarD/dpf/dgl/src/pugl.cpp",
+    "output": "/home/usr/git/audio/GuitarD/dpf/build/dgl/pugl.cpp.o"
   },
   {
     "arguments": [
@@ -1068,7 +1068,6 @@
       "-fvisibility=hidden",
       "-DHAVE_ALSA",
       "-DHAVE_JACK",
-      "-DHAVE_LIBLO",
       "-DHAVE_PULSEAUDIO",
       "-DHAVE_RTAUDIO",
       "-DHAVE_SDL2",
@@ -1084,7 +1083,7 @@
       "-DHAVE_OPENGL",
       "-DDGL_OPENGL",
       "-DHAVE_DGL",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I.",
       "-I../../dpf/distrho",
@@ -1094,9 +1093,9 @@
       "../../build/GuitarD/DistrhoDsp.cpp.o",
       "DistrhoDsp.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/src/plugin",
-    "file": "/home/usr/git/audio-plugins/GuitarD/src/plugin/DistrhoDsp.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/build/GuitarD/DistrhoDsp.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/src/plugin",
+    "file": "/home/usr/git/audio/GuitarD/src/plugin/DistrhoDsp.cpp",
+    "output": "/home/usr/git/audio/GuitarD/build/GuitarD/DistrhoDsp.cpp.o"
   },
   {
     "arguments": [
@@ -1118,7 +1117,6 @@
       "-fvisibility=hidden",
       "-DHAVE_ALSA",
       "-DHAVE_JACK",
-      "-DHAVE_LIBLO",
       "-DHAVE_PULSEAUDIO",
       "-DHAVE_RTAUDIO",
       "-DHAVE_SDL2",
@@ -1134,7 +1132,7 @@
       "-DHAVE_OPENGL",
       "-DDGL_OPENGL",
       "-DHAVE_DGL",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I.",
       "-I../../dpf/distrho",
@@ -1144,9 +1142,9 @@
       "../../build/GuitarD/DistrohUi.cpp.o",
       "DistrohUi.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/src/plugin",
-    "file": "/home/usr/git/audio-plugins/GuitarD/src/plugin/DistrohUi.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/build/GuitarD/DistrohUi.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/src/plugin",
+    "file": "/home/usr/git/audio/GuitarD/src/plugin/DistrohUi.cpp",
+    "output": "/home/usr/git/audio/GuitarD/build/GuitarD/DistrohUi.cpp.o"
   },
   {
     "arguments": [
@@ -1168,7 +1166,6 @@
       "-fvisibility=hidden",
       "-DHAVE_ALSA",
       "-DHAVE_JACK",
-      "-DHAVE_LIBLO",
       "-DHAVE_PULSEAUDIO",
       "-DHAVE_RTAUDIO",
       "-DHAVE_SDL2",
@@ -1184,7 +1181,7 @@
       "-DHAVE_OPENGL",
       "-DDGL_OPENGL",
       "-DHAVE_DGL",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I.",
       "-I../../dpf/distrho",
@@ -1198,9 +1195,9 @@
       "../../build/GuitarD/DistrhoPluginMain_JACK.cpp.o",
       "../../dpf/distrho/DistrhoPluginMain.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/src/plugin",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/distrho/DistrhoPluginMain.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/build/GuitarD/DistrhoPluginMain_JACK.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/src/plugin",
+    "file": "/home/usr/git/audio/GuitarD/dpf/distrho/DistrhoPluginMain.cpp",
+    "output": "/home/usr/git/audio/GuitarD/build/GuitarD/DistrhoPluginMain_JACK.cpp.o"
   },
   {
     "arguments": [
@@ -1222,7 +1219,6 @@
       "-fvisibility=hidden",
       "-DHAVE_ALSA",
       "-DHAVE_JACK",
-      "-DHAVE_LIBLO",
       "-DHAVE_PULSEAUDIO",
       "-DHAVE_RTAUDIO",
       "-DHAVE_SDL2",
@@ -1238,7 +1234,7 @@
       "-DHAVE_OPENGL",
       "-DDGL_OPENGL",
       "-DHAVE_DGL",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I.",
       "-I../../dpf/distrho",
@@ -1249,9 +1245,9 @@
       "../../build/GuitarD/DistrhoUIMain_JACK.cpp.o",
       "../../dpf/distrho/DistrhoUIMain.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/src/plugin",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/distrho/DistrhoUIMain.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/build/GuitarD/DistrhoUIMain_JACK.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/src/plugin",
+    "file": "/home/usr/git/audio/GuitarD/dpf/distrho/DistrhoUIMain.cpp",
+    "output": "/home/usr/git/audio/GuitarD/build/GuitarD/DistrhoUIMain_JACK.cpp.o"
   },
   {
     "arguments": [
@@ -1273,7 +1269,6 @@
       "-fvisibility=hidden",
       "-DHAVE_ALSA",
       "-DHAVE_JACK",
-      "-DHAVE_LIBLO",
       "-DHAVE_PULSEAUDIO",
       "-DHAVE_RTAUDIO",
       "-DHAVE_SDL2",
@@ -1289,7 +1284,7 @@
       "-DHAVE_OPENGL",
       "-DDGL_OPENGL",
       "-DHAVE_DGL",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I.",
       "-I../../dpf/distrho",
@@ -1300,9 +1295,9 @@
       "../../build/GuitarD/DistrhoPluginMain_LV2.cpp.o",
       "../../dpf/distrho/DistrhoPluginMain.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/src/plugin",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/distrho/DistrhoPluginMain.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/build/GuitarD/DistrhoPluginMain_LV2.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/src/plugin",
+    "file": "/home/usr/git/audio/GuitarD/dpf/distrho/DistrhoPluginMain.cpp",
+    "output": "/home/usr/git/audio/GuitarD/build/GuitarD/DistrhoPluginMain_LV2.cpp.o"
   },
   {
     "arguments": [
@@ -1324,7 +1319,6 @@
       "-fvisibility=hidden",
       "-DHAVE_ALSA",
       "-DHAVE_JACK",
-      "-DHAVE_LIBLO",
       "-DHAVE_PULSEAUDIO",
       "-DHAVE_RTAUDIO",
       "-DHAVE_SDL2",
@@ -1340,7 +1334,7 @@
       "-DHAVE_OPENGL",
       "-DDGL_OPENGL",
       "-DHAVE_DGL",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I.",
       "-I../../dpf/distrho",
@@ -1351,9 +1345,9 @@
       "../../build/GuitarD/DistrhoUIMain_LV2.cpp.o",
       "../../dpf/distrho/DistrhoUIMain.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/src/plugin",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/distrho/DistrhoUIMain.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/build/GuitarD/DistrhoUIMain_LV2.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/src/plugin",
+    "file": "/home/usr/git/audio/GuitarD/dpf/distrho/DistrhoUIMain.cpp",
+    "output": "/home/usr/git/audio/GuitarD/build/GuitarD/DistrhoUIMain_LV2.cpp.o"
   },
   {
     "arguments": [
@@ -1375,7 +1369,6 @@
       "-fvisibility=hidden",
       "-DHAVE_ALSA",
       "-DHAVE_JACK",
-      "-DHAVE_LIBLO",
       "-DHAVE_PULSEAUDIO",
       "-DHAVE_RTAUDIO",
       "-DHAVE_SDL2",
@@ -1391,7 +1384,7 @@
       "-DHAVE_OPENGL",
       "-DDGL_OPENGL",
       "-DHAVE_DGL",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I.",
       "-I../../dpf/distrho",
@@ -1402,9 +1395,9 @@
       "../../build/GuitarD/DistrhoPluginMain_VST2.cpp.o",
       "../../dpf/distrho/DistrhoPluginMain.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/src/plugin",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/distrho/DistrhoPluginMain.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/build/GuitarD/DistrhoPluginMain_VST2.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/src/plugin",
+    "file": "/home/usr/git/audio/GuitarD/dpf/distrho/DistrhoPluginMain.cpp",
+    "output": "/home/usr/git/audio/GuitarD/build/GuitarD/DistrhoPluginMain_VST2.cpp.o"
   },
   {
     "arguments": [
@@ -1426,7 +1419,6 @@
       "-fvisibility=hidden",
       "-DHAVE_ALSA",
       "-DHAVE_JACK",
-      "-DHAVE_LIBLO",
       "-DHAVE_PULSEAUDIO",
       "-DHAVE_RTAUDIO",
       "-DHAVE_SDL2",
@@ -1442,7 +1434,7 @@
       "-DHAVE_OPENGL",
       "-DDGL_OPENGL",
       "-DHAVE_DGL",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I.",
       "-I../../dpf/distrho",
@@ -1453,9 +1445,9 @@
       "../../build/GuitarD/DistrhoUIMain_VST2.cpp.o",
       "../../dpf/distrho/DistrhoUIMain.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/src/plugin",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/distrho/DistrhoUIMain.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/build/GuitarD/DistrhoUIMain_VST2.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/src/plugin",
+    "file": "/home/usr/git/audio/GuitarD/dpf/distrho/DistrhoUIMain.cpp",
+    "output": "/home/usr/git/audio/GuitarD/build/GuitarD/DistrhoUIMain_VST2.cpp.o"
   },
   {
     "arguments": [
@@ -1477,7 +1469,6 @@
       "-fvisibility=hidden",
       "-DHAVE_ALSA",
       "-DHAVE_JACK",
-      "-DHAVE_LIBLO",
       "-DHAVE_PULSEAUDIO",
       "-DHAVE_RTAUDIO",
       "-DHAVE_SDL2",
@@ -1493,7 +1484,7 @@
       "-DHAVE_OPENGL",
       "-DDGL_OPENGL",
       "-DHAVE_DGL",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I.",
       "-I../../dpf/distrho",
@@ -1504,9 +1495,9 @@
       "../../build/GuitarD/DistrhoPluginMain_VST3.cpp.o",
       "../../dpf/distrho/DistrhoPluginMain.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/src/plugin",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/distrho/DistrhoPluginMain.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/build/GuitarD/DistrhoPluginMain_VST3.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/src/plugin",
+    "file": "/home/usr/git/audio/GuitarD/dpf/distrho/DistrhoPluginMain.cpp",
+    "output": "/home/usr/git/audio/GuitarD/build/GuitarD/DistrhoPluginMain_VST3.cpp.o"
   },
   {
     "arguments": [
@@ -1528,7 +1519,6 @@
       "-fvisibility=hidden",
       "-DHAVE_ALSA",
       "-DHAVE_JACK",
-      "-DHAVE_LIBLO",
       "-DHAVE_PULSEAUDIO",
       "-DHAVE_RTAUDIO",
       "-DHAVE_SDL2",
@@ -1544,7 +1534,7 @@
       "-DHAVE_OPENGL",
       "-DDGL_OPENGL",
       "-DHAVE_DGL",
-      "-std=gnu++14",
+      "-std=gnu++11",
       "-fvisibility-inlines-hidden",
       "-I.",
       "-I../../dpf/distrho",
@@ -1555,8 +1545,8 @@
       "../../build/GuitarD/DistrhoUIMain_VST3.cpp.o",
       "../../dpf/distrho/DistrhoUIMain.cpp"
     ],
-    "directory": "/home/usr/git/audio-plugins/GuitarD/src/plugin",
-    "file": "/home/usr/git/audio-plugins/GuitarD/dpf/distrho/DistrhoUIMain.cpp",
-    "output": "/home/usr/git/audio-plugins/GuitarD/build/GuitarD/DistrhoUIMain_VST3.cpp.o"
+    "directory": "/home/usr/git/audio/GuitarD/src/plugin",
+    "file": "/home/usr/git/audio/GuitarD/dpf/distrho/DistrhoUIMain.cpp",
+    "output": "/home/usr/git/audio/GuitarD/build/GuitarD/DistrhoUIMain_VST3.cpp.o"
   }
 ]

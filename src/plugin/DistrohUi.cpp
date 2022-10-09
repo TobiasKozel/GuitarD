@@ -1,3 +1,4 @@
+#include "DistrhoPluginInfo.h"
 #include "DistrhoUI.hpp"
 #include "Color.hpp"
 
@@ -32,7 +33,7 @@ public:
 	}
 
 	/* constructor */
-	DistrohUi() : UI(512, 512) {
+	DistrohUi() : UI(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT) {
 	   /**
 		  Initialize the grid to all off per default.
 		*/
@@ -47,6 +48,8 @@ protected:
 	* DSP/Plugin Callbacks */
 
 	void parameterChanged(uint32_t index, float value) override {
+		(void)(index);
+		(void)(value);
 		repaint();
 	}
 

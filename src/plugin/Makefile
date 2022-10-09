@@ -27,9 +27,9 @@ include ../../dpf/Makefile.plugins.mk
 # Enable all possible plugin types
 
 TARGETS += jack
-TARGETS += lv2_sep
-TARGETS += vst2
-TARGETS += vst3
+# TARGETS += lv2_sep
+# TARGETS += vst2
+# TARGETS += vst3
 
 all: $(TARGETS)
 

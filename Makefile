@@ -1,14 +1,7 @@
 #!/usr/bin/make -f
-# Makefile for DISTRHO Plugins #
-# ---------------------------- #
-# Created by falkTX
-#
 include dpf/Makefile.base.mk
-CXXFLAGS=-std=gnu++14
 
 all: dgl plugins 
-
-# --------------------------------------------------------------
 
 ifneq ($(CROSS_COMPILING),true)
 CAN_GENERATE_TTL = true
@@ -32,13 +25,9 @@ else
 gen:
 endif
 
-# --------------------------------------------------------------
-
 clean:
 	$(MAKE) clean -C dpf/dgl
 	$(MAKE) clean -C src/plugin
 	rm -rf bin build
-
-# --------------------------------------------------------------
 
 .PHONY: plugins

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <cstddef>
 
 #include "../../thirdparty/soundwoofer/soundwoofer.h"
 
@@ -173,7 +174,7 @@ namespace guitard {
         mInputNode->setInputChannels(pInputChannels);
         mInputNode->OnReset(pSampleRate, pOutputChannels);
         mOutputNode->OnReset(pSampleRate, pOutputChannels);
-        for (int i = 0; i < mNodes.size(); i++) {
+        for (size_t i = 0; i < mNodes.size(); i++) {
           mNodes[i]->OnReset(pSampleRate, pOutputChannels);
         }
         unlockAudioThread();
@@ -206,12 +207,12 @@ namespace guitard {
       if (size == mMaxBlockSize || size > GUITARD_MAX_BUFFER) { return; }
       lockAudioThread();
       mMaxBlockSize = size;
-      for (int i = 0; i < mNodes.size(); i++) {
+      for (size_t i = 0; i < mNodes.size(); i++) {
         Node* n = mNodes[i];
         n->mMaxBlockSize = size;
         n->OnReset(mSampleRate, mChannelCount, true);
       }
-      for (int i = 0; i < mNodes.size(); i++) {
+      for (size_t i = 0; i < mNodes.size(); i++) {
         mNodes[i]->OnConnectionsChanged();
       }
       mOutputNode->OnConnectionsChanged();
@@ -267,11 +268,11 @@ namespace guitard {
 
       mInputNode->CopyIn(in, nFrames);
 
-      for (int n = 0; n < mNodes.size(); n++) {
+      for (size_t n = 0; n < mNodes.size(); n++) {
         mNodes[n]->BlockStart();
       }
 
-      for (int n = 0; n < mProcessList.size(); n++) {
+      for (size_t n = 0; n < mProcessList.size(); n++) {
         mProcessList[n]->ProcessBlock(nFrames);
       }
 
@@ -374,7 +375,7 @@ namespace guitard {
     }
 
     void removeAllNodes() {
-      for (int i = 0; i < mNodes.size(); i++) {
+      for (size_t i = 0; i < mNodes.size(); i++) {
         disconnectNode(mNodes[i]);
       }
       while (mNodes.size()) {
@@ -406,7 +407,7 @@ namespace guitard {
       node->cleanUp();
 
       if (mPauseAudio == 1) {
-        for (int i = 0; i < mNodes.size(); i++) {
+        for (size_t i = 0; i < mNodes.size(); i++) {
           mNodes[i]->OnConnectionsChanged();
         }
         buildProcessingList();
@@ -452,7 +453,7 @@ namespace guitard {
         };
 
         json["nodes"] = nlohmann::json::array();
-        for (int i = 0; i < mNodes.size(); i++) {
+        for (size_t i = 0; i < mNodes.size(); i++) {
           Node* node = mNodes[i];
           json["nodes"][i]["position"] = { node->mPos.x, node->mPos.y };
           // The index shouldn't really matter since they're all in order
@@ -534,7 +535,6 @@ namespace guitard {
     void deserialize(nlohmann::json& json) {
       soundwoofer::async::cancelAll();
       try {
-        const int NoNode = -2;
         const int InNode = -1;
 
         lockAudioThread();
@@ -781,7 +781,7 @@ namespace guitard {
       PointerList<Node> stack;
       PointerList<Node> feedback;
 
-      for (int i = 0; i < mNodes.size(); i++) {
+      for (size_t i = 0; i < mNodes.size(); i++) {
         if (mNodes[i]->mInfo->name == "FeedbackNode") {
           feedback.add(mNodes[i]);
         }
@@ -797,7 +797,7 @@ namespace guitard {
       /**
        * Push all the feedbacks in front so they can emit their last buffer
        */
-      for (int i = 0; i < feedback.size(); i++) {
+      for (size_t i = 0; i < feedback.size(); i++) {
         mProcessList.add(feedback[i]);
       }
 
@@ -805,7 +805,7 @@ namespace guitard {
        * Get the main bulk of the node in the process list
        * except for feedback nodes
        */
-      for (int i = 0; i < stack.size(); i++) {
+      for (size_t i = 0; i < stack.size(); i++) {
         if (stack[i]->mInfo->name != "FeedbackNode") {
           mProcessList.add(stack[i]);
         }
@@ -814,7 +814,7 @@ namespace guitard {
       /**
        * Push the feeback nodes a second time at the back so they can grab the buffers they need for the next block
        */
-      for (int i = 0; i < feedback.size(); i++) {
+      for (size_t i = 0; i < feedback.size(); i++) {
         mProcessList.add(feedback[i]);
       }
       unlockAudioThread();

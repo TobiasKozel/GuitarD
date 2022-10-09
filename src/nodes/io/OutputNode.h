@@ -28,6 +28,8 @@ namespace guitard {
     }
 
     void OnReset(int p_sampleRate, int p_channels, bool force = false) override {
+      (void)(p_sampleRate);
+      (void)(force);
       mChannelCount = p_channels;
     }
 
