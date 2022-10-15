@@ -1,6 +1,7 @@
-#include "DistrhoPluginInfo.h"
+#include "./DistrhoPluginInfo.h"
 #include "DistrhoUI.hpp"
 #include "Color.hpp"
+#include "src/DistrhoUIPrivateData.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -34,7 +35,7 @@ public:
 
 	/* constructor */
 	DistrohUi() : UI(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT) {
-	   /**
+		/**
 		  Initialize the grid to all off per default.
 		*/
 		std::memset(fParamGrid, 0, sizeof(bool)*9);
@@ -44,7 +45,17 @@ public:
 	}
 
 protected:
-   /* --------------------------------------------------------------------------------------------------------
+
+	uint32_t uiClipboardDataOffer() override {
+		for (auto& i : getClipboardDataOfferTypes()) {
+			if (std::strcmp(i.type, "text/plain") == 0) {
+				return i.id;
+			}
+		}
+		return 0;
+	}
+	
+	/* --------------------------------------------------------------------------------------------------------
 	* DSP/Plugin Callbacks */
 
 	void parameterChanged(uint32_t index, float value) override {
@@ -54,7 +65,7 @@ protected:
 	}
 
 
-   /**
+	/**
 	  A state has changed on the plugin side.
 	  This is called by the host to inform the UI about state changes.
 	*/
@@ -79,7 +90,7 @@ protected:
    /* --------------------------------------------------------------------------------------------------------
 	* Widget Callbacks */
 
-   /**
+	/**
 	  The OpenGL drawing function.
 	  This UI will draw a 3x3 grid, with on/off states according to plugin state.
 	*/
@@ -155,7 +166,16 @@ protected:
 		}
 	}
 
-   /**
+	bool onKeyboard(const KeyboardEvent& ev) override {
+		if (ev.mod & kModifierControl && !ev.press) {
+			if (ev.key == 'c') {
+			}
+			return true;
+		}
+	}
+
+
+	/**
 	  Mouse press event.
 	  This UI will de/activate blocks when you click them and report it as a state change to the plugin.
 	*/
@@ -229,13 +249,13 @@ protected:
 	// -------------------------------------------------------------------------------------------------------
 
 private:
-   /**
+	/**
 	  Our states used to display the grid.
 	  The host does not know about these.
 	*/
 	bool fParamGrid[9];
 
-   /**
+	/**
 	  Set our UI class as non-copyable and add a leak detector just in case.
 	*/
 	DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DistrohUi)

@@ -5,10 +5,12 @@
 #define DISTRHO_PLUGIN_NAME               "GuitarD"
 #define DISTRHO_PLUGIN_URI                "https://TODO.com"
 #define DISTRHO_PLUGIN_LICENSE            "WTFPL"
+#define DISTRHO_PLUGIN_CLAP_ID            "classifiedaudio.guitard"
 
 
 #define DISTRHO_PLUGIN_HAS_UI             1
 #define DISTRHO_PLUGIN_IS_RT_SAFE         1
+#define DISTRHO_PLUGIN_WANT_DIRECT_ACCESS 1  // UI needs to access the dsp
 
 #define DISTRHO_PLUGIN_NUM_INPUTS         2
 #define DISTRHO_PLUGIN_NUM_OUTPUTS        2
@@ -17,10 +19,11 @@
 #define DISTRHO_PLUGIN_WANT_STATE         1
 #define DISTRHO_PLUGIN_WANT_FULL_STATE    1
 
-#define DISTRHO_UI_FILE_BROWSER           0
+#define DISTRHO_UI_FILE_BROWSER           1
 #define DISTRHO_UI_USER_RESIZABLE         1
 #define DISTRHO_UI_DEFAULT_WIDTH          768
 #define DISTRHO_UI_DEFAULT_HEIGHT         512
+
 
 // additional non things not controlling DPF itself
 #define DISTRHO_PLUGIN_VERSION_MAJOR      0
