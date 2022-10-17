@@ -100,70 +100,14 @@ protected:
 		const uint width = getWidth();
 		const uint height = getHeight();
 		const uint minwh = std::min(width, height);
-		const uint bgColor = getBackgroundColor();
 
 		Rectangle<double> r;
 
-		// if host doesn't respect aspect-ratio but supports ui background, draw out-of-bounds color from it
-		if (width != height && bgColor != 0)
-		{
-			const int red   = (bgColor >> 24) & 0xff;
-			const int green = (bgColor >> 16) & 0xff;
-			const int blue  = (bgColor >>  8) & 0xff;
-			Color(red, green, blue).setFor(context);
-
-			if (width > height)
-			{
-				r.setPos(height, 0);
-				r.setSize(width-height, height);
-			}
-			else
-			{
-				r.setPos(0, width);
-				r.setSize(width, height-width);
-			}
-
-			r.draw(context);
-		}
-
 		r.setWidth(minwh/3 - 6);
 		r.setHeight(minwh/3 - 6);
+		Color(0.8f, 0.5f, 0.3f).setFor(context);
+		r.draw(context);
 
-		// draw left, center and right columns
-		for (int i=0; i<3; ++i)
-		{
-			r.setX(3 + i*minwh/3);
-
-			// top
-			r.setY(3);
-
-			if (fParamGrid[0+i])
-				Color(0.8f, 0.5f, 0.3f).setFor(context);
-			else
-				Color(0.3f, 0.5f, 0.8f).setFor(context);
-
-			r.draw(context);
-
-			// middle
-			r.setY(3 + minwh/3);
-
-			if (fParamGrid[3+i])
-				Color(0.8f, 0.5f, 0.3f).setFor(context);
-			else
-				Color(0.3f, 0.5f, 0.8f).setFor(context);
-
-			r.draw(context);
-
-			// bottom
-			r.setY(3 + minwh*2/3);
-
-			if (fParamGrid[6+i])
-				Color(0.8f, 0.5f, 0.3f).setFor(context);
-			else
-				Color(0.3f, 0.5f, 0.8f).setFor(context);
-
-			r.draw(context);
-		}
 	}
 
 	bool onKeyboard(const KeyboardEvent& ev) override {

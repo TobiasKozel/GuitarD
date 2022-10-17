@@ -13,7 +13,8 @@ NAME = GuitarD
 # Files to build
 
 FILES_DSP = \
-	DistrhoDsp.cpp
+	DistrhoDspDummy.cpp
+	# DistrhoDsp.cpp
 
 FILES_UI  = \
 	DistrohUi.cpp

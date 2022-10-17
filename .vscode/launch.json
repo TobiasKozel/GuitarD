@@ -10,7 +10,8 @@
             "request": "launch",
             "target": "${workspaceRoot}/bin/GuitarD",
             "cwd": "${workspaceRoot}",
-            "valuesFormatting": "parseText"
+            "valuesFormatting": "parseText",
+            "preLaunchTask": "make"
         }
     ]
 }
