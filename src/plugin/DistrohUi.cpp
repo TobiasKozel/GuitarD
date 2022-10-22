@@ -39,6 +39,8 @@ public:
 		  Initialize the grid to all off per default.
 		*/
 		std::memset(fParamGrid, 0, sizeof(bool)*9);
+		
+		// loadSharedResources();
 
 		// TODO explain why this is here
 		setGeometryConstraints(128, 128, true);
@@ -107,6 +109,10 @@ protected:
 		r.setHeight(minwh/3 - 6);
 		Color(0.8f, 0.5f, 0.3f).setFor(context);
 		r.draw(context);
+
+	}
+
+	void onNanoDisplay() override {
 
 	}
 
