@@ -10,7 +10,7 @@ CAN_GENERATE_TTL = true
 endif
 
 dgl:
-	$(MAKE) -C dpf/dgl
+	$(MAKE) -C dpf/dgl opengl
 
 plugins: dgl
 	$(MAKE) all -C src/plugin

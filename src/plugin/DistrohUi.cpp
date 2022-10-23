@@ -40,7 +40,7 @@ public:
 		*/
 		std::memset(fParamGrid, 0, sizeof(bool)*9);
 		
-		// loadSharedResources();
+		loadSharedResources();
 
 		// TODO explain why this is here
 		setGeometryConstraints(128, 128, true);
@@ -96,24 +96,38 @@ protected:
 	  The OpenGL drawing function.
 	  This UI will draw a 3x3 grid, with on/off states according to plugin state.
 	*/
-	void onDisplay() override {
-		const GraphicsContext& context(getGraphicsContext());
-
-		const uint width = getWidth();
-		const uint height = getHeight();
-		const uint minwh = std::min(width, height);
-
-		Rectangle<double> r;
-
-		r.setWidth(minwh/3 - 6);
-		r.setHeight(minwh/3 - 6);
-		Color(0.8f, 0.5f, 0.3f).setFor(context);
-		r.draw(context);
-
-	}
+	// void onDisplay() override {
+	// 	const GraphicsContext& context(getGraphicsContext());
+	// 	const uint width = getWidth();
+	// 	const uint height = getHeight();
+	// 	const uint minwh = std::min(width, height);
+	// 	Rectangle<double> r;
+	// 	r.setWidth(minwh/3 - 6);
+	// 	r.setHeight(minwh/3 - 6);
+	// 	Color(0.8f, 0.5f, 0.3f).setFor(context);
+	// 	r.draw(context);
+	// }
 
 	void onNanoDisplay() override {
+		Color labelColor;
+		labelColor.green = 1.0;
+		beginPath();
+		rect(0, 0, 20, 20);
+		fillColor(labelColor);
+		fill();
 
+		beginPath();
+		fontSize(14 * 1);
+		fillColor(labelColor);
+		Rectangle<float> bounds;
+		textBounds(0, 0, "test", NULL, bounds);
+		float tx = 16;
+		float ty = 16;
+		textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
+
+		fillColor(255, 255, 255, 255);
+		text(tx, ty, "test2", NULL);
+		closePath();
 	}
 
 	bool onKeyboard(const KeyboardEvent& ev) override {

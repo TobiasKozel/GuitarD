@@ -24,8 +24,7 @@ FILES_UI  = \
 
 include ../../dpf/Makefile.plugins.mk
 
-# --------------------------------------------------------------
-# Enable all possible plugin types
+LINK_FLAGS      += $(SHARED_MEMORY_LIBS)
 
 TARGETS += jack
 # TARGETS += lv2_sep
@@ -33,5 +32,6 @@ TARGETS += jack
 # TARGETS += vst3
 
 all: $(TARGETS)
+
 
 # --------------------------------------------------------------
