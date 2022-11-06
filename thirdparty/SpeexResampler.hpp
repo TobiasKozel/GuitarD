@@ -40,7 +40,7 @@
 #pragma once
 
 #include <cmath>
-
+#include <climits>
 namespace speexport {
   enum {
     RESAMPLER_ERR_SUCCESS = 0,

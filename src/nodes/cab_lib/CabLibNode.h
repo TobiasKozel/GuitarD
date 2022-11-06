@@ -3,9 +3,9 @@
 #include "../../types/GConvolver.h"
 
 
-#include "./GuitarD/thirdparty/SpeexResampler.hpp"
+#include "../../../thirdparty/SpeexResampler.hpp"
 
-#include "../../../../hardcoded_irs.hpp"
+#include "../../../../resources/hardcoded_irs.hpp"
 namespace guitard {
   /**
    * Fairly similar to SimpleCabNode

@@ -1,6 +1,6 @@
 
 #include "./GHeadlessUnit.h"
-#include "../../Dependencies/Extras/nlohmann/json.hpp"
+#include "../../../thirdparty/json.hpp"
 #include "../../main/Graph.h"
 #include "../../nodes/RegisterNodes.h"
 #include "../../main/parameter/ParameterManager.h"
