@@ -29,3 +29,4 @@ Icon?
 .DS_Stor*
 
 src/main/faust/generated/*.h
+.cache
